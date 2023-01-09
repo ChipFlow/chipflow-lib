@@ -52,6 +52,6 @@ release-from-tag:
         - poetry self add "poetry-dynamic-versioning[plugin]"
         - poetry build
         # To publish we will use the `POETRY_PYPI_TOKEN_PYPI` env var
-        - poetry publish --dry-run
+        - poetry publish
     rules:
         - if: $CI_COMMIT_TAG =~ /^v.*/
