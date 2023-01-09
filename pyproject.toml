@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chipflow"
-version = "0.1.0"
+version = "0.0.0" # Version is set via poetry-dynamic-versioning
 description = "ChipFlow common tools."
 authors = [
     "Robert Taylor <rob.taylor@chipflow.io>", 
@@ -28,12 +28,13 @@ url = "https://gitlab.com/api/v4/projects/33096707/packages/pypi/simple"
 default = false
 secondary = false
 
-
 [tool.poetry.group.dev.dependencies]
 pycodestyle = "^2.10.0"
 
 [tool.poetry-dynamic-versioning]
 enable = true
+metadata = true
+vcs = "git"
 
 [build-system]
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
