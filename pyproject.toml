@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "chipflow"
+name = "chipflow-lib"
 version = "0.0.0" # Version is set via poetry-dynamic-versioning
 description = "ChipFlow common tools."
 authors = [
