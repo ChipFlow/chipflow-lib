@@ -33,6 +33,18 @@ lint:
   stage: prechecks
   script: make lint
 
+# Publish all `main` builds to our GitLab project PyPi repo
+publish-to-gitlab:
+    stage: release
+    script:        
+        - poetry self add "poetry-dynamic-versioning[plugin]"
+        - poetry build
+        - poetry config repositories.chipflow https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/packages/pypi
+        - poetry config http-basic.chipflow gitlab-ci-token ${CI_JOB_TOKEN}
+        - poetry publish --repository chipflow
+    rules:
+        - if: '$CI_COMMIT_BRANCH =~ /^main$/'
+
 # Release to PyPi from v* tags
 release-from-tag:
     stage: release
