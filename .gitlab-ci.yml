@@ -16,6 +16,7 @@ before_script:
 
 stages:
   - prechecks
+  - release
 
 license:
   image: docker:latest
@@ -32,3 +33,15 @@ lint:
   stage: prechecks
   script: make lint
 
+# Release to PyPi from v* tags
+release-from-tag:
+    stage: release
+    cache: {}
+    script:
+        - export APP_CODE_VERSION="v$(poetry version -s)"
+        - if [[ $APP_CODE_VERSION != $CI_COMMIT_TAG ]] echo "Code version '$APP_CODE_VERSION' does not match tag version '$CI_COMMIT_TAG'"; exit 1;
+        - poetry build
+        # To publish we will use the `POETRY_PYPI_TOKEN_PYPI` env var
+        - poetry publish --dry-run
+    only:
+        - tags
