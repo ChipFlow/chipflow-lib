@@ -4,4 +4,4 @@ init:
 
 .PHONY: lint # Lint code
 lint: 
-	poetry run pycodestyle --config=./.pycodestyle chipflow
+	poetry run pycodestyle --config=./.pycodestyle chipflow_lib
