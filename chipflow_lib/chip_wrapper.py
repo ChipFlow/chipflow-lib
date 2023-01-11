@@ -32,7 +32,7 @@ class SoCWrapper(Elaboratable):
         context = self.get_chipflow_context(platform)
 
         try:
-            module_loc = f"chipflow.providers.{context}"
+            module_loc = f"chipflow_lib.providers.{context}"
             module = importlib.import_module(module_loc)
         except ModuleNotFoundError as error:
             raise ChipFlowError("Provider module couldn't be loaded for context, {module_loc}.") from error

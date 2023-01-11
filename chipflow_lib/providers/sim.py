@@ -8,7 +8,7 @@ from amaranth_orchard.memory.spimemio import QSPIPins
 from amaranth_orchard.base.gpio import GPIOPins
 from amaranth_orchard.io.uart import UARTPins
 from amaranth_orchard.memory.hyperram import HyperRAMPins
-from chipflow.providers.base import BaseProvider
+from chipflow_lib.providers.base import BaseProvider
 
 
 class QSPIFlash(BaseProvider):
