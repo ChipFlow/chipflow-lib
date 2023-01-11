@@ -33,7 +33,6 @@ pycodestyle = "^2.10.0"
 
 [tool.poetry-dynamic-versioning]
 enable = true
-metadata = true
 vcs = "git"
 
 [build-system]
