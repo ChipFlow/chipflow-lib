@@ -1,6 +1,7 @@
 # Python stuff
 __pycache__
 dist/
+poetry.lock
 
 # doit local database
 .doit.db
