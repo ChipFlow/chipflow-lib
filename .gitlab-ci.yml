@@ -7,11 +7,13 @@ variables:
 cache:
   paths:
     - .cache/pip
+    - .venv
 
 before_script:
   - apt-get update -y
   - apt-get install curl
   - pip3 install poetry
+  - poetry config virtualenvs.in-project true # Allows us to cache .venv
   - poetry install
 
 stages:
