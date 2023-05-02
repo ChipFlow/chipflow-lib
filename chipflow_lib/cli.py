@@ -22,18 +22,16 @@ class Main():
         sim_action = parser_action.add_parser("sim", help="Simulate the design.")
         sim_subparser = sim_action.add_subparsers(dest="sim_action")
         sim_subparser.add_parser("build", help="Build the simulation binary.")
-        sim_subparser.add_parser("build-yosys", help="Build the intermediate yosys simulation.")
+        sim_subparser.add_parser("build-yosys", help="Build the intermediate Yosys simulation.")
 
         # Board
         board_action = parser_action.add_parser("board", help="Build the design for a board.")
 
         # Silicon
-        silicon_rtlil_action = parser_action.add_parser("silicon_rtlil", help="Generate RTLIL for silicon.")
+        silicon_action = parser_action.add_parser("silicon", help="Build the design for an ASIC.")
 
         # Software/BIOS
-        software_action = parser_action.add_parser("software", help="Software.")
-        software_subparser = software_action.add_subparsers(dest="software_action")
-        software_subparser.add_parser("build", help="Build.")
+        software_action = parser_action.add_parser("software", help="Build the software.")
 
         return parser
 
@@ -48,7 +46,7 @@ class Main():
     def run(self):
         parser = self._build_arg_parser()
 
-        args = parser.parse_args(sys.argv[1:])
+        args = parser.parse_args()
 
         self._parse_config(args)
 
@@ -83,20 +81,24 @@ class Main():
         context.build()
 
     def run_sim(self, args):
-        if args.sim_action == "build-yosys":
+        if args.sim_action in (None, "build"):
+            module_loc = self.config["chipflow"]["sim_module"]
+            doit_build_module = self._load_module(module_loc + ".doit_build")
+
+            cmd = ["build_sim"]
+            DoitMain(ModuleTaskLoader(doit_build_module)).run(cmd)
+
+        elif args.sim_action == "build-yosys":
             return self._sim_build_yosys()
 
-        module_loc = self.config["chipflow"]["sim_module"]
-        doit_build_module = self._load_module(module_loc + ".doit_build")
-
-        cmd = ["build_sim"]
-        DoitMain(ModuleTaskLoader(doit_build_module)).run(cmd)
+        else:
+            assert False
 
     def run_board(self, args):
         context = self._load("load_board_context")
         context.build()
 
-    def run_silicon_rtlil(self, args):
+    def run_silicon(self, args):
         context = self._load("load_silicon_context")
         context.build()
 
