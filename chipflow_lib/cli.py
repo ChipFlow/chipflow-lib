@@ -25,12 +25,15 @@ def _get_cls_by_reference(reference, context):
                             f"`{class_ref}`") from None
 
 
-def _parse_config():
-    chipflow_root = os.environ.get("CHIPFLOW_ROOT", os.getcwd())
-    config_file = f"{chipflow_root}/chipflow.toml"
+def _ensure_chipflow_root():
+    if "CHIPFLOW_ROOT" not in os.environ:
+        os.environ["CHIPFLOW_ROOT"] = os.getcwd()
+    return os.environ["CHIPFLOW_ROOT"]
 
-    # FIXME: temporary hack for sim_platform.SimPlatform.__init__
-    os.environ["BUILD_DIR"] = chipflow_root
+
+def _parse_config():
+    chipflow_root = _ensure_chipflow_root()
+    config_file = f"{chipflow_root}/chipflow.toml"
 
     # TODO: Add better validation/errors for loading chipflow.toml
     with open(config_file, "rb") as f:
