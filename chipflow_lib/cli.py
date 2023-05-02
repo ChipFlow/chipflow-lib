@@ -16,13 +16,17 @@ class Main():
         parser = argparse.ArgumentParser()
 
         parser_action = parser.add_subparsers(dest="action", required=True)
-        sim_action = parser_action.add_parser("sim",
+        sim_action = parser_action.add_parser(
+            "sim",
             help="Simulate the design.")
-        board_action = parser_action.add_parser("board",
+        board_action = parser_action.add_parser(
+            "board",
             help="Build the design for a board.")
-        silicon_action = parser_action.add_parser("silicon",
+        silicon_action = parser_action.add_parser(
+            "silicon",
             help="Build the design for an ASIC.")
-        software_action = parser_action.add_parser("software",
+        software_action = parser_action.add_parser(
+            "software",
             help="Build the software.")
 
         return parser
