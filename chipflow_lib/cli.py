@@ -1,11 +1,10 @@
 # SPDX-License-Identifier: BSD-2-Clause
+
 import sys
 import argparse
 import os
 import tomli
 import importlib
-from doit.cmd_base import ModuleTaskLoader
-from doit.doit_cmd import DoitMain
 
 
 class ChipFlowError(Exception):
@@ -17,21 +16,14 @@ class Main():
         parser = argparse.ArgumentParser()
 
         parser_action = parser.add_subparsers(dest="action", required=True)
-
-        # Simulation
-        sim_action = parser_action.add_parser("sim", help="Simulate the design.")
-        sim_subparser = sim_action.add_subparsers(dest="sim_action")
-        sim_subparser.add_parser("build", help="Build the simulation binary.")
-        sim_subparser.add_parser("build-yosys", help="Build the intermediate Yosys simulation.")
-
-        # Board
-        board_action = parser_action.add_parser("board", help="Build the design for a board.")
-
-        # Silicon
-        silicon_action = parser_action.add_parser("silicon", help="Build the design for an ASIC.")
-
-        # Software/BIOS
-        software_action = parser_action.add_parser("software", help="Build the software.")
+        sim_action = parser_action.add_parser("sim",
+            help="Simulate the design.")
+        board_action = parser_action.add_parser("board",
+            help="Build the design for a board.")
+        silicon_action = parser_action.add_parser("silicon",
+            help="Build the design for an ASIC.")
+        software_action = parser_action.add_parser("software",
+            help="Build the software.")
 
         return parser
 
@@ -44,6 +36,9 @@ class Main():
             self.config = tomli.load(fp)
 
     def run(self):
+        # FIXME: temporary hack for sim_platform.SimPlatform.__init__
+        os.environ["BUILD_DIR"] = "./build/sim"
+
         parser = self._build_arg_parser()
 
         args = parser.parse_args()
@@ -65,34 +60,9 @@ class Main():
 
         return getattr(module, loader_name)(self.config)
 
-    def _load_module(self, module_loc):
-        try:
-            module = importlib.import_module(module_loc)
-        except ModuleNotFoundError as error:
-            raise ChipFlowError("Could not load module, {module_loc}.") from error
-
-        return module
-
-    def _load_design_module(self):
-        return self._load_module(self.config["chipflow"]["design_module"])
-
-    def _sim_build_yosys(self):
+    def run_sim(self, args):
         context = self._load("load_sim_context")
         context.build()
-
-    def run_sim(self, args):
-        if args.sim_action in (None, "build"):
-            module_loc = self.config["chipflow"]["sim_module"]
-            doit_build_module = self._load_module(module_loc + ".doit_build")
-
-            cmd = ["build_sim"]
-            DoitMain(ModuleTaskLoader(doit_build_module)).run(cmd)
-
-        elif args.sim_action == "build-yosys":
-            return self._sim_build_yosys()
-
-        else:
-            assert False
 
     def run_board(self, args):
         context = self._load("load_board_context")
@@ -103,11 +73,8 @@ class Main():
         context.build()
 
     def run_software(self, args):
-        module_loc = self.config["chipflow"]["software_module"]
-        doit_build_module = self._load_module(module_loc + ".doit_build")
-
-        cmd = ["build_software"]
-        DoitMain(ModuleTaskLoader(doit_build_module)).run(cmd)
+        context = self._load("load_software_context")
+        context.build()
 
 
 if __name__ == '__main__':

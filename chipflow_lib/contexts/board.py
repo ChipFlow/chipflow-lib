@@ -1,5 +1,4 @@
-
-class BoardContext():
+class BoardContext:
     def __init__(self, platform):
         self.platform = platform
 

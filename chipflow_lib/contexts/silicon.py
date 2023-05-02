@@ -1,5 +1,4 @@
-
-class SiliconContext():
+class SiliconContext:
     def __init__(self, platform):
         self.platform = platform
 
