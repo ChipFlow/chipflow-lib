@@ -45,7 +45,7 @@ def run(argv=sys.argv[1:]):
         step_cls = _get_cls_by_reference(step_reference, context=f"step `{step_name}`")
         try:
             steps[step_name] = step_cls(config)
-        except:
+        except Exception:
             raise ChipFlowError(f"Encountered error while initializing step `{step_name}` "
                                 f"using `{step_reference}`")
 
@@ -55,14 +55,14 @@ def run(argv=sys.argv[1:]):
         step_subparser = step_argument.add_parser(step_name, help=inspect.getdoc(step_cls))
         try:
             step_cls.build_cli_parser(step_subparser)
-        except:
+        except Exception:
             raise ChipFlowError(f"Encountered error while building CLI argument parser for "
                                 f"step `{step_name}`")
 
     args = parser.parse_args(argv)
     try:
         steps[args.step].run_cli(args)
-    except:
+    except Exception:
         raise ChipFlowError(f"Encountered error while running CLI for step `{args.step}`")
 
 
