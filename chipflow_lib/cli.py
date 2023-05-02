@@ -18,9 +18,6 @@ class Main():
 
         parser_action = parser.add_subparsers(dest="action", required=True)
 
-        # Utility
-        path_parser = parser_action.add_parser("path", help="Get path of module.")
-
         # Sim
         sim_parser = parser_action.add_parser("sim", help="Simulate the design.")
         sim_action = sim_parser.add_subparsers(dest="sim_action")
@@ -80,9 +77,6 @@ class Main():
 
     def _load_design_module(self):
         return self._load_module(self.config["chipflow"]["design_module"])
-
-    def run_path(self, args):
-        print(os.path.dirname(__file__))
 
     def _sim_build_yosys(self):
         context = self._load("load_sim_context")
