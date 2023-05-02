@@ -57,7 +57,7 @@ class Main():
     def _build_arg_parser(self):
         parser = argparse.ArgumentParser()
 
-        parser_action = parser.add_subparsers(dest="action")
+        parser_action = parser.add_subparsers(dest="action", required=True)
 
         # Sim
         sim_parser = parser_action.add_parser("sim", help="Simulate the design.")
