@@ -47,34 +47,29 @@ class Main():
 
         getattr(self, 'run_' + args.action)(args)
 
-    def _load(self, loader_name):
+    def _get_context(self, name):
+        reference = self.config["chipflow"][name]
+        module_ref, _, class_ref = reference.partition(":")
         try:
-            module_loc = self.config["chipflow"]["loader_module"]
-
-            module = importlib.import_module(module_loc)
-        except ModuleNotFoundError as error:
-            raise ChipFlowError("Could not locate module, {module_loc}.") from error
-
-        if (not hasattr(module, loader_name)):
-            raise ChipFlowError(f"Loader module is missing loader. module={module_loc}, loader={loader_name}")
-
-        return getattr(module, loader_name)(self.config)
+            cls = getattr(importlib.import_module(module_ref), class_ref)
+        except ModuleNotFoundError as e:
+            raise NameError(f"Module {module_ref} referenced by context `{name}` is not found")
+        except AttributeError as e:
+            raise NameError(f"Module {module_ref} referenced by context `{name}` does not define "
+                            f"`{class_ref}`")
+        return cls(self.config)
 
     def run_sim(self, args):
-        context = self._load("load_sim_context")
-        context.build()
+        self._get_context("sim_context").build()
 
     def run_board(self, args):
-        context = self._load("load_board_context")
-        context.build()
+        self._get_context("board_context").build()
 
     def run_silicon(self, args):
-        context = self._load("load_silicon_context")
-        context.build()
+        self._get_context("silicon_context").build()
 
     def run_software(self, args):
-        context = self._load("load_software_context")
-        context.build()
+        self._get_context("software_context").build()
 
 
 if __name__ == '__main__':

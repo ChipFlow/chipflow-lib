@@ -7,7 +7,7 @@ from doit.doit_cmd import DoitMain
 class SimContext:
     doit_build_module = None
 
-    def __init__(self, platform):
+    def __init__(self, config, platform):
         self.platform = platform
 
     def doit_build(self):

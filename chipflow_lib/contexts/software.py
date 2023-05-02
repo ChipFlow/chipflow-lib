@@ -7,6 +7,9 @@ from doit.doit_cmd import DoitMain
 class SoftwareContext:
     doit_build_module = None
 
+    def __init__(self, config):
+        pass
+
     def doit_build(self):
         DoitMain(ModuleTaskLoader(self.doit_build_module)).run(["build_software"])
 
