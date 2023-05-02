@@ -1,80 +1,70 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
-import sys
-import argparse
 import os
-import tomli
+import sys
+import inspect
 import importlib
+import argparse
+import tomli
 
 
 class ChipFlowError(Exception):
     pass
 
 
-class Main():
-    def _build_arg_parser(self):
-        parser = argparse.ArgumentParser()
+def _get_cls_by_reference(reference, context):
+    module_ref, _, class_ref = reference.partition(":")
+    try:
+        module_obj = importlib.import_module(module_ref)
+    except ModuleNotFoundError as e:
+        raise ChipFlowError(f"Module `{module_ref}` referenced by {context} is not found")
+    try:
+        return getattr(module_obj, class_ref)
+    except AttributeError as e:
+        raise ChipFlowError(f"Module `{module_ref}` referenced by {context} does not define "
+                            f"`{class_ref}`") from None
 
-        parser_action = parser.add_subparsers(dest="action", required=True)
-        sim_action = parser_action.add_parser(
-            "sim",
-            help="Simulate the design.")
-        board_action = parser_action.add_parser(
-            "board",
-            help="Build the design for a board.")
-        silicon_action = parser_action.add_parser(
-            "silicon",
-            help="Build the design for an ASIC.")
-        software_action = parser_action.add_parser(
-            "software",
-            help="Build the software.")
 
-        return parser
+def _parse_config():
+    chipflow_root = os.environ.get("CHIPFLOW_ROOT", os.getcwd())
+    config_file = f"{chipflow_root}/chipflow.toml"
 
-    def _parse_config(self, args):
-        config_dir = os.getcwd()
-        config_file = f"{config_dir}/chipflow.toml"
+    # FIXME: temporary hack for sim_platform.SimPlatform.__init__
+    os.environ["BUILD_DIR"] = chipflow_root
 
-        # TODO: Add better validation/errors for loading chipflow.toml
-        with open(config_file, mode="rb") as fp:
-            self.config = tomli.load(fp)
+    # TODO: Add better validation/errors for loading chipflow.toml
+    with open(config_file, "rb") as f:
+        return tomli.load(f)
 
-    def run(self):
-        # FIXME: temporary hack for sim_platform.SimPlatform.__init__
-        os.environ["BUILD_DIR"] = "./build/sim"
 
-        parser = self._build_arg_parser()
+def run(argv=sys.argv[1:]):
+    config = _parse_config()
 
-        args = parser.parse_args()
-
-        self._parse_config(args)
-
-        getattr(self, 'run_' + args.action)(args)
-
-    def _get_context(self, name):
-        reference = self.config["chipflow"][name]
-        module_ref, _, class_ref = reference.partition(":")
+    steps = {}
+    for step_name, step_reference in config["chipflow"]["steps"].items():
+        step_cls = _get_cls_by_reference(step_reference, context=f"step `{step_name}`")
         try:
-            cls = getattr(importlib.import_module(module_ref), class_ref)
-        except ModuleNotFoundError as e:
-            raise NameError(f"Module {module_ref} referenced by context `{name}` is not found")
-        except AttributeError as e:
-            raise NameError(f"Module {module_ref} referenced by context `{name}` does not define "
-                            f"`{class_ref}`")
-        return cls(self.config)
+            steps[step_name] = step_cls(config)
+        except:
+            raise ChipFlowError(f"Encountered error while initializing step `{step_name}` "
+                                f"using `{step_reference}`")
 
-    def run_sim(self, args):
-        self._get_context("sim_context").build()
+    parser = argparse.ArgumentParser()
+    step_argument = parser.add_subparsers(dest="step", required=True)
+    for step_name, step_cls in steps.items():
+        step_subparser = step_argument.add_parser(step_name, help=inspect.getdoc(step_cls))
+        try:
+            step_cls.build_cli_parser(step_subparser)
+        except:
+            raise ChipFlowError(f"Encountered error while building CLI argument parser for "
+                                f"step `{step_name}`")
 
-    def run_board(self, args):
-        self._get_context("board_context").build()
-
-    def run_silicon(self, args):
-        self._get_context("silicon_context").build()
-
-    def run_software(self, args):
-        self._get_context("software_context").build()
+    args = parser.parse_args(argv)
+    try:
+        steps[args.step].run_cli(args)
+    except:
+        raise ChipFlowError(f"Encountered error while running CLI for step `{args.step}`")
 
 
 if __name__ == '__main__':
-    Main().run()
+    run()
