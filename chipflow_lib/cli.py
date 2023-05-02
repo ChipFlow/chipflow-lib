@@ -18,22 +18,22 @@ class Main():
 
         parser_action = parser.add_subparsers(dest="action", required=True)
 
-        # Sim
-        sim_parser = parser_action.add_parser("sim", help="Simulate the design.")
-        sim_action = sim_parser.add_subparsers(dest="sim_action")
-        sim_action.add_parser("build", help="Build the simulation binary.")
-        sim_action.add_parser("build-yosys", help="Build the intermediate yosys simulation.")
+        # Simulation
+        sim_action = parser_action.add_parser("sim", help="Simulate the design.")
+        sim_subparser = sim_action.add_subparsers(dest="sim_action")
+        sim_subparser.add_parser("build", help="Build the simulation binary.")
+        sim_subparser.add_parser("build-yosys", help="Build the intermediate yosys simulation.")
 
         # Board
-        board_parser = parser_action.add_parser("board", help="Build the design for a board.")
+        board_action = parser_action.add_parser("board", help="Build the design for a board.")
 
         # Silicon
-        silicon_rtlil_parser = parser_action.add_parser("silicon_rtlil", help="Generate RTLIL for silicon.")
+        silicon_rtlil_action = parser_action.add_parser("silicon_rtlil", help="Generate RTLIL for silicon.")
 
         # Software/BIOS
-        software_parser = parser_action.add_parser("software", help="Software.")
-        software_action = software_parser.add_subparsers(dest="software_action")
-        software_action.add_parser("build", help="Build.")
+        software_action = parser_action.add_parser("software", help="Software.")
+        software_subparser = software_action.add_subparsers(dest="software_action")
+        software_subparser.add_parser("build", help="Build.")
 
         return parser
 
