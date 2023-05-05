@@ -7,10 +7,13 @@ from pathlib import Path
 from amaranth import *
 from amaranth.back import rtlil
 
+from .providers import sim as sim_providers
 
-class SimPlatform():
+
+class SimPlatform:
+    providers = sim_providers
+
     def __init__(self):
-        self.chipflow_context = "sim"
         self.build_dir = os.path.join(os.environ['CHIPFLOW_ROOT'], 'build', 'sim')
         self.extra_files = set()
         self.clk = Signal()

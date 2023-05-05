@@ -11,12 +11,14 @@ from amaranth.hdl.ir import Fragment
 from amaranth.lib.io import Pin
 from amaranth.hdl.xfrm import DomainLowerer
 
+from .providers import silicon as silicon_providers
+
 
 __all__ = ["SiliconPlatform"]
 
 
 class SiliconPlatform:
-    chipflow_context = "silicon"  # FIXME: bad idea
+    providers = silicon_providers
 
     def __init__(self, pads):
         self._pads = pads
