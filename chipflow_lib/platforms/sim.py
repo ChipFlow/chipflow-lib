@@ -13,7 +13,7 @@ __all__ = ["SimPlatform"]
 
 
 class SimPlatform:
-    from .providers import sim as providers
+    from ..providers import sim as providers
 
     def __init__(self):
         self.build_dir = os.path.join(os.environ['CHIPFLOW_ROOT'], 'build', 'sim')

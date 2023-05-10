@@ -16,7 +16,7 @@ __all__ = ["SiliconPlatform"]
 
 
 class SiliconPlatform:
-    from .providers import silicon as providers
+    from ..providers import silicon as providers
 
     def __init__(self, pads):
         self._pads = pads
