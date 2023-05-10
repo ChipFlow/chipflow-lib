@@ -1,64 +1,67 @@
 # SPDX-License-Identifier: BSD-2-Clause
+
 from amaranth import *
-from amaranth.build import *
-from amaranth_boards.ulx3s import *
-from amaranth_boards.ulx3s import *
 
 from amaranth_orchard.memory.spimemio import QSPIPins
 from amaranth_orchard.base.gpio import GPIOPins
 from amaranth_orchard.io.uart import UARTPins
 from amaranth_orchard.memory.hyperram import HyperRAMPins
-from chipflow_lib.providers.base import BaseProvider
 
 
-class QSPIFlash(BaseProvider):
-    def add(self, m):
-        flash = QSPIPins()
-        m.submodules.flash = self.platform.add_model("spiflash_model", flash, edge_det=['clk_o', 'csn_o'])
-        return flash
+class QSPIFlashProvider(Elaboratable):
+    def __init__(self):
+        self.pins = QSPIPins()
+
+    def elaborate(self, platform):
+        return platform.add_model("spiflash_model", self.pins, edge_det=['clk_o', 'csn_o'])
 
 
-class LEDGPIO(BaseProvider):
-    def add(self, m):
-        leds = GPIOPins(width=8)
-        # TODO - something in simulation?
-        return leds
+class LEDGPIOProvider(Elaboratable):
+    def __init__(self):
+        self.pins = GPIOPins(width=8)
+
+    def elaborate(self, platform):
+        return Module()
 
 
-class ButtonGPIO(BaseProvider):
-    def add(self, m):
-        buttons = GPIOPins(width=2)
-        m.d.comb += buttons.i.eq(self.platform.buttons)
-        return buttons
+class ButtonGPIOProvider(Elaboratable):
+    def __init__(self):
+        self.pins = GPIOPins(width=2)
+
+    def elaborate(self, platform):
+        m = Module()
+        m.d.comb += self.pins.i.eq(platform.buttons)
+        return m
 
 
-class UART(BaseProvider):
-    def add(self, m):
-        uart = UARTPins()
-        m.submodules.uart_model = self.platform.add_model("uart_model", uart, edge_det=[])
+class UARTProvider(Elaboratable):
+    def __init__(self):
+        self.pins = UARTPins()
 
-        return uart
-
-
-class HyperRAM(BaseProvider):
-    def add(self, m):
-        # Dual HyperRAM PMOD, starting at GPIO 0+/-
-        hram = HyperRAMPins(cs_count=4)
-        m.submodules.hram = self.platform.add_model("hyperram_model", hram, edge_det=['clk_o', ])
-        return hram
+    def elaborate(self, platform):
+        return platform.add_model("uart_model", self.pins, edge_det=[])
 
 
-class JTAG(BaseProvider):
-    def add(self, m, cpu):
-        m.d.comb += [
-            cpu.jtag_tck.eq(0),
-            cpu.jtag_tdi.eq(0),
-            cpu.jtag_tms.eq(0),
-        ]
+class HyperRAMProvider(Elaboratable):
+    def __init__(self):
+        self.pins = HyperRAMPins(cs_count=4)
+
+    def elaborate(self, platform):
+        return platform.add_model("hyperram_model", hram, edge_det=['clk_o'])
 
 
-class Init(BaseProvider):
-    def add(self, m):
+class JTAGProvider(Elaboratable):
+    def __init__(self, cpu):
+        pass
+
+    def elaborate(self, platform):
+        return Module()  # JTAG is not connected anywhere
+
+
+class ClockResetProvider(Elaboratable):
+    def elaborate(self, platform):
+        m = Module()
         m.domains.sync = ClockDomain()
-        m.d.comb += ClockSignal().eq(self.platform.clk)
-        m.d.comb += ResetSignal().eq(self.platform.rst)
+        m.d.comb += ClockSignal().eq(platform.clk)
+        m.d.comb += ResetSignal().eq(platform.rst)
+        return m
