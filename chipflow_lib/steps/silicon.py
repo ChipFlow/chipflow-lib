@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
-from ..silicon_platform import SiliconPlatform
+from ..platforms.silicon import SiliconPlatform
 
 
 class SiliconStep:
