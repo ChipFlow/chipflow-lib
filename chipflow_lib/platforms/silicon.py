@@ -44,14 +44,15 @@ class SiliconPlatform:
 
     def _check_clock_domains(self, fragment, sync_domain=None):
         for clock_domain in fragment.domains.values():
-            if clock_domain.name != "sync" or clock_domain is not sync_domain:
+            if clock_domain.name != "sync" or (sync_domain is not None and
+                                               clock_domain is not sync_domain):
                 raise ChipFlowError("Only a single clock domain, called 'sync', may be used")
             sync_domain = clock_domain
 
-        for subfragment in fragment.subfragments.values():
+        for subfragment in fragment.subfragments:
             self._check_clock_domains(subfragment, sync_domain)
 
-    def build(self, elaboratable, name="top"):
+    def _prepare(self, elaboratable, name="top"):
         # Build RTLIL for the Amaranth design
         fragment = Fragment.get(elaboratable, self)
         fragment._propagate_domains(lambda domain: None, platform=self)
@@ -77,6 +78,9 @@ class SiliconPlatform:
             fragment.add_subfragment(buffer, name=f"buffer$pad${pad_name}")
 
         fragment._propagate_ports(ports=ports, all_undef_as_ports=False)
+
+    def build(self, elaboratable, name="top"):
+        fragment = self._prepare(elaboratable, name)
         rtlil_text, _ = rtlil.convert_fragment(fragment, name)
 
         # Integrate Amaranth design with external Verilog

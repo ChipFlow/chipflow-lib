@@ -1,3 +1,4 @@
+# amaranth: UnusedElaboratable=no
 # SPDX-License-Identifier: BSD-2-Clause
 
 import os
@@ -12,6 +13,13 @@ from chipflow_lib.platforms.silicon import SiliconPlatform
 class SiliconPlatformTestCase(unittest.TestCase):
     def setUp(self):
         os.environ["CHIPFLOW_ROOT"] = os.path.dirname(os.path.dirname(__file__))
+
+    def test_sync_domain_works(self):
+        m = Module()
+        m.domains += ClockDomain("sync")
+
+        # should raise no exception
+        SiliconPlatform(pads={})._prepare(m)
 
     def test_wrong_clock_domain_name(self):
         m = Module()
