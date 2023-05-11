@@ -49,7 +49,7 @@ class SiliconPlatform:
                 raise ChipFlowError("Only a single clock domain, called 'sync', may be used")
             sync_domain = clock_domain
 
-        for subfragment in fragment.subfragments:
+        for subfragment, subfragment_name in fragment.subfragments:
             self._check_clock_domains(subfragment, sync_domain)
 
     def _prepare(self, elaboratable, name="top"):
@@ -78,6 +78,7 @@ class SiliconPlatform:
             fragment.add_subfragment(buffer, name=f"buffer$pad${pad_name}")
 
         fragment._propagate_ports(ports=ports, all_undef_as_ports=False)
+        return fragment
 
     def build(self, elaboratable, name="top"):
         fragment = self._prepare(elaboratable, name)

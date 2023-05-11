@@ -5,6 +5,7 @@ import os
 
 import unittest
 from amaranth import *
+from amaranth.hdl.ir import Fragment
 
 from chipflow_lib import ChipFlowError
 from chipflow_lib.platforms.silicon import SiliconPlatform
@@ -18,8 +19,15 @@ class SiliconPlatformTestCase(unittest.TestCase):
         m = Module()
         m.domains += ClockDomain("sync")
 
-        # should raise no exception
-        SiliconPlatform(pads={})._prepare(m)
+        fragment = SiliconPlatform(pads={})._prepare(m)
+        self.assertIsInstance(fragment, Fragment)
+
+    def test_subfragment_works(self):
+        m = Module()
+        m.submodules += Module()
+
+        fragment = SiliconPlatform(pads={})._prepare(m)
+        self.assertIsInstance(fragment, Fragment)
 
     def test_wrong_clock_domain_name(self):
         m = Module()
