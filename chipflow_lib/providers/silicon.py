@@ -80,8 +80,29 @@ class HyperRAMProvider(Elaboratable):
 
     def elaborate(self, platform):
         m = Module()
-        # FIXME: update to use platform.request
-        # platform.connect_io(m, hram, "ram")
+        m.d.comb += [
+            platform.request("ram_clk").o.eq(self.pins.clk_o),
+            platform.request("ram_rstn").o.eq(self.pins.rstn_o),
+        ]
+
+        for index in range(4):
+            platform.request(f"ram_csn_{index}").o.eq(self.pins.csn_o[index]),
+
+        rwds = platform.request("ram_rwds")
+        m.d.comb += [
+            rwds.o.eq(self.pins.rwds_o),
+            rwds.oe.eq(self.pins.rwds_oe),
+            self.pins.rwds_i.eq(rwds.i),
+        ]
+
+        for index in range(8):
+            dq = platform.request(f"ram_dq_{index}")
+            m.d.comb += [
+                dq.o.eq(self.pins.dq_o[index]),
+                dq.oe.eq(self.pins.dq_oe[index]),
+                self.pins.dq_i[index].eq(dq.i),
+            ]
+
         return m
 
 
