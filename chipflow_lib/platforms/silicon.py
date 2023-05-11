@@ -11,6 +11,8 @@ from amaranth.hdl.ir import Fragment
 from amaranth.lib.io import Pin
 from amaranth.hdl.xfrm import DomainLowerer
 
+from .. import ChipFlowError
+
 
 __all__ = ["SiliconPlatform"]
 
@@ -40,11 +42,22 @@ class SiliconPlatform:
         assert isinstance(content, bytes)
         self._files[str(filename)] = content
 
+    def _check_clock_domains(self, fragment, sync_domain=None):
+        for clock_domain in fragment.domains.values():
+            if clock_domain.name != "sync" or clock_domain is not sync_domain:
+                raise ChipFlowError("Only a single clock domain, called 'sync', may be used")
+            sync_domain = clock_domain
+
+        for subfragment in fragment.subfragments.values():
+            self._check_clock_domains(subfragment, sync_domain)
+
     def build(self, elaboratable, name="top"):
         # Build RTLIL for the Amaranth design
         fragment = Fragment.get(elaboratable, self)
         fragment._propagate_domains(lambda domain: None, platform=self)
         fragment = DomainLowerer()(fragment)
+
+        self._check_clock_domains(fragment)
 
         ports = []
         for pad_name in self._pins:
@@ -89,6 +102,8 @@ class SiliconPlatform:
         ]
 
         build_dir = os.path.join(os.environ["CHIPFLOW_ROOT"], "build")
+        os.makedirs(build_dir, exist_ok=True)
+
         link_script = os.path.join(build_dir, name + "_link.ys")
         with open(link_script, "wb") as script_fp:
             script_fp.write(b"\n".join(yosys_script))

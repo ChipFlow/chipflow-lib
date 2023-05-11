@@ -7,9 +7,7 @@ import importlib
 import argparse
 import tomli
 
-
-class ChipFlowError(Exception):
-    pass
+from . import ChipFlowError
 
 
 def _get_cls_by_reference(reference, context):

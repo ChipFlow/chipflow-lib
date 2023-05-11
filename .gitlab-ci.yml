@@ -18,6 +18,7 @@ before_script:
 
 stages:
   - prechecks
+  - test
   - release
 
 license:
@@ -34,6 +35,11 @@ license:
 lint:
   stage: prechecks
   script: make lint
+
+test:
+  stage: test
+  script:
+    - poetry run pytest
 
 # Publish all `main` builds to our GitLab project PyPi repo
 publish-to-gitlab:
