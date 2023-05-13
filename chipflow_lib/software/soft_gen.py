@@ -64,6 +64,9 @@ class SoftwareGenerator:
         return f""".section .text
 
 start:
+.globl start
+_start:
+.globl _start
 
 # zero-initialize register file
 addi x1, zero, 0
