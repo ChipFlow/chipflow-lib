@@ -113,4 +113,8 @@ class SiliconPlatform:
         with open(link_script, "wb") as script_fp:
             script_fp.write(b"\n".join(yosys_script))
         output_rtlil = os.path.join(build_dir, name + ".il")
-        subprocess.check_call(["yowasp-yosys", "-q", link_script, "-o", output_rtlil])
+        subprocess.check_call([
+            # yowasp supports forward slashes *only*
+            "yowasp-yosys", "-q", link_script.replace("\\", "/"),
+            "-o", output_rtlil.replace("\\", "/")
+        ])

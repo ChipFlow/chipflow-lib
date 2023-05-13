@@ -80,6 +80,7 @@ class SimPlatform:
         top_ys = Path(self.build_dir) / "sim_soc.ys"
         with open(top_ys, "w") as f:
             for extra in sorted(self.extra_files):
+                extra = extra.replace("\\", "/")  # yowasp supports forward slashes *only*
                 if extra.endswith(".il"):
                     print(f"read_rtlil {extra}", file=f)
                 else:
