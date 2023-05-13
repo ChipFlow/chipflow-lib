@@ -26,6 +26,8 @@ def _get_cls_by_reference(reference, context):
 def _ensure_chipflow_root():
     if "CHIPFLOW_ROOT" not in os.environ:
         os.environ["CHIPFLOW_ROOT"] = os.getcwd()
+    if os.environ["CHIPFLOW_ROOT"] not in sys.path:
+        sys.path.append(os.environ["CHIPFLOW_ROOT"])
     return os.environ["CHIPFLOW_ROOT"]
 
 
