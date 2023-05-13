@@ -118,3 +118,4 @@ class SiliconPlatform:
             "yowasp-yosys", "-q", link_script.replace("\\", "/"),
             "-o", output_rtlil.replace("\\", "/")
         ])
+        return output_rtlil

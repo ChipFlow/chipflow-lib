@@ -65,6 +65,8 @@ def run(argv=sys.argv[1:]):
     args = parser.parse_args(argv)
     try:
         steps[args.step].run_cli(args)
+    except ChipFlowError:
+        raise
     except Exception:
         raise ChipFlowError(f"Encountered error while running CLI for step `{args.step}`")
 
