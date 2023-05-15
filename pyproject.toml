@@ -21,6 +21,7 @@ amaranth-orchard = { git = "https://gitlab.com/ChipFlow/amaranth-orchard.git" }
 amaranth-vexriscv = { version = "0.0.3.post1.dev0+882a734", source = "chipflow-amaranth-vexriscv"}
 yowasp-yosys = "^0.29.0.0"
 yowasp-nextpnr-ecp5 = "^0.5.0.0"
+yowasp-runtime = "^1.21"
 tomli = "^2.0.1"
 doit = "^0.36.0"
 requests = "^2.30.0"
