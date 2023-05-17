@@ -62,20 +62,42 @@ class SiliconPlatform:
 
         ports = []
         for pad_name in self._pins:
-            pad, port, pin = self._pads[pad_name], Signal(name=pad_name), self._pins[pad_name]
-            ports.append(port)
+            pad, pin = self._pads[pad_name], self._pins[pad_name]
+
+            port_i = Signal(name=f"{pad['loc']}_i")
+            port_o = Signal(name=f"{pad['loc']}_o")
+            port_oe = Signal(name=f"{pad['loc']}_oe")
+            ports += (port_i, port_o, port_oe)
 
             if pad["type"] == "io":
-                buffer = Instance("buf_io", io_io=port, o_i=pin.i, i_o=pin.o, i_oe=pin.oe)
+                fragment.add_statements(
+                    pin.i.eq(port_i),
+                    port_o.eq(pin.o),
+                    port_oe.eq(pin.oe)
+                )
             elif pad["type"] == "oe":
-                buffer = Instance("buf_oe", io_io=port,            i_o=pin.o, i_oe=pin.oe)
+                fragment.add_statements(
+                    port_o.eq(pin.o),
+                    port_oe.eq(pin.oe)
+                )
             elif pad["type"] == "o":
-                buffer = Instance("buf_o",  io_io=port,            i_o=pin.o)
+                fragment.add_statements(
+                    port_o.eq(pin.o),
+                    port_oe.eq(1)
+                )
             elif pad["type"] == "i":
-                buffer = Instance("buf_i",  io_io=port, o_i=pin.i)
+                fragment.add_statements(
+                    pin.i.eq(port_i),
+                    port_o.eq(0),
+                    port_oe.eq(0)
+                )
             else:
                 assert False, "chipflow.toml does not follow schema"
-            fragment.add_subfragment(buffer, name=f"buffer$pad${pad_name}")
+
+            if pad["type"] in ("io", "i"):
+                fragment.add_driver(pin.i)
+            fragment.add_driver(port_o)
+            fragment.add_driver(port_oe)
 
         fragment._propagate_ports(ports=ports, all_undef_as_ports=False)
         return fragment
