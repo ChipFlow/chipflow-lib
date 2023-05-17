@@ -3,7 +3,9 @@
 import os
 import time
 import json
+import pprint
 import inspect
+import argparse
 import subprocess
 
 import requests
@@ -22,10 +24,13 @@ class SiliconStep:
 
     def build_cli_parser(self, parser):
         action_argument = parser.add_subparsers(dest="action")
-        action_argument.add_parser(
+        prepare_subparser = action_argument.add_parser(
             "prepare", help=inspect.getdoc(self.prepare).splitlines()[0])
-        action_argument.add_parser(
+        submit_subparser = action_argument.add_parser(
             "submit", help=inspect.getdoc(self.submit).splitlines()[0])
+        submit_subparser.add_argument(
+            "--dry-run", help=argparse.SUPPRESS,
+            default=False, action="store_true")
 
     def run_cli(self, args):
         if args.action == "submit":
@@ -41,7 +46,7 @@ class SiliconStep:
 
         rtlil_path = self.prepare()  # always prepare before submission
         if args.action == "submit":
-            self.submit(rtlil_path)
+            self.submit(rtlil_path, dry_run=args.dry_run)
 
     def prepare(self):
         """Elaborate the design and convert it to RTLIL.
@@ -50,7 +55,7 @@ class SiliconStep:
         """
         raise NotImplementedError
 
-    def submit(self, rtlil_path):
+    def submit(self, rtlil_path, *, dry_run=False):
         """Submit the design to the ChipFlow cloud builder.
         """
         git_head = subprocess.check_output(
@@ -64,16 +69,25 @@ class SiliconStep:
         if git_dirty:
             submission_name += f"-dirty.{time.strftime('%Y%m%d%M%H%S', time.gmtime())}"
 
+        data = {
+            "projectId": self.project_id,
+            "name": submission_name,
+        }
+        config = {
+            "silicon": self.silicon_config
+        }
+        if dry_run:
+            print(f"data=\n{pprint.pformat(data, sort_dicts=False)}")
+            print(f"files['config']=\n{pprint.pformat(config, sort_dicts=False)}")
+            return
+
         resp = requests.post(
             os.environ.get("CHIPFLOW_API_ENDPOINT", "https://app.chipflow-infra.com/api/builds"),
             auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"]),
-            data={
-                "projectId": self.project_id,
-                "name": submission_name,
-            },
+            data=data,
             files={
                 "rtlil": open(rtlil_path, "rb"),
-                "config": json.dumps({"silicon": self.silicon_config}),
+                "config": json.dumps(config),
             })
         resp_data = resp.json()
         if resp.status_code == 403:
