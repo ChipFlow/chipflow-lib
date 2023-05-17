@@ -1,12 +1,14 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 import os
+import sys
 import time
 import json
 import pprint
 import inspect
 import argparse
 import subprocess
+import importlib.metadata
 
 import requests
 
@@ -69,9 +71,26 @@ class SiliconStep:
         if git_dirty:
             submission_name += f"-dirty.{time.strftime('%Y%m%d%M%H%S', time.gmtime())}"
 
+        dep_versions = {
+            "python": sys.version.split()[0]
+        }
+        for package in (
+                    # Upstream packages
+                    "poetry",
+                    "yowasp-runtime", "yowasp-yosys",
+                    "amaranth", "amaranth-stdio", "amaranth-soc",
+                    # ChipFlow packages
+                    "chipflow-lib",
+                    "amaranth-orchard", "amaranth-vexriscv",
+                ):
+            try:
+                dep_versions[package] = importlib.metadata.version(package)
+            except importlib.metadata.PackageNotFoundError:
+                dep_versions[package] = None
         data = {
             "projectId": self.project_id,
             "name": submission_name,
+            "dependencyVersions": dep_versions,
         }
         config = {
             "silicon": self.silicon_config
