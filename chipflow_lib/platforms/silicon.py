@@ -64,40 +64,21 @@ class SiliconPlatform:
         for pad_name in self._pins:
             pad, pin = self._pads[pad_name], self._pins[pad_name]
 
-            port_i = Signal(name=f"{pad['loc']}_i")
-            port_o = Signal(name=f"{pad['loc']}_o")
-            port_oe = Signal(name=f"{pad['loc']}_oe")
-            ports += (port_i, port_o, port_oe)
-
-            if pad["type"] == "io":
-                fragment.add_statements(
-                    pin.i.eq(port_i),
-                    port_o.eq(pin.o),
-                    port_oe.eq(pin.oe)
-                )
-            elif pad["type"] == "oe":
-                fragment.add_statements(
-                    port_o.eq(pin.o),
-                    port_oe.eq(pin.oe)
-                )
-            elif pad["type"] == "o":
-                fragment.add_statements(
-                    port_o.eq(pin.o),
-                    port_oe.eq(1)
-                )
-            elif pad["type"] == "i":
-                fragment.add_statements(
-                    pin.i.eq(port_i),
-                    port_o.eq(0),
-                    port_oe.eq(0)
-                )
-            else:
-                assert False, "chipflow.toml does not follow schema"
-
             if pad["type"] in ("io", "i"):
+                port_i = Signal(name=f"{pad['loc']}_i")
+                fragment.add_statements(pin.i.eq(port_i))
                 fragment.add_driver(pin.i)
-            fragment.add_driver(port_o)
-            fragment.add_driver(port_oe)
+                ports.append(port_i)
+            if pad["type"] in ("oe", "io", "o"):
+                port_o = Signal(name=f"{pad['loc']}_o")
+                fragment.add_statements(port_o.eq(pin.o))
+                fragment.add_driver(port_o)
+                ports.append(port_o)
+            if pad["type"] in ("oe", "io"):
+                port_oe = Signal(name=f"{pad['loc']}_oe")
+                fragment.add_statements(port_oe.eq(pin.oe))
+                fragment.add_driver(port_oe)
+                ports.append(port_oe)
 
         fragment._propagate_ports(ports=ports, all_undef_as_ports=False)
         return fragment
@@ -108,10 +89,6 @@ class SiliconPlatform:
 
         # Integrate Amaranth design with external Verilog
         yosys_script = [
-            b"hierarchy -generate buf_io io:io i:o o:i oe:i",
-            b"hierarchy -generate buf_oe io:io     o:i oe:i",
-            b"hierarchy -generate buf_o  io:io     o:i",
-            b"hierarchy -generate buf_i  io:io i:o",
             b"read_rtlil <<END\n" + rtlil_text.encode("utf-8") + b"\nEND"
         ]
         for filename, content in self._files.items():
