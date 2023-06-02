@@ -75,14 +75,14 @@ class SiliconStep:
             "python": sys.version.split()[0]
         }
         for package in (
-                    # Upstream packages
-                    "poetry",
-                    "yowasp-runtime", "yowasp-yosys",
-                    "amaranth", "amaranth-stdio", "amaranth-soc",
-                    # ChipFlow packages
-                    "chipflow-lib",
-                    "amaranth-orchard", "amaranth-vexriscv",
-                ):
+            # Upstream packages
+            "poetry",
+            "yowasp-runtime", "yowasp-yosys",
+            "amaranth", "amaranth-stdio", "amaranth-soc",
+            # ChipFlow packages
+            "chipflow-lib",
+            "amaranth-orchard", "amaranth-vexriscv",
+        ):
             try:
                 dep_versions[package] = importlib.metadata.version(package)
             except importlib.metadata.PackageNotFoundError:
