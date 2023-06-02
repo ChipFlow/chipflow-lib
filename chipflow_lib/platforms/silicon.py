@@ -31,7 +31,10 @@ class SiliconPlatform:
         if name in self._pins:
             raise NameError(f"Pad `{name}` has already been requested")
 
-        self._pins[name] = Pin(1, dir=self._pads[name]["type"])
+        pin_type = self._pads[name]["type"]
+        if pin_type == "clk":
+            pin_type = "i" # `clk` is used for clock tree synthesis, but treated as `i` in frontend
+        self._pins[name] = Pin(1, dir=pin_type)
         return self._pins[name]
 
     def add_file(self, filename, content):
@@ -64,7 +67,7 @@ class SiliconPlatform:
         for pad_name in self._pins:
             pad, pin = self._pads[pad_name], self._pins[pad_name]
 
-            if pad["type"] in ("io", "i"):
+            if pad["type"] in ("io", "i", "clk"):
                 port_i = Signal(name=f"{pad['loc']}_i")
                 fragment.add_statements(pin.i.eq(port_i))
                 fragment.add_driver(pin.i)
