@@ -6,6 +6,7 @@ import inspect
 import importlib
 import argparse
 import tomli
+import jsonschema
 
 from . import ChipFlowError
 
@@ -31,13 +32,82 @@ def _ensure_chipflow_root():
     return os.environ["CHIPFLOW_ROOT"]
 
 
+config_schema = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://chipflow.io/meta/chipflow.toml.schema.json",
+    "title": "chipflow.toml",
+    "type": "object",
+    "required": [
+        "chipflow"
+    ],
+    "properties": {
+        "chipflow": {
+            "type": "object",
+            "required": [
+                "steps",
+                "silicon"
+            ],
+            "properties": {
+                "project_id": {
+                    "type": "integer",
+                },
+                "steps": {
+                    "type": "object",
+                },
+                "silicon": {
+                    "type": "object",
+                    "required": [
+                        "process",
+                        "pad_ring",
+                        "pads",
+                    ],
+                    "properties": {
+                        "process": {
+                            "enum": ["sky130", "gf180"]
+                        },
+                        "pad_ring": {
+                            "enum": ["caravel"]
+                        },
+                        "pads": {
+                            "type": "object",
+                            "minProperties": 1,
+                            "patternProperties": {
+                                "": {
+                                    "type": "object",
+                                    "required": [
+                                        "type",
+                                        "loc",
+                                    ],
+                                    "properties": {
+                                        "type": {
+                                            "enum": ["io", "i", "o", "oe", "clk"]
+                                        },
+                                        "loc": {
+                                            "type": "string"
+                                        },
+                                    }
+                                }
+                            }
+                        },
+                    }
+                },
+            },
+        }
+    }
+}
+
+
 def _parse_config():
     chipflow_root = _ensure_chipflow_root()
     config_file = f"{chipflow_root}/chipflow.toml"
-
-    # TODO: Add better validation/errors for loading chipflow.toml
     with open(config_file, "rb") as f:
-        return tomli.load(f)
+        config_dict = tomli.load(f)
+
+    try:
+        jsonschema.validate(config_dict, config_schema)
+        return config_dict
+    except jsonschema.ValidationError as e:
+        raise ChipFlowError(f"Syntax error in `chipflow.toml` at `{'.'.join(e.path)}`: {e.message}")
 
 
 def run(argv=sys.argv[1:]):
