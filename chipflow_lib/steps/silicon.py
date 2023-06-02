@@ -35,7 +35,7 @@ class SiliconStep:
             default=False, action="store_true")
 
     def run_cli(self, args):
-        if args.action == "submit":
+        if args.action == "submit" and not args.dry_run:
             if self.project_id is None:
                 raise ChipFlowError(
                     "Key `chipflow.project_id` is not defined in chipflow.toml; "
