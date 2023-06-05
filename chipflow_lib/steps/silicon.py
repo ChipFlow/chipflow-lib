@@ -96,8 +96,8 @@ class SiliconStep:
             "silicon": self.silicon_config
         }
         if dry_run:
-            print(f"data=\n{pprint.pformat(data, sort_dicts=False)}")
-            print(f"files['config']=\n{pprint.pformat(config, sort_dicts=False)}")
+            print(f"data=\n{json.dumps(data, indent=2)}")
+            print(f"files['config']=\n{json.dumps(config, indent=2)}")
             return
 
         resp = requests.post(
