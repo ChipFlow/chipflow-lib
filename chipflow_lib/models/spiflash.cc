@@ -47,7 +47,8 @@ struct spiflash_model : public bb_p_spiflash__model {
             if (sn.command == 0xab) {
                 // power up
             } else if (sn.command == 0x03 || sn.command == 0x9f || sn.command == 0xff
-                || sn.command == 0x35 || sn.command == 0x31 || sn.command == 0x50) {
+                || sn.command == 0x35 || sn.command == 0x31 || sn.command == 0x50
+                || sn.command == 0x05 || sn.command == 0x01 || sn.command == 0x06) {
                 // nothing to do
             } else if (sn.command == 0xeb) {
                 sn.data_width = 4;
