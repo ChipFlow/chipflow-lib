@@ -126,4 +126,5 @@ class SiliconStep:
                     f"Submission failed ({resp_data['msg']}); please contact support and provide "
                     f"this error message")
             else:
-                print(f"{resp_data['msg']} (#{resp_data['id']}: {resp_data['name']})")
+                print(f"{resp_data['msg']} (#{resp_data['id']}: {resp_data['name']}); "
+                      f"{resp_data['url']}")
