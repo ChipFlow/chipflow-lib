@@ -83,7 +83,8 @@ config_schema = {
                                             "enum": ["io", "i", "o", "oe", "clk"]
                                         },
                                         "loc": {
-                                            "type": "string"
+                                            "type": "string",
+                                            "pattern": "^[0-9]+$"
                                         },
                                     }
                                 }
