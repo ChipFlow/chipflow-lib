@@ -63,10 +63,10 @@ config_schema = {
                     ],
                     "properties": {
                         "process": {
-                            "enum": ["sky130", "gf180"]
+                            "enum": ["sky130", "gf180", "customer1"]
                         },
                         "pad_ring": {
-                            "enum": ["caravel"]
+                            "enum": ["caravel", "cf20"]
                         },
                         "pads": {
                             "type": "object",
