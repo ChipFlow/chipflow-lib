@@ -93,7 +93,14 @@ class SiliconStep:
             "dependencyVersions": dep_versions,
         }
         config = {
-            "silicon": self.silicon_config
+            "silicon": {
+                "process": self.silicon_config["process"],
+                "pad_ring": self.silicon_config["pad_ring"],
+                "pads": {
+                    pad_name: self.silicon_config["pads"][pad_name]
+                    for pad_name in self.platform._pins
+                }
+            }
         }
         if dry_run:
             print(f"data=\n{json.dumps(data, indent=2)}")
