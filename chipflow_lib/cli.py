@@ -88,7 +88,7 @@ config_schema = {
                                         },
                                         "loc": {
                                             "type": "string",
-                                            "pattern": "^[0-9]+$"
+                                            "pattern": "^[NSWE]?[0-9]+$"
                                         },
                                     }
                                 }
