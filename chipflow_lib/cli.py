@@ -94,6 +94,25 @@ config_schema = {
                                 }
                             }
                         },
+                        "power": {
+                            "type": "object",
+                            "additionalProperties": False,
+                            "patternProperties": {
+                                ".+": {
+                                    "type": "object",
+                                    "required": [
+                                        "loc",
+                                    ],
+                                    "additionalProperties": False,
+                                    "properties": {
+                                        "loc": {
+                                            "type": "string",
+                                            "pattern": "^[NSWE]?[0-9]+$"
+                                        },
+                                    }
+                                }
+                            }
+                        },
                     }
                 },
             },

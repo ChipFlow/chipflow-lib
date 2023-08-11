@@ -99,7 +99,8 @@ class SiliconStep:
                 "pads": {
                     pad_name: self.silicon_config["pads"][pad_name]
                     for pad_name in self.platform._pins
-                }
+                },
+                "power": self.silicon_config.get("power", {})
             }
         }
         if dry_run:
