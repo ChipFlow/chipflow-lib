@@ -47,6 +47,7 @@ config_schema = {
                 "steps",
                 "silicon"
             ],
+            "additionalProperties": False,
             "properties": {
                 "project_id": {
                     "type": "integer",
@@ -61,6 +62,7 @@ config_schema = {
                         "pad_ring",
                         "pads",
                     ],
+                    "additionalProperties": False,
                     "properties": {
                         "process": {
                             "enum": ["sky130", "gf180", "customer1"]
@@ -70,14 +72,16 @@ config_schema = {
                         },
                         "pads": {
                             "type": "object",
+                            "additionalProperties": False,
                             "minProperties": 1,
                             "patternProperties": {
-                                "": {
+                                ".+": {
                                     "type": "object",
                                     "required": [
                                         "type",
                                         "loc",
                                     ],
+                                    "additionalProperties": False,
                                     "properties": {
                                         "type": {
                                             "enum": ["io", "i", "o", "oe", "clk"]
