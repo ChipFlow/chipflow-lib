@@ -80,11 +80,11 @@ config_schema = {
                                     ],
                                     "properties": {
                                         "type": {
-                                            "enum": ["io", "i", "o", "oe", "clk"]
+                                            "enum": ["io", "i", "o", "oe", "clk", "p"]
                                         },
                                         "loc": {
                                             "type": "string",
-                                            "pattern": "^[0-9]+$"
+                                            "pattern": "^[NSWE]?[0-9]+$"
                                         },
                                     }
                                 }
