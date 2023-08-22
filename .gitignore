@@ -1,7 +1,7 @@
 # Python stuff
-__pycache__
-dist/
-poetry.lock
+__pycache__/
+*.egg-info
+/dist
 
 # pdm
 /.pdm-plugins
