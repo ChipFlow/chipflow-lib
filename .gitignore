@@ -3,8 +3,15 @@ __pycache__
 dist/
 poetry.lock
 
+# pdm
+/.pdm-plugins
+/.pdm-python
+/.pdm-build
+/.venv
+/pdm.lock
+
+# pytest
+/.pytest_cache
+
 # doit local database
 .doit.db
-
-# Visual Studio config
-.vscode/

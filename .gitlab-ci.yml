@@ -2,19 +2,18 @@ image: python:3.11
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  PDM_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pdm"
 
 cache:
   paths:
-    - .cache/pip
-    - .venv
+    - .cache/pdm
 
 before_script:
-  - apt-get update -y
-  - apt-get install curl
-  - pip3 install poetry
-  - poetry config virtualenvs.in-project true # Allows us to cache .venv
-  - poetry install
+  - pip install --user pdm
+  - export PATH=/root/.local/bin:$PATH
+  - pdm config install.cache on
+  - pdm lock --dev
+  - pdm install
 
 stages:
   - prechecks
@@ -34,21 +33,15 @@ license:
 
 lint:
   stage: prechecks
-  script: make lint
+  script: pdm run lint
 
 test:
   stage: test
-  script:
-    - poetry run pytest
+  script: pdm run test
 
 # Publish all `main` builds to our GitLab project PyPi repo
 publish-to-gitlab:
-    stage: release
-    script:        
-        - poetry self add "poetry-dynamic-versioning[plugin]"
-        - poetry build
-        - poetry config repositories.chipflow https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/packages/pypi
-        - poetry config http-basic.chipflow gitlab-ci-token ${CI_JOB_TOKEN}
-        - poetry publish --repository chipflow
-    rules:
-        - if: '$CI_COMMIT_BRANCH =~ /^main$/'
+  stage: release
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^main$/'
+  script: pdm publish -r "https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/packages/pypi" -u "gitlab-ci-token" -p "${CI_JOB_TOKEN}"
