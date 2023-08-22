@@ -27,7 +27,7 @@ dependencies = [
     "amaranth-boards @ git+https://github.com/amaranth-lang/amaranth-boards.git",
     "amaranth-stdio @ git+https://github.com/amaranth-lang/amaranth-stdio.git",
     "amaranth-orchard @ git+https://gitlab.com/ChipFlow/amaranth-orchard.git",
-    "amaranth-vexriscv==0.0.3.post1.dev0+882a734",
+    "amaranth-vexriscv==0.0.4+0cc653c",
     "yowasp-yosys~=0.29.0.0",
     "yowasp-nextpnr-ecp5~=0.5.0.0",
     "yowasp-runtime~=1.21",
