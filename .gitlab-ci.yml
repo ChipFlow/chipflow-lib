@@ -2,7 +2,6 @@ image: python:3.11
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
-  PDM_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pdm"
 
 cache:
   paths:
