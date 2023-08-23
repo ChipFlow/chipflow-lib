@@ -17,14 +17,16 @@ class SimPlatform:
 
     def __init__(self):
         self.build_dir = os.path.join(os.environ['CHIPFLOW_ROOT'], 'build', 'sim')
-        self.extra_files = set()
+        self.extra_files = dict()
         self.clk = Signal()
         self.rst = Signal()
         self.buttons = Signal(2)
         self.sim_boxes = dict()
 
     def add_file(self, filename, content):
-        self.extra_files.add(filename)
+        if not isinstance(content, (str, bytes)):
+            content = content.read()
+        self.extra_files[filename] = content
 
     def add_model(self, inst_type, rec, edge_det=[]):
         conns = dict(a_keep=True)
@@ -73,18 +75,20 @@ class SimPlatform:
         output = rtlil.convert(e, name="sim_top", ports=[self.clk, self.rst, self.buttons], platform=self)
 
         top_rtlil = Path(self.build_dir) / "sim_soc.il"
-        with open(top_rtlil, "w") as f:
+        with open(top_rtlil, "w") as rtlil_file:
             for box_content in self.sim_boxes.values():
-                f.write(box_content)
-            f.write(output)
+                rtlil_file.write(box_content)
+            rtlil_file.write(output)
         top_ys = Path(self.build_dir) / "sim_soc.ys"
-        with open(top_ys, "w") as f:
-            for extra in sorted(self.extra_files):
-                extra = extra.replace("\\", "/")  # yowasp supports forward slashes *only*
-                if extra.endswith(".il"):
-                    print(f"read_rtlil {extra}", file=f)
+        with open(top_ys, "w") as yosys_file:
+            for extra_filename, extra_content in self.extra_files.items():
+                extra_path = Path(self.build_dir) / extra_filename
+                with open(extra_path, "w") as extra_file:
+                    extra_file.write(extra_content)
+                if extra_filename.endswith(".il"):
+                    print(f"read_rtlil {extra_filename}", file=yosys_file)
                 else:
-                    print(f"read_verilog -defer {extra}", file=f)
-            print("read_ilang sim_soc.il", file=f)
-            print("hierarchy -top sim_top", file=f)
-            print("write_cxxrtl -g1 -header sim_soc.cc", file=f)
+                    print(f"read_verilog -defer {extra_filename}", file=yosys_file)
+            print("read_ilang sim_soc.il", file=yosys_file)
+            print("hierarchy -top sim_top", file=yosys_file)
+            print("write_cxxrtl -g1 -header sim_soc.cc", file=yosys_file)
