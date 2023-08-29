@@ -65,7 +65,7 @@ class SiliconStepTestCase(unittest.TestCase):
         assert kwargs["auth"] == ("keyid", "keysecret")
         assert data["projectId"] == 123
         assert isinstance(data["name"], str), "Name is a string"
-        assert list(data["dependencyVersions"]) == [
+        assert list(config["dependency_versions"]) == [
             "python",
             "poetry",
             "yowasp-runtime", "yowasp-yosys",

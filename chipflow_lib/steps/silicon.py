@@ -90,9 +90,9 @@ class SiliconStep:
         data = {
             "projectId": self.project_id,
             "name": submission_name,
-            "dependencyVersions": dep_versions,
         }
         config = {
+            "dependency_versions": dep_versions,
             "silicon": {
                 "process": self.silicon_config["process"],
                 "pad_ring": self.silicon_config["pad_ring"],
