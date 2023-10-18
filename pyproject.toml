@@ -22,10 +22,10 @@ license = {file = "LICENSE.md"}
 
 requires-python = "~=3.8"
 dependencies = [
-    "amaranth @ git+https://github.com/amaranth-lang/amaranth",
+    "amaranth @ git+https://github.com/amaranth-lang/amaranth@7714ce329abe5afef9c34a4b618623716bf78e15",
     "amaranth-soc @ git+https://github.com/amaranth-lang/amaranth-soc@59223a82399df45addf1db362ad6fb9670e72b51",
     "amaranth-boards @ git+https://github.com/amaranth-lang/amaranth-boards",
-    "amaranth-stdio @ git+https://github.com/amaranth-lang/amaranth-stdio",
+    "amaranth-stdio @ git+https://github.com/amaranth-lang/amaranth-stdio@bb39058bd956cf89379c7cde9404998476470a07",
     "amaranth-orchard @ git+https://gitlab.com/ChipFlow/amaranth-orchard",
     "amaranth-vexriscv @  git+https://gitlab.com/ChipFlow/amaranth-vexriscv",
     "yowasp-yosys~=0.32.0.0",
