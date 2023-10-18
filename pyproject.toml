@@ -39,7 +39,7 @@ dependencies = [
 
 [tool.pdm.resolution.overrides]
 # We need this to override reqs like "amaranth<0.5,>=0.3"
-amaranth = "git+https://github.com/amaranth-lang/amaranth@392ead8d00c9a130b656b3af45c21fa410268301"
+amaranth = "git+https://github.com/amaranth-lang/amaranth@33c2246311ab2c59a84ac71eb5187c6b06ac12d8"
 
 [project.scripts]
 chipflow = "chipflow_lib.cli:run"
