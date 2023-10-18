@@ -26,7 +26,7 @@ dependencies = [
     "amaranth-soc @ git+https://github.com/amaranth-lang/amaranth-soc@59223a82399df45addf1db362ad6fb9670e72b51",
     "amaranth-boards @ git+https://github.com/amaranth-lang/amaranth-boards",
     "amaranth-stdio @ git+https://github.com/amaranth-lang/amaranth-stdio@bb39058bd956cf89379c7cde9404998476470a07",
-    "amaranth-orchard @ git+https://gitlab.com/ChipFlow/amaranth-orchard",
+    "amaranth-orchard @ git+https://gitlab.com/ChipFlow/amaranth-orchard@97703a061d248cd27d4f7381582cc9c5d66b299c",
     "amaranth-vexriscv @  git+https://gitlab.com/ChipFlow/amaranth-vexriscv",
     "yowasp-yosys~=0.32.0.0",
     "yowasp-nextpnr-ecp5~=0.6.0.0",
