@@ -28,34 +28,35 @@ class SimPlatform:
             content = content.read()
         self.extra_files[filename] = content
 
-    def add_model(self, inst_type, rec, edge_det=[]):
+    def add_model(self, inst_type, iface, edge_det=[]):
         conns = dict(a_keep=True)
 
-        def is_model_out(pin):
-            assert field.endswith("_o") or field.endswith("_oe") or field.endswith("_i"), field
-            return field.endswith("_i")
-        for field, _, _ in rec.layout:
-            if is_model_out(field):
-                conns[f"o_{field}"] = getattr(rec, field)
+        def is_model_out(field_name):
+            assert field_name.endswith("_o") or field_name.endswith("_oe") or field_name.endswith("_i"), field_name
+            return field_name.endswith("_i")
+        for field_name in iface.signature.members:
+            if is_model_out(field_name):
+                conns[f"o_{field_name}"] = getattr(iface, field_name)
             else:
-                conns[f"i_{field}"] = getattr(rec, field)
+                conns[f"i_{field_name}"] = getattr(iface, field_name)
         if inst_type not in self.sim_boxes:
             box = 'attribute \\blackbox 1\n'
             box += 'attribute \\cxxrtl_blackbox 1\n'
             box += 'attribute \\keep 1\n'
             box += f'module \\{inst_type}\n'
-            for i, (field, width, _) in enumerate(rec.layout):
-                if field in edge_det:
+            for i, ((field_name,), _, field) in enumerate(iface.signature.flatten(iface)):
+                field_width = Shape.cast(field.shape()).width
+                if field_name in edge_det:
                     box += '  attribute \\cxxrtl_edge "a"\n'
-                box += f'  wire width {width} {"output" if is_model_out(field) else "input"} {i} \\{field}\n'
+                box += f'  wire width {field_width} {"output" if is_model_out(field_name) else "input"} {i} \\{field_name}\n' # noqa: E501
             box += 'end\n\n'
             self.sim_boxes[inst_type] = box
         return Instance(inst_type, **conns)
 
-    def add_monitor(self, inst_type, rec):
+    def add_monitor(self, inst_type, iface):
         conns = dict(i_clk=ClockSignal(), a_keep=True)
-        for field, width, _ in rec.layout:
-            conns[f'i_{field}'] = getattr(rec, field)
+        for field_name in iface.signature.members:
+            conns[f'i_{field_name}'] = getattr(iface, field_name)
         if inst_type not in self.sim_boxes:
             box = 'attribute \\blackbox 1\n'
             box += 'attribute \\cxxrtl_blackbox 1\n'
@@ -63,8 +64,9 @@ class SimPlatform:
             box += f'module \\{inst_type}\n'
             box += '  attribute \\cxxrtl_edge "a"\n'
             box += '  wire width 1 input 0 \\clk\n'
-            for i, (field, width, _) in enumerate(rec.layout):
-                box += f'  wire width {width} input {i+1} \\{field}\n'
+            for i, ((field_name,), _, field) in enumerate(iface.signature.flatten(iface)):
+                field_width = Shape.cast(field.shape()).width
+                box += f'  wire width {field_width} input {i+1} \\{field_name}\n'
             box += 'end\n\n'
             self.sim_boxes[inst_type] = box
         return Instance(inst_type, **conns)
