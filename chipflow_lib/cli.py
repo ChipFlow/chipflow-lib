@@ -113,6 +113,14 @@ config_schema = {
                                 }
                             }
                         },
+                        "clocks": {
+                            "type": "object",
+                            "properties": {
+                                "frequency": {
+                                    "type": "number"
+                                },
+                            }
+                        }
                     }
                 },
             },

@@ -84,6 +84,7 @@ class SiliconStepTestCase(unittest.TestCase):
                 'vssio': {'loc': 'N5'},
                 'vddio': {'loc': 'N6'},
                 'vdd': {'loc': 'N7'}
-            }
+            },
+            'clocks': {}
         }
         assert rtlil == b"fake-rtlil", "The RTL file was passed through."
