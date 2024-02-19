@@ -71,17 +71,17 @@ class SiliconPlatform:
 
             if pad["type"] in ("io", "i", "clk"):
                 port_i = Signal(name=f"io${pad_name}$i")
-                fragment.add_statements(pin.i.eq(port_i))
+                fragment.add_statements("comb", pin.i.eq(port_i))
                 fragment.add_driver(pin.i)
                 ports.append(port_i)
             if pad["type"] in ("oe", "io", "o"):
                 port_o = Signal(name=f"io${pad_name}$o")
-                fragment.add_statements(port_o.eq(pin.o))
+                fragment.add_statements("comb", port_o.eq(pin.o))
                 fragment.add_driver(port_o)
                 ports.append(port_o)
             if pad["type"] in ("oe", "io"):
                 port_oe = Signal(name=f"io${pad_name}$oe")
-                fragment.add_statements(port_oe.eq(pin.oe))
+                fragment.add_statements("comb", port_oe.eq(pin.oe))
                 fragment.add_driver(port_oe)
                 ports.append(port_oe)
 
