@@ -29,7 +29,7 @@ class SimPlatform:
         self.extra_files[filename] = content
 
     def add_model(self, inst_type, iface, edge_det=[]):
-        conns = dict(a_keep=True)
+        conns = dict(i_clk=ClockSignal(), a_keep=True)
 
         def is_model_out(field_name):
             assert field_name.endswith("_o") or field_name.endswith("_oe") or field_name.endswith("_i"), field_name
@@ -44,6 +44,8 @@ class SimPlatform:
             box += 'attribute \\cxxrtl_blackbox 1\n'
             box += 'attribute \\keep 1\n'
             box += f'module \\{inst_type}\n'
+            box += '  attribute \\cxxrtl_edge "a"\n'
+            box += '  wire width 1 input 0 \\clk\n'
             for i, ((field_name,), _, field) in enumerate(iface.signature.flatten(iface)):
                 field_width = Shape.cast(field.shape()).width
                 if field_name in edge_det:
