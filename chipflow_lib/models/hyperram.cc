@@ -1,9 +1,10 @@
 /* SPDX-License-Identifier: BSD-2-Clause */
-#include <backends/cxxrtl/cxxrtl.h>
-#include <fstream>
-#include <stdexcept>
 #include "build/sim/sim_soc.h"
 #include "log.h"
+#include <cassert>
+#include <cxxrtl/cxxrtl.h>
+#include <fstream>
+#include <stdexcept>
 
 namespace cxxrtl_design {
 
@@ -16,12 +17,13 @@ struct hyperram_model : public bb_p_hyperram__model {
         uint32_t addr = 0;
         uint16_t cfg0 = 0x8028;
         uint16_t latency = 7;
-    } s, sn;
+    } s;
 
     std::vector<uint8_t> data;
     int N; // number of devices
 
     hyperram_model() {
+        assert(p_csn__o.bits <= 32);
         N = p_csn__o.bits;
         data.resize(N*8*1024*1024);
     }
@@ -52,74 +54,66 @@ struct hyperram_model : public bb_p_hyperram__model {
 
     void handle_clk(bool posedge)
     {
-        if (sn.clk_count < 6) {
-            p_rwds__i.set(1U); // 2x latency; always
-            sn.ca |= uint64_t(p_dq__o.get<uint8_t>()) << ((5U - sn.clk_count) * 8U);
+        if (s.clk_count < 6) {
+            p_rwds__i.next.set<bool>(true); // 2x latency; always
+            s.ca |= uint64_t(p_dq__o.get<uint8_t>()) << ((5U - s.clk_count) * 8U);
         }
-        if (sn.clk_count == 6) {    
-            sn.addr = ((((sn.ca & 0x0FFFFFFFFFULL) >> 16U) << 3) | (sn.ca & 0x7)) * 2; // *2 to convert word address to byte address
-            sn.addr += sn.dev * (8U * 1024U * 1024U); // device offsets
+        if (s.clk_count == 6) {
+            s.addr = ((((s.ca & 0x0FFFFFFFFFULL) >> 16U) << 3) | (s.ca & 0x7)) * 2; // *2 to convert word address to byte address
+            s.addr += s.dev * (8U * 1024U * 1024U); // device offsets
         }
-        if (sn.clk_count >= 6) {
-            bool is_reg = (sn.ca >> 46) & 0x1;
-            bool is_read = (sn.ca >> 47) & 0x1;
-            if (is_reg && !is_read && sn.clk_count < 8) {
-                sn.cfg0 <<= 8;
-                sn.cfg0 |= p_dq__o.get<uint8_t>();
-                if (sn.clk_count == 7) {
-                    sn.latency = lookup_latency(sn.cfg0);
-                    // log("set latency %d\n", sn.latency);
+        if (s.clk_count >= 6) {
+            bool is_reg = (s.ca >> 46) & 0x1;
+            bool is_read = (s.ca >> 47) & 0x1;
+            if (is_reg && !is_read && s.clk_count < 8) {
+                s.cfg0 <<= 8;
+                s.cfg0 |= p_dq__o.get<uint8_t>();
+                if (s.clk_count == 7) {
+                    s.latency = lookup_latency(s.cfg0);
+                    // log("set latency %d\n", s.latency);
                 }
-            } else if (is_read && (sn.clk_count >= (3 + 4 * sn.latency))) {
-                // log("read %08x %02x\n", sn.addr, data.at(sn.addr));
-                p_dq__i.set(data.at(sn.addr++));
-                p_rwds__i.set(posedge);
-            } else if (!is_read && (sn.clk_count >= (4 + 4 * sn.latency))) {
-                if (!p_rwds__o) { // data mask 
-                    // log("write %08x %02x\n", sn.addr, p_dq__o.get<uint8_t>());
-                    data.at(sn.addr) = p_dq__o.get<uint8_t>();
+            } else if (is_read && (s.clk_count >= (3 + 4 * s.latency))) {
+                // log("read %08x %02x\n", s.addr, data.at(s.addr));
+                p_dq__i.next.set<uint8_t>(data.at(s.addr++));
+                p_rwds__i.next.set<bool>(posedge);
+            } else if (!is_read && (s.clk_count >= (4 + 4 * s.latency))) {
+                if (!p_rwds__o) { // data mask
+                    // log("write %08x %02x\n", s.addr, p_dq__o.get<uint8_t>());
+                    data.at(s.addr) = p_dq__o.get<uint8_t>();
                 } else {
-                    // log("write %08x XX\n", sn.addr);
+                    // log("write %08x XX\n", s.addr);
                 }
-                sn.addr++;
+                s.addr++;
             }
         }
-        if (sn.addr >= data.size())
-            sn.addr = 0;
-        ++sn.clk_count;
+        if (s.addr >= data.size())
+            s.addr = 0;
+        ++s.clk_count;
     }
 
-    bool eval() override {
-        sn = s;
-        sn.curr_cs = p_csn__o.get<uint32_t>();
-        if (sn.curr_cs != s.curr_cs) {
+    bool eval(performer *performer) override {
+        uint32_t prev_cs = s.curr_cs;
+        s.curr_cs = p_csn__o.get<uint32_t>();
+        if (s.curr_cs != prev_cs) {
             // reset selected device
-            sn.dev = decode_onecold(sn.curr_cs);
-            // log("sel %d\n", sn.dev);
-            sn.clk_count = 0;
-            sn.ca = 0;
+            s.dev = decode_onecold(s.curr_cs);
+            // log("sel %d\n", s.dev);
+            s.clk_count = 0;
+            s.ca = 0;
         }
-        if (posedge_p_clk__o() && sn.dev != -1) {
-            handle_clk(true);
-        } else if (negedge_p_clk__o() && sn.dev != -1) {
-            handle_clk(false);
+        if (posedge_p_clk__o() && s.dev != -1) {
+            handle_clk(/*posedge=*/true);
+        } else if (negedge_p_clk__o() && s.dev != -1) {
+            handle_clk(/*posedge=*/false);
         }
-        return true;
+        return /*converged=*/true;
     }
 
-    bool commit() override {
-        bool changed = bb_p_hyperram__model::commit();
-        s = sn;
-        return changed;
-    }
-
-    void reset() override {
-    };
-    ~hyperram_model() {};
-};
+    ~hyperram_model() {}
+}
 
 std::unique_ptr<bb_p_hyperram__model> bb_p_hyperram__model::create(std::string name, metadata_map parameters, metadata_map attributes) {
     return std::make_unique<hyperram_model>();
 }
 
-};
+}

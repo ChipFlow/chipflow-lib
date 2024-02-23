@@ -92,7 +92,9 @@ class SimPlatform:
                 if extra_filename.endswith(".il"):
                     print(f"read_rtlil {extra_filename}", file=yosys_file)
                 else:
-                    print(f"read_verilog -defer {extra_filename}", file=yosys_file)
+                    # FIXME: use -defer (workaround for YosysHQ/yosys#4059)
+                    print(f"read_verilog {extra_filename}", file=yosys_file)
             print("read_ilang sim_soc.il", file=yosys_file)
             print("hierarchy -top sim_top", file=yosys_file)
-            print("write_cxxrtl -g1 -header sim_soc.cc", file=yosys_file)
+            # FIXME: use the default -O6 (workaround for YosysHQ/yosys#4227)
+            print("write_cxxrtl -O4 -header sim_soc.cc", file=yosys_file)

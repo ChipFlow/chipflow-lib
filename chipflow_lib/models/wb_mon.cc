@@ -1,9 +1,8 @@
 /* SPDX-License-Identifier: BSD-2-Clause */
-#include <backends/cxxrtl/cxxrtl.h>
+#include <cxxrtl/cxxrtl.h>
+#include <fstream>
 #include "build/sim/sim_soc.h"
 #include "log.h"
-
-#include <fstream>
 
 namespace cxxrtl_design {
 
@@ -13,7 +12,7 @@ struct wb_mon : public bb_p_wb__mon {
         out.open(file);
     }
     int stall_count = 0;
-    bool eval() override {
+    bool eval(performer *performer) override {
         if (!out)
             return true;
         if (posedge_p_clk()) {
@@ -43,10 +42,14 @@ struct wb_mon : public bb_p_wb__mon {
                 stall_count = 0;
             }
         }
-        return true;
+        return /*converged=true*/true;
     }
-    void reset() override {};
-    ~wb_mon() {};
+
+    void reset() override {
+        bb_p_wb__mon::reset();
+    }
+
+    ~wb_mon() {}
 };
 
 std::unique_ptr<bb_p_wb__mon> bb_p_wb__mon::create(std::string name, metadata_map parameters, metadata_map attributes) {
@@ -57,4 +60,4 @@ void wb_mon_set_output(bb_p_wb__mon &mon, const std::string &file) {
     dynamic_cast<wb_mon&>(mon).set_output(file);
 }
 
-};
+}
