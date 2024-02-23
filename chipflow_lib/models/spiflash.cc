@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: BSD-2-Clause */
-#include <backends/cxxrtl/cxxrtl.h>
+#include <cxxrtl/cxxrtl.h>
 #include <fstream>
 #include <stdexcept>
 #include <array>
@@ -86,7 +86,7 @@ struct spiflash_model : public bb_p_spiflash__model {
         }
     }
 
-    bool eval() override {
+    bool eval(performer *performer) override {
         sn = s;
         if (posedge_p_csn__o()) {
             sn.bit_count = 0;

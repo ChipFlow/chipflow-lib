@@ -2,7 +2,7 @@
 #ifndef WB_MON_H
 #define WB_MON_H
 
-#include <backends/cxxrtl/cxxrtl.h>
+#include <cxxrtl/cxxrtl.h>
 
 #include "build/sim/sim_soc.h"
 

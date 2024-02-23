@@ -2,7 +2,7 @@
 #ifndef SPIFLASH_H
 #define SPIFLASH_H
 
-#include <backends/cxxrtl/cxxrtl.h>
+#include <cxxrtl/cxxrtl.h>
 
 #include "build/sim/sim_soc.h"
 

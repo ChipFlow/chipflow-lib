@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: BSD-2-Clause */
-#include <backends/cxxrtl/cxxrtl.h>
+#include <cxxrtl/cxxrtl.h>
 #include <fstream>
 #include <stdexcept>
 #include "build/sim/sim_soc.h"
@@ -20,7 +20,7 @@ struct uart_model : public bb_p_uart__model {
         baud_div = (25000000)/115200;
     }
 
-    bool eval() override {
+    bool eval(performer *performer) override {
         sn = s;
         if (posedge_p_clk()) {
             if (sn.counter == 0) {

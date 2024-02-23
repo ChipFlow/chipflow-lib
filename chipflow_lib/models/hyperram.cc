@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: BSD-2-Clause */
-#include <backends/cxxrtl/cxxrtl.h>
+#include <cxxrtl/cxxrtl.h>
 #include <fstream>
 #include <stdexcept>
 #include "build/sim/sim_soc.h"
@@ -89,7 +89,7 @@ struct hyperram_model : public bb_p_hyperram__model {
         ++sn.clk_count;
     }
 
-    bool eval() override {
+    bool eval(performer *performer) override {
         sn = s;
         sn.curr_cs = p_csn__o.get<uint32_t>();
         if (sn.curr_cs != s.curr_cs) {

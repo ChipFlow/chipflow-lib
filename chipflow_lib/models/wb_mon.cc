@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: BSD-2-Clause */
-#include <backends/cxxrtl/cxxrtl.h>
+#include <cxxrtl/cxxrtl.h>
 #include "build/sim/sim_soc.h"
 #include "log.h"
 
@@ -13,7 +13,7 @@ struct wb_mon : public bb_p_wb__mon {
         out.open(file);
     }
     int stall_count = 0;
-    bool eval() override {
+    bool eval(performer *performer) override {
         if (!out)
             return true;
         if (posedge_p_clk()) {
