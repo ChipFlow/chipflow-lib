@@ -1,9 +1,5 @@
 # Package sources
 
-[[tool.pdm.source]]
-name = "chipflow-amaranth-vexriscv"
-url = "https://gitlab.com/api/v4/projects/33096707/packages/pypi/simple"
-
 # Project metadata
 
 [tool.pdm.version]
@@ -27,9 +23,8 @@ dependencies = [
     "amaranth-boards @ git+https://github.com/amaranth-lang/amaranth-boards",
     "amaranth-stdio @ git+https://github.com/amaranth-lang/amaranth-stdio",
     "amaranth-orchard @ git+https://gitlab.com/ChipFlow/amaranth-orchard",
-    "amaranth-vexriscv @  git+https://gitlab.com/ChipFlow/amaranth-vexriscv",
-    "yowasp-yosys>=0.38",
-    "yowasp-nextpnr-ecp5",
+    "yowasp-yosys==0.38.0.92.post685.dev0",
+    "yowasp-nextpnr-ecp5==0.7.0.11.post528.dev0",
     "yowasp-runtime",
     "tomli~=2.0.1",
     "jsonschema~=4.17.3",
