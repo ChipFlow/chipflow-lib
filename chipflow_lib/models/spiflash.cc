@@ -17,7 +17,7 @@ struct spiflash_model : public bb_p_spiflash__model {
         uint8_t curr_byte = 0;
         uint8_t command = 0;
         uint8_t out_buffer = 0;
-    } s;
+    } s, sn;
 
     std::vector<uint8_t> data;
 
@@ -39,78 +39,85 @@ struct spiflash_model : public bb_p_spiflash__model {
     }
 
     void process_byte() {
-        s.out_buffer = 0;
-        if (s.byte_count == 0) {
-            s.addr = 0;
-            s.data_width = 1;
-            s.command = s.curr_byte;
-            if (s.command == 0xab) {
+        sn.out_buffer = 0;
+        if (sn.byte_count == 0) {
+            sn.addr = 0;
+            sn.data_width = 1;
+            sn.command = sn.curr_byte;
+            if (sn.command == 0xab) {
                 // power up
-            } else if (s.command == 0x03 || s.command == 0x9f || s.command == 0xff
-                || s.command == 0x35 || s.command == 0x31 || s.command == 0x50
-                || s.command == 0x05 || s.command == 0x01 || s.command == 0x06) {
+            } else if (sn.command == 0x03 || sn.command == 0x9f || sn.command == 0xff
+                || sn.command == 0x35 || sn.command == 0x31 || sn.command == 0x50
+                || sn.command == 0x05 || sn.command == 0x01 || sn.command == 0x06) {
                 // nothing to do
-            } else if (s.command == 0xeb) {
-                s.data_width = 4;
+            } else if (sn.command == 0xeb) {
+                sn.data_width = 4;
             } else {
-                log("flash: unknown command %02x\n", s.command);
+                log("flash: unknown command %02x\n", sn.command);
             }
         } else {
-            if (s.command == 0x03) {
+            if (sn.command == 0x03) {
                 // Single read
-                if (s.byte_count <= 3) {
-                    s.addr |= (uint32_t(s.curr_byte) << ((3 - s.byte_count) * 8));
+                if (sn.byte_count <= 3) {
+                    sn.addr |= (uint32_t(sn.curr_byte) << ((3 - sn.byte_count) * 8));
                 }
-                if (s.byte_count >= 3) {
-                    //if (s.byte_count == 3)
-                        //log("flash: begin read 0x%06x\n", s.addr);
-                    s.out_buffer = data.at(s.addr);
-                    s.addr = (s.addr + 1) & 0x00FFFFFF;
+                if (sn.byte_count >= 3) {
+                    //if (sn.byte_count == 3)
+                        //log("flash: begin read 0x%06x\n", sn.addr);
+                    sn.out_buffer = data.at(sn.addr);
+                    sn.addr = (sn.addr + 1) & 0x00FFFFFF;
                 }
-            } else if (s.command == 0xeb) {
+            } else if (sn.command == 0xeb) {
                 // Quad read
-                if (s.byte_count <= 3) {
-                    s.addr |= (uint32_t(s.curr_byte) << ((3 - s.byte_count) * 8));
+                if (sn.byte_count <= 3) {
+                    sn.addr |= (uint32_t(sn.curr_byte) << ((3 - sn.byte_count) * 8));
                 }
-                if (s.byte_count >= 6) { // 1 mode, 2 dummy clocks
+                if (sn.byte_count >= 6) { // 1 mode, 2 dummy clocks
                     // read 4 bytes
-                    s.out_buffer = data.at(s.addr);
-                    s.addr = (s.addr + 1) & 0x00FFFFFF;
+                    sn.out_buffer = data.at(sn.addr);
+                    sn.addr = (sn.addr + 1) & 0x00FFFFFF;
                 }
             }
         }
-        if (s.command == 0x9f) {
+        if (sn.command == 0x9f) {
             // Read ID
             static const std::array<uint8_t, 4> flash_id{0xCA, 0x7C, 0xA7, 0xFF};
-            s.out_buffer = flash_id.at(s.byte_count % int(flash_id.size()));
+            sn.out_buffer = flash_id.at(sn.byte_count % int(flash_id.size()));
         }
     }
 
     bool eval(performer *performer) override {
+        sn = s;
         if (posedge_p_csn__o()) {
-            s.bit_count = 0;
-            s.byte_count = 0;
-            s.data_width = 1;
+            sn.bit_count = 0;
+            sn.byte_count = 0;
+            sn.data_width = 1;
         } else if (posedge_p_clk__o() && !p_csn__o) {
-            if (s.data_width == 4)
-                s.curr_byte = (s.curr_byte << 4U) | (p_d__o.get<uint8_t>() & 0xF);
+            if (sn.data_width == 4)
+                sn.curr_byte = (sn.curr_byte << 4U) | (p_d__o.get<uint32_t>() & 0xF);
             else
-                s.curr_byte = (s.curr_byte << 1U) | p_d__o.bit(0);
-            s.out_buffer = s.out_buffer << unsigned(s.data_width);
-            s.bit_count += s.data_width;
-            if ((s.bit_count) == 8) {
+                sn.curr_byte = (sn.curr_byte << 1U) | p_d__o.bit(0);
+            sn.out_buffer = sn.out_buffer << unsigned(sn.data_width);
+            sn.bit_count += sn.data_width;
+            if ((sn.bit_count) == 8) {
                 process_byte();
-                ++s.byte_count;
-                s.bit_count = 0;
+                ++sn.byte_count;
+                sn.bit_count = 0;
             }
         } else if (negedge_p_clk__o() && !p_csn__o) {
-            if (s.data_width == 4) {
-                p_d__i.next.set<uint8_t>((s.out_buffer >> 4U) & 0xFU);
+            if (sn.data_width == 4) {
+                p_d__i.set((sn.out_buffer >> 4U) & 0xFU);
             } else {
-                p_d__i.next.set<uint8_t>(((s.out_buffer >> 7U) & 0x1U) << 1U);
+                p_d__i.set(((sn.out_buffer >> 7U) & 0x1U) << 1U);
             }
         }
         return /*converged=*/true;
+    }
+
+    bool commit(observer &observer) override {
+        bool changed = bb_p_spiflash__model::commit(observer);
+        s = sn;
+        return changed;
     }
 
     ~spiflash_model() {}

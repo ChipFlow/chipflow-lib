@@ -12,7 +12,7 @@ struct uart_model : public bb_p_uart__model {
         bool tx_last;
         int counter = 0;
         uint8_t sr = 0;
-    } s;
+    } s, sn;
 
     int baud_div = 0;
     uart_model() {
@@ -21,32 +21,39 @@ struct uart_model : public bb_p_uart__model {
     }
 
     bool eval(performer *performer) override {
+        sn = s;
         if (posedge_p_clk()) {
-            if (s.counter == 0) {
-                if (s.tx_last && !p_tx__o) { // start bit
-                    s.counter = 1;
+            if (sn.counter == 0) {
+                if (sn.tx_last && !p_tx__o) { // start bit
+                    sn.counter = 1;
                 }
             } else {
-                ++s.counter;
-                if (s.counter > (baud_div / 2) && ((s.counter - (baud_div / 2)) % baud_div) == 0) {
-                    int bit = ((s.counter - (baud_div / 2)) / baud_div);
+                ++sn.counter;
+                if (sn.counter > (baud_div / 2) && ((sn.counter - (baud_div / 2)) % baud_div) == 0) {
+                    int bit = ((sn.counter - (baud_div / 2)) / baud_div);
                     if (bit >= 1 && bit <= 8) {
                         // update shift register
-                        s.sr = (p_tx__o ? 0x80U : 0x00U) | (s.sr >> 1U);
+                        sn.sr = (p_tx__o ? 0x80U : 0x00U) | (sn.sr >> 1U);
                     }
                     if (bit == 8) {
                         // print to console
-                        log("%c", char(s.sr));
+                        log("%c", char(sn.sr));
                     }
                     if (bit == 9) {
                         // end
-                        s.counter = 0;
+                        sn.counter = 0;
                     }
                 }
             }
-            s.tx_last = bool(p_tx__o);
+            sn.tx_last = bool(p_tx__o);
         }
         return /*converged=*/true;
+    }
+
+    bool commit(observer &observer) override {
+        bool changed = bb_p_uart__model::commit(observer);
+        s = sn;
+        return changed;
     }
 
     ~uart_model() {}
