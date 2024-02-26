@@ -14,9 +14,9 @@ name = "chipflow-lib"
 dynamic = ["version"]
 description = "ChipFlow common tools."
 authors = [
-    {name = "Robert Taylor", email = "rob.taylor@chipflow.io>" },
-    {name = "Ross Motley", email = "ross.motley@chipflow.io>" },
-    {name = "Catherine Zotova", email = "catherine.zotova@chipflow.io>" },
+    {name = "Robert Taylor", email = "rob.taylor@chipflow.io" },
+    {name = "Ross Motley", email = "ross.motley@chipflow.io" },
+    {name = "Catherine Zotova", email = "catherine.zotova@chipflow.io" },
 ]
 license = {file = "LICENSE.md"}
 
