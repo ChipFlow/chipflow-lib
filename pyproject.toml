@@ -23,7 +23,7 @@ dependencies = [
     "amaranth-boards @ git+https://github.com/amaranth-lang/amaranth-boards",
     "amaranth-stdio @ git+https://github.com/amaranth-lang/amaranth-stdio",
     "amaranth-orchard @ git+https://gitlab.com/ChipFlow/amaranth-orchard",
-    "yowasp-yosys==0.38.0.92.post685.dev0",
+    "yowasp-yosys==0.38.0.92.post687.dev0",
     "yowasp-nextpnr-ecp5==0.7.0.11.post528.dev0",
     "yowasp-runtime",
     "tomli~=2.0.1",
