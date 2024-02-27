@@ -1,0 +1,40 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  merge_group:
+
+name: CI
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up PDM
+        uses: pdm-project/setup-pdm@v4
+      - name: Install dependencies
+        run: |
+          pdm lock --dev
+          pdm install
+      - name: Run tests
+        run: |
+          pdm run test
+      - name: Run lints
+        run: |
+          pdm run lint
+
+  license:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check source code licenses
+        run: |
+          docker run --platform=linux/amd64 -v ${PWD}:/src ghcr.io/google/addlicense -v -check -l BSD-2-Clause -c "ChipFlow" -s=only -ignore **/__init__.py **/*.py
