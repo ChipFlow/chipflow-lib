@@ -18,7 +18,7 @@ license = {file = "LICENSE.md"}
 
 requires-python = "~=3.8"
 dependencies = [
-    "amaranth @ git+https://github.com/amaranth-lang/amaranth",
+    "amaranth @ git+https://github.com/amaranth-lang/amaranth@a72528275164cdf0d6af0a75f3e89fecdfe03b4a",
     "amaranth-soc @ git+https://github.com/amaranth-lang/amaranth-soc",
     "amaranth-boards @ git+https://github.com/amaranth-lang/amaranth-boards",
     "amaranth-stdio @ git+https://github.com/amaranth-lang/amaranth-stdio",

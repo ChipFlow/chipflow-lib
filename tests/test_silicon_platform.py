@@ -5,7 +5,7 @@ import os
 
 import unittest
 from amaranth import *
-from amaranth.hdl.ir import Fragment
+from amaranth.hdl import Fragment
 
 from chipflow_lib import ChipFlowError
 from chipflow_lib.platforms.silicon import SiliconPlatform

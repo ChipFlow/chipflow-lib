@@ -7,7 +7,7 @@ import subprocess
 
 from amaranth import *
 from amaranth.back import rtlil
-from amaranth.hdl.ir import Fragment
+from amaranth.hdl import Fragment
 from amaranth.lib.io import Pin
 from amaranth.hdl.xfrm import DomainLowerer
 
