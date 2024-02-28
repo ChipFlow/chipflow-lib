@@ -16,8 +16,8 @@ class QSPIFlashProvider(Elaboratable):
     def elaborate(self, platform):
         m = Module()
         m.d.comb += [
-            platform.request("flash_clk").eq(self.pins.clk_o),
-            platform.request("flash_csn").eq(self.pins.csn_o),
+            platform.request("flash_clk").o.eq(self.pins.clk_o),
+            platform.request("flash_csn").o.eq(self.pins.csn_o),
         ]
         for index in range(4):
             pin = platform.request(f"flash_d{index}")
