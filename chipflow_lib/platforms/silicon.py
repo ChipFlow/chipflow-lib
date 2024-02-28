@@ -68,25 +68,14 @@ class SiliconPlatform:
         ports = []
         for pad_name in self._pins:
             pad, pin = self._pads[pad_name], self._pins[pad_name]
-
             if pad["type"] in ("io", "i", "clk"):
-                port_i = Signal(name=f"io${pad_name}$i")
-                fragment.add_statements("comb", pin.i.eq(port_i))
-                fragment.add_driver(pin.i)
-                ports.append(port_i)
+                ports.append((f"io${pad_name}$i", pin.i, "input"))
             if pad["type"] in ("oe", "io", "o"):
-                port_o = Signal(name=f"io${pad_name}$o")
-                fragment.add_statements("comb", port_o.eq(pin.o))
-                fragment.add_driver(port_o)
-                ports.append(port_o)
+                ports.append((f"io${pad_name}$o", pin.o, "output"))
             if pad["type"] in ("oe", "io"):
-                port_oe = Signal(name=f"io${pad_name}$oe")
-                fragment.add_statements("comb", port_oe.eq(pin.oe))
-                fragment.add_driver(port_oe)
-                ports.append(port_oe)
+                ports.append((f"io${pad_name}$oe", pin.oe, "output"))
 
-        fragment._propagate_ports(ports=ports, all_undef_as_ports=False)
-        return fragment
+        return fragment.prepare(ports)
 
     def build(self, elaboratable, name="top"):
         fragment = self._prepare(elaboratable, name)
