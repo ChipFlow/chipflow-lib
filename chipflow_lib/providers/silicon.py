@@ -69,7 +69,7 @@ class UARTProvider(Elaboratable):
         m = Module()
         m.d.comb += [
             platform.request("uart_tx").o.eq(self.pins.tx_o),
-            self.pins.rx_i.eq(platform.request("uart_rx")),
+            self.pins.rx_i.eq(platform.request("uart_rx").i),
         ]
         return m
 
