@@ -10,6 +10,7 @@ from amaranth.back import rtlil
 from amaranth.hdl import Fragment
 from amaranth.lib.io import Pin
 from amaranth.hdl._xfrm import DomainLowerer
+from amaranth.hdl._ir import PortDirection
 
 from .. import ChipFlowError
 
@@ -58,23 +59,23 @@ class SiliconPlatform:
             self._check_clock_domains(subfragment, sync_domain)
 
     def _prepare(self, elaboratable, name="top"):
-        # Build RTLIL for the Amaranth design
         fragment = Fragment.get(elaboratable, self)
-        fragment._propagate_domains(lambda domain: None, platform=self)
-        fragment = DomainLowerer()(fragment)
 
+        # Check that only a single clock domain is used.
         self._check_clock_domains(fragment)
 
+        # Prepare toplevel ports according to chipflow.toml.
         ports = []
         for pad_name in self._pins:
             pad, pin = self._pads[pad_name], self._pins[pad_name]
             if pad["type"] in ("io", "i", "clk"):
-                ports.append((f"io${pad_name}$i", pin.i, "input"))
+                ports.append((f"io${pad_name}$i", pin.i, PortDirection.Input))
             if pad["type"] in ("oe", "io", "o"):
-                ports.append((f"io${pad_name}$o", pin.o, "output"))
+                ports.append((f"io${pad_name}$o", pin.o, PortDirection.Output))
             if pad["type"] in ("oe", "io"):
-                ports.append((f"io${pad_name}$oe", pin.oe, "output"))
+                ports.append((f"io${pad_name}$oe", pin.oe, PortDirection.Output))
 
+        # Prepare design for RTLIL conversion.
         return fragment.prepare(ports)
 
     def build(self, elaboratable, name="top"):
