@@ -67,7 +67,6 @@ class SiliconStepTestCase(unittest.TestCase):
         assert isinstance(data["name"], str), "Name is a string"
         assert list(config["dependency_versions"]) == [
             "python",
-            "poetry",
             "yowasp-runtime", "yowasp-yosys",
             "amaranth", "amaranth-stdio", "amaranth-soc",
             "chipflow-lib",
