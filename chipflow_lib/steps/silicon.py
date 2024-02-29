@@ -76,7 +76,6 @@ class SiliconStep:
         }
         for package in (
             # Upstream packages
-            "poetry",
             "yowasp-runtime", "yowasp-yosys",
             "amaranth", "amaranth-stdio", "amaranth-soc",
             # ChipFlow packages
