@@ -139,7 +139,6 @@ class ClockResetProvider(Elaboratable):
 
     def elaborate(self, platform):
         m = Module()
-        m.domains.sync = ClockDomain()
-        m.d.comb += ClockSignal().eq(platform.request("clk25").i)
-        m.submodules += ResetSynchronizer(platform.request("button_pwr").i)
+        m.d.comb += ClockSignal("sync").eq(platform.request("clk25").i)
+        m.submodules += ResetSynchronizer(platform.request("button_pwr").i, domain="sync")
         return m
