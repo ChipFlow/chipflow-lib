@@ -61,7 +61,6 @@ class JTAGProvider(Elaboratable):
 class ClockResetProvider(Elaboratable):
     def elaborate(self, platform):
         m = Module()
-        m.domains.sync = ClockDomain()
-        m.d.comb += ClockSignal().eq(platform.clk)
-        m.d.comb += ResetSignal().eq(platform.rst)
+        m.d.comb += ClockSignal("sync").eq(platform.clk)
+        m.d.comb += ResetSignal("sync").eq(platform.rst)
         return m

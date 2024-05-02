@@ -124,11 +124,8 @@ class JTAGProvider(Elaboratable):
 class ClockResetProvider(Elaboratable):
     def elaborate(self, platform):
         m = Module()
-        m.domains.sync = ClockDomain()
-        m.d.comb += [
-            ClockSignal().eq(platform.request("sys_clk").i),
-        ]
+        m.d.comb += ClockSignal("sync").eq(platform.request("sys_clk").i)
         m.submodules.rst_sync = FFSynchronizer(
             ~platform.request("sys_rstn").i,
-            ResetSignal())
+            ResetSignal("sync"))
         return m
