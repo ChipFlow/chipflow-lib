@@ -15,3 +15,5 @@ __pycache__/
 
 # doit local database
 .doit.db
+
+docs/_build

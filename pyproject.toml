@@ -46,6 +46,7 @@ build-backend = "pdm.backend"
 [tool.pdm.dev-dependencies]
 test = [
     "pytest~=7.2.0",
+    "sphinx>=7.1.2",
 ]
 lint = [
     "pycodestyle~=2.10.0",
@@ -53,4 +54,6 @@ lint = [
 
 [tool.pdm.scripts]
 test.cmd = "pytest"
+test-docs.cmd = "sphinx-build -b doctest docs/ docs/_build"
 lint.cmd = "pycodestyle --config=./.pycodestyle chipflow_lib"
+document.cmd = "sphinx-build docs/ docs/_build/ -W --keep-going"
