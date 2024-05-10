@@ -19,27 +19,23 @@ Let's start with a typical example:
    root_dir = os.getcwd()
    _parse_config_file(f"{root_dir}/docs/example-chipflow.toml")
 
-===========
 project_id
 ===========
 
 The ``project_id`` is set to the project ID which you can get from the ChipFlow app project page.
 
-=====
 steps
 =====
 
 The ``steps`` define the Python class which will be used as an entry point to these parts of the ChipFlow process.
 You probably won't need to change these if you're starting from an example repository.
 
-=======
 silicon
 =======
 
 The ``silicon`` section sets the Foundry ``process`` we are targetting for manufacturing, and the physical ``pad_ring`` we want to place our design inside.
 You'll choose the ``process`` and ``pad_ring`` based in the requirements of your design. 
 
--------------------
 Available processes
 -------------------
 
@@ -56,7 +52,6 @@ Available processes
 | customer1 | cf20       | To be announced.          |
 +-----------+------------+---------------------------+
 
--------------------
 Available pad rings
 -------------------
 
@@ -74,7 +69,6 @@ Available pad rings
 ||         ||          || customer support.                                        |
 +----------+-----------+-----------------------------------------------------------+
 
-============
 silicon.pads
 ============
 
@@ -82,7 +76,6 @@ The ``silicon.pads`` section lists the pads we will be using.
 
 For each pad, there's a label which is used by our design, and what ``type`` and ``loc`` each pad should be.
 
-----
 type
 ----
 
@@ -100,7 +93,6 @@ o
 io
    Input or output.
 
-----
 loc
 ----
 
