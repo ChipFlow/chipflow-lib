@@ -15,9 +15,7 @@ Let's start with a typical example:
    # this test fails, then its likely that the content in this file will need
    # to be updated.
    from chipflow_lib.cli import _parse_config_file
-   import os
-   root_dir = os.getcwd()
-   _parse_config_file(f"{root_dir}/docs/example-chipflow.toml")
+   _parse_config_file("docs/example-chipflow.toml")
 
 project_id
 ===========
