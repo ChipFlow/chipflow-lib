@@ -1,7 +1,7 @@
 Intro to chipflow.toml
 ======================
 
-The `chipflow.toml` file provides configuration for your design with the ChipFlow platform.
+The ``chipflow.toml`` file provides configuration for your design with the ChipFlow platform.
 
 Let's start with a typical example:
 
