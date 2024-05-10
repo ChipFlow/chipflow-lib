@@ -5,7 +5,7 @@ The ``chipflow.toml`` file provides configuration for your design with the ChipF
 
 Let's start with a typical example:
 
-.. literalinclude :: example-chipflow.toml
+.. literalinclude:: example-chipflow.toml
    :language: toml
 
 .. testcode::
