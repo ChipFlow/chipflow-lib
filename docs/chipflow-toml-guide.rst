@@ -101,7 +101,7 @@ io
 loc
 ----
 
-This is the physical location of the pad on your chosen pad-ring. How these are indexed varied by the pad ring.
+This is the physical location of the pad on your chosen pad ring. How these are indexed varies by the pad ring.
 
 silicon.power
 =============
