@@ -124,6 +124,10 @@ config_schema = {
 def _parse_config():
     chipflow_root = _ensure_chipflow_root()
     config_file = f"{chipflow_root}/chipflow.toml"
+    return _parse_config_file(config_file)
+
+
+def _parse_config_file(config_file):
     with open(config_file, "rb") as f:
         config_dict = tomli.load(f)
 
