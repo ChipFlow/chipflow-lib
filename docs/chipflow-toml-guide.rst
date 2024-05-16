@@ -59,6 +59,7 @@ Available pad rings
 || caravel || TBC      || TBC               || The `Caravel Harness`_ contains   |
 ||         ||          ||                   || additional logic which wraps your |
 ||         ||          ||                   || design.                           |
+||         ||          ||                   || It handles its own power pins.    |
 +----------+-----------+--------------------+------------------------------------+
 || cf20    || 20       || ``N1`` ... ``N7`` ||                                   |
 ||         ||          || ``S1`` ... ``S7`` ||                                   |
@@ -101,6 +102,13 @@ loc
 ----
 
 This is the physical location of the pad on your chosen pad-ring. How these are indexed varied by the pad ring.
+
+silicon.power
+=============
+
+This section describes how the pads should be connected to the power available on the chosen process.
+
+This is a work in progress, and currently you can use the defaults provided by customer support.
 
 
 .. _Caravel Harness: https://caravel-harness.readthedocs.io/en/latest/
