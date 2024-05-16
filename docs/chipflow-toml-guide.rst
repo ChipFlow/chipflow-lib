@@ -31,7 +31,7 @@ You probably won't need to change these if you're starting from an example repos
 silicon
 =======
 
-The ``silicon`` section sets the Foundry ``process`` we are targetting for manufacturing, and the physical ``pad_ring`` we want to place our design inside.
+The ``silicon`` section sets the Foundry ``process`` we are targeting for manufacturing, and the physical ``pad_ring`` we want to place our design inside.
 You'll choose the ``process`` and ``pad_ring`` based in the requirements of your design. 
 
 Available processes
@@ -43,9 +43,9 @@ Available processes
 +===========+============+===========================+
 | sky130    | caravel    | Skywater 130nm            |
 +-----------+------------+---------------------------+
-| gf180     | caravel    | GlobalFoundries 130nm     |
+| gf180     | caravel    | GlobalFoundries 180nm     |
 +-----------+------------+---------------------------+
-| gf130bcd  | pga140     | GlobalFoundries 130nm BCD |
+| gf130bcd  | pga144     | GlobalFoundries 130nm BCD |
 +-----------+------------+---------------------------+
 | customer1 | cf20       | To be announced.          |
 +-----------+------------+---------------------------+
@@ -53,19 +53,25 @@ Available processes
 Available pad rings
 -------------------
 
-+----------+-----------+-----------------------------------------------------------+
-| Pad ring | Pad count | Notes                                                     |
-+==========+===========+===========================================================+
-|| caravel || TBC      || The `Caravel Harness`_ contains additional logic which   |
-||         ||          || wraps your design.                                       |
-+----------+-----------+-----------------------------------------------------------+
-| cf20     | 20        |                                                           |
-+----------+-----------+-----------------------------------------------------------+
-| pga140   | 140       |                                                           |
-+----------+-----------+-----------------------------------------------------------+
-|| TBA     ||          || If you require a different pad ring, then please contact |
-||         ||          || customer support.                                        |
-+----------+-----------+-----------------------------------------------------------+
++----------+-----------+--------------------+------------------------------------+
+| Pad ring | Pad count | Pad locations      | Notes                              |
++==========+===========+====================+====================================+
+|| caravel || TBC      || TBC               || The `Caravel Harness`_ contains   |
+||         ||          ||                   || additional logic which wraps your |
+||         ||          ||                   || design.                           |
++----------+-----------+--------------------+------------------------------------+
+|| cf20    || 20       || ``N1`` ... ``N7`` ||                                   |
+||         ||          || ``S1`` ... ``S7`` ||                                   |
+||         ||          || ``E1`` ... ``E3`` ||                                   |
+||         ||          || ``W1`` ... ``W3`` ||                                   |
++----------+-----------+--------------------+------------------------------------+
+| pga144   | 144       | ``1`` ... ``144``  |                                    |
++----------+-----------+--------------------+------------------------------------+
+|| TBA     ||          ||                   || If you require a different        |
+||         ||          ||                   || pad ring, then please contact     |
+||         ||          ||                   || customer support.                 |
++----------+-----------+--------------------+------------------------------------+
+
 
 silicon.pads
 ============
@@ -94,7 +100,7 @@ io
 loc
 ----
 
-This is a 0-indexed position on your chosen pad-ring.
+This is the physical location of the pad on your chosen pad-ring. How these are indexed varied by the pad ring.
 
 
 .. _Caravel Harness: https://caravel-harness.readthedocs.io/en/latest/
