@@ -1,9 +1,12 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 from amaranth import *
+from amaranth.lib import wiring
+from amaranth.lib.wiring import In
+
+from amaranth_soc import gpio
 
 from amaranth_orchard.memory.spimemio import QSPIPins
-from amaranth_orchard.base.gpio import GPIOPins
 from amaranth_orchard.io.uart import UARTPins
 from amaranth_orchard.memory.hyperram import HyperRAMPins
 
@@ -16,21 +19,20 @@ class QSPIFlashProvider(Elaboratable):
         return platform.add_model("spiflash_model", self.pins, edge_det=['clk_o', 'csn_o'])
 
 
-class LEDGPIOProvider(Elaboratable):
-    def __init__(self):
-        self.pins = GPIOPins(width=8)
+class LEDGPIOProvider(wiring.Component):
+    pins: In(gpio.PinSignature()).array(8)
 
     def elaborate(self, platform):
         return Module()
 
 
-class ButtonGPIOProvider(Elaboratable):
-    def __init__(self):
-        self.pins = GPIOPins(width=2)
+class ButtonGPIOProvider(wiring.Component):
+    pins: In(gpio.PinSignature()).array(2)
 
     def elaborate(self, platform):
         m = Module()
-        m.d.comb += self.pins.i.eq(platform.buttons)
+        for i in range(2):
+            m.d.comb += self.pins[i].i.eq(platform.buttons[i])
         return m
 
 

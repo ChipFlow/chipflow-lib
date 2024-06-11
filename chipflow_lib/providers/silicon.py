@@ -2,9 +2,12 @@
 
 from amaranth import *
 from amaranth.lib.cdc import FFSynchronizer
+from amaranth.lib import wiring
+from amaranth.lib.wiring import In
+
+from amaranth_soc import gpio
 
 from amaranth_orchard.memory.spimemio import QSPIPins
-from amaranth_orchard.base.gpio import GPIOPins
 from amaranth_orchard.io.uart import UARTPins
 from amaranth_orchard.memory.hyperram import HyperRAMPins
 
@@ -29,34 +32,32 @@ class QSPIFlashProvider(Elaboratable):
         return m
 
 
-class LEDGPIOProvider(Elaboratable):
-    def __init__(self):
-        self.pins = GPIOPins(width=8)
+class LEDGPIOProvider(wiring.Component):
+    pins: In(gpio.PinSignature()).array(8)
 
     def elaborate(self, platform):
         m = Module()
         for index in range(8):
             pin = platform.request(f"gpio_{index}")
             m.d.comb += [
-                self.pins.i[index].eq(pin.i),
-                pin.o.eq(self.pins.o[index]),
-                pin.oe.eq(self.pins.oe[index])
+                self.pins[index].i.eq(pin.i),
+                pin.o.eq(self.pins[index].o),
+                pin.oe.eq(self.pins[index].oe),
             ]
         return m
 
 
-class ButtonGPIOProvider(Elaboratable):
-    def __init__(self):
-        self.pins = GPIOPins(width=2)
+class ButtonGPIOProvider(wiring.Component):
+    pins: In(gpio.PinSignature()).array(2)
 
     def elaborate(self, platform):
         m = Module()
         for index in range(2):
             pin = platform.request(f"btn_{index}")
             m.d.comb += [
-                self.pins.i[index].eq(pin.i),
-                pin.o.eq(self.pins.o[index]),
-                pin.oe.eq(self.pins.oe[index])
+                self.pins[index].i.eq(pin.i),
+                pin.o.eq(self.pins[index].o),
+                pin.oe.eq(self.pins[index].oe),
             ]
         return m
 
