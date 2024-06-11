@@ -4,7 +4,7 @@
 
 #include <stdint.h>
 
-typedef struct __attribute__((packed)) {
+typedef struct __attribute__((packed, aligned(4))) {
 	uint32_t type;
 	uint32_t version;
 } soc_id_regs_t;

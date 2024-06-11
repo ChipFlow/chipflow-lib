@@ -7,7 +7,7 @@
 #define WINBOND_ID 0x40
 #define ISSI_ID 0x60
 
-typedef struct __attribute__((packed)) {
+typedef struct __attribute__((packed, aligned(4))) {
 	uint32_t ctrl;
 } spiflash_regs_t;
 

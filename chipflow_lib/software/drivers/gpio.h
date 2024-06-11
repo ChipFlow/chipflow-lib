@@ -4,7 +4,7 @@
 
 #include <stdint.h>
 
-typedef struct __attribute__((packed)) {
+typedef struct __attribute__((packed, aligned(4))) {
 	uint32_t out;
 	uint32_t oe;
 	uint32_t in;
