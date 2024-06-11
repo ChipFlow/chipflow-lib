@@ -4,7 +4,7 @@
 
 #include <stdint.h>
 
-typedef struct __attribute__((packed)) {
+typedef struct __attribute__((packed, aligned(4))) {
 	uint32_t tx_data;
 	uint32_t rx_data;
 	uint32_t tx_ready;

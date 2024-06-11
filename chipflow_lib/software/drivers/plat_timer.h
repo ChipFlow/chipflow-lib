@@ -4,7 +4,7 @@
 
 #include <stdint.h>
 
-typedef struct __attribute__((packed)) {
+typedef struct __attribute__((packed, aligned(4))) {
 	uint32_t cnt_lo;
 	uint32_t cnt_hi;
 	uint32_t cmp_lo;
