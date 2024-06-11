@@ -126,11 +126,6 @@ addi a0, a0, 4
 blt a0, a1, loop_init_bss
 end_init_bss:
 
-# Update LEDs
-li a0, 0xb1000000
-li a1, 2
-sw a1, 0(a0)
-
 # call main
 call main
 loop:

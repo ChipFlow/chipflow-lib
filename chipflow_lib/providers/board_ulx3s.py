@@ -3,10 +3,12 @@
 from amaranth import *
 from amaranth_boards.ulx3s import *
 from amaranth.lib.cdc import ResetSynchronizer
-from amaranth.lib import io
+from amaranth.lib import io, wiring
+from amaranth.lib.wiring import In
+
+from amaranth_soc import gpio
 
 from amaranth_orchard.memory.spimemio import QSPIPins
-from amaranth_orchard.base.gpio import GPIOPins
 from amaranth_orchard.io.uart import UARTPins
 from amaranth_orchard.memory.hyperram import HyperRAMPins
 
@@ -47,29 +49,27 @@ class QSPIFlashProvider(Elaboratable):
         return m
 
 
-class LEDGPIOProvider(Elaboratable):
-    def __init__(self):
-        self.pins = GPIOPins(width=8)
+class LEDGPIOProvider(wiring.Component):
+    pins: In(gpio.PinSignature()).array(8)
 
     def elaborate(self, platform):
         m = Module()
         for i in range(8):
             led = io.Buffer("o", platform.request("led", i, dir="-"))
             m.submodules[f"led_{i}"] = led
-            m.d.comb += led.o.eq(self.pins.o[i])
+            m.d.comb += led.o.eq(self.pins[i].o)
         return m
 
 
-class ButtonGPIOProvider(Elaboratable):
-    def __init__(self):
-        self.pins = GPIOPins(width=2)
+class ButtonGPIOProvider(wiring.Component):
+    pins: In(gpio.PinSignature()).array(2)
 
     def elaborate(self, platform):
         m = Module()
         for i in range(2):
             btn = io.Buffer("i", platform.request("button_fire", i, dir="-"))
             m.submodules[f"btn_{i}"] = btn
-            m.d.comb += self.pins.i[i].eq(btn.i)
+            m.d.comb += self.pins[i].i.eq(btn.i)
         return m
 
 
