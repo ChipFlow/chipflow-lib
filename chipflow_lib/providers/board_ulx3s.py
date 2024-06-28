@@ -79,7 +79,7 @@ class UARTProvider(Elaboratable):
 
     def elaborate(self, platform):
         m = Module()
-        uart_pins = platform.request("uart", 0, dir={"rx": "-", "tx": "-"})
+        uart_pins = platform.request("uart", 0, dir=dict(rx="-", tx="-", rts="-", dtr="-"))
         m.submodules.uart_rx = uart_rx = io.Buffer("i", uart_pins.rx)
         m.submodules.uart_tx = uart_tx = io.Buffer("o", uart_pins.tx)
         m.d.comb += [
