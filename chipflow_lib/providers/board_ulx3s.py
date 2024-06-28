@@ -3,6 +3,7 @@
 from amaranth import *
 from amaranth_boards.ulx3s import *
 from amaranth.lib.cdc import ResetSynchronizer
+from amaranth.lib import io
 
 from amaranth_orchard.memory.spimemio import QSPIPins
 from amaranth_orchard.base.gpio import GPIOPins
@@ -53,7 +54,8 @@ class LEDGPIOProvider(Elaboratable):
     def elaborate(self, platform):
         m = Module()
         for i in range(8):
-            led = platform.request("led", i)
+            led = io.Buffer("o", platform.request("led", i, dir="-"))
+            m.submodules[f"led_{i}"] = led
             m.d.comb += led.o.eq(self.pins.o[i])
         return m
 
@@ -65,7 +67,8 @@ class ButtonGPIOProvider(Elaboratable):
     def elaborate(self, platform):
         m = Module()
         for i in range(2):
-            btn = platform.request("button_fire", i)
+            btn = io.Buffer("i", platform.request("button_fire", i, dir="-"))
+            m.submodules[f"btn_{i}"] = btn
             m.d.comb += self.pins.i[i].eq(btn.i)
         return m
 
@@ -75,12 +78,13 @@ class UARTProvider(Elaboratable):
         self.pins = UARTPins()
 
     def elaborate(self, platform):
-        uart = platform.request("uart")
-
         m = Module()
+        uart_pins = platform.request("uart", 0, dir={"rx": "-", "tx": "-"})
+        m.submodules.uart_rx = uart_rx = io.Buffer("i", uart_pins.rx)
+        m.submodules.uart_tx = uart_tx = io.Buffer("o", uart_pins.tx)
         m.d.comb += [
-            uart.tx.o.eq(self.pins.tx_o),
-            self.pins.rx_i.eq(uart.rx.i),
+            uart_tx.o.eq(self.pins.tx_o),
+            self.pins.rx_i.eq(uart_rx.i),
         ]
         return m
 
@@ -139,6 +143,8 @@ class ClockResetProvider(Elaboratable):
 
     def elaborate(self, platform):
         m = Module()
-        m.d.comb += ClockSignal("sync").eq(platform.request("clk25").i)
-        m.submodules += ResetSynchronizer(platform.request("button_pwr").i, domain="sync")
+        m.submodules.clk25 = clk25 = io.Buffer("i", platform.request("clk25", dir="-"))
+        m.d.comb += ClockSignal("sync").eq(clk25.i)
+        m.submodules.btn_pwr = btn_pwr = io.Buffer("i", platform.request("button_pwr", dir="-"))
+        m.submodules += ResetSynchronizer(btn_pwr.i, domain="sync")
         return m
