@@ -8,7 +8,7 @@ import subprocess
 from amaranth import *
 from amaranth.back import rtlil
 from amaranth.hdl import Fragment
-from amaranth.lib.io import Pin
+from amaranth.lib.io import Direction, Buffer
 from amaranth.hdl._ir import PortDirection
 
 from .. import ChipFlowError
@@ -33,11 +33,19 @@ class SiliconPlatform:
         if name in self._pins:
             raise NameError(f"Pad `{name}` has already been requested")
 
-        pin_type = self._pads[name]["type"]
-        if pin_type == "clk":
-            pin_type = "i" # `clk` is used for clock tree synthesis, but treated as `i` in frontend
-        self._pins[name] = Pin(1, dir=pin_type)
-        return self._pins[name]
+        pad_type = self._pads[name]["type"]
+        # `clk` is used for clock tree synthesis, but treated as `i` in frontend
+        if pad_type in ("i", "clk"):
+            direction = Direction.Input
+        elif pad_type in ("o", "oe"):
+            direction = Direction.Output
+        elif pad_type == "io":
+            direction = Direction.Bidir
+        else:
+            assert False
+
+        self._pins[name] = pin = Buffer.Signature(direction, 1).create(path=(name,))
+        return pin
 
     def add_file(self, filename, content):
         if hasattr(content, "read"):
@@ -65,14 +73,12 @@ class SiliconPlatform:
 
         # Prepare toplevel ports according to chipflow.toml.
         ports = []
-        for pad_name in self._pins:
-            pad, pin = self._pads[pad_name], self._pins[pad_name]
-            if pad["type"] in ("io", "i", "clk"):
-                ports.append((f"io${pad_name}$i", pin.i, PortDirection.Input))
-            if pad["type"] in ("oe", "io", "o"):
-                ports.append((f"io${pad_name}$o", pin.o, PortDirection.Output))
-            if pad["type"] in ("oe", "io"):
-                ports.append((f"io${pad_name}$oe", pin.oe, PortDirection.Output))
+        for pin_name, pin in self._pins.items():
+            if pin.signature.direction in (Direction.Input, Direction.Bidir):
+                ports.append((f"io${pin_name}$i",  pin.i,  PortDirection.Input))
+            if pin.signature.direction in (Direction.Output, Direction.Bidir):
+                ports.append((f"io${pin_name}$o",  pin.o,  PortDirection.Output))
+                ports.append((f"io${pin_name}$oe", pin.oe, PortDirection.Output))
 
         # Prepare design for RTLIL conversion.
         return fragment.prepare(ports)
