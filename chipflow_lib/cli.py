@@ -65,7 +65,7 @@ config_schema = {
                     "additionalProperties": False,
                     "properties": {
                         "process": {
-                            "enum": ["sky130", "gf180", "customer1", "gf130bcd"]
+                            "enum": ["sky130", "gf180", "customer1", "gf130bcd", "ihp_sg13g2"]
                         },
                         "pad_ring": {
                             "enum": ["caravel", "cf20", "pga144"]
