@@ -51,9 +51,9 @@ class SoftwareGenerator:
             result += f'#define puts(x) uart_puts({uart}, x)\n'
             result += f'#define puthex(x) uart_puthex({uart}, x)\n'
         else:
-            result += f'#define putc(x) do {{ (void)x; }} while(0) \n'
-            result += f'#define puts(x) do {{ (void)x; }} while(0)\n'
-            result += f'#define puthex(x) do {{ (void)x; }} while(0)\n'
+            result += '#define putc(x) do {{ (void)x; }} while(0)\n'
+            result += '#define puts(x) do {{ (void)x; }} while(0)\n'
+            result += '#define puthex(x) do {{ (void)x; }} while(0)\n'
 
         result += "#endif\n"
         return result
@@ -70,7 +70,7 @@ _start:
 
 # zero-initialize register file
 addi x1, zero, 0
-li x2, 0x{self.ram_start+self.ram_size:08x} # Top of stack
+li x2, 0x{self.ram_start + self.ram_size:08x} # Top of stack
 addi x3, zero, 0
 addi x4, zero, 0
 addi x5, zero, 0

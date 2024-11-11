@@ -68,7 +68,7 @@ class SimPlatform:
             box += '  wire width 1 input 0 \\clk\n'
             for i, ((field_name,), _, field) in enumerate(iface.signature.flatten(iface)):
                 field_width = Shape.cast(field.shape()).width
-                box += f'  wire width {field_width} input {i+1} \\{field_name}\n'
+                box += f'  wire width {field_width} input {i + 1} \\{field_name}\n'
             box += 'end\n\n'
             self.sim_boxes[inst_type] = box
         return Instance(inst_type, **conns)
