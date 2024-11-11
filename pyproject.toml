@@ -16,20 +16,20 @@ authors = [
 ]
 license = {file = "LICENSE.md"}
 
-requires-python = "~=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "amaranth>=0.5,<0.7",
     "amaranth-soc @ git+https://github.com/amaranth-lang/amaranth-soc",
     "amaranth-boards @ git+https://github.com/amaranth-lang/amaranth-boards",
     "amaranth-stdio @ git+https://github.com/amaranth-lang/amaranth-stdio",
     "amaranth-orchard @ git+https://github.com/ChipFlow/amaranth-orchard",
-    "yowasp-yosys~=0.41.0.0",
-    "yowasp-nextpnr-ecp5==0.7.0.11.post528.dev0",
+    "yowasp-yosys>=0.41.0.0",
+    "yowasp-nextpnr-ecp5>=0.7",
     "yowasp-runtime",
-    "tomli~=2.0.1",
-    "jsonschema~=4.17.3",
-    "doit~=0.36.0",
-    "requests~=2.30.0",
+    "tomli>=2.0.1",
+    "jsonschema>=4.17.3",
+    "doit>=0.36.0",
+    "requests>=2.30.0",
 ]
 
 [project.scripts]
@@ -45,11 +45,11 @@ build-backend = "pdm.backend"
 
 [tool.pdm.dev-dependencies]
 test = [
-    "pytest~=7.2.0",
+    "pytest>=7.2.0",
     "sphinx>=7.1.2",
 ]
 lint = [
-    "pycodestyle~=2.10.0",
+    "pycodestyle>=2.11",
 ]
 
 [tool.pdm.scripts]
