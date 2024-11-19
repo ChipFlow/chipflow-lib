@@ -97,7 +97,7 @@ class SiliconStep:
                 "pad_ring": self.silicon_config["pad_ring"],
                 "pads": {
                     pad_name: self.silicon_config["pads"][pad_name]
-                    for pad_name in self.platform._pins
+                    for pad_name in self.platform._ports
                 },
                 "power": self.silicon_config.get("power", {})
             }
