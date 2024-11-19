@@ -1,28 +1,168 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 import os
-import sys
-import tempfile
 import subprocess
 
 from amaranth import *
+from amaranth.lib import io
+
 from amaranth.back import rtlil
 from amaranth.hdl import Fragment
-from amaranth.lib.io import Direction, Buffer
 from amaranth.hdl._ir import PortDirection
 
 from .. import ChipFlowError
 
 
-__all__ = ["SiliconPlatform"]
+__all__ = ["SiliconPlatformPort", "SiliconPlatform"]
+
+
+class SiliconPlatformPort(io.PortLike):
+    def __init__(self, name, direction, width, *, invert=False):
+        if not isinstance(name, str):
+            raise TypeError(f"Name must be a string, not {name!r}")
+        if not (isinstance(width, int) and width >= 0):
+            raise TypeError(f"Width must be a non-negative integer, not {width!r}")
+        if not isinstance(invert, bool):
+            raise TypeError(f"'invert' must be a bool, not {invert!r}")
+
+        self._direction = io.Direction(direction)
+        self._invert = invert
+
+        self._i = self._o = self._oe = None
+        if self._direction in (io.Direction.Input, io.Direction.Bidir):
+            self._i = Signal(width, name=f"{name}__i")
+        if self._direction in (io.Direction.Output, io.Direction.Bidir):
+            self._o = Signal(width, name=f"{name}__o")
+            self._oe = Signal(width, name=f"{name}__oe")
+
+    @property
+    def i(self):
+        if self._i is None:
+            raise AttributeError("SiliconPlatformPort with output direction does not have an "
+                                 "input signal")
+        return self._i
+
+    @property
+    def o(self):
+        if self._o is None:
+            raise AttributeError("SiliconPlatformPort with input direction does not have an "
+                                 "output signal")
+        return self._o
+
+    @property
+    def oe(self):
+        if self._oe is None:
+            raise AttributeError("SiliconPlatformPort with input direction does not have an "
+                                 "output enable signal")
+        return self._oe
+
+    @property
+    def direction(self):
+        return self._direction
+
+    @property
+    def invert(self):
+        return self._invert
+
+    def __len__(self):
+        if self._direction is io.Direction.Input:
+            return len(self._i)
+        if self._direction is io.Direction.Output:
+            assert len(self._o) == len(self._oe)
+            return len(self._o)
+        if self._direction is io.Direction.Bidir:
+            assert len(self._i) == len(self._o) == len(self._oe)
+            return len(self._i)
+        assert False # :nocov:
+
+    def __getitem__(self, key):
+        result = object.__new__(type(self))
+        result._i = None if self._i is None else self._i[key]
+        result._o = None if self._o is None else self._o[key]
+        result._oe = None if self._oe is None else self._oe[key]
+        result._invert = self._invert
+        result._direction = self._direction
+        return result
+
+    def __invert__(self):
+        result = object.__new__(type(self))
+        result._i = self._i
+        result._o = self._o
+        result._oe = self._oe
+        result._invert = not self._invert
+        result._direction = self._direction
+        return result
+
+    def __add__(self, other):
+        direction = self._direction & other._direction
+        result = object.__new__(type(self))
+        result._i = None if direction is io.Direction.Output else Cat(self._i, other._i)
+        result._o = None if direction is io.Direction.Input else Cat(self._o, other._o)
+        result._oe = None if direction is io.Direction.Input else Cat(self._oe, other._oe)
+        result._invert = self._invert
+        result._direction = direction
+        return result
+
+
+class IOBuffer(io.Buffer):
+    def elaborate(self, platform):
+        if not isinstance(self.port, SiliconPlatformPort):
+            raise TypeError(f"Cannot elaborate SiliconPlatform buffer with port {self.port!r}")
+
+        m = Module()
+
+        if self.direction is not io.Direction.Input:
+            if self.port.invert:
+                o_inv = Signal.like(self.o)
+                m.d.comb += o_inv.eq(~self.o)
+            else:
+                o_inv = self.o
+
+        if self.direction is not io.Direction.Output:
+            if self.port.invert:
+                i_inv = Signal.like(self.i)
+                m.d.comb += self.i.eq(~i_inv)
+            else:
+                i_inv = self.i
+
+        if self.direction in (io.Direction.Input, io.Direction.Bidir):
+            m.d.comb += i_inv.eq(self.port.i)
+        if self.direction in (io.Direction.Output, io.Direction.Bidir):
+            m.d.comb += self.port.o.eq(o_inv)
+            m.d.comb += self.port.oe.eq(self.oe)
+
+        return m
+
+
+class FFBuffer(io.FFBuffer):
+    def elaborate(self, platform):
+        if not isinstance(self.port, SiliconPlatformPort):
+            raise TypeError(f"Cannot elaborate SiliconPlatform buffer with port {self.port!r}")
+
+        m = Module()
+
+        m.submodules.io_buffer = io_buffer = IOBuffer(self.direction, self.port)
+
+        if self.direction is not io.Direction.Output:
+            i_ff = Signal(reset_less=True)
+            m.d[self.i_domain] += i_ff.eq(io_buffer.i)
+            m.d.comb += self.i.eq(i_ff)
+
+        if self.direction is not io.Direction.Input:
+            o_ff = Signal(reset_less=True)
+            oe_ff = Signal(reset_less=True)
+            m.d[self.o_domain] += o_ff.eq(self.o)
+            m.d[self.o_domain] += oe_ff.eq(self.oe)
+            m.d.comb += io_buffer.o.eq(o_ff)
+            m.d.comb += io_buffer.oe.eq(oe_ff)
+
+        return m
 
 
 class SiliconPlatform:
-    from ..providers import silicon as providers
-
     def __init__(self, pads):
         self._pads = pads
-        self._pins = {}
+        self._ports = {}
         self._files = {}
 
     def request(self, name):
@@ -30,22 +170,39 @@ class SiliconPlatform:
             raise NameError(f"Reserved character `$` used in pad name `{name}`")
         if name not in self._pads:
             raise NameError(f"Pad `{name}` is not defined in chipflow.toml")
-        if name in self._pins:
+        if name in self._ports:
             raise NameError(f"Pad `{name}` has already been requested")
 
         pad_type = self._pads[name]["type"]
         # `clk` is used for clock tree synthesis, but treated as `i` in frontend
         if pad_type in ("i", "clk"):
-            direction = Direction.Input
+            direction = io.Direction.Input
         elif pad_type in ("o", "oe"):
-            direction = Direction.Output
+            direction = io.Direction.Output
         elif pad_type == "io":
-            direction = Direction.Bidir
+            direction = io.Direction.Bidir
         else:
             assert False
 
-        self._pins[name] = pin = Buffer.Signature(direction, 1).create(path=(name,))
-        return pin
+        self._ports[name] = port = SiliconPlatformPort(name, direction, 1)
+        return port
+
+    def get_io_buffer(self, buffer):
+        if isinstance(buffer, io.Buffer):
+            result = IOBuffer(buffer.direction, buffer.port)
+        elif isinstance(buffer, io.FFBuffer):
+            result = FFBuffer(buffer.direction, buffer.port,
+                              i_domain=buffer.i_domain, o_domain=buffer.o_domain)
+        else:
+            raise TypeError(f"Unsupported buffer type {buffer!r}")
+
+        if buffer.direction is not io.Direction.Output:
+            result.i = buffer.i
+        if buffer.direction is not io.Direction.Input:
+            result.o = buffer.o
+            result.oe = buffer.oe
+
+        return result
 
     def add_file(self, filename, content):
         if hasattr(content, "read"):
@@ -73,12 +230,12 @@ class SiliconPlatform:
 
         # Prepare toplevel ports according to chipflow.toml.
         ports = []
-        for pin_name, pin in self._pins.items():
-            if pin.signature.direction in (Direction.Input, Direction.Bidir):
-                ports.append((f"io${pin_name}$i",  pin.i,  PortDirection.Input))
-            if pin.signature.direction in (Direction.Output, Direction.Bidir):
-                ports.append((f"io${pin_name}$o",  pin.o,  PortDirection.Output))
-                ports.append((f"io${pin_name}$oe", pin.oe, PortDirection.Output))
+        for port_name, port in self._ports.items():
+            if port.direction in (io.Direction.Input, io.Direction.Bidir):
+                ports.append((f"io${port_name}$i", port.i, PortDirection.Input))
+            if port.direction in (io.Direction.Output, io.Direction.Bidir):
+                ports.append((f"io${port_name}$o", port.o, PortDirection.Output))
+                ports.append((f"io${port_name}$oe", port.oe, PortDirection.Output))
 
         # Prepare design for RTLIL conversion.
         return fragment.prepare(ports)
