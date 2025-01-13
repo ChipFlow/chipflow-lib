@@ -30,6 +30,7 @@ dependencies = [
     "jsonschema>=4.17.3",
     "doit>=0.36.0",
     "requests>=2.30.0",
+    "python-dotenv>=1.0.1",
 ]
 
 [project.scripts]
