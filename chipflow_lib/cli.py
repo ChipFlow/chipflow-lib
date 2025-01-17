@@ -52,6 +52,9 @@ config_schema = {
                 "project_id": {
                     "type": "integer",
                 },
+                "top": {
+                    "type": "object",
+                },
                 "steps": {
                     "type": "object",
                 },
@@ -65,7 +68,7 @@ config_schema = {
                     "additionalProperties": False,
                     "properties": {
                         "process": {
-                            "enum": ["sky130", "gf180", "customer1", "gf130bcd", "ihp_sg13g2"]
+                           "enum": ["sky130", "gf180", "customer1", "gf130bcd", "ihp_sg13g2"]
                         },
                         "pad_ring": {
                             "enum": ["caravel", "cf20", "pga144"]
