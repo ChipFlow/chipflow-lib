@@ -1,11 +1,38 @@
 from amaranth import *
-from amaranth.lib import enum, data, wiring, stream, io
+from amaranth.lib import enum, data, wiring, stream, io, meta
 from amaranth.lib.wiring import In, Out
 
-from glasgow.gateware.ports import PortGroup
+from typing import List, Dict, Tuple, Self
+from collections.abc import Mapping
+from pprint import pformat
 
+__all__ = ["IOStreamer", "IOClocker", "IOShape", "PortAnnotation", "PortGroup"]
 
-__all__ = ["IOStreamer"]
+class PortGroup:
+    """Group of Amaranth library I/O ports.
+
+    This object is a stand-in for the object returned by the Amaranth :py:`platform.request()`
+    function, as expected by the I/O cores.
+    """
+
+    def __init__(self, **kwargs):
+        for name, port in kwargs.items():
+            setattr(self, name, port)
+
+    def __getitem__(self, key):
+        return self.__dict__[key]
+
+    def __setattr__(self, name, value):
+        if not name.startswith("_"):
+            assert value is None or isinstance(value, (io.PortLike, PortGroup))
+        object.__setattr__(self, name, value)
+
+    def __repr__(self):
+        attrs = []
+        for name, value in self.__dict__.items():
+            if not name.startswith('_'):
+                attrs.append(f"{name}={value!r}")
+        return f"{self.__class__.__name__}({', '.join(attrs)})"
 
 
 def _filter_ioshape(direction, ioshape):
@@ -65,7 +92,98 @@ class SimulatableDDRBuffer(io.DDRBuffer):
 
         return m
 
+class PortAnnotation(meta.Annotation):
+    schema = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://api.chipflow.com/schema/chipflow-lib/0/port-layout.json",
+        "type": "object",
+        "properties": {
+            "ports": {
+                "description": "A list of ports required for a component, their directions and widths",
+                "type": "object",
+                "patternProperties": {
+                    "^.+$": {
+                        "type": "object",
+                        "properties": {
+                            "direction": {"enum": ["io", "i", "o"] },
+                            "width": {"type": "number", "minimum": 1}
+                        }
+                    },
+                },
+            },
+        },
+        "requiredProperties": [
+            "ports",
+        ],
+    }
 
+    def __init__(self, origin):
+        self._origin = origin
+
+    @property
+    def origin(self):
+        return self._origin
+
+    def as_json(self):
+        instance = {
+            "ports": self._origin.ioshape,
+        }
+        # Validating the value returned by `as_json()` ensures its conformance.
+        self.validate(instance)
+        return instance
+
+
+class IOShapeException(Exception):
+    """
+    This Exception is thrown whenever an :class`IOShape` and :class`PortLike` are mismatched.
+
+    """
+
+
+class IOShape(Dict[str, Tuple[str, int]]):
+    def check_ports(self, ports) -> PortGroup:
+        print(f"IOShape.check_ports: {self}, {pformat(ports)}")
+
+        def check_port(name, direction, width, port: io.PortLike):
+            try:
+                assert port.direction & io.Direction(direction)
+                assert len(port) == width
+            except Exception as e:
+                raise IOShapeException(f"Port mismatch for {name}: shape = {direction}:{width}, port={port}: {e}")
+
+        pg = PortGroup()
+
+        if type(ports) == PortGroup:
+            items = ports.__dict__.items()
+        else:
+            items = ports.items()
+
+        for name, port in items:
+            print (f"checking {name} {port}")
+            if name not in self:
+                print(f"splitting: {len(port)}")
+                if len(port) > 1:
+                    for i in range(len(port)):
+                        pin = f"{name}{i}"
+                        print(f"checking: {i}, {pin}")
+                        check_port(pin, self[pin][0], 1, port[i])
+                        setattr(pg, pin, port[i])
+            else:
+                check_port(name, self[name][0], self[name][1], port)
+                setattr(pg, name, port)
+
+        return pg
+
+class PortSignature(wiring.Signature):
+    def __init__(self, members):
+        super().__init__(members)
+
+    def annotations(self, obj, /):
+        return wiring.Signature.annotations(self, obj) + (PortAnnotation(self),)
+
+    def __repr__(self):
+        return f"PortSignature({self._ioshape})"
+    
 class IOStreamer(wiring.Component):
     """I/O buffer to stream adapter.
 
