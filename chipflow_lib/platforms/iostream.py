@@ -336,7 +336,7 @@ class IOClocker(wiring.Component):
         return IOStreamer.o_stream_signature(ioshape, ratio=ratio, meta_layout=meta_layout)
 
     def __init__(self, ioshape, *, clock, o_ratio=1, meta_layout=0, divisor_width=16):
-        assert isinstance(ioshape, dict)
+        assert isinstance(ioshape, IOShape)
         assert isinstance(clock, str)
         assert o_ratio in (1, 2)
         assert clock in ioshape
