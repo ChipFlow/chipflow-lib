@@ -9,6 +9,7 @@ from amaranth.lib import io
 from amaranth.back import rtlil
 from amaranth.hdl import Fragment
 from amaranth.hdl._ir import PortDirection
+from dotenv import load_dotenv
 
 from .. import ChipFlowError
 
@@ -164,6 +165,7 @@ class SiliconPlatform:
         self._pads = pads
         self._ports = {}
         self._files = {}
+        load_dotenv()
 
     def request(self, name):
         if "$" in name:
