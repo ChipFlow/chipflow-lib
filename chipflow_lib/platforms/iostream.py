@@ -92,10 +92,12 @@ class SimulatableDDRBuffer(io.DDRBuffer):
 
         return m
 
+PORT_LAYOUT_SCHEMA='https://api.chipflow.com/schema/chipflow-lib/0/port-layout.json'
+
 class PortAnnotation(meta.Annotation):
     schema = {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "$id": "https://api.chipflow.com/schema/chipflow-lib/0/port-layout.json",
+        "$id": PORT_LAYOUT_SCHEMA,
         "type": "object",
         "properties": {
             "ports": {
@@ -118,6 +120,7 @@ class PortAnnotation(meta.Annotation):
     }
 
     def __init__(self, origin):
+        print(f"PortAnnotation.__init__({origin})")
         self._origin = origin
 
     @property
@@ -126,12 +129,13 @@ class PortAnnotation(meta.Annotation):
 
     def as_json(self):
         instance = {
-            "ports": self._origin.ioshape,
+            "ioshape": self._origin._ioshape,
+            "init": self._origin._init,
+            "ratio": self._origin._ratio,
         }
         # Validating the value returned by `as_json()` ensures its conformance.
         self.validate(instance)
         return instance
-
 
 class IOShapeException(Exception):
     """
@@ -141,6 +145,10 @@ class IOShapeException(Exception):
 
 
 class IOShape(Dict[str, Tuple[str, int]]):
+    """
+    Describes an collection of IO pins.
+    Dictionary of name to tuple of direction and width. direction is "i","o" or "io"
+    """
     def check_ports(self, ports) -> PortGroup:
         print(f"IOShape.check_ports: {self}, {pformat(ports)}")
 
@@ -179,10 +187,10 @@ class PortSignature(wiring.Signature):
         super().__init__(members)
 
     def annotations(self, obj, /):
-        return wiring.Signature.annotations(self, obj) + (PortAnnotation(self),)
+        return wiring.Signature.annotations(self, obj) + (PortAnnotation(obj),)
 
     def __repr__(self):
-        return f"PortSignature({self._ioshape})"
+        return f"PortSignature({dict(self.members.items())})"
     
 class IOStreamer(wiring.Component):
     """I/O buffer to stream adapter.

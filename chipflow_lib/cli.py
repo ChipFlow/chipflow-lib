@@ -49,8 +49,8 @@ config_schema = {
             ],
             "additionalProperties": False,
             "properties": {
-                "project_id": {
-                    "type": "integer",
+                "project_name": {
+                    "type": "string",
                 },
                 "top": {
                     "type": "object",
@@ -73,30 +73,14 @@ config_schema = {
                         "pad_ring": {
                             "enum": ["caravel", "cf20", "pga144"]
                         },
-                        "pads": {
+                        "pads": { "$ref": "#/$defs/pin" },
+                        "clocks": { 
                             "type": "object",
-                            "additionalProperties": False,
-                            "minProperties": 1,
-                            "patternProperties": {
-                                ".+": {
-                                    "type": "object",
-                                    "required": [
-                                        "type",
-                                        "loc",
-                                    ],
-                                    "additionalProperties": False,
-                                    "properties": {
-                                        "type": {
-                                            "enum": ["io", "i", "o", "oe", "clk"]
-                                        },
-                                        "loc": {
-                                            "type": "string",
-                                            "pattern": "^[NSWE]?[0-9]+$"
-                                        },
-                                    }
-                                }
-                            }
+                            "patternPropertues": {
+                                ".+": { "type": "string"}
+                            },
                         },
+                        "reset": { "type": "string"},
                         "power": {
                             "type": "object",
                             "additionalProperties": False,
@@ -116,9 +100,36 @@ config_schema = {
                                 }
                             }
                         },
-                    }
+
+                    },
                 },
             },
+        },
+    },
+    "$defs": {
+        "pin": {
+            "type": "object",
+            "additionalProperties": False,
+            "minProperties": 1,
+            "patternProperties": {
+                ".+": {
+                    "type": "object",
+                    "required": [
+                        "type",
+                        "loc",
+                    ],
+                    "additionalProperties": False,
+                    "properties": {
+                        "type": {
+                            "enum": ["io", "i", "o", "oe", "clk"]
+                        },
+                        "loc": {
+                            "type": "string",
+                            "pattern": "^[NSWE]?[0-9]+$"
+                        },
+                    }
+                }
+            }
         }
     }
 }

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
-
 import os
 import subprocess
+import sys
 
 from amaranth import *
 from amaranth.lib import io
@@ -103,6 +103,9 @@ class SiliconPlatformPort(io.PortLike):
         result._invert = self._invert
         result._direction = direction
         return result
+
+    def __repr__(self):
+        return f"SiliconPlatformPort(direction={repr(self._direction)}, width={len(self)}, i={repr(self._i)}, o={repr(self._o)}, oe={repr(self._oe)}, invert={repr(self._invert)})"
 
 
 class IOBuffer(io.Buffer):
@@ -277,3 +280,27 @@ class SiliconPlatform:
             "-o", output_rtlil.replace("\\", "/")
         ])
         return output_rtlil
+
+    def request_pins(self, names):
+        lookup = []
+        match type(names):
+            case str():
+                lookup.append(names)
+            case list():
+                lookup += names
+        value = Value()
+        for i in lookup:
+            value = value + self.request(i)
+
+        return value
+
+    def default_clock(m, clock, reset):
+        # Clock generation
+        m.domains.sync = ClockDomain()
+
+        clk = platform.request(clock)
+        m.d.comb += ClockSignal().eq(clk.i)
+        m.submodules.rst_sync = FFSynchronizer(
+            ~platform.request(reset).i,
+            ResetSignal())
+

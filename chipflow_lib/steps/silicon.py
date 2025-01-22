@@ -11,15 +11,60 @@ import subprocess
 import importlib.metadata
 
 import requests
+from amaranth import *
+from amaranth.lib import io
+from amaranth.lib.cdc import FFSynchronizer
 
 from .. import ChipFlowError
 from ..platforms.silicon import SiliconPlatform
+from ..platforms.iostream import PortGroup
+
+class SiliconTop(Elaboratable):
+    def __init__(self, config={}):
+        self._config = config
+        self._clocks = config["chipflow"]["silicon"]["clocks"] 
+        self._reset = config["chipflow"]["silicon"]["reset"]
+
+    def elaborate(self, platform):
+        m = Module()
+
+        for clock, pin in self._clocks.items():
+            if clock == 'default':
+                clock = 'sync'
+            setattr(m.domains, clock,  ClockDomain(name=clock))
+            clk_buffer = io.Buffer("i", platform.request(pin))
+            setattr(m.submodules, "clk_buffer_" + clock, clk_buffer)
+            m.d.comb += ClockSignal().eq(clk_buffer.i)
+
+        rst_buffer = io.Buffer("i", ~platform.request(self._reset))
+        m.submodules.rst_buffer = rst_buffer
+        m.submodules.rst_sync = FFSynchronizer(rst_buffer.i, ResetSignal())
+
+        def _map_ports(ports, parent: PortGroup):
+            for name, mapping in ports.items():
+                match mapping:
+                    case str():
+                        pin_names = mapping.split(',')
+                        start = platform.request(pin_names[0])
+                        pins = sum(map(lambda x: platform.request(x), pin_names[1:]), start=start)
+                        setattr(parent, name, pins)
+                    case PortMap:
+                        pg = PortGroup()
+                        setattr(parent, name, pg)
+                        _map_ports(mapping, pg)
+
+        self.ports = PortGroup()
+        #_map_ports(self.config.portmap, self.ports)
+
+        return m
+
 
 
 class SiliconStep:
     """Prepare and submit the design for an ASIC."""
 
     def __init__(self, config):
+        self.config = config
         self.project_id = config["chipflow"].get("project_id")
         self.silicon_config = config["chipflow"]["silicon"]
         self.platform = SiliconPlatform(pads=self.silicon_config["pads"])
@@ -55,8 +100,8 @@ class SiliconStep:
 
         Returns the path to the RTLIL file.
         """
-        raise NotImplementedError
-
+        return self.platform.build(SiliconTop(self.config), name=self.config["chipflow"]["project_name"])
+        
     def submit(self, rtlil_path, *, dry_run=False):
         """Submit the design to the ChipFlow cloud builder.
         """
@@ -135,3 +180,4 @@ class SiliconStep:
             else:
                 print(f"{resp_data['msg']} (#{resp_data['id']}: {resp_data['name']}); "
                       f"{resp_data['url']}")
+
