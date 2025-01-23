@@ -191,7 +191,26 @@ class PortSignature(wiring.Signature):
 
     def __repr__(self):
         return f"PortSignature({dict(self.members.items())})"
-    
+
+
+class PortComponent(wiring.Component):
+    def _port_signature(ioshape, /, *, meta_layout=0):
+        return PortSignature({
+                "o_stream":  In(self.o_stream_signature(ioshape, ratio=ratio, meta_layout=meta_layout)),
+                "i_stream": Out(self.i_stream_signature(ioshape, ratio=ratio, meta_layout=meta_layout)),
+        })
+
+
+    def __init__(self, ioshape, init=None, meta_layout=None, ratio=1):
+        self._ioshape = ioshape
+        self._init = init
+        self._ratio = ratio
+        self.meta_layout = meta_layout
+        super().__init__({
+            _port_signature(ioshape, ratio, meta_layout)
+            })
+
+
 class IOStreamer(wiring.Component):
     """I/O buffer to stream adapter.
 
