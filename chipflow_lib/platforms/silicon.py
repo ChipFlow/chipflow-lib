@@ -17,7 +17,7 @@ __all__ = ["SiliconPlatformPort", "SiliconPlatform"]
 
 
 class SiliconPlatformPort(io.PortLike):
-    def __init__(self, name, direction, width, *, invert=False):
+    def __init__(self, name, pad_type, width, *, invert=False):
         if not isinstance(name, str):
             raise TypeError(f"Name must be a string, not {name!r}")
         if not (isinstance(width, int) and width >= 0):
@@ -25,7 +25,17 @@ class SiliconPlatformPort(io.PortLike):
         if not isinstance(invert, bool):
             raise TypeError(f"'invert' must be a bool, not {invert!r}")
 
-        self._direction = io.Direction(direction)
+        # `clk` is used for clock tree synthesis, but treated as `i` in frontend
+        if pad_type in ("i", "clk"):
+            direction = io.Direction.Input
+        elif pad_type in ("o", "oe"):
+            direction = io.Direction.Output
+        elif pad_type == "io":
+            direction = io.Direction.Bidir
+        else:
+            assert False
+
+        self._direction = direction
         self._invert = invert
 
         self._i = self._o = self._oe = None
@@ -33,7 +43,8 @@ class SiliconPlatformPort(io.PortLike):
             self._i = Signal(width, name=f"{name}__i")
         if self._direction in (io.Direction.Output, io.Direction.Bidir):
             self._o = Signal(width, name=f"{name}__o")
-            self._oe = Signal(width, name=f"{name}__oe")
+            if pad_type != "o":
+                self._oe = Signal(width, name=f"{name}__oe")
 
     @property
     def i(self):
@@ -52,7 +63,7 @@ class SiliconPlatformPort(io.PortLike):
     @property
     def oe(self):
         if self._oe is None:
-            raise AttributeError("SiliconPlatformPort with input direction does not have an "
+            raise AttributeError("SiliconPlatformPort does not have an "
                                  "output enable signal")
         return self._oe
 
@@ -129,7 +140,8 @@ class IOBuffer(io.Buffer):
             m.d.comb += i_inv.eq(self.port.i)
         if self.direction in (io.Direction.Output, io.Direction.Bidir):
             m.d.comb += self.port.o.eq(o_inv)
-            m.d.comb += self.port.oe.eq(self.oe)
+            if self.port._oe is not None:
+                m.d.comb += self.port.oe.eq(self.oe)
 
         return m
 
@@ -174,17 +186,8 @@ class SiliconPlatform:
             raise NameError(f"Pad `{name}` has already been requested")
 
         pad_type = self._pads[name]["type"]
-        # `clk` is used for clock tree synthesis, but treated as `i` in frontend
-        if pad_type in ("i", "clk"):
-            direction = io.Direction.Input
-        elif pad_type in ("o", "oe"):
-            direction = io.Direction.Output
-        elif pad_type == "io":
-            direction = io.Direction.Bidir
-        else:
-            assert False
 
-        self._ports[name] = port = SiliconPlatformPort(name, direction, 1)
+        self._ports[name] = port = SiliconPlatformPort(name, pad_type, 1)
         return port
 
     def get_io_buffer(self, buffer):
@@ -235,7 +238,8 @@ class SiliconPlatform:
                 ports.append((f"io${port_name}$i", port.i, PortDirection.Input))
             if port.direction in (io.Direction.Output, io.Direction.Bidir):
                 ports.append((f"io${port_name}$o", port.o, PortDirection.Output))
-                ports.append((f"io${port_name}$oe", port.oe, PortDirection.Output))
+                if port._oe is not None:
+                    ports.append((f"io${port_name}$oe", port.oe, PortDirection.Output))
 
         # Prepare design for RTLIL conversion.
         return fragment.prepare(ports)
