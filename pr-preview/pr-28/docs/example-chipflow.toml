@@ -1,0 +1,43 @@
+[chipflow]
+project_name = "test-chip"
+
+[chipflow.top]
+soc = "my_design.design:MySoC"
+
+[chipflow.steps]
+silicon = "chipflow_lib.steps.silicon:SiliconStep"
+
+[chipflow.clocks]
+default = 'sys_clk'
+
+[chipflow.resets]
+default = 'sys_rst_n'
+
+[chipflow.silicon]
+process = "gf130bcd"
+package = "pga144"
+
+[chipflow.silicon.pads]
+# System
+sys_clk   = { type = "clock", loc = "114" }
+sys_rst_n = { type = "reset", loc = "115" }
+
+[chipflow.silicon.power]
+dvss0        = { type = "power", loc =   "1" }
+dvdd0        = { type = "ground", loc =   "9" }
+vss0         = { type = "power", loc =  "17" }
+vdd0         = { type = "ground", loc =  "25" }
+dvss1        = { type = "power", loc =  "33" }
+dvdd1        = { type = "ground", loc =  "41" }
+vss1         = { type = "power", loc =  "49" }
+vdd1         = { type = "ground", loc =  "57" }
+dvss2        = { type = "power", loc =  "65" }
+dvdd2        = { type = "ground", loc =  "73" }
+vss2         = { type = "power", loc =  "81" }
+vdd2         = { type = "ground", loc =  "89" }
+dvss3        = { type = "power", loc =  "97" }
+dvdd3        = { type = "ground", loc = "105" }
+vss3         = { type = "power", loc = "113" }
+vdd3         = { type = "ground", loc = "121" }
+dvss4        = { type = "power", loc = "129" }
+dvdd4        = { type = "ground", loc = "137" }
