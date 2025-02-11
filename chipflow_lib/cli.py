@@ -1,173 +1,83 @@
 # SPDX-License-Identifier: BSD-2-Clause
-
-import os
-import sys
-import inspect
-import importlib
 import argparse
-import tomli
-import jsonschema
+import inspect
+import sys
+import traceback
+import logging
 
-from . import ChipFlowError
+from pprint import pformat
 
-
-def _get_cls_by_reference(reference, context):
-    module_ref, _, class_ref = reference.partition(":")
-    try:
-        module_obj = importlib.import_module(module_ref)
-    except ModuleNotFoundError as e:
-        raise ChipFlowError(f"Module `{module_ref}` referenced by {context} is not found")
-    try:
-        return getattr(module_obj, class_ref)
-    except AttributeError as e:
-        raise ChipFlowError(f"Module `{module_ref}` referenced by {context} does not define "
-                            f"`{class_ref}`") from None
+from . import (
+    ChipFlowError,
+    _get_cls_by_reference,
+    _parse_config,
+)
+from .pin_lock import PinCommand
 
 
-def _ensure_chipflow_root():
-    if "CHIPFLOW_ROOT" not in os.environ:
-        os.environ["CHIPFLOW_ROOT"] = os.getcwd()
-    if os.environ["CHIPFLOW_ROOT"] not in sys.path:
-        sys.path.append(os.environ["CHIPFLOW_ROOT"])
-    return os.environ["CHIPFLOW_ROOT"]
+logging.basicConfig(stream=sys.stdout, level=logging.WARNING)
 
 
-config_schema = {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://chipflow.io/meta/chipflow.toml.schema.json",
-    "title": "chipflow.toml",
-    "type": "object",
-    "required": [
-        "chipflow"
-    ],
-    "properties": {
-        "chipflow": {
-            "type": "object",
-            "required": [
-                "steps",
-                "silicon"
-            ],
-            "additionalProperties": False,
-            "properties": {
-                "project_id": {
-                    "type": "integer",
-                },
-                "steps": {
-                    "type": "object",
-                },
-                "silicon": {
-                    "type": "object",
-                    "required": [
-                        "process",
-                        "pad_ring",
-                        "pads",
-                    ],
-                    "additionalProperties": False,
-                    "properties": {
-                        "process": {
-                            "enum": ["sky130", "gf180", "customer1", "gf130bcd", "ihp_sg13g2"]
-                        },
-                        "pad_ring": {
-                            "enum": ["caravel", "cf20", "pga144"]
-                        },
-                        "pads": {
-                            "type": "object",
-                            "additionalProperties": False,
-                            "minProperties": 1,
-                            "patternProperties": {
-                                ".+": {
-                                    "type": "object",
-                                    "required": [
-                                        "type",
-                                        "loc",
-                                    ],
-                                    "additionalProperties": False,
-                                    "properties": {
-                                        "type": {
-                                            "enum": ["io", "i", "o", "oe", "clk"]
-                                        },
-                                        "loc": {
-                                            "type": "string",
-                                            "pattern": "^[NSWE]?[0-9]+$"
-                                        },
-                                    }
-                                }
-                            }
-                        },
-                        "power": {
-                            "type": "object",
-                            "additionalProperties": False,
-                            "patternProperties": {
-                                ".+": {
-                                    "type": "object",
-                                    "required": [
-                                        "loc",
-                                    ],
-                                    "additionalProperties": False,
-                                    "properties": {
-                                        "loc": {
-                                            "type": "string",
-                                            "pattern": "^[NSWE]?[0-9]+$"
-                                        },
-                                    }
-                                }
-                            }
-                        },
-                    }
-                },
-            },
-        }
-    }
-}
-
-
-def _parse_config():
-    chipflow_root = _ensure_chipflow_root()
-    config_file = f"{chipflow_root}/chipflow.toml"
-    return _parse_config_file(config_file)
-
-
-def _parse_config_file(config_file):
-    with open(config_file, "rb") as f:
-        config_dict = tomli.load(f)
-
-    try:
-        jsonschema.validate(config_dict, config_schema)
-        return config_dict
-    except jsonschema.ValidationError as e:
-        raise ChipFlowError(f"Syntax error in `chipflow.toml` at `{'.'.join(e.path)}`: {e.message}")
+class UnexpectedError(ChipFlowError):
+    pass
 
 
 def run(argv=sys.argv[1:]):
     config = _parse_config()
 
-    steps = {}
+    commands = {}
+    commands["pin"] = PinCommand(config)
+
     for step_name, step_reference in config["chipflow"]["steps"].items():
         step_cls = _get_cls_by_reference(step_reference, context=f"step `{step_name}`")
         try:
-            steps[step_name] = step_cls(config)
+            commands[step_name] = step_cls(config)
         except Exception:
             raise ChipFlowError(f"Encountered error while initializing step `{step_name}` "
-                                f"using `{step_reference}`")
+                              f"using `{step_reference}`")
 
-    parser = argparse.ArgumentParser()
-    step_argument = parser.add_subparsers(dest="step", required=True)
-    for step_name, step_cls in steps.items():
-        step_subparser = step_argument.add_parser(step_name, help=inspect.getdoc(step_cls))
+    parser = argparse.ArgumentParser(
+        prog="chipflow",
+        description="Command line tool for interacting with the ChipFlow platform")
+
+    parser.add_argument(
+        "--verbose", "-v",
+        dest="log_level",
+        action="append_const",
+        const=10,
+        help="increase verbosity of messages; can be supplied multiple times to increase verbosity"
+    )
+
+    command_argument = parser.add_subparsers(dest="command", required=True)
+    for command_name, command in commands.items():
+        command_subparser = command_argument.add_parser(command_name, help=inspect.getdoc(command))
         try:
-            step_cls.build_cli_parser(step_subparser)
+            command.build_cli_parser(command_subparser)
         except Exception:
             raise ChipFlowError(f"Encountered error while building CLI argument parser for "
-                                f"step `{step_name}`")
+                              f"step `{command_name}`")
 
+    # each verbose flag increases versbosity (e.g. -v -v, -vv, --verbose --verbose)
+    # cute trick using append_const and summing
     args = parser.parse_args(argv)
+    if args.log_level:
+        log_level = max(logging.DEBUG, logging.WARNING - sum(args.log_level))
+        logging.getLogger().setLevel(log_level)
+
     try:
-        steps[args.step].run_cli(args)
-    except ChipFlowError:
-        raise
-    except Exception:
-        raise ChipFlowError(f"Encountered error while running CLI for step `{args.step}`")
-
-
-if __name__ == '__main__':
-    run()
+        try:
+            commands[args.command].run_cli(args)
+        except ChipFlowError:
+            raise
+        except Exception as e:
+            # convert to ChipFlowError so all handling is same.
+            raise UnexpectedError(
+                f"Unexpected error, please report to ChipFlow:\n"
+                f"args =\n{pformat(args)}\n"
+                f"traceback =\n{''.join(traceback.format_exception(e))}"
+            ) from e
+    except ChipFlowError as e:
+        cmd = args.command
+        if hasattr(args, "action"):
+            cmd += f" {args.action}"
+        print(f"Error while executing `{cmd}`: {e}")
