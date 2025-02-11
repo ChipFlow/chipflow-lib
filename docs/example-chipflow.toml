@@ -1,38 +1,43 @@
 [chipflow]
-project_id = 8
+project_name = "test-chip"
+
+[chipflow.top]
+soc = "my_design.design:MySoC"
 
 [chipflow.steps]
-sim = "my_design.steps.sim:MySimStep"
-board = "my_design.steps.board:MyBoardStep"
-silicon = "my_design.steps.silicon:MySiliconStep"
-software = "my_design.steps.software:MySoftwareStep"
+silicon = "chipflow_lib.steps.silicon:SiliconStep"
+
+[chipflow.clocks]
+default = 'sys_clk'
+
+[chipflow.resets]
+default = 'sys_rst_n'
 
 [chipflow.silicon]
-process = "sky130"
-pad_ring = "caravel"
+process = "gf130bcd"
+package = "pga144"
 
 [chipflow.silicon.pads]
-sys_clk   = { type = "clk", loc = "0" }
-sys_rstn  = { type = "i",   loc = "1" }
-uart_tx   = { type = "o",   loc = "2" }
-uart_rx   = { type = "i",   loc = "3" }
-flash_clk = { type = "o",   loc = "4" }
-flash_csn = { type = "o",   loc = "5" }
-flash_d0  = { type = "io",  loc = "6" }
-flash_d1  = { type = "io",  loc = "7" }
-flash_d2  = { type = "io",  loc = "8" }
-flash_d3  = { type = "io",  loc = "9" }
-gpio_0    = { type = "io",  loc = "10" }
-gpio_1    = { type = "io",  loc = "11" }
-gpio_2    = { type = "io",  loc = "12" }
-gpio_3    = { type = "io",  loc = "13" }
-gpio_4    = { type = "io",  loc = "14" }
-gpio_5    = { type = "io",  loc = "15" }
-gpio_6    = { type = "io",  loc = "16" }
-gpio_7    = { type = "io",  loc = "17" }
-btn_0     = { type = "io",  loc = "18" }
-btn_1     = { type = "io",  loc = "19" }
-jtag_tck  = { type = "i",   loc = "33" }
-jtag_tms  = { type = "i",   loc = "34" }
-jtag_tdi  = { type = "i",   loc = "35" }
-jtag_tdo  = { type = "o",   loc = "36" }
+# System
+sys_clk   = { type = "clock", loc = "114" }
+sys_rst_n = { type = "reset", loc = "115" }
+
+[chipflow.silicon.power]
+dvss0        = { type = "power", loc =   "1" }
+dvdd0        = { type = "ground", loc =   "9" }
+vss0         = { type = "power", loc =  "17" }
+vdd0         = { type = "ground", loc =  "25" }
+dvss1        = { type = "power", loc =  "33" }
+dvdd1        = { type = "ground", loc =  "41" }
+vss1         = { type = "power", loc =  "49" }
+vdd1         = { type = "ground", loc =  "57" }
+dvss2        = { type = "power", loc =  "65" }
+dvdd2        = { type = "ground", loc =  "73" }
+vss2         = { type = "power", loc =  "81" }
+vdd2         = { type = "ground", loc =  "89" }
+dvss3        = { type = "power", loc =  "97" }
+dvdd3        = { type = "ground", loc = "105" }
+vss3         = { type = "power", loc = "113" }
+vdd3         = { type = "ground", loc = "121" }
+dvss4        = { type = "power", loc = "129" }
+dvdd4        = { type = "ground", loc = "137" }

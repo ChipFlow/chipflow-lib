@@ -1,5 +1,5 @@
-Intro to chipflow.toml
-======================
+Intro to ``chipflow.toml``
+==========================
 
 The ``chipflow.toml`` file provides configuration for your design with the ChipFlow platform.
 
@@ -14,25 +14,55 @@ Let's start with a typical example:
    # Assert that example-chipflow.toml matches the current config schema. If 
    # this test fails, then its likely that the content in this file will need
    # to be updated.
-   from chipflow_lib.cli import _parse_config_file
+   from chipflow_lib import _parse_config_file
    _parse_config_file("docs/example-chipflow.toml")
 
-project_id
-===========
+``[chipflow]``
+--------------
 
-The ``project_id`` is set to the project ID which you can get from the ChipFlow app project page.
+.. code-block:: TOML
 
-steps
-=====
+   [chipflow]
+   project_name = "my_project"
 
-The ``steps`` define the Python class which will be used as an entry point to these parts of the ChipFlow process.
+
+The ``project_name`` is a human-readable identifier for this project. If not set, the tool and library will use the project name configured in ``pyproject.toml``.
+
+``[chipflow.steps]``
+--------------------
+
+The ``steps`` section allows overriding or addition to the standard steps available from `chipflow_lib`_.
+
+For example, if you want to override the standard silicon preparation step, you could derive from :class:`chipflow_lib.steps.silicon.SiliconStep`, add your custom functionality
+and add the following to your `chipflow.toml`, with the appropriate Python `qualified name`_ :
+
+.. code-block:: TOML
+
+   [chipflow.stepe]
+   silicon = "my_design.steps.silicon:SiliconStep"
+
+
 You probably won't need to change these if you're starting from an example repository.
 
-silicon
-=======
+.. _chipflow_lib: https://github.com/ChipFlow/chipflow-lib]
+.. _qualified name: https://docs.python.org/3/glossary.html#term-qualified-name
 
-The ``silicon`` section sets the Foundry ``process`` we are targeting for manufacturing, and the physical ``pad_ring`` we want to place our design inside.
-You'll choose the ``process`` and ``pad_ring`` based in the requirements of your design. 
+
+``[chipflow.clocks]``
+---------------------
+
+``[chipflow.silicon]``
+----------------------
+
+.. code-block:: TOML
+
+   [chipflow.silicon]
+   process = "ihp_sg13g2"
+   package = "pga144"
+
+
+The ``silicon`` section sets the Foundry ``process`` we are targeting for manufacturing, and the physical ``package`` we want to place our design inside.
+You'll choose the ``process`` and ``package`` based in the requirements of your design. 
 
 Available processes
 -------------------
@@ -56,12 +86,8 @@ Available pad rings
 +----------+-----------+--------------------+------------------------------------+
 | Pad ring | Pad count | Pad locations      | Notes                              |
 +==========+===========+====================+====================================+
-|| caravel || TBC      || TBC               || The `Caravel Harness`_ contains   |
-||         ||          ||                   || additional logic which wraps your |
-||         ||          ||                   || design.                           |
-||         ||          ||                   || It handles its own power pins.    |
 +----------+-----------+--------------------+------------------------------------+
-|| cf20    || 20       || ``N1`` ... ``N7`` ||                                   |
+|| cf20    || 20       || ``N1`` ... ``N7`` ||   Bare die package with 20 pins   |
 ||         ||          || ``S1`` ... ``S7`` ||                                   |
 ||         ||          || ``E1`` ... ``E3`` ||                                   |
 ||         ||          || ``W1`` ... ``W3`` ||                                   |
@@ -74,10 +100,12 @@ Available pad rings
 +----------+-----------+--------------------+------------------------------------+
 
 
+
+
 silicon.pads
 ============
 
-The ``silicon.pads`` section lists the pads we will be using. 
+The ``silicon.pads`` section lists special pads. In general you are unlikely to need to add to this. 
 
 For each pad, there's a label which is used by our design, and what ``type`` and ``loc`` each pad should be.
 
@@ -86,8 +114,8 @@ type
 
 The ``type`` for each pad can be set to one of:
 
-clk
-   External clock.
+clock
+   External clock input.
 
 i
    Input.
