@@ -1,0 +1,36 @@
+# .github/workflows/preview.yml
+name: Deploy PR previews
+concurrency: preview-${{ github.ref }}
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - closed
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v4
+        with:
+          python-version: 3.12
+          cache: true
+
+      - name: Install dependencies
+        run: pdm install
+
+      - name: Build docs
+        run: pdm docs
+        if: github.event.action != 'closed'
+
+      - uses: rossjrw/pr-preview-action@v1
+        with:
+          source-dir: docs/_build
+          preview-branch: gh-pages
+          umbrella-dir: pr-preview
+          action: auto
+          pages-base-url: chipflow-lib.docs.chipflow-infra.com
