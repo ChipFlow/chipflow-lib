@@ -1,14 +1,12 @@
 # ChipFlow library
 
-WIP
-
+This is a small library to make working with the ChipFlow platform easy and straightforward.
 
 ## Installation and usage
 
 This library uses [PDM](https://pdm.fming.dev/) for dependency management, testing, building, and publishing. Install PDM first. Then run:
 
 ```
-pdm lock
 pdm install
 ```
 
