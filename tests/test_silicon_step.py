@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: BSD-2-Clause
-
 import io
 import json
 import os
 import tomli
 import unittest
 from contextlib import redirect_stdout
+from pprint import pformat
 from unittest.mock import patch
 
 from chipflow_lib.steps.silicon import SiliconStep
@@ -29,7 +29,7 @@ def mocked_requests_post(*args, **kwargs):
             "msg": "msg",
             "url": "https://example.com/build-url/",
             "name": "name",
-            "id": 123,
+            "id": "proj-name",
         }, 200)
 
     return MockResponse(None, 404)
@@ -41,9 +41,10 @@ class SiliconStepTestCase(unittest.TestCase):
         os.environ["CHIPFLOW_API_KEY_ID"] = "keyid"
         os.environ["CHIPFLOW_API_KEY_SECRET"] = "keysecret"
 
+    @patch('dotenv.load_dotenv')
     @patch('requests.post', side_effect=mocked_requests_post)
-    def test_submit_happy_path(self, mock_requests_post):
-        customer_config = f"{current_dir}/fixtures/chipflow-flexic.toml"
+    def test_submit_happy_path(self, mock_requests_post, mock_dotenv):
+        customer_config = f"{current_dir}/fixtures/mock.toml"
         with open(customer_config, "rb") as f:
             config_dict = tomli.load(f)
 
@@ -53,7 +54,7 @@ class SiliconStepTestCase(unittest.TestCase):
         with redirect_stdout(f):
             silicon_step.submit(current_dir + "/fixtures/mock.rtlil")
         output = f.getvalue()
-        assert 'msg (#123: name); https://example.com/build-url/' in output, "The printed output is correct."
+        assert 'msg (#proj-name: name); https://example.com/build-url/' in output, "The printed output is correct."
 
         args = mock_requests_post.call_args_list[0][0]
         kwargs = mock_requests_post.call_args_list[0][1]
@@ -63,7 +64,7 @@ class SiliconStepTestCase(unittest.TestCase):
         rtlil = files["rtlil"].read()
         assert args[0] == 'https://app.chipflow-infra.com/api/builds'
         assert kwargs["auth"] == ("keyid", "keysecret")
-        assert data["projectId"] == 123
+        assert data["projectId"] == 'proj-name'
         assert isinstance(data["name"], str), "Name is a string"
         assert list(config["dependency_versions"]) == [
             "python",
@@ -73,10 +74,10 @@ class SiliconStepTestCase(unittest.TestCase):
             "amaranth-orchard", "amaranth-vexriscv",
         ], "We have entries for the the dependency versions"
 
+        print(pformat(config))
         assert config["silicon"] == {
-            'process': 'customer1',
-            'pad_ring':
-            'cf20',
+            'process': 'ihp_sg13g2',
+            'package': 'pga144',
             'pads': {},
             'power': {
                 'vss': {'loc': 'N1'},
@@ -86,3 +87,5 @@ class SiliconStepTestCase(unittest.TestCase):
             }
         }
         assert rtlil == b"fake-rtlil", "The RTL file was passed through."
+
+        assert mock_dotenv.called
