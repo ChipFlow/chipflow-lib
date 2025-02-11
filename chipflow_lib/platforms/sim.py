@@ -1,7 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
-import argparse
-import sys
 import os
 from pathlib import Path
 
@@ -13,8 +11,6 @@ __all__ = ["SimPlatform"]
 
 
 class SimPlatform:
-    from ..providers import sim as providers
-
     def __init__(self):
         self.build_dir = os.path.join(os.environ['CHIPFLOW_ROOT'], 'build', 'sim')
         self.extra_files = dict()

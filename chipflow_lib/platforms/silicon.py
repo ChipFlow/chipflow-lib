@@ -1,64 +1,113 @@
 # SPDX-License-Identifier: BSD-2-Clause
-
+import logging
 import os
 import subprocess
 
-from amaranth import *
-from amaranth.lib import io
+from dataclasses import dataclass
+
+from amaranth import Module, Signal, Cat, ClockDomain, ClockSignal, ResetSignal
+
+from amaranth.lib import wiring, io
+from amaranth.lib.cdc import FFSynchronizer
+from amaranth.lib.wiring import Component, In
 
 from amaranth.back import rtlil
 from amaranth.hdl import Fragment
 from amaranth.hdl._ir import PortDirection
 
 from .. import ChipFlowError
-
+from .utils import load_pinlock, Port
 
 __all__ = ["SiliconPlatformPort", "SiliconPlatform"]
 
+logger = logging.getLogger(__name__)
+
+
+def make_hashable(cls):
+    def __hash__(self):
+        return hash(id(self))
+
+    def __eq__(self, obj):
+        return id(self) == id(obj)
+
+    cls.__hash__ = __hash__
+    cls.__eq__ = __eq__
+    return cls
+
+
+HeartbeatSignature = wiring.Signature({"heartbeat_i": In(1)})
+
+
+@make_hashable
+@dataclass
+class Heartbeat(Component):
+    clock_domain: str = "sync"
+    counter_size: int = 23
+    name: str = "heartbeat"
+
+    def __init__(self, ports):
+        super().__init__(HeartbeatSignature)
+        self.ports = ports
+
+    def elaborate(self, platform):
+        m = Module()
+        # Heartbeat LED (to confirm clock/reset alive)
+        heartbeat_ctr = Signal(self.counter_size)
+        getattr(m.d, self.clock_domain).__iadd__(heartbeat_ctr.eq(heartbeat_ctr + 1))
+
+        heartbeat_buffer = io.Buffer("o", self.ports.heartbeat)
+        m.submodules.heartbeat_buffer = heartbeat_buffer
+        m.d.comb += heartbeat_buffer.o.eq(heartbeat_ctr[-1])
+        return m
+
 
 class SiliconPlatformPort(io.PortLike):
-    def __init__(self, name, direction, width, *, invert=False):
-        if not isinstance(name, str):
-            raise TypeError(f"Name must be a string, not {name!r}")
-        if not (isinstance(width, int) and width >= 0):
-            raise TypeError(f"Width must be a non-negative integer, not {width!r}")
-        if not isinstance(invert, bool):
-            raise TypeError(f"'invert' must be a bool, not {invert!r}")
-
-        self._direction = io.Direction(direction)
+    def __init__(self,
+                 component: str,
+                 name: str,
+                 port: Port,
+                 *,
+                 invert: bool = False):
+        self._direction = io.Direction(port.direction)
         self._invert = invert
 
-        self._i = self._o = self._oe = None
+        self._i = self._o = self._oe = Signal(1)
         if self._direction in (io.Direction.Input, io.Direction.Bidir):
-            self._i = Signal(width, name=f"{name}__i")
+            self._i = Signal(port.width, name=f"{component}_{name}__i")
         if self._direction in (io.Direction.Output, io.Direction.Bidir):
-            self._o = Signal(width, name=f"{name}__o")
-            self._oe = Signal(width, name=f"{name}__oe")
+            self._o = Signal(port.width, name=f"{component}_{name}__o")
+            self._oe = Signal(1, name=f"{component}_{name}__oe")
+        self._pins = port.pins
+        logger.debug(f"Created SiliconPlatformPort {name}, width={len(port.pins)},dir{self._direction}")
 
     @property
     def i(self):
         if self._i is None:
             raise AttributeError("SiliconPlatformPort with output direction does not have an "
-                                 "input signal")
+                               "input signal")
         return self._i
 
     @property
     def o(self):
         if self._o is None:
             raise AttributeError("SiliconPlatformPort with input direction does not have an "
-                                 "output signal")
+                               "output signal")
         return self._o
 
     @property
     def oe(self):
         if self._oe is None:
             raise AttributeError("SiliconPlatformPort with input direction does not have an "
-                                 "output enable signal")
+                               "output enable signal")
         return self._oe
 
     @property
     def direction(self):
         return self._direction
+
+    @property
+    def pins(self):
+        return self._pins
 
     @property
     def invert(self):
@@ -73,7 +122,7 @@ class SiliconPlatformPort(io.PortLike):
         if self._direction is io.Direction.Bidir:
             assert len(self._i) == len(self._o) == len(self._oe)
             return len(self._i)
-        assert False # :nocov:
+        assert False  # :nocov:
 
     def __getitem__(self, key):
         result = object.__new__(type(self))
@@ -102,6 +151,11 @@ class SiliconPlatformPort(io.PortLike):
         result._invert = self._invert
         result._direction = direction
         return result
+
+    def __repr__(self):
+        return (f"SiliconPlatformPort(direction={repr(self._direction)}, width={len(self)}, "
+                f"i={repr(self._i)}, o={repr(self._o)}, oe={repr(self._oe)}, "
+                f"invert={repr(self._invert)})")
 
 
 class IOBuffer(io.Buffer):
@@ -160,39 +214,58 @@ class FFBuffer(io.FFBuffer):
 
 
 class SiliconPlatform:
-    def __init__(self, pads):
-        self._pads = pads
+    def __init__(self, config):
+        self._config = config
         self._ports = {}
         self._files = {}
 
-    def request(self, name):
+    def instantiate_ports(self, m: Module):
+        if hasattr(self, "pinlock"):
+            return
+
+        pinlock = load_pinlock()
+        for component, iface in pinlock.port_map.items():
+            for k, v in iface.items():
+                for name, port in v.items():
+                    self._ports[name] = SiliconPlatformPort(component, name, port)
+
+        for clock, name in self._config["chipflow"]["clocks"].items():
+            if name not in pinlock.package.clocks:
+                raise ChipFlowError("Unable to find clock {name} in pinlock")
+
+            port_data = pinlock.package.clocks[name]
+            port = SiliconPlatformPort(component, name, port_data, invert=True)
+            self._ports[name] = port
+            if clock == 'default':
+                clock = 'sync'
+            setattr(m.domains, clock, ClockDomain(name=clock))
+            clk_buffer = io.Buffer("i", port)
+            setattr(m.submodules, "clk_buffer_" + clock, clk_buffer)
+            m.d.comb += ClockSignal().eq(clk_buffer.i)
+
+        for reset, name in self._config["chipflow"]["resets"].items():
+            port_data = pinlock.package.resets[name]
+            port = SiliconPlatformPort(component, name, port_data)
+            self._ports[name] = port
+            rst_buffer = io.Buffer("i", port)
+            setattr(m.submodules, reset, rst_buffer)
+            setattr(m.submodules, reset + "_sync", FFSynchronizer(rst_buffer.i, ResetSignal()))
+
+        self.pinlock = pinlock
+
+    def request(self, name=None, **kwargs):
         if "$" in name:
             raise NameError(f"Reserved character `$` used in pad name `{name}`")
-        if name not in self._pads:
-            raise NameError(f"Pad `{name}` is not defined in chipflow.toml")
-        if name in self._ports:
-            raise NameError(f"Pad `{name}` has already been requested")
-
-        pad_type = self._pads[name]["type"]
-        # `clk` is used for clock tree synthesis, but treated as `i` in frontend
-        if pad_type in ("i", "clk"):
-            direction = io.Direction.Input
-        elif pad_type in ("o", "oe"):
-            direction = io.Direction.Output
-        elif pad_type == "io":
-            direction = io.Direction.Bidir
-        else:
-            assert False
-
-        self._ports[name] = port = SiliconPlatformPort(name, direction, 1)
-        return port
+        if name not in self._ports:
+            raise NameError(f"Pad `{name}` is not present in the pin lock")
+        return self._ports[name]
 
     def get_io_buffer(self, buffer):
         if isinstance(buffer, io.Buffer):
             result = IOBuffer(buffer.direction, buffer.port)
         elif isinstance(buffer, io.FFBuffer):
             result = FFBuffer(buffer.direction, buffer.port,
-                              i_domain=buffer.i_domain, o_domain=buffer.o_domain)
+                            i_domain=buffer.i_domain, o_domain=buffer.o_domain)
         else:
             raise TypeError(f"Unsupported buffer type {buffer!r}")
 
@@ -215,7 +288,7 @@ class SiliconPlatform:
     def _check_clock_domains(self, fragment, sync_domain=None):
         for clock_domain in fragment.domains.values():
             if clock_domain.name != "sync" or (sync_domain is not None and
-                                               clock_domain is not sync_domain):
+                                             clock_domain is not sync_domain):
                 raise ChipFlowError("Only a single clock domain, called 'sync', may be used")
             sync_domain = clock_domain
 
@@ -252,10 +325,10 @@ class SiliconPlatform:
             filename_b = filename.encode("utf-8")
             if filename.endswith(".v") or filename.endswith(".vh"):
                 yosys_script.append(b"read_verilog -defer <<" + filename_b + b"\n" +
-                                    content + b"\n" + filename_b)
+                                  content + b"\n" + filename_b)
             elif filename.endswith(".sv"):
                 yosys_script.append(b"read_verilog -defer -sv <<" + filename_b + b"\n" +
-                                    content + b"\n" + filename_b)
+                                  content + b"\n" + filename_b)
             else:
                 raise ValueError(f"File `{filename}` is not supported by the build platform")
         yosys_script += [
@@ -275,3 +348,13 @@ class SiliconPlatform:
             "-o", output_rtlil.replace("\\", "/")
         ])
         return output_rtlil
+
+    def default_clock(m, platform, clock, reset):
+        # Clock generation
+        m.domains.sync = ClockDomain()
+
+        clk = platform.request(clock)
+        m.d.comb += ClockSignal().eq(clk.i)
+        m.submodules.rst_sync = FFSynchronizer(
+            ~platform.request(reset).i,
+            ResetSignal())
