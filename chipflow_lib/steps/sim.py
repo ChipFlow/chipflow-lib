@@ -14,7 +14,7 @@ from amaranth import *
 
 from . import StepBase, _wire_up_ports
 from .. import ChipFlowError, _ensure_chipflow_root
-from ..platforms import SimPlatform, top_interfaces
+from ..platforms import SimPlatform, top_components
 from ..platforms.sim import VARIABLES, TASKS, DOIT_CONFIG
 
 
@@ -81,15 +81,15 @@ class SimStep(StepBase):
         m = Module()
         self._platform.instantiate_ports(m)
 
-        ## heartbeat led (to confirm clock/reset alive)
+        # heartbeat led (to confirm clock/reset alive)
         #if ("debug" in self._config["chipflow"]["silicon"] and
         #   self._config["chipflow"]["silicon"]["debug"]["heartbeat"]):
         #    heartbeat_ctr = Signal(23)
         #    m.d.sync += heartbeat_ctr.eq(heartbeat_ctr + 1)
         #    m.d.comb += platform.request("heartbeat").o.eq(heartbeat_ctr[-1])
 
-        top, interfaces = top_interfaces(self._config)
-        logger.debug(f"SiliconTop top = {top}, interfaces={interfaces}")
+        top = top_components(self._config)
+        logger.debug(f"SimStep top = {top}")
 
         _wire_up_ports(m, top, self._platform)
 

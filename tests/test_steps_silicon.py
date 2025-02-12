@@ -25,12 +25,12 @@ from chipflow_lib.steps.silicon import SiliconStep, SiliconTop
 DEFAULT_PINLOCK = {
     "process" : "ihp_sg13g2",
     "package" : {
-        "package_type": {
-        "type": "_QuadPackageDef",
-        "name": "pga144",
-        "width": 36,
-        "height": 36
-        },
+        "type": {
+            "name": "pga144",
+            "package_type": "QuadPackageDef",
+            "width": 36,
+            "height": 36,
+        }
     },
     "port_map" : {},
     "metadata" : {},
@@ -100,16 +100,16 @@ class TestSiliconStep(unittest.TestCase):
 
     @mock.patch("chipflow_lib.steps.silicon.SiliconTop")
     @mock.patch("chipflow_lib.steps.silicon.SiliconPlatform")
-    @mock.patch("chipflow_lib.steps.silicon.top_interfaces")
-    def test_prepare(self, mock_top_interfaces, mock_platform_class, mock_silicontop_class):
+    @mock.patch("chipflow_lib.steps.silicon.top_components")
+    def test_prepare(self, mock_top_components, mock_platform_class, mock_silicontop_class):
         """Test prepare method"""
         mock_platform = mock_platform_class.return_value
         mock_platform.build.return_value = "/path/to/rtlil"
 
         mock_silicontop = mock_silicontop_class.return_value
 
-        # Mock top_interfaces to avoid UnusedElaboratable
-        mock_top_interfaces.return_value = ({"mock_component": mock.MagicMock()}, {})
+        # Mock top_components to avoid UnusedElaboratable
+        mock_top_components.return_value = {"mock_component": mock.MagicMock()}
 
         # Create SiliconStep instance
         step = SiliconStep(self.config)
@@ -155,11 +155,11 @@ class TestSiliconStep(unittest.TestCase):
         )
 
     @mock.patch("chipflow_lib.steps.silicon.SiliconPlatform")
-    @mock.patch("chipflow_lib.steps.silicon.top_interfaces")
+    @mock.patch("chipflow_lib.steps.silicon.top_components")
     @mock.patch("chipflow_lib.steps.silicon.dotenv.load_dotenv")
     @mock.patch("chipflow_lib.steps.silicon.SiliconStep.submit")
     @mock.patch("chipflow_lib.steps.silicon.SiliconStep.prepare")
-    def test_cli_prepare(self, mock_prepare, mock_submit, mock_dotenv, mock_top_interfaces, mock_platform_class):
+    def test_cli_prepare(self, mock_prepare, mock_submit, mock_dotenv, mock_top_components, mock_platform_class):
         """Test prepare method"""
         mock_platform = mock_platform_class.return_value
         mock_platform.build.return_value = "/path/to/rtlil"
@@ -218,13 +218,13 @@ class TestSiliconStep(unittest.TestCase):
     @mock.patch("chipflow_lib.steps.silicon.SiliconPlatform")
     @mock.patch("chipflow_lib.steps.silicon.SiliconStep.submit")
     @mock.patch("chipflow_lib.steps.silicon.dotenv.load_dotenv")
-    @mock.patch("chipflow_lib.steps.silicon.top_interfaces")
-    def test_run_cli_submit_dry_run(self, mock_top_interfaces, mock_load_dotenv, mock_submit, mock_platform_class, mock_silicontop_class):
+    @mock.patch("chipflow_lib.steps.silicon.top_components")
+    def test_run_cli_submit_dry_run(self, mock_top_components, mock_load_dotenv, mock_submit, mock_platform_class, mock_silicontop_class):
         """Test run_cli with submit action in dry run mode"""
         # Setup mocks
         mock_platform = mock_platform_class.return_value
         mock_platform.build.return_value = "/path/to/rtlil"
-        mock_top_interfaces.return_value = ({"mock_component": mock.MagicMock()}, {})
+        mock_top_components.return_value = {"mock_component": mock.MagicMock()}
         mock_platform.pinlock.port_map = {}
 
         # Create mock args
@@ -616,8 +616,8 @@ class TestSiliconTop(unittest.TestCase):
         top = SiliconTop(self.config)
         self.assertEqual(top._config, self.config)
 
-    @mock.patch("chipflow_lib.steps.silicon.top_interfaces")
-    def test_elaborate(self, mock_top_interfaces):
+    @mock.patch("chipflow_lib.steps.silicon.top_components")
+    def test_elaborate(self, mock_top_components):
         """Test SiliconTop elaborate method"""
         # Create mock platform
         platform = mock.MagicMock()
@@ -638,8 +638,8 @@ class TestSiliconTop(unittest.TestCase):
         mock_component.iface1.port1 = mock.MagicMock()
         mock_components = {"comp1": mock_component}
 
-        # Setup top_interfaces mock
-        mock_top_interfaces.return_value = (mock_components, {})
+        # Setup top_components mock
+        mock_top_components.return_value = mock_components
 
         # Create SiliconTop instance
         top = SiliconTop(self.config)
@@ -662,8 +662,8 @@ class TestSiliconTop(unittest.TestCase):
         platform.request.assert_called_with("heartbeat")
 
     @mock.patch("chipflow_lib.steps.silicon.SiliconPlatform")
-    @mock.patch("chipflow_lib.steps.silicon.top_interfaces")
-    def test_elaborate_no_heartbeat(self, mock_top_interfaces, mock_platform_class):
+    @mock.patch("chipflow_lib.steps.silicon.top_components")
+    def test_elaborate_no_heartbeat(self, mock_top_components, mock_platform_class):
         """Test SiliconTop elaborate without heartbeat"""
         # Config without heartbeat
         config_no_heartbeat = {
@@ -689,8 +689,8 @@ class TestSiliconTop(unittest.TestCase):
         platform = mock_platform_class.return_value
         platform.pinlock.port_map = {}
 
-        # Setup top_interfaces mock
-        mock_top_interfaces.return_value = ({}, {})
+        # Setup top_components mock
+        mock_top_components.return_value = {}
 
         # Create SiliconTop instance with no heartbeat
         top = SiliconTop(config_no_heartbeat)
@@ -713,8 +713,8 @@ class TestSiliconTop(unittest.TestCase):
     @mock.patch("chipflow_lib.platforms.silicon.io.Buffer")
     @mock.patch("chipflow_lib.steps.silicon.Module")
     @mock.patch("chipflow_lib.platforms.silicon.Heartbeat")
-    @mock.patch("chipflow_lib.steps.silicon.top_interfaces")
-    def test_heartbeat(self, mock_top_interfaces, mock_module, mock_heartbeat_class, mock_io_buffer):
+    @mock.patch("chipflow_lib.steps.silicon.top_components")
+    def test_heartbeat(self, mock_top_components, mock_module, mock_heartbeat_class, mock_io_buffer):
         """Test that Heartbeat class gets used properly when debug.heartbeat is True"""
         # Import Heartbeat class to make sure it's loaded and used
 
@@ -730,8 +730,8 @@ class TestSiliconTop(unittest.TestCase):
         }
         platform.request.return_value = platform.ports["heartbeat"]
 
-        # Create a mock for top_interfaces
-        mock_top_interfaces.return_value = ({}, {})
+        # Create a mock for top_components
+        mock_top_components.return_value = {}
 
         # Create and elaborate SiliconTop with heartbeat
         top = SiliconTop(self.config)
