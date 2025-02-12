@@ -33,14 +33,15 @@ def run(argv=sys.argv[1:]):
     commands = {}
     commands["pin"] = PinCommand(config)
 
-    steps = DEFAULT_STEPS | config["chipflow"]["steps"]
-    for step_name, step_reference in steps.items():
-        step_cls = _get_cls_by_reference(step_reference, context=f"step `{step_name}`")
-        try:
-            commands[step_name] = step_cls(config)
-        except Exception:
-            raise ChipFlowError(f"Encountered error while initializing step `{step_name}` "
-                              f"using `{step_reference}`")
+    if config.chipflow.steps:
+        steps = DEFAULT_STEPS |config.chipflow.steps
+        for step_name, step_reference in steps.items():
+            step_cls = _get_cls_by_reference(step_reference, context=f"step `{step_name}`")
+            try:
+                commands[step_name] = step_cls(config)
+            except Exception:
+                raise ChipFlowError(f"Encountered error while initializing step `{step_name}` "
+                                f"using `{step_reference}`")
 
     parser = argparse.ArgumentParser(
         prog="chipflow",
