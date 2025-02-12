@@ -1,4 +1,5 @@
 # amaranth: UnusedElaboratable=no
+# type: ignore[reportAttributeAccessIssue]
 
 # SPDX-License-Identifier: BSD-2-Clause
 import logging
@@ -60,7 +61,7 @@ class Heartbeat(Component):
 
         heartbeat_buffer = io.Buffer("o", self.ports.heartbeat)
         m.submodules.heartbeat_buffer = heartbeat_buffer
-        m.d.comb += heartbeat_buffer.o.eq(heartbeat_ctr[-1])
+        m.d.comb += heartbeat_buffer.o.eq(heartbeat_ctr[-1])  # type: ignore
         return m
 
 
@@ -71,10 +72,10 @@ class SiliconPlatformPort(io.PortLike):
                  port: Port,
                  *,
                  invert: bool = False):
-        self._direction = io.Direction(port.direction)
+        self._direction = io.Direction(port.iomodel['direction'])
         self._invert = invert
-        self._options = port.options
-        self._pins = port.pins
+        self._iomodel = port.iomodel
+        self._pins = port.pins if port.pins else []
 
         # Initialize signal attributes to None
         self._i = None
@@ -87,7 +88,7 @@ class SiliconPlatformPort(io.PortLike):
         if self._direction in (io.Direction.Output, io.Direction.Bidir):
             self._o = Signal(port.width, name=f"{component}_{name}__o")
         if self._direction is io.Direction.Bidir:
-            if "all_have_oe" in self._options and self._options["all_have_oe"]:
+            if "all_have_oe" in self._iomodel and self._iomodel["all_have_oe"]:
                 self._oe = Signal(port.width, name=f"{component}_{name}__oe", init=-1)
             else:
                 self._oe = Signal(1, name=f"{component}_{name}__oe", init=-1)
@@ -95,12 +96,12 @@ class SiliconPlatformPort(io.PortLike):
             # Always create an _oe for output ports
             self._oe = Signal(1, name=f"{component}_{name}__oe", init=-1)
 
-        logger.debug(f"Created SiliconPlatformPort {name}, width={len(port.pins)},dir{self._direction}")
+        logger.debug(f"Created SiliconPlatformPort {name}, width={len(self._pins)},dir{self._direction}")
 
     def wire(self, m: Module, interface: PureInterface):
-        assert self._direction == interface.signature.direction
+        assert self._direction == interface.signature.direction  #type: ignore
         if hasattr(interface, 'i'):
-            m.d.comb += interface.i.eq(self.i)
+            m.d.comb += interface.i.eq(self.i)  # type: ignore
         for d in ['o', 'oe']:
             if hasattr(interface, d):
                 m.d.comb += getattr(self, d).eq(getattr(interface, d))
@@ -142,16 +143,16 @@ class SiliconPlatformPort(io.PortLike):
 
     def __len__(self):
         if self._direction is io.Direction.Input:
-            return len(self._i)
+            return len(self.i)
         if self._direction is io.Direction.Output:
-            return len(self._o)
+            return len(self.o)
         if self._direction is io.Direction.Bidir:
-            assert len(self._i) == len(self._o)
-            if self._options["all_have_oe"]:
-                assert len(self.o) == len(self._oe)
+            assert len(self.i) == len(self.o)
+            if 'all_have_oe' in self._iomodel and self._iomodel["all_have_oe"]:
+                assert len(self.o) == len(self.oe)
             else:
-                assert len(self._oe) == 1
-            return len(self._i)
+                assert len(self.oe) == 1
+            return len(self.i)
         assert False  # :nocov:
 
     def __getitem__(self, key):
@@ -161,7 +162,7 @@ class SiliconPlatformPort(io.PortLike):
         result._oe = None if self._oe is None else self._oe[key]
         result._invert = self._invert
         result._direction = self._direction
-        result._options = self._options
+        result._iomodel = self._iomodel
         result._pins = self._pins
         return result
 
@@ -172,7 +173,7 @@ class SiliconPlatformPort(io.PortLike):
         result._oe = self._oe
         result._invert = not self._invert
         result._direction = self._direction
-        result._options = self._options
+        result._iomodel = self._iomodel
         result._pins = self._pins
         return result
 
@@ -184,7 +185,7 @@ class SiliconPlatformPort(io.PortLike):
         result._oe = None if direction is io.Direction.Input else Cat(self._oe, other._oe)
         result._invert = self._invert
         result._direction = direction
-        result._options = self._options
+        result._iomodel = self._iomodel
         result._pins = self._pins + other._pins
         return result
 
@@ -254,6 +255,7 @@ class SiliconPlatform:
         self._config = config
         self._ports = {}
         self._files = {}
+        self._pinlock = None
 
     @property
     def ports(self):
@@ -264,37 +266,27 @@ class SiliconPlatform:
             return
 
         pinlock = load_pinlock()
-        for component, iface in pinlock.port_map.items():
+        for component, iface in pinlock.port_map.ports.items():
             for k, v in iface.items():
                 for name, port in v.items():
                     self._ports[port.port_name] = SiliconPlatformPort(component, name, port)
 
-        for clock, name in self._config["chipflow"]["clocks"].items():
-            if name not in pinlock.package.clocks:
-                raise ChipFlowError(f"Unable to find clock {name} in pinlock")
+        for clock in pinlock.port_map.get_clocks():
+            domain = name=clock.iomodel['clock_domain_o']
+            setattr(m.domains, domain, ClockDomain(name=domain))
+            clk_buffer = io.Buffer("i", self._ports[clock.port_name])
+            setattr(m.submodules, "clk_buffer_" + domain, clk_buffer)
+            m.d.comb += ClockSignal().eq(clk_buffer.i)  #type: ignore[reportAttributeAccessIssue]
 
-            port_data = pinlock.package.clocks[name]
-            port = SiliconPlatformPort(component, name, port_data, invert=True)
-            self._ports[name] = port
-
-            if clock == 'default':
-                clock = 'sync'
-            setattr(m.domains, clock, ClockDomain(name=clock))
-            clk_buffer = io.Buffer("i", port)
-            setattr(m.submodules, "clk_buffer_" + clock, clk_buffer)
-            m.d.comb += ClockSignal().eq(clk_buffer.i)
-
-        for reset, name in self._config["chipflow"]["resets"].items():
-            port_data = pinlock.package.resets[name]
-            port = SiliconPlatformPort(component, name, port_data, invert=True)
-            self._ports[name] = port
-            rst_buffer = io.Buffer("i", port)
-            setattr(m.submodules, reset, rst_buffer)
-            setattr(m.submodules, reset + "_sync", FFSynchronizer(rst_buffer.i, ResetSignal()))
+        for reset in pinlock.port_map.get_resets():
+            domain = name=clock.iomodel['clock_domain_o']
+            rst_buffer = io.Buffer("i", self._ports[reset.port_name])
+            setattr(m.submodules, reset.port_name, rst_buffer)
+            setattr(m.submodules, reset.port_name + "_sync", FFSynchronizer(rst_buffer.i, ResetSignal()))  #type: ignore[reportAttributeAccessIssue]
 
         self._pinlock = pinlock
 
-    def request(self, name=None, **kwargs):
+    def request(self, name, **kwargs):
         if "$" in name:
             raise NameError(f"Reserved character `$` used in pad name `{name}`")
         if name not in self._ports:
@@ -311,10 +303,10 @@ class SiliconPlatform:
             raise TypeError(f"Unsupported buffer type {buffer!r}")
 
         if buffer.direction is not io.Direction.Output:
-            result.i = buffer.i
+            result.i = buffer.i  #type: ignore[reportAttributeAccessIssue]
         if buffer.direction is not io.Direction.Input:
-            result.o = buffer.o
-            result.oe = buffer.oe
+            result.o = buffer.o  #type: ignore[reportAttributeAccessIssue]
+            result.oe = buffer.oe  #type: ignore[reportAttributeAccessIssue]
 
         return result
 
@@ -330,7 +322,7 @@ class SiliconPlatform:
         for clock_domain in fragment.domains.values():
             if clock_domain.name != "sync" or (sync_domain is not None and
                                              clock_domain is not sync_domain):
-                raise ChipFlowError("Only a single clock domain, called 'sync', may be used")
+                raise ChipFlowError(f"Only a single clock domain, called 'sync', may be used: {clock_domain.name}")
             sync_domain = clock_domain
 
         for subfragment, subfragment_name, src_loc in fragment.subfragments:
@@ -391,13 +383,3 @@ class SiliconPlatform:
             "-o", output_rtlil.replace("\\", "/")
         ])
         return output_rtlil
-
-    def default_clock(m, platform, clock, reset):
-        # Clock generation
-        m.domains.sync = ClockDomain()
-
-        clk = platform.request(clock)
-        m.d.comb += ClockSignal().eq(clk.i)
-        m.submodules.rst_sync = FFSynchronizer(
-            ~platform.request(reset).i,
-            ResetSignal())
