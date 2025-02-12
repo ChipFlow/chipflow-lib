@@ -6,12 +6,12 @@ from pathlib import Path
 
 from amaranth import *
 from amaranth.lib import io
-from amaranth.back import rtlil
+from amaranth.back import rtlil  # type: ignore[reportAttributeAccessIssue]
 from amaranth.hdl._ir import PortDirection
 from amaranth.lib.cdc import FFSynchronizer
 
-from .. import ChipFlowError
 from .utils import load_pinlock
+
 
 __all__ = ["SimPlatform"]
 
@@ -70,38 +70,25 @@ class SimPlatform:
             return
 
         pinlock = load_pinlock()
-        for component, iface in pinlock.port_map.items():
+        for component, iface in pinlock.port_map.ports.items():
             for k, v in iface.items():
                 for name, port in v.items():
                    invert = port.invert if port.invert else False
                    self._ports[port.port_name] = io.SimulationPort(port.direction, port.width, invert=invert, name=f"{component}-{name}")
 
-        for clock, name in self._config["chipflow"]["clocks"].items():
-            if name not in pinlock.package.clocks:
-                raise ChipFlowError("Unable to find clock {name} in pinlock")
+        for clock in pinlock.port_map.get_clocks():
+            setattr(m.domains, clock.port_name, ClockDomain(name=clock.port_name))
+            clk_buffer = io.Buffer(clock.direction, self._ports[clock.port_name])
+            setattr(m.submodules, "clk_buffer_" + clock.port_name, clk_buffer)
+            m.d.comb += ClockSignal().eq(clk_buffer.i)  # type: ignore[reportAttributeAccessIssue]
 
-            port_data = pinlock.package.clocks[name]
-            port = io.SimulationPort(io.Direction.Input, port_data.width, name=f"clock-{name}")
-            self._ports[name] = port
-
-            if clock == 'default':
-                clock = 'sync'
-            setattr(m.domains, clock, ClockDomain(name=clock))
-            clk_buffer = io.Buffer("i", port)
-            setattr(m.submodules, "clk_buffer_" + clock, clk_buffer)
-            m.d.comb += ClockSignal().eq(clk_buffer.i)
-
-        for reset, name in self._config["chipflow"]["resets"].items():
-            port_data = pinlock.package.resets[name]
-            port = io.SimulationPort(io.Direction.Input, port_data.width, name=f"reset-{name}", invert=True)
-            self._ports[name] = port
-            rst_buffer = io.Buffer("i", port)
-            setattr(m.submodules, reset, rst_buffer)
-            setattr(m.submodules, reset + "_sync", FFSynchronizer(rst_buffer.i, ResetSignal()))
+        for reset in pinlock.port_map.get_resets():
+            rst_buffer = io.Buffer(reset.direction, self._ports[clock.port_name])
+            setattr(m.submodules, reset.port_name, rst_buffer)
+            ffsync = FFSynchronizer(rst_buffer.i, ResetSignal(name=reset.port_name))  # type: ignore[reportAttributeAccessIssue]
+            setattr(m.submodules, reset.port_name + "_sync", ffsync)
 
         self._pinlock = pinlock
-
-
 
 
 VARIABLES = {

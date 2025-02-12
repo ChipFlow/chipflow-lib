@@ -11,9 +11,11 @@ from chipflow_lib import (
     ChipFlowError,
     _get_cls_by_reference,
     _ensure_chipflow_root,
-    _parse_config_file,
     _parse_config
 )
+from chipflow_lib.config import _parse_config_file
+from chipflow_lib.config_models import Config, ChipFlowConfig
+from chipflow_lib.platforms import Process
 
 
 class TestCoreUtilities(unittest.TestCase):
@@ -66,7 +68,7 @@ class TestCoreUtilities(unittest.TestCase):
         os.environ["CHIPFLOW_ROOT"] = "/test/path"
         sys.path = ["/some/other/path"]
 
-        _ensure_chipflow_root.root = None
+        _ensure_chipflow_root.root = None  #type: ignore
         result = _ensure_chipflow_root()
 
         self.assertEqual(result, Path("/test/path"))
@@ -76,7 +78,7 @@ class TestCoreUtilities(unittest.TestCase):
         """Test _ensure_chipflow_root when CHIPFLOW_ROOT is not set"""
         if "CHIPFLOW_ROOT" in os.environ:
             del os.environ["CHIPFLOW_ROOT"]
-        _ensure_chipflow_root.root = None
+        _ensure_chipflow_root.root = None  #type: ignore
 
         with mock.patch("os.getcwd", return_value="/mock/cwd"):
             result = _ensure_chipflow_root()
@@ -105,16 +107,17 @@ package = "caravel"
 
         config = _parse_config_file(config_path)
 
-        self.assertIn("chipflow", config)
-        self.assertEqual(config["chipflow"]["project_name"], "test_project")
-        self.assertEqual(config["chipflow"]["silicon"]["process"], "sky130")
+        assert config.chipflow
+        assert config.chipflow.silicon
+        self.assertEqual(config.chipflow.project_name, "test_project")
+        self.assertEqual(config.chipflow.silicon.process, Process.SKY130)
 
     @mock.patch("chipflow_lib._ensure_chipflow_root")
-    @mock.patch("chipflow_lib._parse_config_file")
+    @mock.patch("chipflow_lib.config._parse_config_file")
     def test_parse_config(self, mock_parse_config_file, mock_ensure_chipflow_root):
         """Test _parse_config which uses _ensure_chipflow_root and _parse_config_file"""
         mock_ensure_chipflow_root.return_value = "/mock/chipflow/root"
-        mock_parse_config_file.return_value = {"chipflow": {"test": "value"}}
+        mock_parse_config_file.return_value = Config(chipflow=ChipFlowConfig(project_name='test', top={'test': 'test'}))
 
         config = _parse_config()
 
@@ -124,4 +127,5 @@ package = "caravel"
                         if hasattr(mock_parse_config_file.call_args[0][0], 'as_posix')
                         else mock_parse_config_file.call_args[0][0],
                         "/mock/chipflow/root/chipflow.toml")
-        self.assertEqual(config, {"chipflow": {"test": "value"}})
+        self.assertEqual(config.chipflow.project_name, "test")
+        self.assertEqual(config.chipflow.top, {'test': 'test'})

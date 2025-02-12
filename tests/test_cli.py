@@ -6,7 +6,7 @@ from unittest import mock
 
 from chipflow_lib import ChipFlowError
 from chipflow_lib.cli import run
-
+from chipflow_lib.config_models import Config, ChipFlowConfig
 
 class MockCommand:
     """Mock command for testing CLI"""
@@ -22,6 +22,9 @@ class MockCommand:
             raise ValueError("Unexpected error")
         # Valid action does nothing
 
+MOCK_CONFIG = Config(chipflow=ChipFlowConfig(project_name="test",
+                                             steps={"test": "test:MockStep"}
+                                             ))
 
 class TestCLI(unittest.TestCase):
     @mock.patch("chipflow_lib.cli._parse_config")
@@ -30,14 +33,7 @@ class TestCLI(unittest.TestCase):
     def test_run_success(self, mock_get_cls, mock_pin_command, mock_parse_config):
         """Test CLI run with successful command execution"""
         # Setup mocks
-        mock_config = {
-            "chipflow": {
-                "steps": {
-                    "test": "test:MockStep"
-                }
-            }
-        }
-        mock_parse_config.return_value = mock_config
+        mock_parse_config.return_value = MOCK_CONFIG
 
         mock_pin_cmd = MockCommand()
         mock_pin_command.return_value = mock_pin_cmd
@@ -59,14 +55,7 @@ class TestCLI(unittest.TestCase):
     def test_run_command_error(self, mock_get_cls, mock_pin_command, mock_parse_config):
         """Test CLI run with command raising ChipFlowError"""
         # Setup mocks
-        mock_config = {
-            "chipflow": {
-                "steps": {
-                    "test": "test:MockStep"
-                }
-            }
-        }
-        mock_parse_config.return_value = mock_config
+        mock_parse_config.return_value = MOCK_CONFIG
 
         mock_pin_cmd = MockCommand()
         mock_pin_command.return_value = mock_pin_cmd
@@ -93,14 +82,7 @@ class TestCLI(unittest.TestCase):
     def test_run_unexpected_error(self, mock_get_cls, mock_pin_command, mock_parse_config):
         """Test CLI run with command raising unexpected exception"""
         # Setup mocks
-        mock_config = {
-            "chipflow": {
-                "steps": {
-                    "test": "test:MockStep"
-                }
-            }
-        }
-        mock_parse_config.return_value = mock_config
+        mock_parse_config.return_value = MOCK_CONFIG
 
         mock_pin_cmd = MockCommand()
         mock_pin_command.return_value = mock_pin_cmd
@@ -127,14 +109,7 @@ class TestCLI(unittest.TestCase):
     def test_step_init_error(self, mock_pin_command, mock_parse_config):
         """Test CLI run with error initializing step"""
         # Setup mocks
-        mock_config = {
-            "chipflow": {
-                "steps": {
-                    "test": "test:MockStep"
-                }
-            }
-        }
-        mock_parse_config.return_value = mock_config
+        mock_parse_config.return_value = MOCK_CONFIG
 
         mock_pin_cmd = MockCommand()
         mock_pin_command.return_value = mock_pin_cmd
@@ -154,14 +129,7 @@ class TestCLI(unittest.TestCase):
     def test_build_parser_error(self, mock_get_cls, mock_pin_command, mock_parse_config):
         """Test CLI run with error building CLI parser"""
         # Setup mocks
-        mock_config = {
-            "chipflow": {
-                "steps": {
-                    "test": "test:MockStep"
-                }
-            }
-        }
-        mock_parse_config.return_value = mock_config
+        mock_parse_config.return_value = MOCK_CONFIG
 
         # Make pin command raise an error during build_cli_parser
         mock_pin_cmd = mock.Mock()
@@ -183,14 +151,7 @@ class TestCLI(unittest.TestCase):
 #     def test_verbosity_flags(self, mock_get_cls, mock_pin_command, mock_parse_config):
 #         """Test CLI verbosity flags"""
 #         # Setup mocks
-#         mock_config = {
-#             "chipflow": {
-#                 "steps": {
-#                     "test": "test:MockStep"
-#                 }
-#             }
-#         }
-#         mock_parse_config.return_value = mock_config
+#         mock_parse_config.return_value = MOCK_CONFIG
 #
 #         mock_pin_cmd = MockCommand()
 #         mock_pin_command.return_value = mock_pin_cmd
