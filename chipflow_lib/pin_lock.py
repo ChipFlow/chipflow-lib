@@ -103,27 +103,31 @@ def lock_pins() -> None:
 
     package = Package(package_type=package_type)
 
-    # Process pads and power configurations using Pydantic models
-    for d in ("pads", "power"):
-        logger.debug(f"Checking [chipflow.silicon.{d}]:")
-        silicon_config = getattr(config_model.chipflow.silicon, d, {})
-        for k, v in silicon_config.items():
-            pin = str(v.loc)
-            used_pins.add(pin)
+    # Initialize standard pins from package type
+    package.initialize_from_package_type()
 
-            # Convert Pydantic model to dict for backward compatibility
-            v_dict = {"type": v.type, "loc": v.loc}
-            port = oldlock.package.check_pad(k, v_dict) if oldlock else None
+    # Process user-defined pads
+    logger.debug(f"Checking [chipflow.silicon.pads]:") if hasattr(config_model.chipflow.silicon, "pads") else ...
+    silicon_config = getattr(config_model.chipflow.silicon, "pads", {})
+    for k, v in silicon_config.items():
+        pin = str(v.loc)
+        used_pins.add(pin)
 
-            if port and port.pins != [pin]:
-                raise ChipFlowError(
-                    f"chipflow.toml conflicts with pins.lock: "
-                    f"{k} had pin {port.pins}, now {[pin]}."
-                )
+        # Convert Pydantic model to dict for backward compatibility
+        v_dict = {"type": v.type, "loc": v.loc}
+        port = oldlock.package.check_pad(k, v_dict) if oldlock else None
 
-            # Add pad to package
-            package.add_pad(k, v_dict)
+        if port and port.pins != [pin]:
+            raise ChipFlowError(
+                f"chipflow.toml conflicts with pins.lock: "
+                f"{k} had pin {port.pins}, now {[pin]}."
+            )
 
+        # Add pad to package
+        package.add_pad(k, v_dict)
+
+    # TODO: power pins
+    #
     logger.debug(f'Pins in use: {package_type.sortpins(used_pins)}')
 
     unallocated = package_type.pins - used_pins
