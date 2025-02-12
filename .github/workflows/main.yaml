@@ -19,7 +19,6 @@ jobs:
         uses: pdm-project/setup-pdm@v4
       - name: Install dependencies
         run: |
-          pdm lock --dev
           pdm install
       - name: Run tests
         run: |
