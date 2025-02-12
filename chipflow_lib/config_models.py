@@ -1,11 +1,10 @@
 # SPDX-License-Identifier: BSD-2-Clause
 import re
-from typing import Dict, Optional, Literal, Any
+from typing import Dict, Optional, Literal, Any, List
 
 from pydantic import BaseModel, model_validator, ValidationInfo, field_validator
 
 from .platforms.utils import Process
-
 
 class PadConfig(BaseModel):
     """Configuration for a pad in chipflow.toml."""
@@ -36,13 +35,16 @@ class PadConfig(BaseModel):
         return v
 
 
+Voltage = float
+
 class SiliconConfig(BaseModel):
     """Configuration for silicon in chipflow.toml."""
-    process: Process
+    process: 'Process'
     package: Literal["caravel", "cf20", "pga144"]
-    pads: Dict[str, PadConfig] = {}
-    power: Dict[str, PadConfig] = {}
+    power: Dict[str, Voltage] = {}
     debug: Optional[Dict[str, bool]] = None
+    # This is still kept around to allow forcing pad locations.
+    pads: Optional[Dict[str, PadConfig]] = {}
 
     @field_validator('pads', 'power', mode='before')
     @classmethod
@@ -64,8 +66,7 @@ class ChipFlowConfig(BaseModel):
     top: Dict[str, Any] = {}
     steps: Optional[Dict[str, str]] = None
     silicon: Optional[SiliconConfig] = None
-    clocks: Optional[Dict[str, str]] = None
-    resets: Optional[Dict[str, str]] = None
+    clock_domains: Optional[List[str]] = None
 
 
 class Config(BaseModel):
