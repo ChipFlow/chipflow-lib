@@ -114,6 +114,16 @@ PinSet = Set[Pin]
 PinList = List[Pin]
 Pins = Union[PinSet, PinList]
 
+class PowerPins(enum.Enum):
+    POWER = "power"
+    GROUND = "ground"
+
+class JTAGPins(enum.Enum):
+    TRST = "trst"
+    TCK = "tck"
+    TMS = "tms"
+    TDI = "tdi"
+    TDO = "tdo"
 
 class _Side(enum.IntEnum):
     N = 1
@@ -206,17 +216,69 @@ class _BasePackageDef(pydantic.BaseModel, abc.ABC):
     @property
     @abc.abstractmethod
     def pins(self) -> PinSet:
+        "Returns the full set of pins for the package"
         ...
 
     @abc.abstractmethod
     def allocate(self, available: PinSet, width: int) -> PinList:
+        """
+        Allocates pins as close to each other as possible from available pins.
+
+        Args:
+            available: set of available pins
+            width: number of pins to allocate
+
+        Returns:
+            An ordered list of pins
+        """
         ...
+
+    @property
+    @abc.abstractmethod
+    def power(self) -> Dict[PowerType, Pin]:
+        """
+        The set of power pins for the package
+        """
+        ...
+
+    @property
+    @abc.abstractmethod
+    def resets(self) -> Dict[int, Pin]:
+        """
+        Numbered set of reset pins for the package
+        """
+        ...
+
+    @property
+    @abc.abstractmethod
+    def clocks(self) -> Dict[int, Pin]:
+        """
+        Numbered set of clock pins for the package
+        """
+        ...
+
+    @property
+    @abc.abstractmethod
+    def jtag(self) -> Dict[JTAGPin, Pin]:
+        """
+        Map of JTAG pins for the package
+        """
+        ...
+
+    @property
+    @abc.abstractmethod
+    def heartbeat(self) -> Dict(int, Pin):
+        """
+        Numbered set of heartbeat pins for the package
+        """
 
     def to_string(pins: Pins):
         return [''.join(map(str, t)) for t in pins]
 
     def sortpins(self, pins: Pins) -> PinList:
         return list(pins).sort()
+
+    
 
 
 class _BareDiePackageDef(_BasePackageDef):
