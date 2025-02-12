@@ -11,6 +11,7 @@ import subprocess
 import sys
 import time
 import urllib3
+from pprint import pformat
 
 
 import dotenv
@@ -21,14 +22,14 @@ from halo import Halo
 from . import StepBase, _wire_up_ports
 from .. import ChipFlowError
 from ..cli import log_level
-from ..platforms import SiliconPlatform, top_interfaces, load_pinlock
+from ..platforms import SiliconPlatform, top_components, load_pinlock
 
 
 logger = logging.getLogger(__name__)
 
 
 class SiliconTop(StepBase, Elaboratable):
-    def __init__(self, config={}):
+    def __init__(self, config):
         self._config = config
 
     def elaborate(self, platform: SiliconPlatform):
@@ -37,14 +38,16 @@ class SiliconTop(StepBase, Elaboratable):
         platform.instantiate_ports(m)
 
         # heartbeat led (to confirm clock/reset alive)
-        if ("debug" in self._config["chipflow"]["silicon"] and
-           self._config["chipflow"]["silicon"]["debug"]["heartbeat"]):
+        if (self._config.chipflow.silicon.debug and
+           self._config.chipflow.silicon.debug.get('heartbeat', False)):
             heartbeat_ctr = Signal(23)
             m.d.sync += heartbeat_ctr.eq(heartbeat_ctr + 1)
             m.d.comb += platform.request("heartbeat").o.eq(heartbeat_ctr[-1])
 
-        top, interfaces = top_interfaces(self._config)
-        logger.debug(f"SiliconTop top = {top}, interfaces={interfaces}")
+        top = top_components(self._config)
+        assert platform._pinlock
+        logger.debug(f"SiliconTop top = {top}")
+        logger.debug(f"port map ports =\n{pformat(platform._pinlock.port_map.ports)}")
 
         _wire_up_ports(m, top, platform)
         return m
@@ -55,20 +58,15 @@ class SiliconStep:
     def __init__(self, config):
         self.config = config
 
-        # Also parse with Pydantic for type checking and better code structure
-        from chipflow_lib.config_models import Config
-        self.config_model = Config.model_validate(config)
-        self.project_name = self.config_model.chipflow.project_name
-        self.silicon_config = config["chipflow"]["silicon"]  # Keep for backward compatibility
         self.platform = SiliconPlatform(config)
         self._log_file = None
 
     def build_cli_parser(self, parser):
         action_argument = parser.add_subparsers(dest="action")
         action_argument.add_parser(
-            "prepare", help=inspect.getdoc(self.prepare).splitlines()[0])
+            "prepare", help=inspect.getdoc(self.prepare).splitlines()[0])   # type: ignore
         submit_subparser = action_argument.add_parser(
-            "submit", help=inspect.getdoc(self.submit).splitlines()[0])
+            "submit", help=inspect.getdoc(self.submit).splitlines()[0])  # type: ignore
         submit_subparser.add_argument(
             "--dry-run", help=argparse.SUPPRESS,
             default=False, action="store_true")
@@ -80,9 +78,6 @@ class SiliconStep:
         load_pinlock()  # check pinlock first so we error cleanly
         if args.action == "submit" and not args.dry_run:
             dotenv.load_dotenv(dotenv_path=dotenv.find_dotenv(usecwd=True))
-            if self.project_name is None:
-                raise ChipFlowError(
-                    "Key `chipflow.project_name` is not defined in chipflow.toml; ")
 
         rtlil_path = self.prepare()  # always prepare before submission
         if args.action == "submit":
@@ -93,7 +88,7 @@ class SiliconStep:
 
         Returns the path to the RTLIL file.
         """
-        return self.platform.build(SiliconTop(self.config), name=self.config_model.chipflow.project_name)
+        return self.platform.build(SiliconTop(self.config), name=self.config.chipflow.project_name)
 
     def submit(self, rtlil_path, args):
         """Submit the design to the ChipFlow cloud builder.
@@ -127,7 +122,7 @@ class SiliconStep:
             fh = None
             submission_name = self.determine_submission_name()
             data = {
-                "projectId": self.project_name,
+                "projectId": self.config.chipflow.project_name,
                 "name": submission_name,
             }
 
@@ -172,18 +167,19 @@ class SiliconStep:
                     fh.close()
                 exit(1)
 
-            sp.info(f"> Submitting {submission_name} for project {self.project_name} to ChipFlow Cloud {'('+os.environ.get('CHIPFLOW_API_ORIGIN')+')' if 'CHIPFLOW_API_ORIGIN' in os.environ else ''}")
+            sp.info(f"> Submitting {submission_name} for project {self.config.chipflow.project_name} to ChipFlow Cloud {self._chipflow_api_origin}")
             sp.start("Sending design to ChipFlow Cloud")
 
-            chipflow_api_origin = os.environ.get("CHIPFLOW_API_ORIGIN", "https://build.chipflow.org")
-            build_submit_url = f"{chipflow_api_origin}/build/submit"
+            build_submit_url = f"{self._chipflow_api_origin}/build/submit"
 
+            assert self._chipflow_api_key
+            assert self._chipflow_api_origin
             try:
                 resp = requests.post(
                     build_submit_url,
                     # TODO: This needs to be reworked to accept only one key, auth accepts user and pass
                     # TODO: but we want to submit a single key
-                    auth=(None, self._chipflow_api_key),
+                    auth=("", self._chipflow_api_key),
                     data=data,
                     files={
                         "rtlil": open(rtlil_path, "rb"),
@@ -203,14 +199,14 @@ class SiliconStep:
             try:
                 resp_data = resp.json()
             except ValueError:
-                resp_data = resp.text
+                resp_data = {'message': resp.text}
 
             # Handle response based on status code
             if resp.status_code == 200:
                 logger.debug(f"Submitted design: {resp_data}")
-                self._build_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}"
-                self._build_status_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/status"
-                self._log_stream_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/logs?follow=true"
+                self._build_url = f"{self._chipflow_api_origin}/build/{resp_data['build_id']}"
+                self._build_status_url = f"{self._chipflow_api_origin}/build/{resp_data['build_id']}/status"
+                self._log_stream_url = f"{self._chipflow_api_origin}/build/{resp_data['build_id']}/logs?follow=true"
 
                 sp.succeed(f"✅ Design submitted successfully! Build URL: {self._build_url}")
 
@@ -247,13 +243,14 @@ class SiliconStep:
     def _long_poll_stream(self, sp, network_err):
         steps = self._last_log_steps
         stream_event_counter = 0
+        assert self._chipflow_api_key
         # after 4 errors, return to _stream_logs loop and query the build status again
         while (stream_event_counter < 4):
             sp.text = "Build running... " + ' -> '.join(steps)
             try:
                 log_resp = requests.get(
                     self._log_stream_url,
-                    auth=(None, self._chipflow_api_key),
+                    auth=("", self._chipflow_api_key),
                     stream=True,
                     timeout=(2.0, 60.0)  # fail if connect takes >2s, long poll for 60s at a time
                 )
@@ -280,18 +277,19 @@ class SiliconStep:
                     logger.debug(f"Failed to stream logs: {log_resp.text}")
                     sp.text = "💥 Failed streaming build logs. Trying again!"
                     break
-            except requests.ConnectTimeout:
+            except requests.ConnectionError as e:
+                if type(e.__context__) is urllib3.exceptions.ReadTimeoutError:
+                    continue  #just timed out, continue long poll
                 sp.text = "💥 Failed connecting to ChipFlow Cloud."
                 logger.debug(f"Error while streaming logs: {e}")
                 break
             except (requests.RequestException, requests.exceptions.ReadTimeout) as e:
+                if type(e.__context__) is urllib3.exceptions.ReadTimeoutError:
+                    continue  #just timed out, continue long poll
                 sp.text = "💥 Failed streaming build logs. Trying again!"
                 logger.debug(f"Error while streaming logs: {e}")
                 stream_event_counter +=1
                 continue
-            except requests.ConnectionError as e:
-                if type(e.__context__) is urllib3.exceptions.ReadTimeoutError:
-                    continue  #just timed out, continue long poll
 
         # save steps so we coninue where we left off if we manage to reconnect
         self._last_log_steps = steps
@@ -305,13 +303,14 @@ class SiliconStep:
         build_status = "pending"
         stream_event_counter = 0
         self._last_log_steps = []
+        assert self._chipflow_api_key is not None
         while fail_counter < 10 and stream_event_counter < 10:
             sp.text = f"Waiting for build to run... {build_status}"
             time.sleep(timeout)  # Wait before polling
             try:
                 status_resp = requests.get(
                     self._build_status_url,
-                    auth=(None, self._chipflow_api_key),
+                    auth=("", self._chipflow_api_key),
                     timeout=timeout
                 )
             except requests.exceptions.ReadTimeout as e:
