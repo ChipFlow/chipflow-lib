@@ -105,7 +105,8 @@ The logic that synchronizes the reset signal with the clock will be generated au
    package = "pga144"
 
 
-The ``silicon`` section sets the Foundry ``process`` (i.e. PDK) that we are targeting for manufacturing, and the physical ``package`` (pad ring) we want to place our design inside.
+The ``silicon`` section sets the Foundry ``process`` (i.e. PDK) that we are targeting for manufacturing, and the physical ``package`` (including pad ring) we want to place our design inside.
+
 You'll choose the ``process`` and ``package`` based in the requirements of your design.
 
 Available processes
@@ -124,8 +125,8 @@ Available processes
 | ihp_sg13g2 | pga144     | IHP SG13G2 130nm SiGe     |
 +------------+------------+---------------------------+
 
-Available pad rings
--------------------
+Available Package Definitions
+-----------------------------
 
 +----------+-----------+--------------------+------------------------------------+
 | Pad ring | Pad count | Pad locations      | Notes                              |
@@ -139,19 +140,37 @@ Available pad rings
 +----------+-----------+--------------------+------------------------------------+
 
 
-``[silicon.pads]``
-------------------
+``[silicon.power]``
+-------------------
 
-The ``silicon.pads`` section lists special pads. In general you are unlikely to need to add to this.
-Each pad specified with the name used by the design and two parameters: :term:`type` and :term:`loc`.
+This section outlines the connection of pads to the power supply available for the selected process and package.
+These pads are declared with the :term:type parameter, along with a name and other optional information, like voltage.
 
-.. code-block:: TOML
+Note that in this context, the :term:type parameter can only be ``ground`` or ``power``.
 
-   [chipflow.silicon.pads]
-   sys_clk   = { type = "clock", loc = "114" }
-   sys_rst_n = { type = "reset", loc = "115" }
+The package definition provides default locations for standard pins like power, ground, clocks, and resets. You only need to specify the name and properties.
 
-In the above example two pads specified, ``sys_clk`` pad for clock input and ``sys_rst_n`` for reset.
+[chipflow.silicon.power]
+vdd = { type = "power", name = "vdd", voltage = "1.8V" }
+gnd = { type = "ground", name = "gnd" }
+```
+
+
+``[silicon.power]``
+-------------------
+
+This section outlines the connection of pads to the power supply available for the selected process and package.
+These pads are declared with the :term:type parameter, along with a name and other optional information, like voltage.
+
+Note that in this context, the :term:type parameter can only be ``ground`` or ``power``.
+
+[chipflow.silicon.power]
+vdd = { type = "power", name = "vdd", voltage = "1.8V" }
+gnd = { type = "ground", name = "gnd" }
+```
+
+In the new format, the package definition provides default locations for standard pins like power, ground, clocks, and resets. You only need to specify the name and properties.
+
 
 .. glossary::
 
@@ -167,14 +186,5 @@ In the above example two pads specified, ``sys_clk`` pad for clock input and ``s
    reset
        External reset input.
 
-
-``[silicon.power]``
--------------------
-
-This section outlines the connection of pads to the power supply available for the selected process and package.
-These pads are declared with the :term:`type` and :term:`loc` parameters, similar to the `[silicon.pads]`_ section.
-Note that in this context, the :term:`type` parameter can only be ``ground`` or ``power``.
-
-This is a work in progress, and currently you can use the defaults provided by customer support.
 
 .. _Caravel Harness: https://caravel-harness.readthedocs.io/en/latest/

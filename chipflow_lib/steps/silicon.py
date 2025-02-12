@@ -19,7 +19,7 @@ from halo import Halo
 from . import StepBase
 from .. import ChipFlowError
 from ..cli import log_level
-from ..platforms import SiliconPlatform, top_interfaces, load_pinlock
+from ..platforms import SiliconPlatform, top_components, load_pinlock
 from ..platforms.utils import IOSignature
 
 
@@ -42,8 +42,8 @@ class SiliconTop(StepBase, Elaboratable):
             m.d.sync += heartbeat_ctr.eq(heartbeat_ctr + 1)
             m.d.comb += platform.request("heartbeat").o.eq(heartbeat_ctr[-1])
 
-        top, interfaces = top_interfaces(self._config)
-        logger.debug(f"SiliconTop top = {top}, interfaces={interfaces}")
+        top = top_components(self._config)
+        logger.debug(f"SiliconTop top = {top}")
 
         for n, t in top.items():
             setattr(m.submodules, n, t)

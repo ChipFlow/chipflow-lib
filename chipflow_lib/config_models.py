@@ -36,13 +36,16 @@ class PadConfig(BaseModel):
         return v
 
 
+Voltage = float
+
 class SiliconConfig(BaseModel):
     """Configuration for silicon in chipflow.toml."""
     process: Process
     package: Literal["caravel", "cf20", "pga144"]
-    pads: Dict[str, PadConfig] = {}
-    power: Dict[str, PadConfig] = {}
+    power: Dict[str, Voltage] = {}
     debug: Optional[Dict[str, bool]] = None
+    # This is still kept around to allow forcing pad locations.
+    pads: Optional[Dict[str, PadConfig]] = {}
 
     @field_validator('pads', 'power', mode='before')
     @classmethod
