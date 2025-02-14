@@ -85,8 +85,20 @@ config_schema = {
                         "package": {
                             "enum": ["caravel", "cf20", "pga144"]
                         },
-                        "pads": {"$ref": "#/$defs/pin"},
-                        "power": {"$ref": "#/$defs/pin"},
+                        "power": {
+                            "type": "object",
+                            "patternProperties": {
+                                ".+": {
+                                    "type": "object",
+                                    "required": [
+                                        "name"
+                                    ],
+                                    "properties": {
+                                        "voltage":"string"
+                                    }
+                                }
+                            },
+                        },
                         "debug": {
                             "type": "object",
                             "properties": {
@@ -98,32 +110,6 @@ config_schema = {
             },
         },
     },
-    "$defs": {
-        "pin": {
-            "type": "object",
-            "additionalProperties": False,
-            "minProperties": 1,
-            "patternProperties": {
-                ".+": {
-                    "type": "object",
-                    "required": [
-                        "type",
-                        "loc",
-                    ],
-                    "additionalProperties": False,
-                    "properties": {
-                        "type": {
-                            "enum": ["io", "i", "o", "oe", "clock", "reset", "power", "ground"]
-                        },
-                        "loc": {
-                            "type": "string",
-                            "pattern": "^[NSWE]?[0-9]+$"
-                        },
-                    }
-                }
-            }
-        }
-    }
 }
 
 

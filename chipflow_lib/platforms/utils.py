@@ -125,11 +125,11 @@ PinSet = Set[Pin]
 PinList = List[Pin]
 Pins = Union[PinSet, PinList]
 
-class PowerPins(enum.Enum):
+class PowerType(enum.Enum):
     POWER = "power"
     GROUND = "ground"
 
-class JTAGPins(enum.Enum):
+class JTAGWireName(enum.Enum):
     TRST = "trst"
     TCK = "tck"
     TMS = "tms"
@@ -270,7 +270,7 @@ class _BasePackageDef(pydantic.BaseModel, abc.ABC):
 
     @property
     @abc.abstractmethod
-    def jtag(self) -> Dict[JTAGPin, Pin]:
+    def jtag(self) -> Dict[JTAGWireName, Pin]:
         """
         Map of JTAG pins for the package
         """
