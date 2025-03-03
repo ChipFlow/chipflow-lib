@@ -136,7 +136,7 @@ class SiliconStep:
             "dependency_versions": dep_versions,
             "silicon": {
                 "process": self.silicon_config["process"],
-                "package": self.silicon_config["package"],
+                "pad_ring": self.silicon_config["package"],
                 "pads": pads,
                 "power": self.silicon_config.get("power", {})
             }
