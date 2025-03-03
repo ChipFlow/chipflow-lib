@@ -77,7 +77,7 @@ class SiliconStepTestCase(unittest.TestCase):
         print(pformat(config))
         assert config["silicon"] == {
             'process': 'ihp_sg13g2',
-            'package': 'pga144',
+            'pad_ring': 'pga144',
             'pads': {},
             'power': {
                 'vss': {'loc': 'N1'},
