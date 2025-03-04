@@ -4,6 +4,7 @@ import os
 import subprocess
 
 from dataclasses import dataclass
+from pprint import pformat
 
 from amaranth import Module, Signal, Cat, ClockDomain, ClockSignal, ResetSignal
 
@@ -227,6 +228,7 @@ class SiliconPlatform:
         for component, iface in pinlock.port_map.items():
             for k, v in iface.items():
                 for name, port in v.items():
+                    logger.debug(f"Adding port {component}.{name}: {pformat(port)}")
                     self._ports[name] = SiliconPlatformPort(component, name, port)
 
         for clock, name in self._config["chipflow"]["clocks"].items():

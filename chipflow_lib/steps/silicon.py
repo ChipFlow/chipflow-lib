@@ -60,7 +60,7 @@ class SiliconStep:
         submit_subparser = action_argument.add_parser(
             "submit", help=inspect.getdoc(self.submit).splitlines()[0])
         submit_subparser.add_argument(
-            "--dry-run", help=argparse.SUPPRESS,
+            "--dry-run", help="Dry run. Do not submit to ChipFlow service and output paramters to stdout.",
             default=False, action="store_true")
 
     def run_cli(self, args):
@@ -124,13 +124,20 @@ class SiliconStep:
         pads = {}
         for iface, port in self.platform._ports.items():
             width = len(port.pins)
-            print(f"iface={iface}, port={port}, dir={port.direction}, width={width}")
+            logger.debug(f"iface={iface}, port={port}, dir={port.direction}, width={width}")
             if width > 1:
                 for i in range(width):
                     padname = f"{iface}{i}"
-                    print(f"padname={padname}, port={port}, loc={port.pins[i:i+1]}, "
+                    logger.debug(f"padname={padname}, port={port}, loc={port.pins[i:i+1]}, "
                           f"dir={port.direction}, width={width}")
                     pads[padname] = {'loc': port.pins[i:i+1], 'dir': port.direction}
+            else:
+                padname = f"{iface}"
+
+                logger.debug(f"padname={padname}, port={port}, loc={port.pins[0]}, "
+                        f"dir={port.direction}, width={width}")
+                pads[padname] = {'loc': port.pins[0], 'dir': port.direction}
+ 
 
         config = {
             "dependency_versions": dep_versions,
@@ -142,8 +149,8 @@ class SiliconStep:
             }
         }
         if dry_run:
-            print(f"data=\n{json.dumps(data, indent=2)}")
-            print(f"files['config']=\n{json.dumps(config, indent=2)}")
+            print(f"data=\n{json.dumps(data, indent=2, default=str)}")
+            print(f"files['config']=\n{json.dumps(config, indent=2, default=str)}")
             return
 
         logger.info(f"Submitting {submission_name} for project {self.project_name}")
@@ -154,7 +161,7 @@ class SiliconStep:
             data=data,
             files={
                 "rtlil": open(rtlil_path, "rb"),
-                "config": json.dumps(config),
+                "config": json.dumps(config, default=str),
             })
         resp_data = resp.json()
         if resp.status_code == 403:
@@ -174,7 +181,7 @@ class SiliconStep:
                     f"Submission failed ({resp_data['msg']}); please contact support and provide "
                     f"this error message")
             else:
-                print(f"{resp_data['msg']} (#{resp_data['id']}: {resp_data['name']}); "
-                      f"{resp_data['url']}")
+                logger.debug(f"{resp_data['msg']} (#{resp_data['id']}: {resp_data['name']}); "
+                             f"{resp_data['url']}")
         else:
             ChipFlowError(f"Unexpected response from API: {resp}")
