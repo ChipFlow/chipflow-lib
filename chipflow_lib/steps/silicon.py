@@ -31,13 +31,15 @@ class SiliconTop(Elaboratable):
         platform.instantiate_ports(m)
 
         # heartbeat led (to confirm clock/reset alive)
-        if ("config" in self._config["chipflow"]["silicon"] and
+        if ("debug" in self._config["chipflow"]["silicon"] and
            self._config["chipflow"]["silicon"]["debug"]["heartbeat"]):
             heartbeat_ctr = Signal(23)
             m.d.sync += heartbeat_ctr.eq(heartbeat_ctr + 1)
             m.d.comb += platform.request("heartbeat").o.eq(heartbeat_ctr[-1])
 
         top, interfaces = top_interfaces(self._config)
+        logger.debug(f"SiliconTop top = {top}, interfaces={interfaces}")
+
         for n, t in top.items():
             setattr(m.submodules, n, t)
 
@@ -129,7 +131,14 @@ class SiliconStep:
                     padname = f"{iface}{i}"
                     logger.debug(f"padname={padname}, port={port}, loc={port.pins[i]}, "
                           f"dir={port.direction}, width={width}")
-                    pads[padname] = {'loc': port.pins[i], 'dir': port.direction.value}
+                    pads[padname] = {'loc': port.pins[i], 'type': port.direction.value}
+            else:
+                padname = f"{iface}"
+
+                logger.debug(f"padname={padname}, port={port}, loc={port.pins[0]}, "
+                        f"dir={port.direction}, width={width}")
+                pads[padname] = {'loc': port.pins[0], 'type': port.direction.value}
+ 
 
         config = {
             "dependency_versions": dep_versions,
