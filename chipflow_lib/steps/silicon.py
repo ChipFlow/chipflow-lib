@@ -12,7 +12,7 @@ import sys
 import time
 
 import dotenv
-
+from pprint import pformat
 from amaranth import *
 
 from .. import ChipFlowError
@@ -124,13 +124,13 @@ class SiliconStep:
         pads = {}
         for iface, port in self.platform._ports.items():
             width = len(port.pins)
-            print(f"iface={iface}, port={port}, dir={port.direction}, width={width}")
+            logger.debug(f"iface={iface}, port={port}, dir={port.direction}, width={width}")
             if width > 1:
                 for i in range(width):
                     padname = f"{iface}{i}"
-                    print(f"padname={padname}, port={port}, loc={port.pins[i:i+1]}, "
+                    logger.debug(f"padname={padname}, port={port}, loc={port.pins[i]}, "
                           f"dir={port.direction}, width={width}")
-                    pads[padname] = {'loc': port.pins[i:i+1], 'dir': port.direction}
+                    pads[padname] = {'loc': port.pins[i], 'dir': port.direction.value}
 
         config = {
             "dependency_versions": dep_versions,

@@ -45,9 +45,11 @@ def allocate_pins(name: str, member: Dict[str, Any], pins: List[str]) -> Tuple[D
         name = name
         sig = member['annotations'][PIN_ANNOTATION_SCHEMA]
         width = sig['width']
+        options = sig['options']
         pin_map[name] = {'pins': pins[0:width],
                         'direction': sig['direction'],
-                        'type': 'io'}
+                        'type': 'io',
+                        'options': options}
         logger.debug(f"added '{name}':{pin_map[name]} to pin_map")
         return pin_map, pins[width:]
     elif member['type'] == 'interface':
