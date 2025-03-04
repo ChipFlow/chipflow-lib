@@ -33,6 +33,7 @@ class _PinAnnotationModel(BaseModel):
     model_config = ConfigDict(use_enum_values=True)
     direction: io.Direction
     width: int
+    options: dict = {}
 
     @classmethod
     def _annotation_schema(cls):
@@ -65,10 +66,15 @@ PIN_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("pin-annotation", 0))
 
 class PinSignature(wiring.Signature):
     """Amaranth Signtaure used to decorate wires that would
-    usually be brought out onto a pin on the package.
+    usually be brought out onto a port on the package.
+
+    direction: Input, Output or Bidir
+    width: width of port
+    all_have_oe: For Bidir ports, should Output Enable be per wire or for the whole port
+    init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
     """
 
-    def __init__(self, direction, width=1, init=None):
+    def __init__(self, direction: io.Direction, width: int = 1, all_have_oe: bool = False, init = None):
         self._direction = direction
         self._width = width
         self._init = init
@@ -76,7 +82,7 @@ class PinSignature(wiring.Signature):
             case io.Direction.Bidir:
                 sig = {
                     "o": Out(width),
-                    "oe": Out(1),
+                    "oe": Out(width if all_have_oe else 1),
                     "i": In(width)
                 }
             case io.Direction.Input:
@@ -85,16 +91,21 @@ class PinSignature(wiring.Signature):
                 sig = {"o": Out(width)}
             case _:
                 assert False
+        self._options = {
+                "all_have_oe": all_have_oe,
+                "init": init,
+                }
 
         super().__init__(sig)
 
     def annotations(self, *args):
         annotations = wiring.Signature.annotations(self, *args)
-        pin_annotation = _PinAnnotation(direction=self._direction, width=self._width)
+        pin_annotation = _PinAnnotation(direction=self._direction, width=self._width, options=self._options)
         return annotations + (pin_annotation,)
 
     def __repr__(self):
-        return f"PinSignature({self._direction}, {self._width})"
+        opts = ', '.join(f"{k}={v}" for k, v in self._options.items())
+        return f"PinSignature({self._direction}, {self._width}, {opts})"
 
 
 def OutputPinSignature(width, **kwargs):
@@ -297,6 +308,7 @@ class Port(pydantic.BaseModel):
     type: str
     pins: List[str]
     direction: Optional[str] = None
+    options: Optional[dict] = None
 
     @property
     def width(self):
