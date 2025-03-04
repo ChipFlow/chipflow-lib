@@ -70,13 +70,19 @@ class SiliconPlatformPort(io.PortLike):
                  invert: bool = False):
         self._direction = io.Direction(port.direction)
         self._invert = invert
+        self._options = port.options
 
         self._i = self._o = self._oe = Signal(1)
         if self._direction in (io.Direction.Input, io.Direction.Bidir):
             self._i = Signal(port.width, name=f"{component}_{name}__i")
         if self._direction in (io.Direction.Output, io.Direction.Bidir):
             self._o = Signal(port.width, name=f"{component}_{name}__o")
-            self._oe = Signal(1, name=f"{component}_{name}__oe")
+        if self._direction is io.Direction.Bidir:
+            if "all_have_oe" in self._options and self._options["all_have_oe"]:
+                self._oe = Signal(port.width, name=f"{component}_{name}__oe")
+            else:
+                self._oe = Signal(1, name=f"{component}_{name}__oe")
+
         self._pins = port.pins
         logger.debug(f"Created SiliconPlatformPort {name}, width={len(port.pins)},dir{self._direction}")
 
@@ -120,7 +126,11 @@ class SiliconPlatformPort(io.PortLike):
             assert len(self._o) == len(self._oe)
             return len(self._o)
         if self._direction is io.Direction.Bidir:
-            assert len(self._i) == len(self._o) == len(self._oe)
+            assert len(self._i) == len(self._o)
+            if self._options["all_have_oe"]:
+                assert len(self.o) == len(self._oe)
+            else:
+                assert len(self._oe) == 1
             return len(self._i)
         assert False  # :nocov:
 
