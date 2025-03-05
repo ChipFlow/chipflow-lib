@@ -149,32 +149,14 @@ class SiliconStep:
         logger.info(f"Submitting {submission_name} for project {self.project_name}")
 
         resp = requests.post(
-            os.environ.get("CHIPFLOW_API_ENDPOINT", "https://app.chipflow-infra.com/api/builds"),
-            auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"]),
+            os.environ.get("CHIPFLOW_API_ENDPOINT", "https://build.chipflow.org/api/builds"),
+            auth=os.environ["CHIPFLOW_API_KEY_SECRET"],
             data=data,
             files={
                 "rtlil": open(rtlil_path, "rb"),
                 "config": json.dumps(config),
             })
         resp_data = resp.json()
-        if resp.status_code == 403:
-            raise ChipFlowError(
-                "Authentication failed; please verify the values of the the CHIPFLOW_API_KEY_ID "
-                "and CHIPFLOW_API_KEY_SECRET environment variables, if the issue persists, "
-                "contact support to resolve it")
-        elif resp.status_code >= 400:
-            raise ChipFlowError(
-                f"Submission failed ({resp_data['statusCode']} {resp_data['error']}: "
-                f"{resp_data['message']}); please contact support and provide this error message")
-        elif resp.status_code >= 300:
-            assert False, "3xx responses should not be returned"
-        elif resp.status_code >= 200:
-            if not resp_data["ok"]:
-                raise ChipFlowError(
-                    f"Submission failed ({resp_data['msg']}); please contact support and provide "
-                    f"this error message")
-            else:
-                print(f"{resp_data['msg']} (#{resp_data['id']}: {resp_data['name']}); "
-                      f"{resp_data['url']}")
-        else:
-            ChipFlowError(f"Unexpected response from API: {resp}")
+        print(resp_data)
+        if resp.status_code != 200:
+            raise ChipFlowError(f"Failed to submit: {resp_data}")
