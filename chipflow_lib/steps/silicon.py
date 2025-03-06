@@ -65,15 +65,15 @@ class SiliconStep:
 
     def run_cli(self, args):
         if args.action == "submit" and not args.dry_run:
+            dotenv.load_dotenv()
             if self.project_name is None:
                 raise ChipFlowError(
-                    "Key `chipflow.project_id` is not defined in chipflow.toml; "
-                    "see https://chipflow.io/beta for details on how to join the beta")
-            if ("CHIPFLOW_API_KEY_ID" not in os.environ or
-                    "CHIPFLOW_API_KEY_SECRET" not in os.environ):
+                    "Key `chipflow.project_name` is not defined in chipflow.toml")
+            if "CHIPFLOW_API_KEY_SECRET" not in os.environ:
                 raise ChipFlowError(
-                    "Environment variables `CHIPFLOW_API_KEY_ID` and `CHIPFLOW_API_KEY_SECRET` "
-                    "must be set in order to submit a design")
+                    "Environment variable `CHIPFLOW_API_KEY_SECRET` "
+                    "must be set in order to submit a design. "
+                    "You can set this in a `.env` file in your project root.")
 
         rtlil_path = self.prepare()  # always prepare before submission
         if args.action == "submit":
@@ -89,7 +89,6 @@ class SiliconStep:
     def submit(self, rtlil_path, *, dry_run=False):
         """Submit the design to the ChipFlow cloud builder.
         """
-        dotenv.load_dotenv()
         git_head = subprocess.check_output(
             ["git", "-C", os.environ["CHIPFLOW_ROOT"],
              "rev-parse", "HEAD"],
