@@ -64,6 +64,7 @@ class SiliconStep:
 
     def run_cli(self, args):
         if args.action == "submit" and not args.dry_run:
+            dotenv.load_dotenv(dotenv_path=dotenv.find_dotenv(usecwd=True))
             if self.project_name is None:
                 raise ChipFlowError(
                     "Key `chipflow.project_id` is not defined in chipflow.toml; "
@@ -88,7 +89,6 @@ class SiliconStep:
     def submit(self, rtlil_path, *, dry_run=False):
         """Submit the design to the ChipFlow cloud builder.
         """
-        dotenv.load_dotenv()
         git_head = subprocess.check_output(
             ["git", "-C", os.environ["CHIPFLOW_ROOT"],
              "rev-parse", "HEAD"],

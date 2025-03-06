@@ -41,9 +41,8 @@ class SiliconStepTestCase(unittest.TestCase):
         os.environ["CHIPFLOW_API_KEY_ID"] = "keyid"
         os.environ["CHIPFLOW_API_KEY_SECRET"] = "keysecret"
 
-    @patch('dotenv.load_dotenv')
     @patch('requests.post', side_effect=mocked_requests_post)
-    def test_submit_happy_path(self, mock_requests_post, mock_dotenv):
+    def test_submit_happy_path(self, mock_requests_post):
         customer_config = f"{current_dir}/fixtures/mock.toml"
         with open(customer_config, "rb") as f:
             config_dict = tomli.load(f)
@@ -87,5 +86,3 @@ class SiliconStepTestCase(unittest.TestCase):
             }
         }
         assert rtlil == b"fake-rtlil", "The RTL file was passed through."
-
-        assert mock_dotenv.called
