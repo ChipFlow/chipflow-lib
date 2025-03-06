@@ -51,7 +51,7 @@
     <link rel="prev" title="chipflow_lib.platforms.sim" href="../sim/index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.dev1+g2624f13" />
+  <meta name="docsearch:version" content="0.1.dev1+g34b1245" />
   </head>
   
   
@@ -418,10 +418,23 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="chipflow_lib.platforms.utils.PinSignature">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.utils.</span></span><span class="sig-name descname"><span class="pre">PinSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.utils.PinSignature" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.utils.</span></span><span class="sig-name descname"><span class="pre">PinSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_have_oe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.utils.PinSignature" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">amaranth.lib.wiring.Signature</span></code></a></p>
 <p>Amaranth Signtaure used to decorate wires that would
-usually be brought out onto a pin on the package.</p>
+usually be brought out onto a port on the package.</p>
+<p>direction: Input, Output or Bidir
+width: width of port
+all_have_oe: For Bidir ports, should Output Enable be per wire or for the whole port
+init: a  <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/guide.html#lang-constcasting" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">const-castable object</span></a> for the initial values of the port</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>direction</strong> (<a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/io.html#amaranth.lib.io.Direction" title="(in Amaranth language &amp; toolchain v0.5.4)"><em>amaranth.lib.io.Direction</em></a>)</p></li>
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>)</p></li>
+<li><p><strong>all_have_oe</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="chipflow_lib.platforms.utils.PinSignature.annotations">
 <span class="sig-name descname"><span class="pre">annotations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.utils.PinSignature.annotations" title="Link to this definition">#</a></dt>
