@@ -69,9 +69,9 @@ class SiliconStep:
             if self.project_name is None:
                 raise ChipFlowError(
                     "Key `chipflow.project_name` is not defined in chipflow.toml")
-            if "CHIPFLOW_API_KEY_SECRET" not in os.environ:
+            if "CHIPFLOW_API_KEY" not in os.environ:
                 raise ChipFlowError(
-                    "Environment variable `CHIPFLOW_API_KEY_SECRET` "
+                    "Environment variable `CHIPFLOW_API_KEY` "
                     "must be set in order to submit a design. "
                     "You can set this in a `.env` file in your project root.")
 
@@ -149,7 +149,7 @@ class SiliconStep:
 
         resp = requests.post(
             os.environ.get("CHIPFLOW_API_ENDPOINT", "https://build.chipflow.org/api/builds"),
-            auth=os.environ["CHIPFLOW_API_KEY_SECRET"],
+            auth=os.environ["CHIPFLOW_API_KEY"],
             data=data,
             files={
                 "rtlil": open(rtlil_path, "rb"),
