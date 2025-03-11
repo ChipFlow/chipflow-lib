@@ -5,7 +5,7 @@
 groups = ["default", "doc", "lint", "test"]
 strategy = ["direct_minimal_versions", "inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:848106b51f6e8955f070f56418fbe62443c2aa2294f31191bded7caadd08e195"
+content_hash = "sha256:79834ab8abd925af18de424d2824347d92076f8ce026b7d9caf14765e155e774"
 
 [[metadata.targets]]
 requires_python = "~=3.10"
@@ -344,13 +344,13 @@ files = [
 
 [[package]]
 name = "docutils"
-version = "0.20.1"
-requires_python = ">=3.7"
+version = "0.21.2"
+requires_python = ">=3.9"
 summary = "Docutils -- Python Documentation Utilities"
 groups = ["doc"]
 files = [
-    {file = "docutils-0.20.1-py3-none-any.whl", hash = "sha256:96f387a2c5562db4476f09f13bbab2192e764cac08ebbf3a34a95d9b1e4a59d6"},
-    {file = "docutils-0.20.1.tar.gz", hash = "sha256:f08a4e276c3a1583a86dce3e34aba3fe04d02bba2dd51ed16106244e8a923e3b"},
+    {file = "docutils-0.21.2-py3-none-any.whl", hash = "sha256:dafca5b9e384f0e419294eb4d2ff9fa826435bf15f15b7bd45723e8ad76811b2"},
+    {file = "docutils-0.21.2.tar.gz", hash = "sha256:3a6b18732edf182daa3cd12775bbb338cf5691468f91eeeb109deff6ebfa986f"},
 ]
 
 [[package]]
@@ -865,17 +865,17 @@ files = [
 
 [[package]]
 name = "sphinx"
-version = "7.1.2"
-requires_python = ">=3.8"
+version = "7.3.7"
+requires_python = ">=3.9"
 summary = "Python documentation generator"
 groups = ["doc"]
 dependencies = [
     "Jinja2>=3.0",
-    "Pygments>=2.13",
-    "alabaster<0.8,>=0.7",
+    "Pygments>=2.14",
+    "alabaster~=0.7.14",
     "babel>=2.9",
     "colorama>=0.4.5; sys_platform == \"win32\"",
-    "docutils<0.21,>=0.18.1",
+    "docutils<0.22,>=0.18.1",
     "imagesize>=1.3",
     "importlib-metadata>=4.8; python_version < \"3.10\"",
     "packaging>=21.0",
@@ -886,11 +886,12 @@ dependencies = [
     "sphinxcontrib-htmlhelp>=2.0.0",
     "sphinxcontrib-jsmath",
     "sphinxcontrib-qthelp",
-    "sphinxcontrib-serializinghtml>=1.1.5",
+    "sphinxcontrib-serializinghtml>=1.1.9",
+    "tomli>=2; python_version < \"3.11\"",
 ]
 files = [
-    {file = "sphinx-7.1.2-py3-none-any.whl", hash = "sha256:d170a81825b2fcacb6dfd5a0d7f578a053e45d3f2b153fecc948c37344eb4cbe"},
-    {file = "sphinx-7.1.2.tar.gz", hash = "sha256:780f4d32f1d7d1126576e0e5ecc19dc32ab76cd24e950228dcf7b1f6d3d9e22f"},
+    {file = "sphinx-7.3.7-py3-none-any.whl", hash = "sha256:413f75440be4cacf328f580b4274ada4565fb2187d696a84970c23f77b64d8c3"},
+    {file = "sphinx-7.3.7.tar.gz", hash = "sha256:a4a7db75ed37531c05002d56ed6948d4c42f473a36f46e1382b0bd76ca9627bc"},
 ]
 
 [[package]]
@@ -998,7 +999,7 @@ name = "tomli"
 version = "2.0.1"
 requires_python = ">=3.7"
 summary = "A lil' TOML parser"
-groups = ["default", "lint", "test"]
+groups = ["default", "doc", "lint", "test"]
 files = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
