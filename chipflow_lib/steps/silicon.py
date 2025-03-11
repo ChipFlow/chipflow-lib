@@ -16,6 +16,7 @@ from amaranth import *
 
 from .. import ChipFlowError
 from ..platforms import SiliconPlatform, top_interfaces
+from urllib.parse import urlparse
 
 
 logger = logging.getLogger(__name__)
@@ -155,34 +156,42 @@ class SiliconStep:
             return
 
         logger.info(f"Submitting {submission_name} for project {self.project_name}")
+        endpoint = os.environ.get("CHIPFLOW_API_ENDPOINT", "https://build.chipflow.org/api/builds")
+        host = urlparse(endpoint).netloc
 
         resp = requests.post(
-            os.environ.get("CHIPFLOW_API_ENDPOINT", "https://app.chipflow-infra.com/api/builds"),
+            os.environ.get("CHIPFLOW_API_ENDPOINT", "https://build.chipflow.org/api/builds"),
             auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"]),
             data=data,
             files={
                 "rtlil": open(rtlil_path, "rb"),
                 "config": json.dumps(config),
             })
-        resp_data = resp.json()
-        if resp.status_code == 403:
-            raise ChipFlowError(
-                "Authentication failed; please verify the values of the the CHIPFLOW_API_KEY_ID "
-                "and CHIPFLOW_API_KEY_SECRET environment variables, if the issue persists, "
-                "contact support to resolve it")
-        elif resp.status_code >= 400:
-            raise ChipFlowError(
-                f"Submission failed ({resp_data['statusCode']} {resp_data['error']}: "
-                f"{resp_data['message']}); please contact support and provide this error message")
-        elif resp.status_code >= 300:
-            assert False, "3xx responses should not be returned"
-        elif resp.status_code >= 200:
-            if not resp_data["ok"]:
-                raise ChipFlowError(
-                    f"Submission failed ({resp_data['msg']}); please contact support and provide "
-                    f"this error message")
-            else:
-                print(f"{resp_data['msg']} (#{resp_data['id']}: {resp_data['name']}); "
-                      f"{resp_data['url']}")
+        
+        # Parse response body
+        try:
+            resp_data = resp.json()
+        except ValueError:
+            resp_data = resp.text
+        
+        # Handle response based on status code
+        if resp.status_code == 200:
+            logger.info(f"Submitted design: {resp_data}")
+            print(f"https://{host}/build/{resp_data["build_id"]}")
+            
         else:
-            ChipFlowError(f"Unexpected response from API: {resp}")
+            # Log detailed information about the failed request
+            logger.error(f"Request failed with status code {resp.status_code}")
+            logger.error(f"Request URL: {resp.request.url}")
+            
+            # Log headers with auth information redacted
+            headers = dict(resp.request.headers)
+            if "Authorization" in headers:
+                headers["Authorization"] = "REDACTED"
+            logger.error(f"Request headers: {headers}")
+            
+            logger.error(f"Request data: {data}")
+            logger.error(f"Response headers: {dict(resp.headers)}")
+            logger.error(f"Response body: {resp_data}")
+            
+            raise ChipFlowError(f"Failed to submit design: {resp_data}")
