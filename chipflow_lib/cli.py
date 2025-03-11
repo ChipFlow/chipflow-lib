@@ -15,7 +15,7 @@ from . import (
 from .pin_lock import PinCommand
 
 
-logging.basicConfig(stream=sys.stdout, level=logging.WARNING)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
 class UnexpectedError(ChipFlowError):
