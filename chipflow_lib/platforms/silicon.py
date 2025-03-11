@@ -9,7 +9,7 @@ from amaranth import Module, Signal, Cat, ClockDomain, ClockSignal, ResetSignal
 
 from amaranth.lib import wiring, io
 from amaranth.lib.cdc import FFSynchronizer
-from amaranth.lib.wiring import Component, In
+from amaranth.lib.wiring import Component, In, PureInterface, flipped, connect
 
 from amaranth.back import rtlil
 from amaranth.hdl import Fragment
@@ -72,21 +72,29 @@ class SiliconPlatformPort(io.PortLike):
         self._invert = invert
         self._options = port.options
 
-        self._i = self._o = self._oe = Signal(1)
         if self._direction in (io.Direction.Input, io.Direction.Bidir):
             self._i = Signal(port.width, name=f"{component}_{name}__i")
         if self._direction in (io.Direction.Output, io.Direction.Bidir):
             self._o = Signal(port.width, name=f"{component}_{name}__o")
         if self._direction is io.Direction.Bidir:
             if "all_have_oe" in self._options and self._options["all_have_oe"]:
-                self._oe = Signal(port.width, name=f"{component}_{name}__oe")
+                self._oe = Signal(port.width, name=f"{component}_{name}__oe", init=-1)
             else:
-                self._oe = Signal(1, name=f"{component}_{name}__oe")
+                self._oe = Signal(1, name=f"{component}_{name}__oe", init=-1)
 
         self._pins = port.pins
         logger.debug(f"Created SiliconPlatformPort {name}, width={len(port.pins)},dir{self._direction}")
 
+    def wire(self, m: Module, interface: PureInterface):
+        assert self._direction == interface.signature.direction
+        if hasattr(interface, 'i'):
+            m.d.comb += interface.i.eq(self.i)
+        for d in ['o', 'oe']:
+            if hasattr(interface, d):
+                m.d.comb += getattr(self, d).eq(getattr(interface, d))
+
     @property
+
     def i(self):
         if self._i is None:
             raise AttributeError("SiliconPlatformPort with output direction does not have an "
@@ -229,6 +237,10 @@ class SiliconPlatform:
         self._ports = {}
         self._files = {}
 
+    @property
+    def ports(self):
+        return self._ports
+
     def instantiate_ports(self, m: Module):
         if hasattr(self, "pinlock"):
             return
@@ -237,7 +249,7 @@ class SiliconPlatform:
         for component, iface in pinlock.port_map.items():
             for k, v in iface.items():
                 for name, port in v.items():
-                    self._ports[name] = SiliconPlatformPort(component, name, port)
+                    self._ports[port.port_name] = SiliconPlatformPort(component, name, port)
 
         for clock, name in self._config["chipflow"]["clocks"].items():
             if name not in pinlock.package.clocks:
@@ -246,6 +258,7 @@ class SiliconPlatform:
             port_data = pinlock.package.clocks[name]
             port = SiliconPlatformPort(component, name, port_data, invert=True)
             self._ports[name] = port
+
             if clock == 'default':
                 clock = 'sync'
             setattr(m.domains, clock, ClockDomain(name=clock))
@@ -311,13 +324,14 @@ class SiliconPlatform:
         # Check that only a single clock domain is used.
         self._check_clock_domains(fragment)
 
-        # Prepare toplevel ports according to chipflow.toml.
+        # Prepare toplevel ports according to pinlock
         ports = []
         for port_name, port in self._ports.items():
             if port.direction in (io.Direction.Input, io.Direction.Bidir):
                 ports.append((f"io${port_name}$i", port.i, PortDirection.Input))
             if port.direction in (io.Direction.Output, io.Direction.Bidir):
                 ports.append((f"io${port_name}$o", port.o, PortDirection.Output))
+            if port.direction is io.Direction.Bidir:
                 ports.append((f"io${port_name}$oe", port.oe, PortDirection.Output))
 
         # Prepare design for RTLIL conversion.
