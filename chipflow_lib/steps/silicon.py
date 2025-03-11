@@ -94,7 +94,7 @@ class SiliconStep:
         """
         git_head = subprocess.check_output(
             ["git", "-C", os.environ["CHIPFLOW_ROOT"],
-             "rev-parse", "HEAD"],
+             "rev-parse", "--short", "HEAD"],
             encoding="ascii").rstrip()
         git_dirty = bool(subprocess.check_output(
             ["git", "-C", os.environ["CHIPFLOW_ROOT"],
@@ -102,7 +102,7 @@ class SiliconStep:
         submission_name = git_head
         if git_dirty:
             logging.warning("Git tree is dirty, submitting anyway!")
-            submission_name += f"-dirty.{time.strftime('%Y%m%d%M%H%S', time.gmtime())}"
+            submission_name += f"-dirty"
         dep_versions = {
             "python": sys.version.split()[0]
         }
