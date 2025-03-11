@@ -32,40 +32,42 @@ def count_member_pins(name: str, member: Dict[str, Any]) -> int:
         return member['width']
 
 
-def allocate_pins(name: str, member: Dict[str, Any], pins: List[str]) -> Tuple[Dict[str, Port], List[str]]:
+def allocate_pins(name: str, member: Dict[str, Any], pins: List[str], port_name: str = None) -> Tuple[Dict[str, Port], List[str]]:
     "Allocate pins based of Amaranth member metadata"
 
     pin_map = {}
+
     logger.debug(f"allocate_pins: name={name}, pins={pins}")
     logger.debug(f"member={pformat(member)}")
 
     if member['type'] == 'interface' and 'annotations' in member \
        and PIN_ANNOTATION_SCHEMA in member['annotations']:
         logger.debug("matched PinSignature {sig}")
-        name = name
         sig = member['annotations'][PIN_ANNOTATION_SCHEMA]
         width = sig['width']
         options = sig['options']
         pin_map[name] = {'pins': pins[0:width],
-                        'direction': sig['direction'],
-                        'type': 'io',
-                        'options': options}
+                         'direction': sig['direction'],
+                         'type': 'io',
+                         'port_name': port_name,
+                         'options': options}
         logger.debug(f"added '{name}':{pin_map[name]} to pin_map")
         return pin_map, pins[width:]
     elif member['type'] == 'interface':
         for k, v in member['members'].items():
-            n = '_'.join([name, k])
-            _map, pins = allocate_pins(n, v, pins)
+            port_name = '_'.join([name, k])
+            _map, pins = allocate_pins(k, v, pins, port_name=port_name)
             pin_map |= _map
             logger.debug(f"{pin_map},{_map}")
         return pin_map, pins
     elif member['type'] == 'port':
         logger.warning(f"Port '{name}' has no PinSignature, pin allocation likely to be wrong")
-        name = name
         width = member['width']
         pin_map[name] = {'pins': pins[0:width],
-                        'direction': member['dir'],
-                        'type': 'io'}
+                              'direction': member['dir'],
+                              'type': 'io',
+                              'port_name': port_name
+                              }
         logger.debug(f"added '{name}':{pin_map[name]} to pin_map")
         return pin_map, pins[width:]
     else:

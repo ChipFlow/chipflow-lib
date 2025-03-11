@@ -98,6 +98,16 @@ class PinSignature(wiring.Signature):
 
         super().__init__(sig)
 
+    @property
+    def direction(self):
+        return self._direction
+
+    def width(self):
+        return self._width
+
+    def options(self):
+        return self._options
+
     def annotations(self, *args):
         annotations = wiring.Signature.annotations(self, *args)
         pin_annotation = _PinAnnotation(direction=self._direction, width=self._width, options=self._options)
@@ -307,6 +317,7 @@ PackageDef = Union[_QuadPackageDef, _BasePackageDef]
 class Port(pydantic.BaseModel):
     type: str
     pins: List[str]
+    port_name: str
     direction: Optional[str] = None
     options: Optional[dict] = None
 
@@ -337,13 +348,13 @@ class Package(pydantic.BaseModel):
     def add_pad(self, name: str, defn: dict):
         match defn:
             case {"type": "clock", "loc": loc}:
-                self.clocks[name] = Port(type="clock", pins=[loc], direction=io.Direction.Input)
+                self.clocks[name] = Port(type="clock", pins=[loc], direction=io.Direction.Input, port_name=name)
             case {"type": "reset", "loc": loc}:
-                self.resets[name] = Port(type="reset", pins=[loc], direction=io.Direction.Input)
+                self.resets[name] = Port(type="reset", pins=[loc], direction=io.Direction.Input, port_name=name)
             case {"type": "power", "loc": loc}:
-                self.power[name] = Port(type="power", pins=[loc])
+                self.power[name] = Port(type="power", pins=[loc], port_name=name)
             case {"type": "ground", "loc": loc}:
-                self.power[name] = Port(type="ground", pins=[loc])
+                self.power[name] = Port(type="ground", pins=[loc], port_name=name)
             case _:
                 pass
 

@@ -12,7 +12,9 @@ import sys
 import time
 
 import dotenv
+from pprint import pprint
 from amaranth import *
+from amaranth.lib.wiring import connect, flipped
 
 from .. import ChipFlowError
 from ..platforms import SiliconPlatform, top_interfaces
@@ -43,6 +45,13 @@ class SiliconTop(Elaboratable):
         for n, t in top.items():
             setattr(m.submodules, n, t)
 
+        for component, iface in platform.pinlock.port_map.items():
+            for iface_name, member, in iface.items():
+                for name, port in member.items():
+                    platform.ports[port.port_name].wire(
+                            m,
+                            getattr(getattr(top[component], iface_name), name)
+                            )
         return m
 
 
