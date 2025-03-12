@@ -51,7 +51,7 @@
     <link rel="prev" title="chipflow_lib.errors" href="../errors/index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.dev1+g28aaba0" />
+  <meta name="docsearch:version" content="0.1.dev1+gd6b7833" />
   </head>
   
   
@@ -390,7 +390,7 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.pin_lock.count_member_pins" title="chipflow_lib.pin_lock.count_member_pins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">count_member_pins</span></code></a>(name, member)</p></td>
 <td><p>Counts the pins from amaranth metadata</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.pin_lock.allocate_pins" title="chipflow_lib.pin_lock.allocate_pins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">allocate_pins</span></code></a>(name, member, pins)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.pin_lock.allocate_pins" title="chipflow_lib.pin_lock.allocate_pins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">allocate_pins</span></code></a>(name, member, pins[, port_name])</p></td>
 <td><p>Allocate pins based of Amaranth member metadata</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.pin_lock.lock_pins" title="chipflow_lib.pin_lock.lock_pins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lock_pins</span></code></a>()</p></td>
@@ -426,7 +426,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="chipflow_lib.pin_lock.allocate_pins">
-<span class="sig-prename descclassname"><span class="pre">chipflow_lib.pin_lock.</span></span><span class="sig-name descname"><span class="pre">allocate_pins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">member</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pins</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.pin_lock.allocate_pins" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">chipflow_lib.pin_lock.</span></span><span class="sig-name descname"><span class="pre">allocate_pins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">member</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.pin_lock.allocate_pins" title="Link to this definition">#</a></dt>
 <dd><p>Allocate pins based of Amaranth member metadata</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -434,6 +434,7 @@
 <li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
 <li><p><strong>member</strong> (<em>Dict</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>)</p></li>
 <li><p><strong>pins</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>]</em>)</p></li>
+<li><p><strong>port_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>

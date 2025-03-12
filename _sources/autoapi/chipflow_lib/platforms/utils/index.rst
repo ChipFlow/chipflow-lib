@@ -54,6 +54,15 @@ Module Contents
    init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
 
 
+   .. py:property:: direction
+
+
+   .. py:method:: width()
+
+
+   .. py:method:: options()
+
+
    .. py:method:: annotations(*args)
 
       Annotate an interface object.

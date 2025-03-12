@@ -40,7 +40,7 @@ Module Contents
    Counts the pins from amaranth metadata
 
 
-.. py:function:: allocate_pins(name, member, pins)
+.. py:function:: allocate_pins(name, member, pins, port_name = None)
 
    Allocate pins based of Amaranth member metadata
 

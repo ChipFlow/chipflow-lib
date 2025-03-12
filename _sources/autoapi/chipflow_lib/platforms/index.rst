@@ -65,6 +65,9 @@ Package Contents
        :class:`amaranth.hdl.IOPort` is not an instance of :class:`amaranth.lib.io.PortLike`.
 
 
+   .. py:method:: wire(m, interface)
+
+
    .. py:property:: i
 
 
@@ -88,6 +91,9 @@ Package Contents
 
 
 .. py:class:: SiliconPlatform(config)
+
+   .. py:property:: ports
+
 
    .. py:method:: instantiate_ports(m)
 
@@ -155,6 +161,15 @@ Package Contents
    width: width of port
    all_have_oe: For Bidir ports, should Output Enable be per wire or for the whole port
    init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
+
+
+   .. py:property:: direction
+
+
+   .. py:method:: width()
+
+
+   .. py:method:: options()
 
 
    .. py:method:: annotations(*args)
