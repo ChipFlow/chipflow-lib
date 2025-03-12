@@ -1,12 +1,21 @@
 /* SPDX-License-Identifier: BSD-2-Clause */
 #include "uart.h"
 
+void uart_init(volatile uart_regs_t *uart, uint32_t divisor) {
+	uart->tx.config = 0;
+	uart->tx.phy_config = divisor & 0x00FFFFFF;
+	uart->tx.config = 1;
+	uart->rx.config = 0;
+	uart->rx.phy_config = divisor & 0x00FFFFFF;
+	uart->rx.config = 1;
+};
+
 void uart_putc(volatile uart_regs_t *uart, char c) {
 	if (c == '\n')
 		uart_putc(uart, '\r');
-	while (!uart->tx_ready)
+	while (!(uart->tx.status & 0x1))
 		;
-	uart->tx_data = c;
+	uart->tx.data = c;
 }
 
 void uart_puts(volatile uart_regs_t *uart, const char *s) {
