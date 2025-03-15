@@ -405,6 +405,7 @@ class LockFile(pydantic.BaseModel):
         port_map: Mapping of components to interfaces to port
         metadata: Amaranth metadata, for reference
     """
+    process: str
     package: Package
     port_map: PortMap
     metadata: dict
