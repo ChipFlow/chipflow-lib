@@ -140,20 +140,19 @@ class SiliconStep:
                 for i in range(width):
                     padname = f"{iface}{i}"
                     logger.debug(f"padname={padname}, port={port}, loc={port.pins[i]}, "
-                          f"dir={port.direction}, width={width}")
+                                 f"dir={port.direction}, width={width}")
                     pads[padname] = {'loc': port.pins[i], 'type': port.direction.value}
             else:
                 padname = f"{iface}"
 
                 logger.debug(f"padname={padname}, port={port}, loc={port.pins[0]}, "
-                        f"dir={port.direction}, width={width}")
+                             f"dir={port.direction}, width={width}")
                 pads[padname] = {'loc': port.pins[0], 'type': port.direction.value}
  
-
         config = {
             "dependency_versions": dep_versions,
             "silicon": {
-                "process": self.silicon_config["process"],
+                "process": self.silicon_config["processes"][0],
                 "pad_ring": self.silicon_config["package"],
                 "pads": pads,
                 "power": self.silicon_config.get("power", {})
