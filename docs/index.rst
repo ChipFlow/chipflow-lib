@@ -1,16 +1,30 @@
 ChipFlow Library Documentation
-------------------------------
+==============================
 
-.. image: _static/chipflow-logo.svg
+.. image:: _static/chipflow-logo.svg
    :width: 200px
    :class: sd-m-auto
    :name: landing-page-logo
 
 
-.. rubric: ChipFlow IC Design Platform
+ChipFlow IC Design Platform
+---------------------------
 
+ChipFlow is an open-source platform for designing, testing, and manufacturing custom silicon. 
+It provides a streamlined workflow from design to fabrication using Python and the Amaranth HDL.
 
 .. toctree::
+   :maxdepth: 2
+   :caption: User Guide
 
+   getting-started
+   workflows
    chipflow-toml-guide
+   advanced-configuration
+
+.. toctree::
+   :maxdepth: 1
+   :caption: API Reference
+
+   autoapi/chipflow_lib/index
 
