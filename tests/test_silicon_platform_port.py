@@ -41,10 +41,9 @@ class TestSiliconPlatformPort(unittest.TestCase):
         
         # Test accessing properties
         _ = spp.o  # Should not raise an error
+        _ = spp.oe  # Should not raise an error since we now always have an _oe for outputs
         with self.assertRaises(AttributeError):
             _ = spp.i  # Should raise an error for output port
-        with self.assertRaises(AttributeError):
-            _ = spp.oe  # Should raise an error for output port
 
     def test_init_bidir_port(self):
         # Test initialization with bidirectional direction
