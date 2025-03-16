@@ -57,11 +57,14 @@ You probably won't need to change these if you're starting from an example repos
 .. code-block:: TOML
 
    [chipflow.silicon]
-   process = "ihp_sg13g2"
+   processes = [
+        "ihp_sg13g2",
+        "gf130bcd"
+        ]
    package = "pga144"
 
 
-The ``silicon`` section sets the Foundry ``process`` we are targeting for manufacturing, and the physical ``package`` we want to place our design inside.
+The ``silicon`` section sets the Foundry ``processes`` (i.e. PDKs) that we are targeting for manufacturing, and the physical ``package`` we want to place our design inside.
 You'll choose the ``process`` and ``package`` based in the requirements of your design. 
 
 Available processes
