@@ -471,13 +471,21 @@ class SiliconPlatformTest(unittest.TestCase):
     @mock.patch('chipflow_lib.platforms.silicon.os.makedirs')
     @mock.patch('builtins.open', new_callable=mock.mock_open)
     @mock.patch('chipflow_lib.platforms.silicon.subprocess.check_call')
-    def test_build(self, mock_check_call, mock_open, mock_makedirs, mock_convert_fragment):
+    @mock.patch('chipflow_lib.platforms.silicon.Heartbeat.elaborate', side_effect=lambda self, platform: Module())
+    def test_build(self, mock_heartbeat_elaborate, mock_check_call, mock_open, mock_makedirs, mock_convert_fragment):
         """Test build method with mocked dependencies"""
+        # Create a module instance for our tests to use
+        m = Module()
+
         # Create platform
         platform = SiliconPlatform(self.config)
 
         # Setup convert_fragment mock
         mock_convert_fragment.return_value = ("rtlil_code", None)
+
+        # Make platform._prepare return a mocked Fragment to avoid creating Module objects
+        # that may trigger warnings
+        platform._prepare = mock.MagicMock(return_value=mock.MagicMock())
 
         # Add some files
         platform._files = {
@@ -486,11 +494,16 @@ class SiliconPlatformTest(unittest.TestCase):
             "test.vh": b"// header file"
         }
 
-        # Create a simple module
-        m = Module()
+        # Create a simple test class instead of using an actual Module
+        class TestElaboratable:
+            def elaborate(self, platform):
+                return m
 
-        # Call build
-        result = platform.build(m, name="test_build")
+        # Call build with our test elaboratable
+        result = platform.build(TestElaboratable(), name="test_build")
+
+        # Check that prepare was called
+        platform._prepare.assert_called_once()
 
         # Check that convert_fragment was called
         mock_convert_fragment.assert_called_once()
