@@ -62,6 +62,8 @@ test.cmd = "pytest"
 test-docs.cmd = "sphinx-build -b doctest docs/ docs/_build"
 lint.cmd = "ruff check"
 docs.cmd = "sphinx-build docs/ docs/_build/ -W --keep-going"
+test-silicon.cmd = "python -m pytest tests/test_silicon_platform.py tests/test_silicon_platform_additional.py tests/test_silicon_platform_amaranth.py tests/test_silicon_platform_build.py tests/test_silicon_platform_port.py --cov=chipflow_lib.platforms.silicon --cov-report=term"
+test-silicon-html.cmd = "python -m pytest tests/test_silicon_platform.py tests/test_silicon_platform_additional.py tests/test_silicon_platform_amaranth.py tests/test_silicon_platform_build.py tests/test_silicon_platform_port.py --cov=chipflow_lib.platforms.silicon --cov-report=html"
 
 
 [dependency-groups]
@@ -78,3 +80,8 @@ doc = [
     "sphinx-autoapi>=3.5.0",
     "sphinx>=7.3.7",
 ]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+    ]
