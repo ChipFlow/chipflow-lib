@@ -1,3 +1,5 @@
+# amaranth: UnusedElaboratable=no
+
 # SPDX-License-Identifier: BSD-2-Clause
 import unittest
 from unittest import mock
@@ -253,6 +255,11 @@ class TestPackageDef(unittest.TestCase):
         # Create an instance
         pkg = TestPackageDef(name="test_pkg")
         
+        # Instead of using SiliconTop to test elaboratables, let's use a simple mock
+        # This avoids the need to import and use SiliconTop which generates warnings
+        elaboratable_mock = mock.MagicMock()
+        elaboratable_mock.elaborate = mock.MagicMock(return_value=mock.MagicMock())
+        
         # Test sortpins method - THIS IS EXPECTED TO FAIL because of a bug
         # The method should return sorted(list(pins)) but actually returns None
         # because list.sort() sorts in-place and returns None
@@ -401,8 +408,10 @@ class TestPackage(unittest.TestCase):
 
 
 class TestTopInterfaces(unittest.TestCase):
+
+    @mock.patch("chipflow_lib.steps.silicon.SiliconTop")
     @mock.patch('chipflow_lib.platforms.utils._get_cls_by_reference')
-    def test_top_interfaces(self, mock_get_cls):
+    def test_top_interfaces(self, mock_get_cls, mock_silicontop_class):
         """Test top_interfaces function"""
         from chipflow_lib.platforms.utils import top_interfaces
         
