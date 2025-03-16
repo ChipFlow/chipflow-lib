@@ -83,8 +83,8 @@ class TestHeartbeat(unittest.TestCase):
         mock_buffer.assert_called_with("o", mock_port.heartbeat)
 
 
-@mock.patch('chipflow_lib.platforms.silicon.IOBuffer.elaborate')
 class TestIOBuffer(unittest.TestCase):
+    @mock.patch('chipflow_lib.platforms.silicon.IOBuffer.elaborate')
     def test_io_buffer_elaborate_mocked(self, mock_elaborate):
         """Test IOBuffer class by mocking the elaborate method"""
         # Create a mock SiliconPlatformPort
@@ -106,10 +106,69 @@ class TestIOBuffer(unittest.TestCase):
         
         # Check result is what was returned by mock
         self.assertIsInstance(result, Module)
+        
+    def test_io_buffer_with_wrong_port_type(self):
+        """Test IOBuffer error case with wrong port type"""
+        # Create a proper port-like but not SiliconPlatformPort
+        class MockPort(io.PortLike):
+            def __init__(self, direction="i", width=1):
+                self._direction = io.Direction(direction)
+                self._width = width
+                self.i = Signal(width) if direction != "o" else None
+                self.o = Signal(width) if direction != "i" else None
+                self.oe = Signal(1) if direction != "i" else None
+                
+            @property
+            def direction(self):
+                return self._direction
+                
+            def __len__(self):
+                return self._width
+                
+            def __getitem__(self, key):
+                result = object.__new__(type(self))
+                result._direction = self._direction
+                result._width = 1 if isinstance(key, int) else len(range(*key.indices(self._width)))
+                result.i = self.i[key] if self.i is not None else None
+                result.o = self.o[key] if self.o is not None else None
+                result.oe = self.oe
+                return result
+                
+            def __invert__(self):
+                result = object.__new__(type(self))
+                result._direction = self._direction
+                result._width = self._width
+                result.i = self.i
+                result.o = self.o
+                result.oe = self.oe
+                return result
+                
+            def __add__(self, other):
+                if not isinstance(other, MockPort):
+                    return NotImplemented
+                result = object.__new__(type(self))
+                result._direction = self._direction
+                result._width = self._width + other._width
+                result.i = Cat(self.i, other.i) if self.i is not None else None
+                result.o = Cat(self.o, other.o) if self.o is not None else None
+                result.oe = self.oe
+                return result
+                
+        wrong_port = MockPort(direction="i", width=2)
+        
+        # Create a proper IOBuffer now
+        buffer = IOBuffer(io.Direction.Input, wrong_port)
+        
+        # Now the elaborate method should raise our specific TypeError
+        with self.assertRaises(TypeError) as exc:
+            buffer.elaborate(mock.MagicMock())
+            
+        # Check the error message
+        self.assertIn("Cannot elaborate SiliconPlatform buffer with port", str(exc.exception))
 
 
-@mock.patch('chipflow_lib.platforms.silicon.FFBuffer.elaborate')
 class TestFFBuffer(unittest.TestCase):
+    @mock.patch('chipflow_lib.platforms.silicon.FFBuffer.elaborate')
     def test_ff_buffer_elaborate_mocked(self, mock_elaborate):
         """Test FFBuffer class by mocking the elaborate method"""
         # Create a mock SiliconPlatformPort
@@ -131,6 +190,7 @@ class TestFFBuffer(unittest.TestCase):
         # Check result is what was returned by mock
         self.assertIsInstance(result, Module)
         
+    @mock.patch('chipflow_lib.platforms.silicon.FFBuffer.elaborate')
     def test_ff_buffer_with_domains(self, mock_elaborate):
         """Test FFBuffer with custom domains"""
         # Create a mock SiliconPlatformPort
@@ -146,6 +206,65 @@ class TestFFBuffer(unittest.TestCase):
         # Check domains were set
         self.assertEqual(buffer.i_domain, "i_domain")
         self.assertEqual(buffer.o_domain, "o_domain")
+        
+    def test_ff_buffer_with_wrong_port_type(self):
+        """Test FFBuffer error case with wrong port type"""
+        # Create a proper port-like but not SiliconPlatformPort
+        class MockPort(io.PortLike):
+            def __init__(self, direction="i", width=1):
+                self._direction = io.Direction(direction)
+                self._width = width
+                self.i = Signal(width) if direction != "o" else None
+                self.o = Signal(width) if direction != "i" else None
+                self.oe = Signal(1) if direction != "i" else None
+                
+            @property
+            def direction(self):
+                return self._direction
+                
+            def __len__(self):
+                return self._width
+                
+            def __getitem__(self, key):
+                result = object.__new__(type(self))
+                result._direction = self._direction
+                result._width = 1 if isinstance(key, int) else len(range(*key.indices(self._width)))
+                result.i = self.i[key] if self.i is not None else None
+                result.o = self.o[key] if self.o is not None else None
+                result.oe = self.oe
+                return result
+                
+            def __invert__(self):
+                result = object.__new__(type(self))
+                result._direction = self._direction
+                result._width = self._width
+                result.i = self.i
+                result.o = self.o
+                result.oe = self.oe
+                return result
+                
+            def __add__(self, other):
+                if not isinstance(other, MockPort):
+                    return NotImplemented
+                result = object.__new__(type(self))
+                result._direction = self._direction
+                result._width = self._width + other._width
+                result.i = Cat(self.i, other.i) if self.i is not None else None
+                result.o = Cat(self.o, other.o) if self.o is not None else None
+                result.oe = self.oe
+                return result
+                
+        wrong_port = MockPort(direction="i", width=2)
+        
+        # Create a proper FFBuffer now
+        buffer = FFBuffer(io.Direction.Input, wrong_port)
+        
+        # Now the elaborate method should raise our specific TypeError
+        with self.assertRaises(TypeError) as exc:
+            buffer.elaborate(mock.MagicMock())
+            
+        # Check the error message
+        self.assertIn("Cannot elaborate SiliconPlatform buffer with port", str(exc.exception))
 
 
 class TestSiliconPlatformMethods(unittest.TestCase):
