@@ -263,6 +263,118 @@ class TestSiliconPlatformMethods(unittest.TestCase):
             # Restore the original function to avoid affecting other tests
             load_pinlock.__globals__['load_pinlock'] = original_load_pinlock
 
+    @mock.patch('chipflow_lib.platforms.silicon.ClockSignal')
+    @mock.patch('chipflow_lib.platforms.silicon.ResetSignal')
+    @mock.patch('chipflow_lib.platforms.silicon.io.Buffer')
+    @mock.patch('chipflow_lib.platforms.silicon.FFSynchronizer')
+    @mock.patch('chipflow_lib.platforms.silicon.SiliconPlatformPort')
+    @mock.patch('chipflow_lib.platforms.silicon.load_pinlock')
+    def test_instantiate_ports_with_clocks_and_resets(self, mock_load_pinlock, mock_silicon_platform_port,
+                                                    mock_ff_synchronizer, mock_buffer,
+                                                    mock_reset_signal, mock_clock_signal):
+        """Test instantiate_ports method with clocks and resets"""
+        # Import here to avoid issues during test collection
+        from chipflow_lib.platforms.silicon import SiliconPlatform, Port
+        from amaranth import Module, Signal
+
+        # Create mocks for signals and buffer
+        mock_clock_signal_instance = Signal()
+        mock_reset_signal_instance = Signal()
+        mock_clock_signal.return_value = mock_clock_signal_instance
+        mock_reset_signal.return_value = mock_reset_signal_instance
+
+        # Create mock for buffer
+        mock_buffer_instance = mock.MagicMock()
+        mock_buffer_instance.i = Signal()
+        mock_buffer.return_value = mock_buffer_instance
+
+        # Create mock for SiliconPlatformPort
+        mock_port_instance = mock.MagicMock()
+        mock_port_instance.i = Signal()
+        mock_port_instance.o = Signal()
+        mock_port_instance.oe = Signal()
+        mock_silicon_platform_port.side_effect = lambda comp, name, port, **kwargs: mock_port_instance
+
+        # Create mock pinlock with simpler approach
+        mock_pinlock = mock.MagicMock()
+
+        # Setup port_map
+        mock_port = mock.MagicMock()
+        mock_port.port_name = "test_port"
+        mock_port_map = {"component1": {"interface1": {"port1": mock_port}}}
+        mock_pinlock.port_map = mock_port_map
+
+        # Setup clocks and resets
+        mock_clock_port = mock.MagicMock()
+        mock_clock_port.port_name = "sys_clk"
+        mock_alt_clock_port = mock.MagicMock()
+        mock_alt_clock_port.port_name = "alt_clk"
+        mock_reset_port = mock.MagicMock()
+        mock_reset_port.port_name = "sys_rst"
+
+        mock_pinlock.package.clocks = {
+            "sys_clk": mock_clock_port,
+            "alt_clk": mock_alt_clock_port
+        }
+        mock_pinlock.package.resets = {
+            "sys_rst": mock_reset_port
+        }
+
+        # Return mock pinlock from load_pinlock
+        mock_load_pinlock.return_value = mock_pinlock
+
+        # Create config with clock and reset definitions
+        config_copy = self.config.copy()
+        config_copy["chipflow"] = config_copy.get("chipflow", {}).copy()
+        config_copy["chipflow"]["clocks"] = {
+            "default": "sys_clk",
+            "alt": "alt_clk"
+        }
+        config_copy["chipflow"]["resets"] = {
+            "reset": "sys_rst"
+        }
+
+        # Create platform with modified config
+        platform = SiliconPlatform(config_copy)
+
+        # Make sure pinlock is not already set
+        if hasattr(platform, "pinlock"):
+            del platform.pinlock
+
+        # Create module to pass to instantiate_ports
+        m = Module()
+
+        # Call instantiate_ports
+        platform.instantiate_ports(m)
+
+        # Verify clocks were set up
+        self.assertIn("sys_clk", platform._ports)
+        self.assertIn("alt_clk", platform._ports)
+
+        # Verify resets were set up
+        self.assertIn("sys_rst", platform._ports)
+
+        # Verify port_map ports were added
+        self.assertIn("test_port", platform._ports)
+
+        # Verify the pinlock was set
+        self.assertEqual(platform.pinlock, mock_pinlock)
+
+        # Verify creation of SiliconPlatformPort for clocks and resets
+        for name, port in [("sys_clk", mock_clock_port), ("alt_clk", mock_alt_clock_port),
+                           ("sys_rst", mock_reset_port)]:
+            call_found = False
+            for call in mock_silicon_platform_port.call_args_list:
+                if call[0][1] == name:
+                    call_found = True
+            self.assertTrue(call_found, f"SiliconPlatformPort not created for {name}")
+
+        # Verify buffer was created for clocks and resets (line 281-282 and 289)
+        self.assertGreaterEqual(mock_buffer.call_count, 3)  # At least 3 calls (2 clocks, 1 reset)
+
+        # Verify FFSynchronizer was created for reset (line 291)
+        self.assertGreaterEqual(mock_ff_synchronizer.call_count, 1)
+
     @mock.patch('chipflow_lib.platforms.silicon.IOBuffer')
     @mock.patch('chipflow_lib.platforms.silicon.FFBuffer')
     def test_get_io_buffer(self, mock_ffbuffer, mock_iobuffer):
