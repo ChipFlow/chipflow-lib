@@ -5,13 +5,11 @@ import logging
 import os
 import subprocess
 
-from dataclasses import dataclass
-
 from amaranth import Module, Signal, Cat, ClockDomain, ClockSignal, ResetSignal
 
-from amaranth.lib import wiring, io
+from amaranth.lib import io
 from amaranth.lib.cdc import FFSynchronizer
-from amaranth.lib.wiring import Component, In, PureInterface
+from amaranth.lib.wiring import PureInterface
 
 from amaranth.back import rtlil
 from amaranth.hdl import Fragment
@@ -23,44 +21,6 @@ from .utils import load_pinlock, Port
 __all__ = ["SiliconPlatformPort", "SiliconPlatform"]
 
 logger = logging.getLogger(__name__)
-
-
-def make_hashable(cls):
-    def __hash__(self):
-        return hash(id(self))
-
-    def __eq__(self, obj):
-        return id(self) == id(obj)
-
-    cls.__hash__ = __hash__
-    cls.__eq__ = __eq__
-    return cls
-
-
-HeartbeatSignature = wiring.Signature({"heartbeat_i": In(1)})
-
-
-@make_hashable
-@dataclass
-class Heartbeat(Component):
-    clock_domain: str = "sync"
-    counter_size: int = 23
-    name: str = "heartbeat"
-
-    def __init__(self, ports):
-        super().__init__(HeartbeatSignature)
-        self.ports = ports
-
-    def elaborate(self, platform):
-        m = Module()
-        # Heartbeat LED (to confirm clock/reset alive)
-        heartbeat_ctr = Signal(self.counter_size)
-        getattr(m.d, self.clock_domain).__iadd__(heartbeat_ctr.eq(heartbeat_ctr + 1))
-
-        heartbeat_buffer = io.Buffer("o", self.ports.heartbeat)
-        m.submodules.heartbeat_buffer = heartbeat_buffer
-        m.d.comb += heartbeat_buffer.o.eq(heartbeat_ctr[-1])
-        return m
 
 
 class SiliconPlatformPort(io.PortLike):
