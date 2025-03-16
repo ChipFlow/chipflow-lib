@@ -263,17 +263,25 @@ class TestSiliconPlatformMethods(unittest.TestCase):
             # Restore the original function to avoid affecting other tests
             load_pinlock.__globals__['load_pinlock'] = original_load_pinlock
 
-    def test_get_io_buffer(self):
-        """Test get_io_buffer method"""
+    @mock.patch('chipflow_lib.platforms.silicon.IOBuffer')
+    @mock.patch('chipflow_lib.platforms.silicon.FFBuffer')
+    def test_get_io_buffer(self, mock_ffbuffer, mock_iobuffer):
+        """Test get_io_buffer method with mocked buffer classes to avoid UnusedElaboratable warnings"""
         # Import here to avoid issues during test collection
         from chipflow_lib.platforms.silicon import SiliconPlatform
+
+        # Setup mock returns
+        mock_io_instance = mock.MagicMock()
+        mock_ff_instance = mock.MagicMock()
+        mock_iobuffer.return_value = mock_io_instance
+        mock_ffbuffer.return_value = mock_ff_instance
 
         # Create platform
         platform = SiliconPlatform(self.config)
 
         # Create a SiliconPlatformPort
         port_obj = Port(type="bidir", pins=["1", "2"], port_name="test_bidir",
-                         direction="io", options={"all_have_oe": False})
+                       direction="io", options={"all_have_oe": False})
         silicon_port = SiliconPlatformPort("comp", "test_bidir", port_obj)
 
         # Create different buffer types
@@ -282,14 +290,20 @@ class TestSiliconPlatformMethods(unittest.TestCase):
 
         # Test with io.Buffer
         result_io = platform.get_io_buffer(io_buffer)
-        self.assertIsInstance(result_io, IOBuffer)
+        self.assertEqual(result_io, mock_io_instance)
+        # The first arg to IOBuffer is the direction enum, not string
+        mock_iobuffer.assert_called_once_with(io.Direction.Bidir, silicon_port)
 
         # Test with io.FFBuffer
         result_ff = platform.get_io_buffer(ff_buffer)
-        self.assertIsInstance(result_ff, FFBuffer)
+        self.assertEqual(result_ff, mock_ff_instance)
+        # The first arg to FFBuffer is the direction enum, not string
+        mock_ffbuffer.assert_called_once_with(io.Direction.Bidir, silicon_port, i_domain="sync", o_domain="sync")
 
         # Test with unsupported buffer type
         unsupported_buffer = mock.MagicMock()
+        unsupported_buffer.direction = "io"
+        unsupported_buffer.port = silicon_port
         with self.assertRaises(TypeError):
             platform.get_io_buffer(unsupported_buffer)
 
