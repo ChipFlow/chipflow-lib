@@ -37,8 +37,9 @@ extensions = [
 ]
 
 html_theme = 'furo'
-html_logo = '_static/chipflow-logo.svg'
+html_logo = '_assets/chipflow-logo.svg'
 html_title = "ChipFlow Platform Documentation"
+html_static_path = ['_assets']
 
 autodoc_typehints = 'description'
 
@@ -57,8 +58,11 @@ autoapi_options = [
     'imported-members',
 ]
 
-# Exclude autoapi templates
-exclude_patterns = [autoapi_template_dir]
+# Exclude autoapi templates and in-progress stuff
+exclude_patterns = [
+    autoapi_template_dir,
+    "unfinished",
+]
 
 intersphinx_mapping = {
     'py': ('https://docs.python.org/3/', None),

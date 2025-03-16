@@ -11,7 +11,7 @@ Let's start with a typical example:
 .. testcode::
    :hide:
 
-   # Assert that example-chipflow.toml matches the current config schema. If 
+   # Assert that example-chipflow.toml matches the current config schema. If
    # this test fails, then its likely that the content in this file will need
    # to be updated.
    from chipflow_lib import _parse_config_file
@@ -178,5 +178,3 @@ Note that in this context, the :term:type parameter can only be ``ground`` or ``
 This is a work in progress, and currently you can use the defaults provided by customer support.
 
 .. _Caravel Harness: https://caravel-harness.readthedocs.io/en/latest/
-
-
