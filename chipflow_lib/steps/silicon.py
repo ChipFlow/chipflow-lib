@@ -9,12 +9,9 @@ import os
 import requests
 import subprocess
 import sys
-import time
 
 import dotenv
-from pprint import pprint
 from amaranth import *
-from amaranth.lib.wiring import connect, flipped
 
 from .. import ChipFlowError
 from ..platforms import SiliconPlatform, top_interfaces
@@ -115,7 +112,7 @@ class SiliconStep:
         submission_name = git_head
         if git_dirty:
             logging.warning("Git tree is dirty, submitting anyway!")
-            submission_name += f"-dirty"
+            submission_name += "-dirty"
         dep_versions = {
             "python": sys.version.split()[0]
         }
@@ -192,7 +189,6 @@ class SiliconStep:
         if resp.status_code == 200:
             logger.info(f"Submitted design: {resp_data}")
             print(f"https://{host}/build/{resp_data['build_id']}")
-
         else:
             # Log detailed information about the failed request
             logger.error(f"Request failed with status code {resp.status_code}")
