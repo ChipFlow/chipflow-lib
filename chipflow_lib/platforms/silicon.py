@@ -131,7 +131,6 @@ class SiliconPlatformPort(io.PortLike):
         if self._direction is io.Direction.Input:
             return len(self._i)
         if self._direction is io.Direction.Output:
-            assert len(self._o) == len(self._oe)
             return len(self._o)
         if self._direction is io.Direction.Bidir:
             assert len(self._i) == len(self._o)
