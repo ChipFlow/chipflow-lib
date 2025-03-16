@@ -219,32 +219,49 @@ class TestSiliconPlatformMethods(unittest.TestCase):
         # Check that pinlock was set
         self.assertEqual(platform.pinlock, mock_pinlock)
 
-    @mock.patch('chipflow_lib.platforms.silicon.load_pinlock')
-    def test_instantiate_ports_missing_clock(self, mock_load_pinlock):
-        """Test instantiate_ports method with missing clock"""
+    def test_instantiate_ports_missing_clock(self):
+        """Test instantiate_ports method with missing clock directly"""
         # Import here to avoid issues during test collection
-        from chipflow_lib.platforms.silicon import SiliconPlatform
+        from chipflow_lib.platforms.silicon import SiliconPlatform, load_pinlock, ChipFlowError
+        from amaranth import Module
 
-        # Create mocks
-        mock_pinlock = mock.MagicMock()
-        mock_load_pinlock.return_value = mock_pinlock
+        # Create a config with missing clock configuration
+        # This deliberately causes an error to test error handling
+        config_copy = self.config.copy()
+        config_copy["chipflow"] = config_copy.get("chipflow", {}).copy()
+        config_copy["chipflow"]["clocks"] = {"default": "non_existent_clock"}
+        config_copy["chipflow"]["resets"] = {}
 
-        # Setup port_map
-        mock_pinlock.port_map = {}
+        # Create platform with our modified config
+        platform = SiliconPlatform(config_copy)
 
-        # Setup clocks and resets - empty
-        mock_pinlock.package.clocks = {}
-        mock_pinlock.package.resets = {"sys_rst_n": mock.MagicMock()}
+        # Make sure pinlock is not already set
+        if hasattr(platform, "pinlock"):
+            del platform.pinlock
 
-        # Create platform
-        platform = SiliconPlatform(self.config)
-
-        # Create module
+        # Create a Module
         m = Module()
 
-        # Call instantiate_ports - should raise ChipFlowError
-        with self.assertRaises(ChipFlowError):
-            platform.instantiate_ports(m)
+        # Create a custom TestPinlock with an empty clocks dict
+        class TestPinlock:
+            def __init__(self):
+                self.port_map = {}
+                self.package = mock.MagicMock()
+                self.package.clocks = {}
+                self.package.resets = {}
+
+        # Patch the load_pinlock function directly
+        original_load_pinlock = load_pinlock
+        try:
+            # Replace with our custom implementation
+            load_pinlock.__globals__['load_pinlock'] = lambda: TestPinlock()
+
+            # Call instantiate_ports - should raise ChipFlowError
+            with self.assertRaises(ChipFlowError):
+                platform.instantiate_ports(m)
+        finally:
+            # Restore the original function to avoid affecting other tests
+            load_pinlock.__globals__['load_pinlock'] = original_load_pinlock
 
     def test_get_io_buffer(self):
         """Test get_io_buffer method"""
