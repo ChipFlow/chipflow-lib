@@ -70,6 +70,7 @@ test-docs.cmd = "sphinx-build -b doctest docs/ docs/_build"
 lint.cmd = "ruff check"
 docs.cmd = "sphinx-build docs/ docs/_build/ -W --keep-going"
 test-silicon.cmd = "pytest tests/test_silicon_platform.py tests/test_silicon_platform_additional.py tests/test_silicon_platform_amaranth.py tests/test_silicon_platform_build.py tests/test_silicon_platform_port.py --cov=chipflow_lib.platforms.silicon --cov-report=term"
+test-silicon-html.cmd = "pytest tests/test_silicon_platform.py tests/test_silicon_platform_additional.py tests/test_silicon_platform_amaranth.py tests/test_silicon_platform_build.py tests/test_silicon_platform_port.py --cov=chipflow_lib.platforms.silicon --cov-report=html"
 
 
 [dependency-groups]
