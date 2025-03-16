@@ -396,6 +396,17 @@ class PortMap(pydantic.RootModel[Dict[str, _Interface]], MutableMapping):
         return self[component][name]
 
 
+class Process(enum.Enum):
+    SKY130 = "sky130"
+    GF180 = "gf180"
+    HELVELLYN2 = "helvellyn2"
+    GF130BCD = "gf130bcd"
+    IHP_SG13G2 = "ihp_sg13g2"
+
+    def __str__(self):
+        return f'{self.name}'
+
+
 class LockFile(pydantic.BaseModel):
     """
     Representation of a pin lock file.
@@ -405,7 +416,7 @@ class LockFile(pydantic.BaseModel):
         port_map: Mapping of components to interfaces to port
         metadata: Amaranth metadata, for reference
     """
-    process: str
+    processes: List[Process]
     package: Package
     port_map: PortMap
     metadata: dict

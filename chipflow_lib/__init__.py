@@ -74,13 +74,17 @@ config_schema = {
                 "silicon": {
                     "type": "object",
                     "required": [
-                        "process",
+                        "processes",
                         "package",
                     ],
                     "additionalProperties": False,
                     "properties": {
-                        "process": {
-                            "enum": ["sky130", "gf180", "customer1", "gf130bcd", "ihp_sg13g2"]
+                        "processes": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": ["sky130", "gf180", "customer1", "gf130bcd", "ihp_sg13g2"]
+                            }
                         },
                         "package": {
                             "enum": ["caravel", "cf20", "pga144"]

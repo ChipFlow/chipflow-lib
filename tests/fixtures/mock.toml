@@ -5,7 +5,11 @@ project_name = "proj-name"
 silicon = "chipflow_lib.steps.silicon:SiliconStep"
 
 [chipflow.silicon]
-process = "ihp_sg13g2"
+processes = [
+  "ihp_sg13g2",
+  "helvellyn2",
+  "sky130"
+]
 package = "pga144"
 
 [chipflow.clocks]
