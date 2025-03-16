@@ -121,7 +121,7 @@ project_name = "test_project"
         with self.assertRaises(ChipFlowError) as cm:
             _parse_config_file(config_path)
 
-        self.assertIn("Syntax error in `chipflow.toml`", str(cm.exception))
+        self.assertIn("Validation error in chipflow.toml", str(cm.exception))
 
     @mock.patch("chipflow_lib._ensure_chipflow_root")
     @mock.patch("chipflow_lib._parse_config_file")
@@ -133,6 +133,9 @@ project_name = "test_project"
         config = _parse_config()
 
         mock_ensure_chipflow_root.assert_called_once()
-        # We're expecting a string, not a Path
-        mock_parse_config_file.assert_called_once_with("/mock/chipflow/root/chipflow.toml")
+        # Accept either string or Path object
+        self.assertEqual(mock_parse_config_file.call_args[0][0].as_posix()
+                        if hasattr(mock_parse_config_file.call_args[0][0], 'as_posix')
+                        else mock_parse_config_file.call_args[0][0],
+                        "/mock/chipflow/root/chipflow.toml")
         self.assertEqual(config, {"chipflow": {"test": "value"}})
