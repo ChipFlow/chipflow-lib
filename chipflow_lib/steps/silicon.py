@@ -9,12 +9,9 @@ import os
 import requests
 import subprocess
 import sys
-import time
 
 import dotenv
-from pprint import pprint
 from amaranth import *
-from amaranth.lib.wiring import connect, flipped
 
 from .. import ChipFlowError
 from ..platforms import SiliconPlatform, top_interfaces
@@ -60,8 +57,12 @@ class SiliconStep:
     """Prepare and submit the design for an ASIC."""
     def __init__(self, config):
         self.config = config
-        self.project_name = config["chipflow"].get("project_name")
-        self.silicon_config = config["chipflow"]["silicon"]
+
+        # Also parse with Pydantic for type checking and better code structure
+        from chipflow_lib.config_models import Config
+        self.config_model = Config.model_validate(config)
+        self.project_name = self.config_model.chipflow.project_name
+        self.silicon_config = config["chipflow"]["silicon"]  # Keep for backward compatibility
         self.platform = SiliconPlatform(config)
 
     def build_cli_parser(self, parser):
@@ -96,7 +97,7 @@ class SiliconStep:
 
         Returns the path to the RTLIL file.
         """
-        return self.platform.build(SiliconTop(self.config), name=self.config["chipflow"]["project_name"])
+        return self.platform.build(SiliconTop(self.config), name=self.config_model.chipflow.project_name)
 
     def submit(self, rtlil_path, *, dry_run=False):
         """Submit the design to the ChipFlow cloud builder.
@@ -111,7 +112,7 @@ class SiliconStep:
         submission_name = git_head
         if git_dirty:
             logging.warning("Git tree is dirty, submitting anyway!")
-            submission_name += f"-dirty"
+            submission_name += "-dirty"
         dep_versions = {
             "python": sys.version.split()[0]
         }
@@ -149,13 +150,15 @@ class SiliconStep:
                              f"dir={port.direction}, width={width}")
                 pads[padname] = {'loc': port.pins[0], 'type': port.direction.value}
  
+        # Use the Pydantic models to access configuration data
+        silicon_model = self.config_model.chipflow.silicon
         config = {
             "dependency_versions": dep_versions,
             "silicon": {
-                "process": self.silicon_config["process"],
-                "pad_ring": self.silicon_config["package"],
+                "process": str(silicon_model.process),
+                "pad_ring": silicon_model.package,
                 "pads": pads,
-                "power": self.silicon_config.get("power", {})
+                "power": {k: {"type": v.type, "loc": v.loc} for k, v in silicon_model.power.items()}
             }
         }
         if dry_run:
@@ -175,31 +178,30 @@ class SiliconStep:
                 "rtlil": open(rtlil_path, "rb"),
                 "config": json.dumps(config),
             })
-        
+
         # Parse response body
         try:
             resp_data = resp.json()
         except ValueError:
             resp_data = resp.text
-        
+
         # Handle response based on status code
         if resp.status_code == 200:
             logger.info(f"Submitted design: {resp_data}")
-            print(f"https://{host}/build/{resp_data["build_id"]}")
-            
+            print(f"https://{host}/build/{resp_data['build_id']}")
         else:
             # Log detailed information about the failed request
             logger.error(f"Request failed with status code {resp.status_code}")
             logger.error(f"Request URL: {resp.request.url}")
-            
+
             # Log headers with auth information redacted
             headers = dict(resp.request.headers)
             if "Authorization" in headers:
                 headers["Authorization"] = "REDACTED"
             logger.error(f"Request headers: {headers}")
-            
+
             logger.error(f"Request data: {data}")
             logger.error(f"Response headers: {dict(resp.headers)}")
             logger.error(f"Response body: {resp_data}")
-            
+
             raise ChipFlowError(f"Failed to submit design: {resp_data}")
