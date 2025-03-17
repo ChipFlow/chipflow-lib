@@ -57,11 +57,13 @@ ignore = ['F403', 'F405']
 source = "scm"
 
 [tool.pdm.scripts]
-test-cov.cmd = "pytest --cov=chipflow_lib --cov-report=html"
 test.cmd = "pytest"
+test-cov.cmd = "pytest --cov=chipflow_lib --cov-report=term"
+test-cov-html.cmd = "pytest --cov=chipflow_lib --cov-report=html"
 test-docs.cmd = "sphinx-build -b doctest docs/ docs/_build"
 lint.cmd = "ruff check"
 docs.cmd = "sphinx-build docs/ docs/_build/ -W --keep-going"
+test-silicon.cmd = "pytest tests/test_silicon_platform.py tests/test_silicon_platform_additional.py tests/test_silicon_platform_amaranth.py tests/test_silicon_platform_build.py tests/test_silicon_platform_port.py --cov=chipflow_lib.platforms.silicon --cov-report=term"
 
 
 [dependency-groups]
@@ -78,3 +80,8 @@ doc = [
     "sphinx-autoapi>=3.5.0",
     "sphinx>=7.3.7",
 ]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+    ]
