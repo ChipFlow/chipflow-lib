@@ -8,7 +8,8 @@ from typing import Any, List, Dict, Tuple
 
 from chipflow_lib import _parse_config, ChipFlowError
 from chipflow_lib.platforms import PACKAGE_DEFINITIONS, PIN_ANNOTATION_SCHEMA, top_interfaces
-from chipflow_lib.platforms.utils import LockFile, Package, PortMap, Port
+from chipflow_lib.platforms.utils import LockFile, Package, PortMap, Port, Process
+from chipflow_lib.config_models import Config
 
 # logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -76,7 +77,13 @@ def allocate_pins(name: str, member: Dict[str, Any], pins: List[str], port_name:
 
 
 def lock_pins() -> None:
-    config = _parse_config()
+    # Get the config as dict for backward compatibility with top_interfaces
+    config_dict = _parse_config()
+    
+    # Parse with Pydantic for type checking and strong typing
+    from chipflow_lib.config_models import Config
+    config_model = Config.model_validate(config_dict)
+    
     used_pins = set()
     oldlock = None
 
@@ -86,27 +93,36 @@ def lock_pins() -> None:
         oldlock = LockFile.model_validate_json(json_string)
 
     print(f"Locking pins: {'using pins.lock' if lockfile.exists() else ''}")
-    process_name = config["chipflow"]["silicon"]["process"]
-    package_name = config["chipflow"]["silicon"]["package"]
+
+    process = config_model.chipflow.silicon.process
+    package_name = config_model.chipflow.silicon.package
 
     if package_name not in PACKAGE_DEFINITIONS:
         logger.debug(f"Package '{package_name} is unknown")
     package_type = PACKAGE_DEFINITIONS[package_name]
 
     package = Package(package_type=package_type)
+
+    # Process pads and power configurations using Pydantic models
     for d in ("pads", "power"):
         logger.debug(f"Checking [chipflow.silicon.{d}]:")
-        _map = {}
-        for k, v in config["chipflow"]["silicon"][d].items():
-            pin = str(v['loc'])
+        silicon_config = getattr(config_model.chipflow.silicon, d, {})
+        for k, v in silicon_config.items():
+            pin = str(v.loc)
             used_pins.add(pin)
-            port = oldlock.package.check_pad(k, v) if oldlock else None
+
+            # Convert Pydantic model to dict for backward compatibility
+            v_dict = {"type": v.type, "loc": v.loc}
+            port = oldlock.package.check_pad(k, v_dict) if oldlock else None
+
             if port and port.pins != [pin]:
                 raise ChipFlowError(
                     f"chipflow.toml conflicts with pins.lock: "
                     f"{k} had pin {port.pins}, now {[pin]}."
                 )
-            package.add_pad(k, v)
+
+            # Add pad to package
+            package.add_pad(k, v_dict)
 
     logger.debug(f'Pins in use: {package_type.sortpins(used_pins)}')
 
@@ -114,7 +130,8 @@ def lock_pins() -> None:
 
     logger.debug(f"unallocated pins = {package_type.sortpins(unallocated)}")
 
-    _, interfaces = top_interfaces(config)
+    # Use the raw dict for top_interfaces since it expects the legacy format
+    _, interfaces = top_interfaces(config_dict)
 
     logger.debug(f"All interfaces:\n{pformat(interfaces)}")
 
@@ -146,7 +163,7 @@ def lock_pins() -> None:
                 _map, _ = allocate_pins(k, v, pins)
                 port_map.add_ports(component, k, _map)
 
-    newlock = LockFile(process=process_name,
+    newlock = LockFile(process=process,
                        package=package,
                        port_map=port_map,
                        metadata=interfaces)
