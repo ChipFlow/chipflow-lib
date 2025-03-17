@@ -14,10 +14,7 @@ default = 'sys_clk'
 default = 'sys_rst_n'
 
 [chipflow.silicon]
-processes = [
-    "gf130bcd",
-    "gf130bcd"
-    ]
+process = "gf130bcd"
 package = "pga144"
 
 [chipflow.silicon.pads]
