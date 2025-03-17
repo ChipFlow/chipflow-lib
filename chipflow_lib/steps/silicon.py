@@ -152,7 +152,7 @@ class SiliconStep:
         config = {
             "dependency_versions": dep_versions,
             "silicon": {
-                "process": self.silicon_config["processes"][0],
+                "process": self.silicon_config["process"],
                 "pad_ring": self.silicon_config["package"],
                 "pads": pads,
                 "power": self.silicon_config.get("power", {})

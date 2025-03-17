@@ -86,7 +86,7 @@ def lock_pins() -> None:
         oldlock = LockFile.model_validate_json(json_string)
 
     print(f"Locking pins: {'using pins.lock' if lockfile.exists() else ''}")
-    processes = config["chipflow"]["silicon"]["process"]
+    process_name = config["chipflow"]["silicon"]["process"]
     package_name = config["chipflow"]["silicon"]["package"]
 
     if package_name not in PACKAGE_DEFINITIONS:
@@ -146,7 +146,7 @@ def lock_pins() -> None:
                 _map, _ = allocate_pins(k, v, pins)
                 port_map.add_ports(component, k, _map)
 
-    newlock = LockFile(processes=processes,
+    newlock = LockFile(process=process_name,
                        package=package,
                        port_map=port_map,
                        metadata=interfaces)
