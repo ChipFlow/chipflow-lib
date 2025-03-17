@@ -41,10 +41,9 @@ class TestSiliconPlatformPort(unittest.TestCase):
         
         # Test accessing properties
         _ = spp.o  # Should not raise an error
+        _ = spp.oe  # Should not raise an error since we now always have an _oe for outputs
         with self.assertRaises(AttributeError):
             _ = spp.i  # Should raise an error for output port
-        with self.assertRaises(AttributeError):
-            _ = spp.oe  # Should raise an error for output port
 
     def test_init_bidir_port(self):
         # Test initialization with bidirectional direction
@@ -148,8 +147,8 @@ class TestSiliconPlatformPort(unittest.TestCase):
         self.assertEqual(spp1.direction, combined_port.direction)
         self.assertEqual(len(combined_port), len(spp1) + len(spp2))
         
-    def test_wire(self):
-        # Test wire method with a mock interface
+    def test_wire_input(self):
+        # Test wire method with a mock input interface
         port_obj = Port(type="input", pins=["1", "2", "3"], port_name="test_input", 
                          direction="i", options={})
         spp = SiliconPlatformPort("comp", "test_input", port_obj)
@@ -174,3 +173,79 @@ class TestSiliconPlatformPort(unittest.TestCase):
         
         # Wire should not raise an exception
         spp.wire(m, interface)
+        
+    def test_wire_output(self):
+        # Test wire method with a mock output interface to cover line 105
+        port_obj = Port(type="output", pins=["1", "2"], port_name="test_output", 
+                         direction="o", options={})
+        spp = SiliconPlatformPort("comp", "test_output", port_obj)
+        
+        # Create a mock interface
+        class MockSignature(wiring.Signature):
+            def __init__(self):
+                super().__init__({"o": wiring.Out(2)})
+                self._direction = io.Direction.Output
+                
+            @property
+            def direction(self):
+                return self._direction
+                
+        class MockInterface(PureInterface):
+            def __init__(self):
+                self.signature = MockSignature()
+                self.o = Signal(2)
+                self.oe = Signal(1)
+                
+        interface = MockInterface()
+        m = Module()
+        
+        # Wire should not raise an exception
+        spp.wire(m, interface)
+        
+    def test_wire_bidir(self):
+        # Test wire method with a mock bidirectional interface to cover both cases
+        port_obj = Port(type="bidir", pins=["1", "2", "3"], port_name="test_bidir", 
+                         direction="io", options={"all_have_oe": True})
+        spp = SiliconPlatformPort("comp", "test_bidir", port_obj)
+        
+        # Create a mock interface
+        class MockSignature(wiring.Signature):
+            def __init__(self):
+                super().__init__({
+                    "i": wiring.In(3),
+                    "o": wiring.Out(3),
+                    "oe": wiring.Out(3),
+                })
+                self._direction = io.Direction.Bidir
+                
+            @property
+            def direction(self):
+                return self._direction
+                
+        class MockInterface(PureInterface):
+            def __init__(self):
+                self.signature = MockSignature()
+                self.i = Signal(3)
+                self.o = Signal(3)
+                self.oe = Signal(3)
+                
+        interface = MockInterface()
+        m = Module()
+        
+        # Wire should not raise an exception
+        spp.wire(m, interface)
+        
+    def test_repr(self):
+        # Test the __repr__ method for a bidirectional port
+        port_obj = Port(type="bidir", pins=["1", "2", "3"], port_name="test_bidir", 
+                         direction="io", options={"all_have_oe": True})
+        spp = SiliconPlatformPort("comp", "test_bidir", port_obj)
+        
+        # Get the representation
+        repr_str = repr(spp)
+        
+        # Check that it contains expected elements
+        self.assertIn("SiliconPlatformPort", repr_str)
+        self.assertIn("direction", repr_str)
+        self.assertIn("width=3", repr_str)
+        self.assertIn("invert=False", repr_str)

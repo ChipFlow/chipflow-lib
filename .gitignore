@@ -18,3 +18,4 @@ __pycache__/
 .doit.db
 
 docs/_build
+/tmp
