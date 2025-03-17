@@ -57,8 +57,8 @@ Module Contents
    Configuration for silicon in chipflow.toml.
 
 
-   .. py:attribute:: processes
-      :type:  List[chipflow_lib.platforms.utils.Process]
+   .. py:attribute:: process
+      :type:  chipflow_lib.platforms.utils.Process
 
 
    .. py:attribute:: package
