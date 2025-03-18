@@ -50,7 +50,6 @@ class SiliconPlatformPort(io.PortLike):
                 self._oe = Signal(port.width, name=f"{component}_{name}__oe", init=-1)
             else:
                 self._oe = Signal(1, name=f"{component}_{name}__oe", init=-1)
-        # Output ports don't have _oe signals
 
         logger.debug(f"Created SiliconPlatformPort {name}, width={len(port.pins)},dir{self._direction}")
 
@@ -67,21 +66,21 @@ class SiliconPlatformPort(io.PortLike):
     def i(self):
         if self._i is None:
             raise AttributeError("SiliconPlatformPort with output direction does not have an "
-                               "input signal")
+                                 "input signal")
         return self._i
 
     @property
     def o(self):
         if self._o is None:
             raise AttributeError("SiliconPlatformPort with input direction does not have an "
-                               "output signal")
+                                 "output signal")
         return self._o
 
     @property
     def oe(self):
         if self._oe is None:
             raise AttributeError("SiliconPlatformPort with output or input direction does not have an "
-                               "output enable signal")
+                                 "output enable signal")
         return self._oe
 
     @property
