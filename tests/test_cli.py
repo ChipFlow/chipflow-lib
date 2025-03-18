@@ -1,4 +1,6 @@
 # SPDX-License-Identifier: BSD-2-Clause
+
+import pytest
 import unittest
 from unittest import mock
 import logging
@@ -9,6 +11,7 @@ from chipflow_lib.cli import run
 
 class MockCommand:
     """Mock command for testing CLI"""
+
     def build_cli_parser(self, parser):
         parser.add_argument("--option", help="Test option")
         parser.add_argument("action", choices=["valid", "error", "unexpected"])
@@ -74,8 +77,12 @@ class TestCLI(unittest.TestCase):
 
         # Capture stdout for assertion
         with mock.patch("builtins.print") as mock_print:
-            # Run with error action
-            run(["test", "error"])
+            with pytest.raises(SystemExit) as systemexit:
+                # Run with error action
+                run(["test", "error"])
+
+                assert systemexit.type is SystemExit
+                assert systemexit.value.code == 1
 
             # Error message should be printed
             mock_print.assert_called_once()
@@ -104,8 +111,12 @@ class TestCLI(unittest.TestCase):
 
         # Capture stdout for assertion
         with mock.patch("builtins.print") as mock_print:
-            # Run with unexpected error action
-            run(["test", "unexpected"])
+            with pytest.raises(SystemExit) as systemexit:
+                # Run with unexpected error action
+                run(["test", "unexpected"])
+
+                assert systemexit.type is SystemExit
+                assert systemexit.value.code == 1
 
             # Error message should be printed
             mock_print.assert_called_once()
