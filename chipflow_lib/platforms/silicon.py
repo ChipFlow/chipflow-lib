@@ -1,3 +1,5 @@
+# amaranth: UnusedElaboratable=no
+
 # SPDX-License-Identifier: BSD-2-Clause
 import logging
 import os
@@ -71,7 +73,14 @@ class SiliconPlatformPort(io.PortLike):
         self._direction = io.Direction(port.direction)
         self._invert = invert
         self._options = port.options
-
+        self._pins = port.pins
+        
+        # Initialize signal attributes to None
+        self._i = None
+        self._o = None
+        self._oe = None
+        
+        # Create signals based on direction
         if self._direction in (io.Direction.Input, io.Direction.Bidir):
             self._i = Signal(port.width, name=f"{component}_{name}__i")
         if self._direction in (io.Direction.Output, io.Direction.Bidir):
@@ -81,8 +90,10 @@ class SiliconPlatformPort(io.PortLike):
                 self._oe = Signal(port.width, name=f"{component}_{name}__oe", init=-1)
             else:
                 self._oe = Signal(1, name=f"{component}_{name}__oe", init=-1)
+        elif self._direction is io.Direction.Output:
+            # Always create an _oe for output ports
+            self._oe = Signal(1, name=f"{component}_{name}__oe", init=-1)
 
-        self._pins = port.pins
         logger.debug(f"Created SiliconPlatformPort {name}, width={len(port.pins)},dir{self._direction}")
 
     def wire(self, m: Module, interface: PureInterface):
@@ -148,6 +159,8 @@ class SiliconPlatformPort(io.PortLike):
         result._oe = None if self._oe is None else self._oe[key]
         result._invert = self._invert
         result._direction = self._direction
+        result._options = self._options
+        result._pins = self._pins
         return result
 
     def __invert__(self):
@@ -157,6 +170,8 @@ class SiliconPlatformPort(io.PortLike):
         result._oe = self._oe
         result._invert = not self._invert
         result._direction = self._direction
+        result._options = self._options
+        result._pins = self._pins
         return result
 
     def __add__(self, other):
@@ -167,6 +182,8 @@ class SiliconPlatformPort(io.PortLike):
         result._oe = None if direction is io.Direction.Input else Cat(self._oe, other._oe)
         result._invert = self._invert
         result._direction = direction
+        result._options = self._options
+        result._pins = self._pins + other._pins
         return result
 
     def __repr__(self):
