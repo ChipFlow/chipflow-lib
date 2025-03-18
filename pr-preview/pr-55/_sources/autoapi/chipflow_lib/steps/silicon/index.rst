@@ -42,9 +42,6 @@ Module Contents
    .. py:attribute:: config
 
 
-   .. py:attribute:: config_model
-
-
    .. py:attribute:: project_name
 
 
