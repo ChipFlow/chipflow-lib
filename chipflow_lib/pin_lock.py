@@ -91,14 +91,27 @@ def lock_pins() -> None:
     package_type = PACKAGE_DEFINITIONS[package_name]
 
     package = Package(package_type=package_type)
+    
+    # Initialize standard pins from package type
+    package.initialize_from_package_type()
+    
+    # Process user-defined pads and power pins
     for d in ("pads", "power"):
+        if d not in config["chipflow"]["silicon"]:
+            continue
+            
         logger.debug(f"Checking [chipflow.silicon.{d}]:")
         _map = {}
         for k, v in config["chipflow"]["silicon"][d].items():
-            pin = str(v['loc'])
-            used_pins.add(pin)
+            # Handle both old-style (loc) and new-style (name/voltage) configurations
+            pin = str(v['loc']) if 'loc' in v else None
+            
+            # Mark the pin as used if it has a location
+            if pin:
+                used_pins.add(pin)
+                
             port = oldlock.package.check_pad(k, v) if oldlock else None
-            if port and port.pins != [pin]:
+            if port and pin and port.pins != [pin]:
                 raise ChipFlowError(
                     f"chipflow.toml conflicts with pins.lock: "
                     f"{k} had pin {port.pins}, now {[pin]}."
