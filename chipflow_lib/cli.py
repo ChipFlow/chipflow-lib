@@ -81,3 +81,4 @@ def run(argv=sys.argv[1:]):
         if hasattr(args, "action"):
             cmd += f" {args.action}"
         print(f"Error while executing `{cmd}`: {e}")
+        exit(1)
