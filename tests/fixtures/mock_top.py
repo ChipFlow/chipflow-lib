@@ -43,5 +43,5 @@ class MockTop(wiring.Component):
         m = Module()
         for inpin, outpin in zip(self.test1.members, self.test2.members):
             m.d.comb += inpin.eq(outpin)
- 
+
         return m

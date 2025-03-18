@@ -1,9 +1,8 @@
 # SPDX-License-Identifier: BSD-2-Clause
-import enum
 import re
-from typing import Dict, List, Optional, Union, Literal, Any
+from typing import Dict, Optional, Literal, Any
 
-from pydantic import BaseModel, Field, model_validator, ValidationInfo, field_validator
+from pydantic import BaseModel, model_validator, ValidationInfo, field_validator
 
 from .platforms.utils import Process
 
@@ -19,7 +18,7 @@ class PadConfig(BaseModel):
         if not re.match(r"^[NSWE]?[0-9]+$", self.loc):
             raise ValueError(f"Invalid location format: {self.loc}, expected format: [NSWE]?[0-9]+")
         return self
-    
+
     @classmethod
     def validate_pad_dict(cls, v: dict, info: ValidationInfo):
         """Custom validation for pad dicts from TOML that may not have all fields."""
@@ -28,11 +27,11 @@ class PadConfig(BaseModel):
             if 'loc' in v and 'type' not in v:
                 if info.field_name == 'power':
                     v['type'] = 'power'
-                    
+
             # Map legacy 'clk' type to 'clock' to match our enum
             if 'type' in v and v['type'] == 'clk':
                 v['type'] = 'clock'
-                
+
             return v
         return v
 
@@ -44,7 +43,7 @@ class SiliconConfig(BaseModel):
     pads: Dict[str, PadConfig] = {}
     power: Dict[str, PadConfig] = {}
     debug: Optional[Dict[str, bool]] = None
-    
+
     @field_validator('pads', 'power', mode='before')
     @classmethod
     def validate_pad_dicts(cls, v, info: ValidationInfo):

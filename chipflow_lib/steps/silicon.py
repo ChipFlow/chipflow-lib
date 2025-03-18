@@ -149,7 +149,7 @@ class SiliconStep:
                 logger.debug(f"padname={padname}, port={port}, loc={port.pins[0]}, "
                              f"dir={port.direction}, width={width}")
                 pads[padname] = {'loc': port.pins[0], 'type': port.direction.value}
- 
+
         # Use the Pydantic models to access configuration data
         silicon_model = self.config_model.chipflow.silicon
         config = {

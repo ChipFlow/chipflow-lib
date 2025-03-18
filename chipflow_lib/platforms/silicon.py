@@ -11,7 +11,7 @@ from amaranth import Module, Signal, Cat, ClockDomain, ClockSignal, ResetSignal
 
 from amaranth.lib import wiring, io
 from amaranth.lib.cdc import FFSynchronizer
-from amaranth.lib.wiring import Component, In, PureInterface, flipped, connect
+from amaranth.lib.wiring import Component, In, PureInterface
 
 from amaranth.back import rtlil
 from amaranth.hdl import Fragment
@@ -74,12 +74,12 @@ class SiliconPlatformPort(io.PortLike):
         self._invert = invert
         self._options = port.options
         self._pins = port.pins
-        
+
         # Initialize signal attributes to None
         self._i = None
         self._o = None
         self._oe = None
-        
+
         # Create signals based on direction
         if self._direction in (io.Direction.Input, io.Direction.Bidir):
             self._i = Signal(port.width, name=f"{component}_{name}__i")
