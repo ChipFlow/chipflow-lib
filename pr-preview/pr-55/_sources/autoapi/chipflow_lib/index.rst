@@ -12,6 +12,7 @@ Submodules
 
    /autoapi/chipflow_lib/cli/index
    /autoapi/chipflow_lib/config/index
+   /autoapi/chipflow_lib/config_models/index
    /autoapi/chipflow_lib/errors/index
    /autoapi/chipflow_lib/pin_lock/index
    /autoapi/chipflow_lib/platforms/index
