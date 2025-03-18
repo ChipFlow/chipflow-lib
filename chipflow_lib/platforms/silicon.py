@@ -90,9 +90,7 @@ class SiliconPlatformPort(io.PortLike):
                 self._oe = Signal(port.width, name=f"{component}_{name}__oe", init=-1)
             else:
                 self._oe = Signal(1, name=f"{component}_{name}__oe", init=-1)
-        elif self._direction is io.Direction.Output:
-            # Always create an _oe for output ports
-            self._oe = Signal(1, name=f"{component}_{name}__oe", init=-1)
+        # Output ports don't have _oe signals
 
         logger.debug(f"Created SiliconPlatformPort {name}, width={len(port.pins)},dir{self._direction}")
 
@@ -100,12 +98,12 @@ class SiliconPlatformPort(io.PortLike):
         assert self._direction == interface.signature.direction
         if hasattr(interface, 'i'):
             m.d.comb += interface.i.eq(self.i)
-        for d in ['o', 'oe']:
-            if hasattr(interface, d):
-                m.d.comb += getattr(self, d).eq(getattr(interface, d))
+        if hasattr(interface, 'o'):
+            m.d.comb += self.o.eq(interface.o)
+        if hasattr(interface, 'oe') and self._oe is not None:
+            m.d.comb += self.oe.eq(interface.oe)
 
     @property
-
     def i(self):
         if self._i is None:
             raise AttributeError("SiliconPlatformPort with output direction does not have an "
@@ -122,7 +120,7 @@ class SiliconPlatformPort(io.PortLike):
     @property
     def oe(self):
         if self._oe is None:
-            raise AttributeError("SiliconPlatformPort with input direction does not have an "
+            raise AttributeError("SiliconPlatformPort with output or input direction does not have an "
                                "output enable signal")
         return self._oe
 
@@ -217,7 +215,9 @@ class IOBuffer(io.Buffer):
             m.d.comb += i_inv.eq(self.port.i)
         if self.direction in (io.Direction.Output, io.Direction.Bidir):
             m.d.comb += self.port.o.eq(o_inv)
-            m.d.comb += self.port.oe.eq(self.oe)
+            # Only set oe for bidirectional ports
+            if self.direction is io.Direction.Bidir:
+                m.d.comb += self.port.oe.eq(self.oe)
 
         return m
 

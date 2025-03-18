@@ -40,7 +40,8 @@ class TestSiliconPlatformPort(unittest.TestCase):
 
         # Test accessing properties
         _ = spp.o  # Should not raise an error
-        _ = spp.oe  # Should not raise an error since we now always have an _oe for outputs
+        with self.assertRaises(AttributeError):
+            _ = spp.oe  # Should raise an error since output ports don't have oe signals
         with self.assertRaises(AttributeError):
             _ = spp.i  # Should raise an error for output port
 
@@ -174,7 +175,7 @@ class TestSiliconPlatformPort(unittest.TestCase):
         spp.wire(m, interface)
 
     def test_wire_output(self):
-        # Test wire method with a mock output interface to cover line 105
+        # Test wire method with a mock output interface
         port_obj = Port(type="output", pins=["1", "2"], port_name="test_output",
                          direction="o", options={})
         spp = SiliconPlatformPort("comp", "test_output", port_obj)
@@ -193,7 +194,6 @@ class TestSiliconPlatformPort(unittest.TestCase):
             def __init__(self):
                 self.signature = MockSignature()
                 self.o = Signal(2)
-                self.oe = Signal(1)
 
         interface = MockInterface()
         m = Module()
