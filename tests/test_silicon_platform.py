@@ -4,7 +4,7 @@
 import os
 import unittest
 
-import tomli 
+import tomli
 
 from amaranth import *
 from amaranth.hdl._ir import Design

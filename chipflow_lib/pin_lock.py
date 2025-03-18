@@ -8,7 +8,7 @@ from typing import Any, List, Dict, Tuple
 
 from chipflow_lib import _parse_config, ChipFlowError
 from chipflow_lib.platforms import PACKAGE_DEFINITIONS, PIN_ANNOTATION_SCHEMA, top_interfaces
-from chipflow_lib.platforms.utils import LockFile, Package, PortMap, Port, Process
+from chipflow_lib.platforms.utils import LockFile, Package, PortMap, Port
 from chipflow_lib.config_models import Config
 
 # logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
@@ -79,11 +79,10 @@ def allocate_pins(name: str, member: Dict[str, Any], pins: List[str], port_name:
 def lock_pins() -> None:
     # Get the config as dict for backward compatibility with top_interfaces
     config_dict = _parse_config()
-    
+
     # Parse with Pydantic for type checking and strong typing
-    from chipflow_lib.config_models import Config
     config_model = Config.model_validate(config_dict)
-    
+
     used_pins = set()
     oldlock = None
 

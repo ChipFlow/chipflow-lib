@@ -1,0 +1,19 @@
+# Basic .gitattributes for a python repo.
+
+# Source files
+# ============
+*.py     text diff=python eol=lf whitespace=trailing-space,space-before-tab,tab-in-indent,tabwidth=4
+
+# Binary files
+# ============
+*.db     binary
+*.p      binary
+*.pkl    binary
+*.pickle binary
+*.pyc    binary export-ignore
+*.pyo    binary export-ignore
+*.pyd    binary
+
+# Jupyter notebook
+*.ipynb  text eol=lf
+

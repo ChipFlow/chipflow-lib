@@ -4,10 +4,7 @@ import sys
 import unittest
 import tempfile
 from unittest import mock
-from pathlib import Path
 
-import jsonschema
-import pytest
 
 from chipflow_lib import (
     ChipFlowError,
@@ -23,7 +20,7 @@ class TestCoreUtilities(unittest.TestCase):
         # Save original environment to restore later
         self.original_chipflow_root = os.environ.get("CHIPFLOW_ROOT")
         self.original_sys_path = sys.path.copy()
-        
+
         # Create a temporary directory for tests
         self.temp_dir = tempfile.TemporaryDirectory()
         self.temp_path = self.temp_dir.name
@@ -34,7 +31,7 @@ class TestCoreUtilities(unittest.TestCase):
             os.environ["CHIPFLOW_ROOT"] = self.original_chipflow_root
         else:
             os.environ.pop("CHIPFLOW_ROOT", None)
-        
+
         sys.path = self.original_sys_path
         self.temp_dir.cleanup()
 
@@ -53,23 +50,23 @@ class TestCoreUtilities(unittest.TestCase):
         """Test _get_cls_by_reference when the module doesn't exist"""
         with self.assertRaises(ChipFlowError) as cm:
             _get_cls_by_reference("nonexistent_module:SomeClass", "test context")
-        
+
         self.assertIn("Module `nonexistent_module` referenced by test context is not found", str(cm.exception))
 
     def test_get_cls_by_reference_class_not_found(self):
         """Test _get_cls_by_reference when the class doesn't exist in the module"""
         with self.assertRaises(ChipFlowError) as cm:
             _get_cls_by_reference("unittest:NonExistentClass", "test context")
-        
+
         self.assertIn("Module `unittest` referenced by test context does not define `NonExistentClass`", str(cm.exception))
 
     def test_ensure_chipflow_root_already_set(self):
         """Test _ensure_chipflow_root when CHIPFLOW_ROOT is already set"""
         os.environ["CHIPFLOW_ROOT"] = "/test/path"
         sys.path = ["/some/other/path"]
-        
+
         result = _ensure_chipflow_root()
-        
+
         self.assertEqual(result, "/test/path")
         self.assertIn("/test/path", sys.path)
 
@@ -77,10 +74,10 @@ class TestCoreUtilities(unittest.TestCase):
         """Test _ensure_chipflow_root when CHIPFLOW_ROOT is not set"""
         if "CHIPFLOW_ROOT" in os.environ:
             del os.environ["CHIPFLOW_ROOT"]
-        
+
         with mock.patch("os.getcwd", return_value="/mock/cwd"):
             result = _ensure_chipflow_root()
-            
+
             self.assertEqual(result, "/mock/cwd")
             self.assertEqual(os.environ["CHIPFLOW_ROOT"], "/mock/cwd")
             self.assertIn("/mock/cwd", sys.path)
@@ -102,9 +99,9 @@ package = "caravel"
         config_path = os.path.join(self.temp_path, "chipflow.toml")
         with open(config_path, "w") as f:
             f.write(config_content)
-        
+
         config = _parse_config_file(config_path)
-        
+
         self.assertIn("chipflow", config)
         self.assertEqual(config["chipflow"]["project_name"], "test_project")
         self.assertEqual(config["chipflow"]["silicon"]["process"], "sky130")
@@ -120,10 +117,10 @@ project_name = "test_project"
         config_path = os.path.join(self.temp_path, "chipflow.toml")
         with open(config_path, "w") as f:
             f.write(config_content)
-        
+
         with self.assertRaises(ChipFlowError) as cm:
             _parse_config_file(config_path)
-        
+
         self.assertIn("Syntax error in `chipflow.toml`", str(cm.exception))
 
     @mock.patch("chipflow_lib._ensure_chipflow_root")
@@ -132,9 +129,9 @@ project_name = "test_project"
         """Test _parse_config which uses _ensure_chipflow_root and _parse_config_file"""
         mock_ensure_chipflow_root.return_value = "/mock/chipflow/root"
         mock_parse_config_file.return_value = {"chipflow": {"test": "value"}}
-        
+
         config = _parse_config()
-        
+
         mock_ensure_chipflow_root.assert_called_once()
         # We're expecting a string, not a Path
         mock_parse_config_file.assert_called_once_with("/mock/chipflow/root/chipflow.toml")

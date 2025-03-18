@@ -5,15 +5,10 @@ import os
 import unittest
 from unittest import mock
 import argparse
-import json
 import tempfile
-from pathlib import Path
 
-import pytest
-import requests
 
-from amaranth import Module, Signal
-from amaranth.lib import io
+from amaranth import Module
 
 from chipflow_lib import ChipFlowError
 from chipflow_lib.steps.silicon import SiliconStep, SiliconTop
@@ -25,13 +20,13 @@ class TestSiliconStep(unittest.TestCase):
         self.temp_dir = tempfile.TemporaryDirectory()
         self.original_cwd = os.getcwd()
         os.chdir(self.temp_dir.name)
-        
+
         # Mock environment for testing
         self.chipflow_root_patcher = mock.patch.dict(
             os.environ, {"CHIPFLOW_ROOT": self.temp_dir.name}
         )
         self.chipflow_root_patcher.start()
-        
+
         # Create basic config for tests
         self.config = {
             "chipflow": {
@@ -63,7 +58,7 @@ class TestSiliconStep(unittest.TestCase):
     def test_init(self, mock_silicontop_class):
         """Test SiliconStep initialization"""
         step = SiliconStep(self.config)
-        
+
         # Check that attributes are correctly set
         self.assertEqual(step.config, self.config)
         self.assertEqual(step.project_name, "test_project")
@@ -98,7 +93,7 @@ class TestSiliconStep(unittest.TestCase):
         # Verify the name parameter
         self.assertEqual(kwargs["name"], "test_project")
         self.assertEqual(mock_silicontop_class.call_args[0][0], self.config)
-        
+
         # Check result
         self.assertEqual(result, "/path/to/rtlil")
 
@@ -108,13 +103,13 @@ class TestSiliconStep(unittest.TestCase):
         parser = mock.MagicMock()
         subparsers = mock.MagicMock()
         parser.add_subparsers.return_value = subparsers
-        
+
         # Create SiliconStep instance
         step = SiliconStep(self.config)
-        
+
         # Call the method
         step.build_cli_parser(parser)
-        
+
         # Verify parser setup
         parser.add_subparsers.assert_called_once_with(dest="action")
         # Check that prepare and submit subparsers were added
@@ -147,7 +142,7 @@ class TestSiliconStep(unittest.TestCase):
 
         # Call the method
         step.run_cli(args)
- 
+
         mock_prepare.assert_called_once()
         mock_submit.assert_not_called()
         # Verify dotenv not loaded for prepare
@@ -161,7 +156,7 @@ class TestSiliconStep(unittest.TestCase):
         """Test run_cli with submit action"""
         # Setup mocks
         mock_prepare.return_value = "/path/to/rtlil"
-        
+
         # Add environment variables
         with mock.patch.dict(os.environ, {
             "CHIPFLOW_API_KEY_ID": "api_key_id",
@@ -171,13 +166,13 @@ class TestSiliconStep(unittest.TestCase):
             args = mock.MagicMock()
             args.action = "submit"
             args.dry_run = False
-            
+
             # Create SiliconStep instance
             step = SiliconStep(self.config)
-            
+
             # Call the method
             step.run_cli(args)
-            
+
             # Verify prepare and submit were called
             mock_prepare.assert_called_once()
             mock_submit.assert_called_once_with("/path/to/rtlil", dry_run=False)
@@ -196,18 +191,18 @@ class TestSiliconStep(unittest.TestCase):
         mock_platform.build.return_value = "/path/to/rtlil"
         mock_top_interfaces.return_value = ({"mock_component": mock.MagicMock()}, {})
         mock_platform.pinlock.port_map = {}
-        
+
         # Create mock args
         args = mock.MagicMock()
         args.action = "submit"
         args.dry_run = True
-        
+
         # Create SiliconStep instance
         step = SiliconStep(self.config)
-        
+
         # Call the method
         step.run_cli(args)
-        
+
         # Verify prepare and submit were called
         mock_platform.build.assert_called_once()
         mock_submit.assert_called_once_with("/path/to/rtlil", dry_run=True)
@@ -231,7 +226,7 @@ class TestSiliconStep(unittest.TestCase):
                 }
             }
         }
-        
+
         # Add environment variables
         with mock.patch.dict(os.environ, {
             "CHIPFLOW_API_KEY_ID": "api_key_id",
@@ -241,14 +236,14 @@ class TestSiliconStep(unittest.TestCase):
             args = mock.MagicMock()
             args.action = "submit"
             args.dry_run = False
-            
+
             # Create SiliconStep instance
             step = SiliconStep(config_no_project)
-            
+
             # Test for exception
             with self.assertRaises(ChipFlowError) as cm:
                 step.run_cli(args)
-                
+
             # Verify error message mentions project_id
             self.assertIn("project_id", str(cm.exception))
             # Verify dotenv was loaded
@@ -262,14 +257,14 @@ class TestSiliconStep(unittest.TestCase):
         args = mock.MagicMock()
         args.action = "submit"
         args.dry_run = False
-        
+
         # Create SiliconStep instance
         step = SiliconStep(self.config)
-        
+
         # Test for exception
         with self.assertRaises(ChipFlowError) as cm:
             step.run_cli(args)
-            
+
         # Verify error message
         self.assertIn("CHIPFLOW_API_KEY_ID", str(cm.exception))
         self.assertIn("CHIPFLOW_API_KEY_SECRET", str(cm.exception))
@@ -285,39 +280,39 @@ class TestSiliconStep(unittest.TestCase):
             "abcdef\n",  # git rev-parse
             ""           # git status (not dirty)
         ]
-        
+
         # Setup version mocks
         mock_version.return_value = "1.0.0"
-        
+
         # Setup platform mock
         platform_mock = mock.MagicMock()
         platform_mock._ports = {
             "port1": mock.MagicMock(
-                pins=["1"], 
+                pins=["1"],
                 direction=mock.MagicMock(value="i")
             ),
             "port2": mock.MagicMock(
-                pins=["2", "3"], 
+                pins=["2", "3"],
                 direction=mock.MagicMock(value="o")
             )
         }
-        
+
         # Create SiliconStep with mocked platform
         step = SiliconStep(self.config)
         step.platform = platform_mock
-        
+
         # Mock print and capture output
         with mock.patch("builtins.print") as mock_print:
             # Call submit with dry run
             step.submit("/path/to/rtlil", dry_run=True)
-            
+
             # Verify print was called twice
             self.assertEqual(mock_print.call_count, 2)
             # Verify JSON data was printed
             args = mock_print.call_args_list
             self.assertIn("data=", args[0][0][0])
             self.assertIn("files['config']=", args[1][0][0])
-            
+
             # Verify no requests were made
             self.assertFalse(hasattr(step, "_request_made"))
 
@@ -334,29 +329,29 @@ class TestSiliconStep(unittest.TestCase):
             "abcdef\n",  # git rev-parse
             "M file.py"  # git status (dirty)
         ]
-        
+
         # Setup version mocks
         mock_version.return_value = "1.0.0"
-        
+
         # Setup response mock
         mock_response = mock.MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"build_id": "12345"}
         mock_post.return_value = mock_response
-        
+
         # Setup platform mock
         platform_mock = mock_platform_class.return_value
         platform_mock._ports = {
             "port1": mock.MagicMock(
-                pins=["1"], 
+                pins=["1"],
                 direction=mock.MagicMock(value="i")
             ),
             "port2": mock.MagicMock(
-                pins=["2", "3"], 
+                pins=["2", "3"],
                 direction=mock.MagicMock(value="o")
             )
         }
-        
+
         # Add required environment variables
         with mock.patch.dict(os.environ, {
             "CHIPFLOW_API_KEY_ID": "api_key_id",
@@ -364,12 +359,12 @@ class TestSiliconStep(unittest.TestCase):
         }):
             # Create SiliconStep with mocked platform
             step = SiliconStep(self.config)
-            
+
             # Mock print and capture output
             with mock.patch("builtins.print") as mock_print:
                 # Call submit
                 step.submit("/path/to/rtlil")
-                
+
                 # Verify requests.post was called
                 mock_post.assert_called_once()
                 # Check auth was provided
@@ -378,10 +373,10 @@ class TestSiliconStep(unittest.TestCase):
                 # Check files were included
                 self.assertIn("rtlil", kwargs["files"])
                 self.assertIn("config", kwargs["files"])
-                
+
                 # Verify file was opened
                 mock_file_open.assert_called_with("/path/to/rtlil", "rb")
-                
+
                 # Verify build URL was printed
                 mock_print.assert_called_once()
                 self.assertIn("build/12345", mock_print.call_args[0][0])
@@ -398,10 +393,10 @@ class TestSiliconStep(unittest.TestCase):
             "abcdef\n",  # git rev-parse
             ""           # git status (not dirty)
         ]
-        
+
         # Setup version mocks
         mock_version.return_value = "1.0.0"
-        
+
         # Setup response mock with error
         mock_response = mock.MagicMock()
         mock_response.status_code = 400
@@ -411,16 +406,16 @@ class TestSiliconStep(unittest.TestCase):
         mock_response.request.headers = {"Authorization": "Basic xyz"}
         mock_response.headers = {"Content-Type": "application/json"}
         mock_post.return_value = mock_response
-        
+
         # Setup platform mock
         platform_mock = mock_platform_class.return_value
         platform_mock._ports = {
             "port1": mock.MagicMock(
-                pins=["1"], 
+                pins=["1"],
                 direction=mock.MagicMock(value="i")
             ),
         }
-        
+
         # Add required environment variables
         with mock.patch.dict(os.environ, {
             "CHIPFLOW_API_KEY_ID": "api_key_id",
@@ -428,14 +423,14 @@ class TestSiliconStep(unittest.TestCase):
         }):
             # Create SiliconStep with mocked platform
             step = SiliconStep(self.config)
-            
+
             # Test for exception
             with self.assertRaises(ChipFlowError) as cm:
                 step.submit("/path/to/rtlil")
-                
+
             # Verify error message
             self.assertIn("Failed to submit design", str(cm.exception))
-            
+
             # Verify requests.post was called
             mock_post.assert_called_once()
 
@@ -466,7 +461,7 @@ class TestSiliconTop(unittest.TestCase):
         """Test SiliconTop initialization"""
         top = SiliconTop(self.config)
         self.assertEqual(top._config, self.config)
-        
+
     @mock.patch("chipflow_lib.steps.silicon.top_interfaces")
     def test_elaborate(self, mock_top_interfaces):
         """Test SiliconTop elaborate method"""
@@ -483,33 +478,33 @@ class TestSiliconTop(unittest.TestCase):
             "test_port": mock.MagicMock(),
             "heartbeat": mock.MagicMock()
         }
-        
+
         # Create mock components and interfaces
         mock_component = mock.MagicMock()
         mock_component.iface1.port1 = mock.MagicMock()
         mock_components = {"comp1": mock_component}
-        
+
         # Setup top_interfaces mock
         mock_top_interfaces.return_value = (mock_components, {})
-        
+
         # Create SiliconTop instance
         top = SiliconTop(self.config)
-        
+
         # Call elaborate
         module = top.elaborate(platform)
-        
+
         # Verify it's a Module
         self.assertIsInstance(module, Module)
-        
+
         # Use the result to avoid UnusedElaboratable warning
         self.assertIsNotNone(module)
-        
+
         # Verify platform methods were called
         platform.instantiate_ports.assert_called_once()
-        
+
         # Verify port wiring
         platform.ports["test_port"].wire.assert_called_once()
-        
+
         # Verify heartbeat was created (since debug.heartbeat is True)
         platform.request.assert_called_with("heartbeat")
 
@@ -569,12 +564,11 @@ class TestSiliconTop(unittest.TestCase):
     def test_heartbeat(self, mock_top_interfaces, mock_module, mock_heartbeat_class, mock_io_buffer):
         """Test that Heartbeat class gets used properly when debug.heartbeat is True"""
         # Import Heartbeat class to make sure it's loaded and used
-        from chipflow_lib.platforms.silicon import Heartbeat
-        
+
         # Create a mock Heartbeat instance
         mock_heartbeat = mock.MagicMock()
         mock_heartbeat_class.return_value = mock_heartbeat
-        
+
         # Create a mock platform with a heartbeat port
         platform = mock.MagicMock()
         platform.pinlock.port_map = {}
@@ -582,14 +576,14 @@ class TestSiliconTop(unittest.TestCase):
             "heartbeat": mock.MagicMock()
         }
         platform.request.return_value = platform.ports["heartbeat"]
-        
+
         # Create a mock for top_interfaces
         mock_top_interfaces.return_value = ({}, {})
-        
+
         # Create and elaborate SiliconTop with heartbeat
         top = SiliconTop(self.config)
         result = top.elaborate(platform)
-        
+
         # Verify platform.request was called with "heartbeat"
         platform.request.assert_called_with("heartbeat")
 

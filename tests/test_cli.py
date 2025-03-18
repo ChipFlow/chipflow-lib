@@ -1,13 +1,10 @@
 # SPDX-License-Identifier: BSD-2-Clause
-import os
-import sys
 import unittest
-import argparse
 from unittest import mock
 import logging
 
 from chipflow_lib import ChipFlowError
-from chipflow_lib.cli import run, UnexpectedError
+from chipflow_lib.cli import run
 
 
 class MockCommand:
@@ -15,7 +12,7 @@ class MockCommand:
     def build_cli_parser(self, parser):
         parser.add_argument("--option", help="Test option")
         parser.add_argument("action", choices=["valid", "error", "unexpected"])
-    
+
     def run_cli(self, args):
         if args.action == "error":
             raise ChipFlowError("Command error")
@@ -39,18 +36,18 @@ class TestCLI(unittest.TestCase):
             }
         }
         mock_parse_config.return_value = mock_config
-        
+
         mock_pin_cmd = MockCommand()
         mock_pin_command.return_value = mock_pin_cmd
-        
+
         mock_test_cmd = MockCommand()
         mock_get_cls.return_value = lambda config: mock_test_cmd
-        
+
         # Capture stdout for assertion
         with mock.patch("sys.stdout") as mock_stdout:
             # Run with valid action
             run(["test", "valid"])
-            
+
             # No error message should be printed
             mock_stdout.write.assert_not_called()
 
@@ -68,18 +65,18 @@ class TestCLI(unittest.TestCase):
             }
         }
         mock_parse_config.return_value = mock_config
-        
+
         mock_pin_cmd = MockCommand()
         mock_pin_command.return_value = mock_pin_cmd
-        
+
         mock_test_cmd = MockCommand()
         mock_get_cls.return_value = lambda config: mock_test_cmd
-        
+
         # Capture stdout for assertion
         with mock.patch("builtins.print") as mock_print:
             # Run with error action
             run(["test", "error"])
-            
+
             # Error message should be printed
             mock_print.assert_called_once()
             self.assertIn("Error while executing `test error`", mock_print.call_args[0][0])
@@ -98,18 +95,18 @@ class TestCLI(unittest.TestCase):
             }
         }
         mock_parse_config.return_value = mock_config
-        
+
         mock_pin_cmd = MockCommand()
         mock_pin_command.return_value = mock_pin_cmd
-        
+
         mock_test_cmd = MockCommand()
         mock_get_cls.return_value = lambda config: mock_test_cmd
-        
+
         # Capture stdout for assertion
         with mock.patch("builtins.print") as mock_print:
             # Run with unexpected error action
             run(["test", "unexpected"])
-            
+
             # Error message should be printed
             mock_print.assert_called_once()
             self.assertIn("Error while executing `test unexpected`", mock_print.call_args[0][0])
@@ -128,17 +125,17 @@ class TestCLI(unittest.TestCase):
             }
         }
         mock_parse_config.return_value = mock_config
-        
+
         mock_pin_cmd = MockCommand()
         mock_pin_command.return_value = mock_pin_cmd
-        
+
         # Make _get_cls_by_reference raise an exception during step initialization
         with mock.patch("chipflow_lib.cli._get_cls_by_reference") as mock_get_cls:
             mock_get_cls.return_value = mock.Mock(side_effect=Exception("Init error"))
-            
+
             with self.assertRaises(ChipFlowError) as cm:
                 run(["test", "valid"])
-            
+
             self.assertIn("Encountered error while initializing step", str(cm.exception))
 
     @mock.patch("chipflow_lib.cli._parse_config")
@@ -155,19 +152,19 @@ class TestCLI(unittest.TestCase):
             }
         }
         mock_parse_config.return_value = mock_config
-        
+
         # Make pin command raise an error during build_cli_parser
         mock_pin_cmd = mock.Mock()
         mock_pin_cmd.build_cli_parser.side_effect = Exception("Parser error")
         mock_pin_command.return_value = mock_pin_cmd
-        
+
         mock_test_cmd = mock.Mock()
         mock_test_cmd.build_cli_parser.side_effect = Exception("Parser error")
         mock_get_cls.return_value = lambda config: mock_test_cmd
-        
+
         with self.assertRaises(ChipFlowError) as cm:
             run(["pin", "lock"])
-        
+
         self.assertIn("Encountered error while building CLI argument parser", str(cm.exception))
 
     @mock.patch("chipflow_lib.cli._parse_config")
@@ -184,25 +181,25 @@ class TestCLI(unittest.TestCase):
             }
         }
         mock_parse_config.return_value = mock_config
-        
+
         mock_pin_cmd = MockCommand()
         mock_pin_command.return_value = mock_pin_cmd
-        
+
         mock_test_cmd = MockCommand()
         mock_get_cls.return_value = lambda config: mock_test_cmd
-        
+
         # Save original log level
         original_level = logging.getLogger().level
-        
+
         try:
             # Test with -v
             with mock.patch("sys.stdout"):
                 run(["-v", "test", "valid"])
                 self.assertEqual(logging.getLogger().level, logging.INFO)
-            
+
             # Reset log level
             logging.getLogger().setLevel(original_level)
-            
+
             # Test with -v -v
             with mock.patch("sys.stdout"):
                 run(["-v", "-v", "test", "valid"])
