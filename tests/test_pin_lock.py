@@ -2,13 +2,10 @@
 import os
 import unittest
 import tempfile
-import pathlib
 from unittest import mock
-from pathlib import Path
 
-from chipflow_lib import ChipFlowError
 from chipflow_lib.platforms.utils import (
-    Port, Package, PortMap, LockFile, Process, _QuadPackageDef
+    Package, PortMap, LockFile, Process, _QuadPackageDef
 )
 from chipflow_lib.config_models import Config, SiliconConfig, PadConfig, StepsConfig, ChipFlowConfig
 from chipflow_lib.pin_lock import (
@@ -21,7 +18,7 @@ class MockPackageType:
     """Mock for package type class used in tests"""
     def __init__(self, name="test_package"):
         self.name = name
-        self.type = "_QuadPackageDef"  # This is needed for Pydantic discrimination
+        self.type = "_PGAPackageDef"  # This is needed for Pydantic discrimination
         self.pins = set([str(i) for i in range(1, 100)])  # Create pins 1-99
         self.width = 50  # For Pydantic compatibility
         self.height = 50  # For Pydantic compatibility
@@ -41,11 +38,9 @@ class TestPinLock(unittest.TestCase):
         self.temp_dir = tempfile.TemporaryDirectory()
         self.original_cwd = os.getcwd()
         os.chdir(self.temp_dir.name)
-        
         # Mock environment for testing
         self.chipflow_root_patcher = mock.patch.dict(os.environ, {"CHIPFLOW_ROOT": self.temp_dir.name})
         self.chipflow_root_patcher.start()
-        
         # Create test configuration
         # Create a proper Pydantic model
         self.silicon_config = SiliconConfig(
@@ -61,12 +56,10 @@ class TestPinLock(unittest.TestCase):
                 "vss": PadConfig(type="ground", loc="5")
             }
         )
-        
         # Create the steps config
         self.steps_config = StepsConfig(
             silicon="chipflow_lib.steps.silicon:SiliconStep"
         )
-        
         # Create a full chipflow config
         self.chipflow_config = ChipFlowConfig(
             project_name="test_project",
@@ -76,10 +69,8 @@ class TestPinLock(unittest.TestCase):
             clocks={"default": "clk"},
             resets={"default": "rst"}
         )
-        
         # Create the complete config
         self.config = Config(chipflow=self.chipflow_config)
-        
         # Also create a dict version for compatibility with some functions
         self.config_dict = {
             "chipflow": {
@@ -111,7 +102,6 @@ class TestPinLock(unittest.TestCase):
                 }
             }
         }
-        
         # Create mock interfaces
         self.mock_interfaces = {
             "soc": {
@@ -195,14 +185,11 @@ class TestPinLock(unittest.TestCase):
             }
         }
         pins = ["pin1", "pin2", "pin3", "pin4", "pin5", "pin6"]
-        
         pin_map, remaining_pins = allocate_pins("test_interface", member_data, pins)
-        
         # Check that correct pins were allocated
         self.assertIn("test_interface", pin_map)
         self.assertEqual(pin_map["test_interface"]["pins"], pins[:4])
         self.assertEqual(pin_map["test_interface"]["direction"], "io")
-        
         # Check remaining pins
         self.assertEqual(remaining_pins, pins[4:])
 
@@ -224,18 +211,14 @@ class TestPinLock(unittest.TestCase):
             }
         }
         pins = ["pin1", "pin2", "pin3", "pin4", "pin5", "pin6"]
-        
         pin_map, remaining_pins = allocate_pins("test_interface", member_data, pins)
-        
         # Check that correct pins were allocated
         self.assertIn("sub1", pin_map)
         self.assertEqual(pin_map["sub1"]["pins"], pins[:2])
         self.assertEqual(pin_map["sub1"]["direction"], "i")
-        
         self.assertIn("sub2", pin_map)
         self.assertEqual(pin_map["sub2"]["pins"], pins[2:5])
         self.assertEqual(pin_map["sub2"]["direction"], "o")
-        
         # Check remaining pins
         self.assertEqual(remaining_pins, pins[5:])
 
@@ -247,26 +230,23 @@ class TestPinLock(unittest.TestCase):
             "dir": "i"
         }
         pins = ["pin1", "pin2", "pin3", "pin4"]
-        
         pin_map, remaining_pins = allocate_pins("test_port", member_data, pins, port_name="my_port")
-        
         # Check that correct pins were allocated
         self.assertIn("test_port", pin_map)
         self.assertEqual(pin_map["test_port"]["pins"], pins[:3])
         self.assertEqual(pin_map["test_port"]["direction"], "i")
         self.assertEqual(pin_map["test_port"]["port_name"], "my_port")
-        
         # Check remaining pins
         self.assertEqual(remaining_pins, pins[3:])
 
 
     @mock.patch("chipflow_lib.pin_lock._parse_config")
     @mock.patch("chipflow_lib.pin_lock.Config.model_validate")
-    @mock.patch("chipflow_lib.pin_lock.PACKAGE_DEFINITIONS", new={"cf20": MockPackageType(name="cf20")})
+    @mock.patch("chipflow_lib.pin_lock.PACKAGE_DEFINITIONS", new={"cf20": _QuadPackageDef(name="cf20", width=50, height=50)})
     @mock.patch("chipflow_lib.pin_lock.top_interfaces")
     @mock.patch("pathlib.Path.exists")
     @mock.patch("builtins.open", new_callable=mock.mock_open)
-    def test_lock_pins_new_file(self, mock_open, mock_exists, mock_top_interfaces, 
+    def test_lock_pins_new_file(self, mock_open, mock_exists, mock_top_interfaces,
                               mock_config_validate, mock_parse_config):
         """Test lock_pins function with a new pins.lock file"""
         # Set up mocks
@@ -274,34 +254,27 @@ class TestPinLock(unittest.TestCase):
         mock_config_validate.return_value = self.config
         mock_exists.return_value = False  # No existing file
         mock_top_interfaces.return_value = ({}, self.mock_interfaces)
-        
-        # Create real Pydantic objects
-        package_def = MockPackageType(name="cf20")
-        
         # Call the function with real objects
         with mock.patch("chipflow_lib.pin_lock.logger"):
             lock_pins()
-        
         # Verify open was called for writing the pin lock file
         mock_open.assert_called_once_with('pins.lock', 'w')
-        
         # Check that the file was written (write was called)
         mock_open().write.assert_called_once()
-        
         # We can't easily verify the exact content that was written without
         # fully mocking all the complex Pydantic objects, but we can check that
         # a write happened, which confirms basic functionality
 
-    @mock.patch("chipflow_lib.pin_lock._parse_config") 
+    @mock.patch("chipflow_lib.pin_lock._parse_config")
     @mock.patch("chipflow_lib.pin_lock.Config.model_validate")
-    @mock.patch("chipflow_lib.pin_lock.PACKAGE_DEFINITIONS", new={"cf20": MockPackageType(name="cf20")})
+    @mock.patch("chipflow_lib.pin_lock.PACKAGE_DEFINITIONS", new={"cf20": _QuadPackageDef(name="cf20", width=50, height=50)})
     @mock.patch("chipflow_lib.pin_lock.top_interfaces")
     @mock.patch("pathlib.Path.exists")
     @mock.patch("pathlib.Path.read_text")
     @mock.patch("chipflow_lib.pin_lock.LockFile.model_validate_json")
     @mock.patch("builtins.open", new_callable=mock.mock_open)
-    def test_lock_pins_with_existing_lockfile(self, mock_open, mock_validate_json, 
-                                           mock_read_text, mock_exists, mock_top_interfaces, 
+    def test_lock_pins_with_existing_lockfile(self, mock_open, mock_validate_json,
+                                           mock_read_text, mock_exists, mock_top_interfaces,
                                            mock_config_validate, mock_parse_config):
         """Test lock_pins function with an existing pins.lock file"""
         # Setup mocks
@@ -310,10 +283,8 @@ class TestPinLock(unittest.TestCase):
         mock_exists.return_value = True  # Existing file
         mock_read_text.return_value = '{"mock":"json"}'
         mock_top_interfaces.return_value = ({}, self.mock_interfaces)
-        
         # Create a package for the existing lock file
         package_def = _QuadPackageDef(name="cf20", width=50, height=50)
-        
         # Create a Package instance with the package_def
         package = Package(
             package_type=package_def,
@@ -321,10 +292,8 @@ class TestPinLock(unittest.TestCase):
             resets={},
             power={}
         )
-        
         # Create a PortMap instance
         port_map = PortMap({})
-        
         # Create the LockFile instance
         old_lock = LockFile(
             process=Process.IHP_SG13G2,
@@ -332,20 +301,16 @@ class TestPinLock(unittest.TestCase):
             port_map=port_map,
             metadata={}
         )
-        
         # Setup the mock to return our LockFile
         mock_validate_json.return_value = old_lock
-        
         # Call the function
         with mock.patch("chipflow_lib.pin_lock.logger"):
             lock_pins()
-        
         # Verify file operations
         mock_read_text.assert_called_once()
         mock_validate_json.assert_called_once_with('{"mock":"json"}')
         mock_open.assert_called_once_with('pins.lock', 'w')
         mock_open().write.assert_called_once()
-        
         # Since we're using real objects, we'd need complex assertions to
         # verify the exact behavior. But the above confirms the basic flow
         # of reading the existing file and writing a new one.
@@ -357,27 +322,20 @@ class TestPinCommand(unittest.TestCase):
         """Test PinCommand functionality"""
         # Create config
         config = {"test": "config"}
-        
         # Create command instance
         cmd = PinCommand(config)
-        
         # Create mock args
         mock_args = mock.Mock()
         mock_args.action = "lock"
-        
         # Call run_cli
         cmd.run_cli(mock_args)
-        
         # Verify lock_pins was called
         mock_lock_pins.assert_called_once()
-        
         # Test build_cli_parser
         mock_parser = mock.Mock()
         mock_subparsers = mock.Mock()
         mock_parser.add_subparsers.return_value = mock_subparsers
-        
         cmd.build_cli_parser(mock_parser)
-        
         # Verify parser was built
         mock_parser.add_subparsers.assert_called_once()
         mock_subparsers.add_parser.assert_called_once()
