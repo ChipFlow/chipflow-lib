@@ -36,12 +36,15 @@ class TestSiliconStep(unittest.TestCase):
         self.config = {
             "chipflow": {
                 "project_name": "test_project",
+                "steps": {
+                    "silicon": "chipflow_lib.steps.silicon:SiliconStep" 
+                },
                 "top": {
                     "mock_component": "module.MockComponent"
                 },
                 "silicon": {
                     "package": "cf20",
-                    "process": "test_process",
+                    "process": "ihp_sg13g2",  # Valid process value from model enumeration
                     "debug": {
                         "heartbeat": True
                     },
@@ -219,9 +222,12 @@ class TestSiliconStep(unittest.TestCase):
         # Setup config without project_name
         config_no_project = {
             "chipflow": {
+                "steps": {
+                    "silicon": "chipflow_lib.steps.silicon:SiliconStep"
+                },
                 "silicon": {
                     "package": "cf20",
-                    "process": "test_process"
+                    "process": "ihp_sg13g2"
                 }
             }
         }
@@ -445,7 +451,7 @@ class TestSiliconTop(unittest.TestCase):
                 },
                 "silicon": {
                     "package": "cf20",
-                    "process": "test_process",
+                    "process": "ihp_sg13g2",
                     "debug": {
                         "heartbeat": True
                     }
@@ -517,7 +523,7 @@ class TestSiliconTop(unittest.TestCase):
                 },
                 "silicon": {
                     "package": "cf20",
-                    "process": "test_process",
+                    "process": "ihp_sg13g2",
                     "debug": {
                         "heartbeat": False
                     }

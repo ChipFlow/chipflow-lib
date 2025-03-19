@@ -1,153 +1,229 @@
 # SPDX-License-Identifier: BSD-2-Clause
 import os
+import pytest
 import unittest
 from unittest import mock
-import tempfile
-import json
 from pathlib import Path
-from io import StringIO
-from pprint import pformat
 
-from chipflow_lib import ChipFlowError
-from chipflow_lib.pin_lock import (
-    lock_pins,
-    count_member_pins,
-    allocate_pins,
-    PinCommand
-)
+import tomli
+
+from chipflow_lib.config_models import SiliconConfig, PadConfig, Config, ChipFlowConfig, StepsConfig
+from chipflow_lib.platforms.utils import LockFile, Process, Port
+from chipflow_lib.pin_lock import lock_pins
 
 
-class MockPackageType:
-    """Mock for package type class used in tests"""
-    def __init__(self, name="test_package"):
-        self.name = name
-        self.pins = set([str(i) for i in range(1, 100)])  # Create pins 1-99
-        self.allocated_pins = []
+class TestPinLock(unittest.TestCase):
+    def setUp(self):
+        # Set up environment variables and paths for testing
+        os.environ["CHIPFLOW_ROOT"] = os.path.dirname(os.path.dirname(__file__))
+        self.current_dir = os.path.dirname(__file__)
+        # Load configuration for tests
+        self.config_path = f"{self.current_dir}/fixtures/mock.toml"
+        with open(self.config_path, "rb") as f:
+            self.config = tomli.load(f)
+
+    def test_config_model_structure(self):
+        """Test that our Pydantic models correctly represent the TOML structure."""
+        # Create a PadConfig instance
+        pad = PadConfig(type="io", loc="N1")
+        self.assertEqual(pad.type, "io")
+        self.assertEqual(pad.loc, "N1")
+        
+        # Create a SiliconConfig instance
+        silicon = SiliconConfig(
+            process=Process.IHP_SG13G2,
+            package="cf20",
+            pads={"test_pad": pad},
+            power={"vdd": PadConfig(type="power", loc="1")}
+        )
+        self.assertEqual(silicon.process, Process.IHP_SG13G2)
+        self.assertEqual(silicon.package, "cf20")
+        self.assertEqual(silicon.pads["test_pad"].type, "io")
+        self.assertEqual(silicon.power["vdd"].type, "power")
+        
+        # Create a StepsConfig instance
+        steps = StepsConfig(silicon="chipflow_lib.steps.silicon:SiliconStep")
+        self.assertEqual(steps.silicon, "chipflow_lib.steps.silicon:SiliconStep")
+        
+        # Create a ChipFlowConfig instance
+        chipflow_config = ChipFlowConfig(
+            project_name="test",
+            top={"test_component": "test.module:TestComponent"},
+            steps=steps,
+            silicon=silicon
+        )
+        self.assertEqual(chipflow_config.project_name, "test")
+        
+        # Create a full Config instance
+        config = Config(chipflow=chipflow_config)
+        self.assertEqual(config.chipflow.project_name, "test")
+        self.assertEqual(config.chipflow.silicon.process, Process.IHP_SG13G2)
     
-    def sortpins(self, pins):
-        return sorted(list(pins))
+    def test_validate_real_config(self):
+        """Test that our Mock TOML file passes validation."""
+        # Convert the TOML dict to a Config model
+        config = Config.model_validate(self.config)
+        
+        # Verify basic fields
+        self.assertEqual(config.chipflow.project_name, "proj-name")
+        self.assertEqual(config.chipflow.steps.silicon, "chipflow_lib.steps.silicon:SiliconStep")
+        self.assertEqual(config.chipflow.silicon.process, Process.IHP_SG13G2)
+        self.assertEqual(config.chipflow.silicon.package, "pga144")
+        
+        # Verify clocks and resets
+        self.assertEqual(config.chipflow.clocks["default"], "sys_clk")
+        self.assertEqual(config.chipflow.resets["default"], "sys_rst_n")
+        
+        # Verify pads
+        self.assertEqual(config.chipflow.silicon.pads["sys_clk"].type, "clock")  # clk gets mapped to clock
+        self.assertEqual(config.chipflow.silicon.pads["sys_clk"].loc, "N3")
+        self.assertEqual(config.chipflow.silicon.pads["sys_rst_n"].type, "i")
+        
+        # Verify power pads
+        self.assertEqual(config.chipflow.silicon.power["vss"].type, "power")  # Inferred from section
+        self.assertEqual(config.chipflow.silicon.power["vss"].loc, "N1")
     
-    def allocate(self, available, width):
-        # Simple allocation - just return the first 'width' pins from available
-        available_list = sorted(list(available))
-        allocated = available_list[:width]
-        self.allocated_pins.append(allocated)
-        return allocated
+    def test_pydantic_lockfile_creation(self):
+        """Test creating a lock file using the real Pydantic models"""
+        # Create a new silicon configuration with proper process and package
+        silicon_config = SiliconConfig(
+            process=Process.IHP_SG13G2,
+            package="cf20",
+            pads={"clock": PadConfig(type="clock", loc="1")},
+            power={"vdd": PadConfig(type="power", loc="3")}
+        )
+        
+        # Create the steps config
+        steps_config = StepsConfig(silicon="chipflow_lib.steps.silicon:SiliconStep")
+        
+        # Create a full chipflow config
+        chipflow_config = ChipFlowConfig(
+            project_name="test_project",
+            top={"mock_component": "module.MockComponent"},
+            steps=steps_config,
+            silicon=silicon_config
+        )
+        
+        # Create the complete config
+        config = Config(chipflow=chipflow_config)
+        
+        # Create a new lock file with the config
+        lock_file = LockFile(package="cf20")
+        
+        # Add a port to the lock file
+        lock_file.add_port("comp1", "if1", "port1", "o", "5")
+        
+        # Verify port was added correctly
+        port = lock_file.port_map["comp1"]["if1"]["port1"]
+        self.assertEqual(port.port_name, "port1")
+        self.assertEqual(port.port_type, "o")
+        self.assertEqual(port.pin, "5")
+        
+        # Test serialization
+        json_data = lock_file.model_dump_json(indent=2)
+        self.assertIn('"package": "cf20"', json_data)
+        self.assertIn('"port_name": "port1"', json_data)
+        self.assertIn('"pin": "5"', json_data)
+        
+        # Test deserialization
+        loaded_lock = LockFile.model_validate_json(json_data)
+        self.assertEqual(loaded_lock.package, lock_file.package)
+        self.assertEqual(loaded_lock.port_map["comp1"]["if1"]["port1"].pin, "5")
 
 
-
-
-class TestPinLockUtilities(unittest.TestCase):
-    """Tests for utility functions in pin_lock module"""
+class TestProcessorConfig(unittest.TestCase):
+    """Test cases for Process enum"""
     
-    def test_allocate_pins_with_pin_signature(self):
-        """Test allocate_pins with PinSignature annotation"""
-        PIN_ANNOTATION_SCHEMA = "https://api.chipflow.com/schemas/0/pin-annotation"
+    def test_process_enum_values(self):
+        """Test Process enum has expected values"""
+        # Check enum values match expected values
+        self.assertEqual(Process.SKY130, "sky130")
+        self.assertEqual(Process.GF180, "gf180")
+        self.assertEqual(Process.HELVELLYN2, "helvellyn2")
+        self.assertEqual(Process.GF130BCD, "gf130bcd")
+        self.assertEqual(Process.IHP_SG13G2, "ihp_sg13g2")
         
-        # Create member data with annotation
-        member_data = {
-            "type": "interface",
-            "annotations": {
-                PIN_ANNOTATION_SCHEMA: {
-                    "width": 3,
-                    "direction": "o",
-                    "options": {"opt1": "val1"}
-                }
-            }
-        }
+        # Test that we can create a SiliconConfig with a valid process
+        config = SiliconConfig(
+            process=Process.IHP_SG13G2,
+            package="cf20"
+        )
+        self.assertEqual(config.process, Process.IHP_SG13G2)
         
-        pins = ["pin1", "pin2", "pin3", "pin4", "pin5"]
-        port_name = "test_port"
-        
-        # Call allocate_pins
-        pin_map, remaining = allocate_pins("output_port", member_data, pins, port_name)
-        
-        # Check results
-        self.assertIn("output_port", pin_map)
-        self.assertEqual(pin_map["output_port"]["pins"], pins[:3])
-        self.assertEqual(pin_map["output_port"]["direction"], "o")
-        self.assertEqual(pin_map["output_port"]["type"], "io")
-        self.assertEqual(pin_map["output_port"]["port_name"], "test_port")
-        self.assertEqual(pin_map["output_port"]["options"], {"opt1": "val1"})
-        
-        # Check remaining pins
-        self.assertEqual(remaining, pins[3:])
+        # Test JSON serialization
+        json_str = config.model_dump_json()
+        self.assertIn('"process": "ihp_sg13g2"', json_str)
 
-    def test_allocate_pins_nested_interface(self):
-        """Test allocate_pins with nested interfaces"""
-        # Create nested member data
-        member_data = {
-            "type": "interface",
-            "members": {
-                "uart_tx": {
-                    "type": "port",
-                    "width": 1,
-                    "dir": "o"
-                },
-                "uart_rx": {
-                    "type": "port",
-                    "width": 1,
-                    "dir": "i"
-                }
-            }
-        }
-        
-        pins = ["pin1", "pin2", "pin3", "pin4"]
-        
-        # Call allocate_pins
-        pin_map, remaining = allocate_pins("uart", member_data, pins)
-        
-        # Check results
-        self.assertIn("uart_tx", pin_map)
-        self.assertEqual(pin_map["uart_tx"]["pins"], ["pin1"])
-        self.assertEqual(pin_map["uart_tx"]["direction"], "o")
-        
-        self.assertIn("uart_rx", pin_map)
-        self.assertEqual(pin_map["uart_rx"]["pins"], ["pin2"])
-        self.assertEqual(pin_map["uart_rx"]["direction"], "i")
-        
-        # Check remaining pins
-        self.assertEqual(remaining, pins[2:])
 
-    def test_count_member_pins_with_annotation(self):
-        """Test count_member_pins with PinSignature annotation"""
-        PIN_ANNOTATION_SCHEMA = "https://api.chipflow.com/schemas/0/pin-annotation"
+class TestPadConfig(unittest.TestCase):
+    """Test cases for PadConfig model"""
+    
+    def test_pad_config_validation(self):
+        """Test pad config validation rules"""
+        # Valid pad configs
+        valid_pads = [
+            {"type": "io", "loc": "1"},
+            {"type": "i", "loc": "N2"},
+            {"type": "o", "loc": "E3"},
+            {"type": "clock", "loc": "W4"},
+            {"type": "reset", "loc": "S5"},
+            {"type": "power", "loc": "6"},
+            {"type": "ground", "loc": "7"}
+        ]
         
-        # Create member data with annotation
-        member_data = {
-            "type": "interface",
-            "annotations": {
-                PIN_ANNOTATION_SCHEMA: {
-                    "width": 8
-                }
-            }
-        }
+        for pad_dict in valid_pads:
+            # Should not raise validation error
+            pad = PadConfig(**pad_dict)
+            self.assertEqual(pad.type, pad_dict["type"])
+            self.assertEqual(pad.loc, pad_dict["loc"])
         
-        # Call count_member_pins
-        count = count_member_pins("test_port", member_data)
+        # Invalid type
+        with self.assertRaises(ValueError):
+            PadConfig(type="invalid", loc="1")
         
-        # Check result
-        self.assertEqual(count, 8)
+        # Invalid location format
+        with self.assertRaises(ValueError):
+            PadConfig(type="io", loc="invalid")
+        
+        # Test clk to clock mapping
+        pad_dict = {"type": "clk", "loc": "1"}
+        pad = PadConfig.validate_pad_dict(pad_dict, mock.MagicMock())
+        self.assertEqual(pad["type"], "clock")
 
-    def test_count_member_pins_nested_interface(self):
-        """Test count_member_pins with nested interfaces"""
-        # Create nested member data
-        member_data = {
-            "type": "interface",
-            "members": {
-                "port1": {
-                    "type": "port",
-                    "width": 4
-                },
-                "port2": {
-                    "type": "port",
-                    "width": 2
-                }
-            }
-        }
+
+@mock.patch("chipflow_lib.pin_lock.top_interfaces")
+class TestPortIntegration(unittest.TestCase):
+    """Test integration between Port and LockFile"""
+    
+    def test_port_in_lockfile(self, mock_top_interfaces):
+        """Test that a Port can be added to LockFile correctly"""
+        # Create a Port
+        port = Port(
+            type="output",
+            pins=["1"],
+            port_name="test_port",
+            direction="o",
+            options={}
+        )
         
-        # Call count_member_pins
-        count = count_member_pins("test_interface", member_data)
+        # Verify Port attributes
+        self.assertEqual(port.type, "output")
+        self.assertEqual(port.pins, ["1"])
+        self.assertEqual(port.port_name, "test_port")
+        self.assertEqual(port.direction, "o")
         
-        # Check result
-        self.assertEqual(count, 6)  # 4 + 2
+        # Create a LockFile
+        lock_file = LockFile(package="cf20")
+        
+        # Add the port to the lock file
+        lock_file.add_port("comp1", "if1", port.port_name, port.direction, port.pins[0])
+        
+        # Verify port was added correctly
+        self.assertIn("comp1", lock_file.port_map)
+        self.assertIn("if1", lock_file.port_map["comp1"])
+        self.assertIn(port.port_name, lock_file.port_map["comp1"]["if1"])
+        
+        added_port = lock_file.port_map["comp1"]["if1"][port.port_name]
+        self.assertEqual(added_port.port_name, port.port_name)
+        self.assertEqual(added_port.port_type, port.direction)
+        self.assertEqual(added_port.pin, port.pins[0])
