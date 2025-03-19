@@ -165,7 +165,7 @@ class TestPinLock(unittest.TestCase):
 
         # Check remaining pins
         self.assertEqual(remaining_pins, pins[3:])
-        
+
     def test_allocate_pins_invalid_type(self):
         """Test allocate_pins with an invalid member type"""
         # Create member data with an invalid type - not 'interface' or 'port'
@@ -173,7 +173,7 @@ class TestPinLock(unittest.TestCase):
             "type": "invalid_type"
         }
         pins = ["pin1", "pin2", "pin3"]
-        
+
         # This should cause the function to raise an AssertionError at the "assert False" line
         with self.assertRaises(AssertionError):
             allocate_pins("test_invalid", member_data, pins)
@@ -230,7 +230,7 @@ class TestPinLock(unittest.TestCase):
 
         # Setup mocks
         mock_exists.return_value = False  # No existing pins.lock
-        
+
         # Mock config
         mock_config = {
             "chipflow": {
@@ -277,7 +277,7 @@ class TestPinLock(unittest.TestCase):
                 lock_pins()
 
             self.assertIn("No pins were allocated", str(cm.exception))
-            
+
     @mock.patch("builtins.open", new_callable=mock.mock_open)
     @mock.patch("chipflow_lib.pin_lock._parse_config")
     @mock.patch("chipflow_lib.pin_lock.top_interfaces")
@@ -298,7 +298,7 @@ class TestPinLock(unittest.TestCase):
         # Setup mocks
         mock_exists.return_value = True  # Existing pins.lock
         mock_read_text.return_value = '{"mock": "json"}'
-        
+
         # Mock config
         mock_config = {
             "chipflow": {
@@ -319,12 +319,12 @@ class TestPinLock(unittest.TestCase):
         mock_old_lock = mock.MagicMock()
         mock_old_lock.package = mock.MagicMock()
         mock_old_lock.package.check_pad.return_value = None  # No conflicts
-        
+
         # Create a port map that will have a different size than the new interface
         existing_ports = {
             "tx": mock.MagicMock(pins=["10"]),  # Only 1 pin
         }
-        
+
         # Setup the port_map to return these ports
         mock_port_map = mock.MagicMock()
         mock_port_map.get_ports.return_value = existing_ports
@@ -617,7 +617,7 @@ class TestPinLock(unittest.TestCase):
         # Setup package
         mock_package = mock.MagicMock()
         mock_package.check_pad.return_value = MockConflictPort()
-        
+
         # Configure mock for both dict and Pydantic model compatibility
         mock_old_lock.configure_mock(package=mock_package)
         mock_validate_json.return_value = mock_old_lock
@@ -685,11 +685,11 @@ class TestPinLock(unittest.TestCase):
 
         # Mock LockFile instance for existing lock
         mock_old_lock = mock.MagicMock()
-        
+
         # Setup package
         mock_package = mock.MagicMock()
         mock_package.check_pad.return_value = None  # No conflicting pads
-        
+
         # Configure mock for both dict and Pydantic model compatibility
         mock_old_lock.configure_mock(package=mock_package)
 

@@ -483,7 +483,7 @@ class TestSiliconTop(unittest.TestCase):
             platform.pinlock.port_map = mock_port_map
         else:
             platform.pinlock.configure_mock(port_map=mock_port_map)
-        
+
         platform.ports = {
             "test_port": mock.MagicMock(),
             "heartbeat": mock.MagicMock()
