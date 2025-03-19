@@ -6,9 +6,7 @@ import unittest
 from unittest import mock
 
 import tomli
-from amaranth import Module, Signal
-
-from chipflow_lib import ChipFlowError
+from amaranth import Module
 
 
 class TestSiliconPlatformBuild(unittest.TestCase):
