@@ -6,9 +6,8 @@ import unittest
 from unittest import mock
 
 import tomli
-from amaranth import Module, Signal, ClockDomain, ClockSignal, ResetSignal
-from amaranth.lib import io, wiring
-from amaranth.lib.wiring import Component, In
+from amaranth import Module, Signal, ClockDomain
+from amaranth.lib import io
 
 from chipflow_lib.platforms.silicon import (
     IOBuffer, FFBuffer, SiliconPlatformPort
@@ -93,8 +92,8 @@ class TestSiliconPlatformMethods(unittest.TestCase):
     def test_instantiate_ports(self, mock_load_pinlock):
         """Test instantiate_ports method with minimal mocking"""
         # Import here to avoid issues during test collection
-        from chipflow_lib.platforms.silicon import SiliconPlatform, Port
-        from amaranth import Module, Signal, ClockDomain
+        from chipflow_lib.platforms.silicon import SiliconPlatform
+        from amaranth import Module
 
         # Create mock pinlock
         mock_pinlock = mock.MagicMock()
@@ -213,8 +212,8 @@ class TestSiliconPlatformMethods(unittest.TestCase):
                                                     mock_reset_signal, mock_clock_signal):
         """Test instantiate_ports method with clocks and resets"""
         # Import here to avoid issues during test collection
-        from chipflow_lib.platforms.silicon import SiliconPlatform, Port
-        from amaranth import Module, Signal
+        from chipflow_lib.platforms.silicon import SiliconPlatform
+        from amaranth import Module
 
         # Create mocks for signals and buffer
         mock_clock_signal_instance = Signal()

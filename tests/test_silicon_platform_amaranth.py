@@ -6,8 +6,8 @@ import unittest
 from unittest import mock
 
 import tomli
-from amaranth import Module, Signal, Cat, ClockDomain, ClockSignal, ResetSignal
-from amaranth.lib import io, wiring
+from amaranth import Module, Signal, ClockDomain
+from amaranth.lib import io
 from amaranth.hdl._ir import Fragment
 
 from chipflow_lib import ChipFlowError
@@ -439,7 +439,7 @@ class SiliconPlatformTest(unittest.TestCase):
                 return m
 
         # Call build with our test elaboratable
-        result = platform.build(TestElaboratable(), name="test_build")
+        platform.build(TestElaboratable(), name="test_build")
 
         # Check that prepare was called
         platform._prepare.assert_called_once()
