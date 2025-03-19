@@ -49,7 +49,7 @@ def _parse_config_file(config_file):
 
     try:
         # Validate with Pydantic
-        config = Config.model_validate(config_dict)
+        Config.model_validate(config_dict)  # Just validate the config_dict
         return config_dict  # Return the original dict for backward compatibility
     except ValidationError as e:
         # Format Pydantic validation errors in a user-friendly way
