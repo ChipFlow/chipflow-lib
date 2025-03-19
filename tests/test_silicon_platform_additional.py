@@ -10,77 +10,10 @@ from amaranth import Module, Signal, ClockDomain, ClockSignal, ResetSignal
 from amaranth.lib import io, wiring
 from amaranth.lib.wiring import Component, In
 
-from chipflow_lib import ChipFlowError
 from chipflow_lib.platforms.silicon import (
-    make_hashable, Heartbeat, IOBuffer, FFBuffer, SiliconPlatform,
-    SiliconPlatformPort, HeartbeatSignature
+    IOBuffer, FFBuffer, SiliconPlatformPort
 )
 from chipflow_lib.platforms.utils import Port
-
-
-class TestMakeHashable(unittest.TestCase):
-    def test_make_hashable(self):
-        """Test the make_hashable decorator"""
-        # Create a simple class
-        class TestClass:
-            def __init__(self, value):
-                self.value = value
-
-        # Apply the decorator
-        HashableTestClass = make_hashable(TestClass)
-
-        # Create two instances with the same value
-        obj1 = HashableTestClass(42)
-        obj2 = HashableTestClass(42)
-
-        # Test that they hash to different values (based on id)
-        self.assertNotEqual(hash(obj1), hash(obj2))
-
-        # Test that they are not equal (based on id)
-        self.assertNotEqual(obj1, obj2)
-
-        # Test that an object is equal to itself
-        self.assertEqual(obj1, obj1)
-
-
-class TestHeartbeat(unittest.TestCase):
-    def test_heartbeat_init(self):
-        """Test Heartbeat initialization"""
-        # Create a mock port
-        mock_port = mock.MagicMock()
-
-        # Create heartbeat component
-        heartbeat = Heartbeat(mock_port)
-
-        # Check initialization
-        self.assertEqual(heartbeat.clock_domain, "sync")
-        self.assertEqual(heartbeat.counter_size, 23)
-        self.assertEqual(heartbeat.name, "heartbeat")
-        self.assertEqual(heartbeat.ports, mock_port)
-
-        # Check signature
-        self.assertEqual(heartbeat.signature, HeartbeatSignature)
-
-    @mock.patch('chipflow_lib.platforms.silicon.io.Buffer')
-    def test_heartbeat_elaborate(self, mock_buffer):
-        """Test Heartbeat elaboration"""
-        # Create mocks
-        mock_port = mock.MagicMock()
-        mock_platform = mock.MagicMock()
-        mock_buffer_instance = mock.MagicMock()
-        mock_buffer.return_value = mock_buffer_instance
-
-        # Create heartbeat component
-        heartbeat = Heartbeat(mock_port)
-
-        # Call elaborate
-        result = heartbeat.elaborate(mock_platform)
-
-        # Verify the module has clock domain logic
-        self.assertIsInstance(result, Module)
-
-        # Check that the buffer was created
-        mock_buffer.assert_called_with("o", mock_port.heartbeat)
 
 
 @mock.patch('chipflow_lib.platforms.silicon.IOBuffer.elaborate')
@@ -168,9 +101,15 @@ class TestSiliconPlatformMethods(unittest.TestCase):
         mock_load_pinlock.return_value = mock_pinlock
 
         # Setup an empty port_map to avoid unnecessary complexity
-        mock_pinlock.port_map = {}
+        if hasattr(mock_pinlock, 'port_map'):
+            mock_pinlock.port_map = {}
+        else:
+            # For Pydantic model support
+            mock_pinlock.configure_mock(port_map={})
 
         # Setup no clocks and no resets to avoid buffer creation
+        if not hasattr(mock_pinlock, 'package'):
+            mock_pinlock.package = mock.MagicMock()
         mock_pinlock.package.clocks = {}
         mock_pinlock.package.resets = {}
 
@@ -418,5 +357,3 @@ class TestSiliconPlatformMethods(unittest.TestCase):
         unsupported_buffer.port = silicon_port
         with self.assertRaises(TypeError):
             platform.get_io_buffer(unsupported_buffer)
-
-

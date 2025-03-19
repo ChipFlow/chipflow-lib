@@ -12,7 +12,7 @@ from amaranth.hdl._ir import Fragment
 
 from chipflow_lib import ChipFlowError
 from chipflow_lib.platforms.silicon import (
-    make_hashable, Heartbeat, IOBuffer, FFBuffer, SiliconPlatform,
+    IOBuffer, FFBuffer, SiliconPlatform,
     SiliconPlatformPort
 )
 from chipflow_lib.platforms.utils import Port
@@ -351,67 +351,6 @@ class FFBufferTestCase(unittest.TestCase):
         self.assertIsNotNone(fragment)
 
 
-class HeartbeatTestCase(unittest.TestCase):
-    def test_initialize_heartbeat(self):
-        """Test Heartbeat initialization"""
-        # Create a mock for ports
-        mock_ports = mock.MagicMock()
-        mock_ports.heartbeat = mock.MagicMock()
-
-        # Create Heartbeat component
-        heartbeat = Heartbeat(mock_ports)
-
-        # Check initialization
-        self.assertEqual(heartbeat.clock_domain, "sync")
-        self.assertEqual(heartbeat.counter_size, 23)
-        self.assertEqual(heartbeat.name, "heartbeat")
-
-    def test_elaborate_heartbeat(self):
-        """Test Heartbeat elaborate"""
-        # Create a test platform that can handle buffer initialization
-        class TestPlatform:
-            def get_io_buffer(self, buffer):
-                # Create specialized buffer
-                if isinstance(buffer, io.Buffer):
-                    result = IOBuffer(buffer.direction, buffer.port)
-                else:
-                    result = mock.MagicMock()
-
-                # Set buffer attributes
-                if buffer.direction is not io.Direction.Output:
-                    result.i = buffer.i
-                if buffer.direction is not io.Direction.Input:
-                    result.o = buffer.o
-                    result.oe = buffer.oe
-
-                return result
-
-        # Create a mock for ports that's a proper SiliconPlatformPort
-        port_obj = Port(type="output", pins=["1"], port_name="heartbeat",
-                       direction=io.Direction.Output, options={})
-
-        # Create a proper SiliconPlatformPort for heartbeat
-        platform_port = SiliconPlatformPort("comp", "heartbeat", port_obj)
-
-        # Create a proper mock ports object with heartbeat attribute
-        mock_ports = mock.MagicMock()
-        mock_ports.heartbeat = platform_port
-
-        # Create Heartbeat component
-        heartbeat = Heartbeat(mock_ports)
-
-        # Create module with clock domain
-        m = Module()
-        m.domains += ClockDomain("sync")
-        m.submodules.heartbeat = heartbeat
-
-        # Get the fragment using the test platform
-        fragment = Fragment.get(m, TestPlatform())
-
-        # Just check that elaboration succeeds without error
-        self.assertIsNotNone(fragment)
-
-
 class SiliconPlatformTest(unittest.TestCase):
     def setUp(self):
         # Set up environment for tests
@@ -429,9 +368,10 @@ class SiliconPlatformTest(unittest.TestCase):
 
         # Setup ports
         test_port = mock.MagicMock()
-        platform._ports = {
-            "test_port": test_port
-        }
+        # Ensure _ports exists and is properly initialized
+        if not hasattr(platform, '_ports'):
+            platform._ports = {}
+        platform._ports["test_port"] = test_port
 
         # Request existing port
         port = platform.request("test_port")
@@ -471,8 +411,7 @@ class SiliconPlatformTest(unittest.TestCase):
     @mock.patch('chipflow_lib.platforms.silicon.os.makedirs')
     @mock.patch('builtins.open', new_callable=mock.mock_open)
     @mock.patch('chipflow_lib.platforms.silicon.subprocess.check_call')
-    @mock.patch('chipflow_lib.platforms.silicon.Heartbeat.elaborate', side_effect=lambda self, platform: Module())
-    def test_build(self, mock_heartbeat_elaborate, mock_check_call, mock_open, mock_makedirs, mock_convert_fragment):
+    def test_build(self, mock_check_call, mock_open, mock_makedirs, mock_convert_fragment):
         """Test build method with mocked dependencies"""
         # Create a module instance for our tests to use
         m = Module()

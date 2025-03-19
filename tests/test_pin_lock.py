@@ -165,6 +165,18 @@ class TestPinLock(unittest.TestCase):
 
         # Check remaining pins
         self.assertEqual(remaining_pins, pins[3:])
+        
+    def test_allocate_pins_invalid_type(self):
+        """Test allocate_pins with an invalid member type"""
+        # Create member data with an invalid type - not 'interface' or 'port'
+        member_data = {
+            "type": "invalid_type"
+        }
+        pins = ["pin1", "pin2", "pin3"]
+        
+        # This should cause the function to raise an AssertionError at the "assert False" line
+        with self.assertRaises(AssertionError):
+            allocate_pins("test_invalid", member_data, pins)
 
     @mock.patch("chipflow_lib.pin_lock.lock_pins")
     def test_pin_command_mocked(self, mock_lock_pins):
@@ -198,6 +210,161 @@ class TestPinLock(unittest.TestCase):
         # Verify parser was built
         mock_parser.add_subparsers.assert_called_once()
         mock_subparsers.add_parser.assert_called_once()
+
+    @mock.patch("builtins.open", new_callable=mock.mock_open)
+    @mock.patch("chipflow_lib.pin_lock._parse_config")
+    @mock.patch("chipflow_lib.pin_lock.top_interfaces")
+    @mock.patch("pathlib.Path.exists")
+    @mock.patch("pathlib.Path.read_text")
+    @mock.patch("chipflow_lib.pin_lock.PACKAGE_DEFINITIONS", new_callable=dict)
+    @mock.patch("chipflow_lib.pin_lock.LockFile")
+    def test_lock_pins_no_pins_allocated(self, mock_lock_file, mock_package_defs,
+                                     mock_read_text, mock_exists, mock_top_interfaces,
+                                     mock_parse_config, mock_open):
+        """Test that lock_pins raises appropriate error when no pins can be allocated"""
+        # Setup mock package definitions with a special allocate method
+        # that returns an empty list (no pins allocated)
+        mock_package_type = MockPackageType(name="cf20")
+        mock_package_type.allocate = mock.MagicMock(return_value=[])  # Return empty list
+        mock_package_defs["cf20"] = mock_package_type
+
+        # Setup mocks
+        mock_exists.return_value = False  # No existing pins.lock
+        
+        # Mock config
+        mock_config = {
+            "chipflow": {
+                "steps": {
+                    "silicon": "chipflow_lib.steps.silicon:SiliconStep"
+                },
+                "silicon": {
+                    "process": "ihp_sg13g2",
+                    "package": "cf20",
+                    "pads": {},
+                    "power": {}
+                }
+            }
+        }
+        mock_parse_config.return_value = mock_config
+
+        # Mock top_interfaces with an interface that needs pins
+        mock_interface = {
+            "comp1": {
+                "interface": {
+                    "members": {
+                        "uart": {
+                            "type": "interface",
+                            "members": {
+                                "tx": {"type": "port", "width": 1, "dir": "o"}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        mock_top_interfaces.return_value = (None, mock_interface)
+
+        # Import and run lock_pins
+        from chipflow_lib.pin_lock import lock_pins
+
+        # Mock the Package.__init__ to avoid validation errors
+        with mock.patch("chipflow_lib.pin_lock.Package") as mock_package_class:
+            mock_package_instance = mock.MagicMock()
+            mock_package_class.return_value = mock_package_instance
+
+            # Test for the expected error when no pins are allocated
+            with self.assertRaises(ChipFlowError) as cm:
+                lock_pins()
+
+            self.assertIn("No pins were allocated", str(cm.exception))
+            
+    @mock.patch("builtins.open", new_callable=mock.mock_open)
+    @mock.patch("chipflow_lib.pin_lock._parse_config")
+    @mock.patch("chipflow_lib.pin_lock.top_interfaces")
+    @mock.patch("pathlib.Path.exists")
+    @mock.patch("pathlib.Path.read_text")
+    @mock.patch("chipflow_lib.pin_lock.LockFile.model_validate_json")
+    @mock.patch("chipflow_lib.pin_lock.PACKAGE_DEFINITIONS", new_callable=dict)
+    @mock.patch("chipflow_lib.pin_lock.LockFile")
+    def test_lock_pins_interface_size_change(self, mock_lock_file, mock_package_defs,
+                                          mock_validate_json, mock_read_text,
+                                          mock_exists, mock_top_interfaces,
+                                          mock_parse_config, mock_open):
+        """Test that lock_pins raises appropriate error when interface size changes"""
+        # Setup mock package definitions
+        mock_package_type = MockPackageType(name="cf20")
+        mock_package_defs["cf20"] = mock_package_type
+
+        # Setup mocks
+        mock_exists.return_value = True  # Existing pins.lock
+        mock_read_text.return_value = '{"mock": "json"}'
+        
+        # Mock config
+        mock_config = {
+            "chipflow": {
+                "steps": {
+                    "silicon": "chipflow_lib.steps.silicon:SiliconStep"
+                },
+                "silicon": {
+                    "process": "ihp_sg13g2",
+                    "package": "cf20",
+                    "pads": {},
+                    "power": {}
+                }
+            }
+        }
+        mock_parse_config.return_value = mock_config
+
+        # Create a mock for the existing lock file
+        mock_old_lock = mock.MagicMock()
+        mock_old_lock.package = mock.MagicMock()
+        mock_old_lock.package.check_pad.return_value = None  # No conflicts
+        
+        # Create a port map that will have a different size than the new interface
+        existing_ports = {
+            "tx": mock.MagicMock(pins=["10"]),  # Only 1 pin
+        }
+        
+        # Setup the port_map to return these ports
+        mock_port_map = mock.MagicMock()
+        mock_port_map.get_ports.return_value = existing_ports
+        mock_old_lock.configure_mock(port_map=mock_port_map)
+        mock_validate_json.return_value = mock_old_lock
+
+        # Mock top_interfaces with an interface that has DIFFERENT size (2 pins instead of 1)
+        mock_interface = {
+            "comp1": {
+                "interface": {
+                    "members": {
+                        "uart": {
+                            "type": "interface",
+                            "members": {
+                                "tx": {"type": "port", "width": 2, "dir": "o"}  # Width 2 instead of 1
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        mock_top_interfaces.return_value = (None, mock_interface)
+
+        # Import and run lock_pins
+        from chipflow_lib.pin_lock import lock_pins
+
+        # Mock the Package.__init__ to avoid validation errors
+        with mock.patch("chipflow_lib.pin_lock.Package") as mock_package_class:
+            mock_package_instance = mock.MagicMock()
+            mock_package_class.return_value = mock_package_instance
+
+            # Test for the expected error when interface size changes
+            with self.assertRaises(ChipFlowError) as cm:
+                lock_pins()
+
+            # Check that the error message includes the size change information
+            error_msg = str(cm.exception)
+            self.assertIn("top level interface has changed size", error_msg)
+            self.assertIn("Old size = 1", error_msg)
+            self.assertIn("new size = 2", error_msg)
 
     @mock.patch("builtins.open", new_callable=mock.mock_open)
     @mock.patch("chipflow_lib.pin_lock._parse_config")
@@ -447,7 +614,12 @@ class TestPinLock(unittest.TestCase):
             def __init__(self):
                 self.pins = ["5"]  # Different from config
 
-        mock_old_lock.package.check_pad.return_value = MockConflictPort()
+        # Setup package
+        mock_package = mock.MagicMock()
+        mock_package.check_pad.return_value = MockConflictPort()
+        
+        # Configure mock for both dict and Pydantic model compatibility
+        mock_old_lock.configure_mock(package=mock_package)
         mock_validate_json.return_value = mock_old_lock
 
         # Set up new LockFile mock for constructor (will not be reached in this test)
@@ -513,14 +685,23 @@ class TestPinLock(unittest.TestCase):
 
         # Mock LockFile instance for existing lock
         mock_old_lock = mock.MagicMock()
-        mock_old_lock.package.check_pad.return_value = None  # No conflicting pads
+        
+        # Setup package
+        mock_package = mock.MagicMock()
+        mock_package.check_pad.return_value = None  # No conflicting pads
+        
+        # Configure mock for both dict and Pydantic model compatibility
+        mock_old_lock.configure_mock(package=mock_package)
 
         # Create existing ports to be reused
         existing_ports = {
             "tx": mock.MagicMock(pins=["10"]),
             "rx": mock.MagicMock(pins=["11"])
         }
-        mock_old_lock.port_map.get_ports.return_value = existing_ports
+        # Configure port_map in a way that's compatible with both dict and Pydantic models
+        mock_port_map = mock.MagicMock()
+        mock_port_map.get_ports.return_value = existing_ports
+        mock_old_lock.configure_mock(port_map=mock_port_map)
         mock_validate_json.return_value = mock_old_lock
 
         # Set up new LockFile mock for constructor
