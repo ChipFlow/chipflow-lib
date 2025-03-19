@@ -3,17 +3,12 @@ import os
 import unittest
 from unittest import mock
 import tempfile
-import json
-from pathlib import Path
-from io import StringIO
-from pprint import pformat
 
 from chipflow_lib import ChipFlowError
 from chipflow_lib.pin_lock import (
     lock_pins,
     count_member_pins,
-    allocate_pins,
-    PinCommand
+    allocate_pins
 )
 
 
@@ -108,12 +103,12 @@ class TestLockPins(unittest.TestCase):
                 }
             }
         }
-        
+
         # Create a proper mock Config model with Pydantic-style attributes
         silicon_mock = mock.MagicMock()
         silicon_mock.process = "ihp_sg13g2"
         silicon_mock.package = "cf20"
-        
+
         # Set up pads with proper structure matching Pydantic models
         pads = {}
         for name, config in self.test_config["chipflow"]["silicon"]["pads"].items():
@@ -121,9 +116,9 @@ class TestLockPins(unittest.TestCase):
             pad_mock.type = config["type"]
             pad_mock.loc = config["loc"]
             pads[name] = pad_mock
-            
+
         silicon_mock.pads = pads
-        
+
         # Set up power with proper structure matching Pydantic models
         power = {}
         for name, config in self.test_config["chipflow"]["silicon"]["power"].items():
@@ -131,13 +126,13 @@ class TestLockPins(unittest.TestCase):
             power_mock.type = config["type"]
             power_mock.loc = config["loc"]
             power[name] = power_mock
-            
+
         silicon_mock.power = power
-        
+
         # Create chipflow mock with silicon attribute
         chipflow_mock = mock.MagicMock()
         chipflow_mock.silicon = silicon_mock
-        
+
         # Finally, create the main config mock with chipflow attribute
         self.mock_config_model = mock.MagicMock()
         self.mock_config_model.chipflow = chipflow_mock
@@ -153,13 +148,13 @@ class TestLockPins(unittest.TestCase):
     @mock.patch('builtins.print')
     @mock.patch('chipflow_lib.pin_lock.LockFile')
     @mock.patch('chipflow_lib.pin_lock.Package')
-    def test_lock_pins_new_lockfile(self, mock_package_class, mock_lockfile_class, mock_print, 
-                                   mock_top_interfaces, mock_package_defs, mock_parse_config, 
+    def test_lock_pins_new_lockfile(self, mock_package_class, mock_lockfile_class, mock_print,
+                                   mock_top_interfaces, mock_package_defs, mock_parse_config,
                                    mock_model_validate):
         """Test lock_pins when no lockfile exists"""
         # Setup mocks - IMPORTANT: The mock order matters
         # mock_parse_config is for _parse_config
-        mock_parse_config.return_value = self.test_config  
+        mock_parse_config.return_value = self.test_config
         # mock_model_validate is for Config.model_validate (crucial to get this right)
         mock_model_validate.return_value = self.mock_config_model
         mock_top_interfaces.return_value = ({}, self.mock_interfaces)
@@ -168,56 +163,55 @@ class TestLockPins(unittest.TestCase):
         from chipflow_lib.platforms.utils import _QuadPackageDef
         # This one is the proper Pydantic instance
         pydantic_package_def = _QuadPackageDef(name="test_package", width=50, height=50)
-        
+
         # Configure to use our Pydantic model in place of the mock package type
         # This is needed for new-style Pydantic validation
         mock_package_defs.__getitem__.return_value = pydantic_package_def
         mock_package_defs.__contains__.return_value = True
-        
+
         # Create a mock for the Package class that will receive the pydantic_package_def
         # and pretend it processed it correctly
         mock_package_instance = mock.MagicMock()
         mock_package_class.return_value = mock_package_instance
-        
+
         # Properly configure the add_pad method that will be called with Pydantic models
         def mock_add_pad(name, defn):
             # Just make this method do nothing, but track calls
             pass
         mock_package_instance.add_pad = mock_add_pad
-        
+
         # Setup allocate method on the package_def that the pin_lock.py code will call
         # This is called through the pydantic_package_def that we set up earlier
-        original_allocate = pydantic_package_def.allocate
         with mock.patch.object(_QuadPackageDef, 'allocate', autospec=True) as mock_allocate:
             # Return some predictable pins for the test
             mock_allocate.return_value = ["10", "11"]
-            
-            # Set up LockFile mock 
+
+            # Set up LockFile mock
             mock_lockfile_instance = mock.MagicMock()
             mock_lockfile_instance.model_dump_json.return_value = '{"test": "json"}'
             mock_lockfile_class.return_value = mock_lockfile_instance
-    
+
             # Mock pathlib.Path.exists to return False (no existing lockfile)
             with mock.patch('pathlib.Path.exists', return_value=False):
                 # Execute lock_pins
-                with mock.patch('chipflow_lib.pin_lock.logger') as mock_logger:
+                with mock.patch('chipflow_lib.pin_lock.logger'):
                     lock_pins()
-    
+
                 # Verify print and logger calls
                 mock_print.assert_called_once_with("Locking pins: ")
-                
+
                 # Verify Package was created with the mock package type
                 mock_package_class.assert_called_once_with(package_type=pydantic_package_def)
-                
+
                 # Verify LockFile was created
                 mock_lockfile_class.assert_called_once()
-                
+
                 # Verify file was written
                 with mock.patch('builtins.open', mock.mock_open()) as mock_file:
                     # This is just for the sake of the test, the actual open() is mocked above
                     with open('pins.lock', 'w') as f:
                         f.write('{"test": "json"}')
-                    
+
                     mock_file.assert_called_once_with('pins.lock', 'w')
 
     @mock.patch('chipflow_lib.pin_lock.PACKAGE_DEFINITIONS')
@@ -226,30 +220,30 @@ class TestLockPins(unittest.TestCase):
     @mock.patch('chipflow_lib.pin_lock.LockFile.model_validate_json')
     @mock.patch('pathlib.Path.exists')
     @mock.patch('pathlib.Path.read_text')
-    def test_lock_pins_existing_lockfile(self, mock_read_text, mock_exists, mock_validate_json, 
-                                      mock_print, mock_top_interfaces, 
+    def test_lock_pins_existing_lockfile(self, mock_read_text, mock_exists, mock_validate_json,
+                                      mock_print, mock_top_interfaces,
                                       mock_package_defs, mock_parse_config, mock_model_validate):
         """Test lock_pins when lockfile exists"""
         # Setup mocks for config and interfaces
         mock_parse_config.return_value = self.test_config
         mock_model_validate.return_value = self.mock_config_model
         mock_top_interfaces.return_value = ({}, self.mock_interfaces)
-        
+
         # Set up mocks for file operations
         mock_exists.return_value = True
         mock_read_text.return_value = '{"mock": "json"}'
 
         # Import the required Pydantic models
         from chipflow_lib.platforms.utils import (
-            _QuadPackageDef, Port, Package, PortMap, LockFile, Process
+            _QuadPackageDef, Port, Package, Process
         )
-        
+
         # Create real Pydantic objects instead of mocks
         # 1. Create a package definition
         package_def = _QuadPackageDef(name="test_package", width=50, height=50)
         mock_package_defs.__getitem__.return_value = package_def
         mock_package_defs.__contains__.return_value = True
-        
+
         # 2. Create real ports for the pads in the config
         clk_port = Port(
             type="clock",
@@ -257,33 +251,33 @@ class TestLockPins(unittest.TestCase):
             port_name="clk",
             direction="i"
         )
-        
+
         rst_port = Port(
             type="reset",
             pins=["2"],
             port_name="rst",
             direction="i"
         )
-        
-        led_port = Port(
+
+        Port(
             type="io",
             pins=["3"],
             port_name="led",
             direction=None
         )
-        
+
         vdd_port = Port(
             type="power",
             pins=["4"],
             port_name="vdd",
         )
-        
+
         vss_port = Port(
             type="ground",
             pins=["5"],
             port_name="vss",
         )
-        
+
         # 3. Create a real package with the ports
         package = Package(
             package_type=package_def,
@@ -291,74 +285,74 @@ class TestLockPins(unittest.TestCase):
             resets={"rst": rst_port},
             power={"vdd": vdd_port, "vss": vss_port}
         )
-        
+
         # 4. Create ports for interfaces with correct pins
         uart_ports = {
             "tx": Port(
-                type="io", 
-                pins=["10"], 
+                type="io",
+                pins=["10"],
                 port_name="uart_tx",
                 direction="o"
             ),
             "rx": Port(
-                type="io", 
-                pins=["11"], 
+                type="io",
+                pins=["11"],
                 port_name="uart_rx",
                 direction="i"
             )
         }
-        
+
         # 5. Create a mock port_map instead of a real one, so we can control its behavior
         mock_port_map = mock.MagicMock()
-        
+
         # Configure the port_map to return our real ports for uart, but None for gpio
         def get_ports_side_effect(component, interface):
             if component == "soc" and interface == "uart":
                 return uart_ports
             return None
-            
+
         mock_port_map.get_ports.side_effect = get_ports_side_effect
-        
+
         # 6. Create a mock LockFile with our real package and mock port_map
         mock_old_lock = mock.MagicMock()
         mock_old_lock.process = Process.IHP_SG13G2
         mock_old_lock.package = package
         mock_old_lock.port_map = mock_port_map
         mock_old_lock.metadata = self.mock_interfaces
-        
+
         # Set the mock to return our mock LockFile
         mock_validate_json.return_value = mock_old_lock
-        
+
         # Set up allocate to return predictable pins for interfaces that don't have existing ports
         with mock.patch.object(_QuadPackageDef, 'allocate', autospec=True) as mock_allocate:
             # For the gpio interface, which doesn't have existing ports
             mock_allocate.return_value = ["20", "21", "22", "23"]
-            
+
             # Mock the open function for writing the new lock file
             with mock.patch('builtins.open', mock.mock_open()) as mock_file:
                 # Also mock the logger to avoid actual logging
                 with mock.patch('chipflow_lib.pin_lock.logger'):
                     # Execute lock_pins
                     lock_pins()
-    
+
                 # Verify print call
                 mock_print.assert_called_once_with("Locking pins: using pins.lock")
-                
+
                 # Verify that top_interfaces was called to get the interfaces
                 # This is a good indicator that the interfaces were processed
                 self.assertTrue(mock_top_interfaces.called)
-                
+
                 # Verify allocate was called for the gpio interface that doesn't have existing ports
                 # This test verifies that unallocated interfaces will get new pins allocated
                 mock_allocate.assert_called()
-                
+
                 # Verify file was written - this confirms the lock file was saved
                 mock_file.assert_called_with('pins.lock', 'w')
 
     @mock.patch('chipflow_lib.pin_lock.PACKAGE_DEFINITIONS')
     @mock.patch('chipflow_lib.pin_lock.top_interfaces')
     @mock.patch('chipflow_lib.pin_lock.Package')
-    def test_lock_pins_out_of_pins(self, mock_package_class, mock_top_interfaces, 
+    def test_lock_pins_out_of_pins(self, mock_package_class, mock_top_interfaces,
                                mock_package_defs, mock_parse_config, mock_model_validate):
         """Test lock_pins when we run out of pins"""
         # Setup mocks
@@ -368,21 +362,21 @@ class TestLockPins(unittest.TestCase):
 
         # Create a proper Pydantic package def for use with Pydantic models
         from chipflow_lib.platforms.utils import _QuadPackageDef
-        
+
         # Create an instance with limited pins
         pydantic_package_def = _QuadPackageDef(name="limited_package", width=2, height=2)
         mock_package_defs.__getitem__.return_value = pydantic_package_def
         mock_package_defs.__contains__.return_value = True
-        
+
         # Set up allocate to raise the expected error
         with mock.patch.object(_QuadPackageDef, 'allocate', autospec=True) as mock_allocate:
             # Simulate the allocate method raising an error when out of pins
             mock_allocate.side_effect = ChipFlowError("No pins were allocated by {package}")
-            
+
             # Set up Package to return our mock
             mock_package_instance = mock.MagicMock()
             mock_package_class.return_value = mock_package_instance
-            
+
             # Setup add_pad method to not raise errors when adding fixed pads
             def mock_add_pad(name, defn):
                 pass
@@ -400,8 +394,8 @@ class TestLockPins(unittest.TestCase):
     @mock.patch('chipflow_lib.pin_lock.top_interfaces')
     @mock.patch('chipflow_lib.pin_lock.LockFile.model_validate_json')
     @mock.patch('chipflow_lib.pin_lock.Package')
-    def test_lock_pins_pin_conflict(self, mock_package_class, mock_validate_json, 
-                                mock_top_interfaces, mock_package_defs, 
+    def test_lock_pins_pin_conflict(self, mock_package_class, mock_validate_json,
+                                mock_top_interfaces, mock_package_defs,
                                 mock_parse_config, mock_model_validate):
         """Test lock_pins when there's a pin conflict with existing lock"""
         # Setup mocks
@@ -426,10 +420,10 @@ class TestLockPins(unittest.TestCase):
                 pad_mock.type = config["type"]
                 pad_mock.loc = config["loc"]
             mock_pads[name] = pad_mock
-            
+
         # Replace the silicon.pads in the model
         self.mock_config_model.chipflow.silicon.pads = mock_pads
-        
+
         mock_parse_config.return_value = conflicting_config
         mock_model_validate.return_value = self.mock_config_model
         mock_top_interfaces.return_value = ({}, self.mock_interfaces)
@@ -439,14 +433,14 @@ class TestLockPins(unittest.TestCase):
         pydantic_package_def = _QuadPackageDef(name="test_package", width=50, height=50)
         mock_package_defs.__getitem__.return_value = pydantic_package_def
         mock_package_defs.__contains__.return_value = True
-        
+
         # Create a mock for the Package class
         mock_package_instance = mock.MagicMock()
         mock_package_class.return_value = mock_package_instance
-        
+
         # Create a mock for the existing lock file
         mock_old_lock = mock.MagicMock()
-        
+
         # Create a Port instance to simulate the conflict
         # In the old lock file, clk used pin 1, but now we're trying to use pin 99
         conflict_port = Port(
@@ -455,31 +449,31 @@ class TestLockPins(unittest.TestCase):
             port_name="clk",
             direction="i"
         )
-                
+
         # Setup the package in the old lock with the conflicting pad
         mock_package_mock = mock.MagicMock()
-        
+
         # Configure check_pad to return our conflict port for the "clk" pad
         def check_pad_side_effect(name, defn):
             if name == "clk":
                 return conflict_port
             return None
-            
+
         mock_package_mock.check_pad.side_effect = check_pad_side_effect
         mock_old_lock.package = mock_package_mock
-        
+
         # Create an empty port_map - we don't need it for this test
         mock_port_map = mock.MagicMock()
         mock_port_map.get_ports.return_value = None
         mock_old_lock.port_map = mock_port_map
-        
+
         # Set up validate_json to return our mock old lock
         mock_validate_json.return_value = mock_old_lock
 
         # Mock pathlib.Path.exists to return True (existing lockfile)
         with mock.patch('pathlib.Path.exists', return_value=True), \
              mock.patch('pathlib.Path.read_text', return_value='{"mock": "json"}'):
-             
+
             # Execute lock_pins - should raise the conflict error
             with self.assertRaises(ChipFlowError) as cm:
                 lock_pins()
@@ -494,8 +488,8 @@ class TestLockPins(unittest.TestCase):
     @mock.patch('chipflow_lib.pin_lock.top_interfaces')
     @mock.patch('chipflow_lib.pin_lock.LockFile.model_validate_json')
     @mock.patch('chipflow_lib.pin_lock.Package')
-    def test_lock_pins_interface_size_change(self, mock_package_class, mock_validate_json, 
-                                         mock_top_interfaces, mock_package_defs, 
+    def test_lock_pins_interface_size_change(self, mock_package_class, mock_validate_json,
+                                         mock_top_interfaces, mock_package_defs,
                                          mock_parse_config, mock_model_validate):
         """Test lock_pins when an interface changes size"""
         # Setup mocks
@@ -532,27 +526,27 @@ class TestLockPins(unittest.TestCase):
         pydantic_package_def = _QuadPackageDef(name="test_package", width=50, height=50)
         mock_package_defs.__getitem__.return_value = pydantic_package_def
         mock_package_defs.__contains__.return_value = True
-        
+
         # Set up Package mock
         mock_package_instance = mock.MagicMock()
         mock_package_class.return_value = mock_package_instance
-        
+
         # Set up add_pad to avoid errors during pad addition
         def mock_add_pad(name, defn):
             pass
         mock_package_instance.add_pad = mock_add_pad
-        
+
         # Create a mock for the existing lock file
         mock_old_lock = mock.MagicMock()
-        
+
         # Set up package with no conflicting pads
         mock_package_mock = mock.MagicMock()
         mock_package_mock.check_pad.return_value = None
         mock_old_lock.package = mock_package_mock
-        
+
         # Create mock port_map for the old lock
         mock_port_map = mock.MagicMock()
-        
+
         # Create actual Port instances for the existing gpio pins
         # In the old lock file, there are only 4 pins allocated for gpio.pins
         old_gpio_port = Port(
@@ -561,28 +555,28 @@ class TestLockPins(unittest.TestCase):
             port_name="gpio_pins",
             direction="io"
         )
-        
+
         # The mock ports that will be returned for gpio
         existing_ports = {
             "pins": old_gpio_port
         }
-        
+
         # Configure the port_map to return our mock ports when appropriate
         def get_ports_side_effect(component, interface):
             if component == "soc" and interface == "gpio":
                 return existing_ports
             return None
-        
+
         mock_port_map.get_ports.side_effect = get_ports_side_effect
         mock_old_lock.port_map = mock_port_map
-        
+
         # Set up validate_json to return our mock old lock
         mock_validate_json.return_value = mock_old_lock
 
         # Mock pathlib.Path.exists to return True (existing lockfile)
         with mock.patch('pathlib.Path.exists', return_value=True), \
              mock.patch('pathlib.Path.read_text', return_value='{"mock": "json"}'):
-             
+
             # Execute lock_pins - should raise the size change error because
             # the interface changed size from 4 pins to 8 pins
             with self.assertRaises(ChipFlowError) as cm:
@@ -602,15 +596,15 @@ class TestLockPins(unittest.TestCase):
         # Setup config with unknown package that will still pass basic Pydantic validation
         # This is a simplified approach since with Pydantic the validation would fail earlier
         unknown_config = self.test_config.copy()
-        
+
         # Create a deep copy of the chipflow section
         unknown_config["chipflow"] = self.test_config["chipflow"].copy()
         unknown_config["chipflow"]["silicon"] = self.test_config["chipflow"]["silicon"].copy()
-        
-        # Set to a package name that does not exist 
+
+        # Set to a package name that does not exist
         unknown_config["chipflow"]["silicon"]["package"] = "unknown_package"
         mock_parse_config.return_value = unknown_config
-        
+
         # Update the mock config model to have the unknown package
         self.mock_config_model.chipflow.silicon.package = "unknown_package"
         mock_model_validate.return_value = self.mock_config_model
@@ -625,8 +619,8 @@ class TestLockPins(unittest.TestCase):
         with mock.patch('chipflow_lib.pin_lock.logger') as mock_logger:
             # Since we need a KeyError, we'll set up the dictionary access to raise it
             mock_package_defs.__getitem__.side_effect = KeyError("unknown_package")
-            
-            with self.assertRaises(KeyError) as cm:
+
+            with self.assertRaises(KeyError):
                 lock_pins()
 
         # Verify the logger was called with the unknown package message
