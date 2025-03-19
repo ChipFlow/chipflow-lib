@@ -11,7 +11,7 @@ Let's start with a typical example:
 .. testcode::
    :hide:
 
-   # Assert that example-chipflow.toml matches the current config schema. If
+   # Assert that example-chipflow.toml matches the current config schema. If 
    # this test fails, then its likely that the content in this file will need
    # to be updated.
    from chipflow_lib import _parse_config_file
@@ -108,7 +108,7 @@ Available pad rings
 silicon.pads
 ============
 
-The ``silicon.pads`` section lists special pads. In general you are unlikely to need to add to this.
+The ``silicon.pads`` section lists special pads. In general you are unlikely to need to add to this. 
 
 For each pad, there's a label which is used by our design, and what ``type`` and ``loc`` each pad should be.
 
