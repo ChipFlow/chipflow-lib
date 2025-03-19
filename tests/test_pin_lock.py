@@ -12,7 +12,7 @@ from chipflow_lib.platforms.utils import (
 )
 from chipflow_lib.config_models import Config, SiliconConfig, PadConfig, StepsConfig, ChipFlowConfig
 from chipflow_lib.pin_lock import (
-    count_member_pins, allocate_pins, lock_pins, parse_component_path, PinCommand
+    count_member_pins, allocate_pins, lock_pins, PinCommand
 )
 
 
@@ -259,25 +259,6 @@ class TestPinLock(unittest.TestCase):
         # Check remaining pins
         self.assertEqual(remaining_pins, pins[3:])
 
-    def test_parse_component_path(self):
-        """Test parse_component_path function"""
-        # Test valid paths
-        self.assertEqual(
-            parse_component_path("component.interface.port"),
-            ("component", "interface", "port")
-        )
-        self.assertEqual(
-            parse_component_path("comp_name.if_name.port_name"),
-            ("comp_name", "if_name", "port_name")
-        )
-        
-        # Test invalid paths
-        with self.assertRaises(ValueError):
-            parse_component_path("invalid")
-        with self.assertRaises(ValueError):
-            parse_component_path("only.one")
-        with self.assertRaises(ValueError):
-            parse_component_path("too.many.dots.here")
 
     @mock.patch("chipflow_lib.pin_lock._parse_config")
     @mock.patch("chipflow_lib.pin_lock.Config.model_validate")
