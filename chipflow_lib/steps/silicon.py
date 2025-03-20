@@ -9,13 +9,13 @@ import os
 import requests
 import subprocess
 import sys
+import time
 
 import dotenv
 from amaranth import *
 
 from .. import ChipFlowError
 from ..platforms import SiliconPlatform, top_interfaces
-from urllib.parse import urlparse
 
 
 logger = logging.getLogger(__name__)
@@ -74,6 +74,9 @@ class SiliconStep:
         submit_subparser.add_argument(
             "--dry-run", help=argparse.SUPPRESS,
             default=False, action="store_true")
+        submit_subparser.add_argument(
+            "--wait", help=argparse.SUPPRESS,
+            default=False, action="store_true")
 
     def run_cli(self, args):
         if args.action == "submit" and not args.dry_run:
@@ -90,7 +93,7 @@ class SiliconStep:
 
         rtlil_path = self.prepare()  # always prepare before submission
         if args.action == "submit":
-            self.submit(rtlil_path, dry_run=args.dry_run)
+            self.submit(rtlil_path, dry_run=args.dry_run, wait=args.wait)
 
     def prepare(self):
         """Elaborate the design and convert it to RTLIL.
@@ -99,7 +102,7 @@ class SiliconStep:
         """
         return self.platform.build(SiliconTop(self.config), name=self.config_model.chipflow.project_name)
 
-    def submit(self, rtlil_path, *, dry_run=False):
+    def submit(self, rtlil_path, *, dry_run=False, wait=False):
         """Submit the design to the ChipFlow cloud builder.
         """
         git_head = subprocess.check_output(
@@ -174,11 +177,13 @@ class SiliconStep:
             return
 
         logger.info(f"Submitting {submission_name} for project {self.project_name}")
-        endpoint = os.environ.get("CHIPFLOW_API_ENDPOINT", "https://build.chipflow.org/api/builds")
-        host = urlparse(endpoint).netloc
+        chipflow_api_origin = os.environ.get("CHIPFLOW_API_ORIGIN", "https://build.chipflow.org")
+        build_submit_url = f"{chipflow_api_origin}/build/submit"
 
         resp = requests.post(
-            os.environ.get("CHIPFLOW_API_ENDPOINT", "https://build.chipflow.org/api/builds"),
+            build_submit_url,
+            # TODO: This needs to be reworked to accept only one key, auth accepts user and pass
+            # TODO: but we want to submit a single key
             auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"]),
             data=data,
             files={
@@ -197,7 +202,36 @@ class SiliconStep:
         # Handle response based on status code
         if resp.status_code == 200:
             logger.info(f"Submitted design: {resp_data}")
-            print(f"https://{host}/build/{resp_data['build_id']}")
+            build_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}"
+            build_status_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/status"
+
+            print(f"Design submitted successfully! Build URL: {build_url}")
+
+            # Poll the status API until the build is completed or failed
+            if wait:
+                while True:
+                    status_resp = requests.get(
+                        build_status_url,
+                        auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"])
+                    )
+                    if status_resp.status_code != 200:
+                        logger.error(f"Failed to fetch build status: {status_resp.text}")
+                        raise ChipFlowError("Error while checking build status.")
+
+                    status_data = status_resp.json()
+                    build_status = status_data.get("status")
+                    logger.info(f"Build status: {build_status}")
+
+                    if build_status == "completed":
+                        print("Build completed successfully!")
+                        exit(0)
+                    elif build_status == "failed":
+                        print("Build failed.")
+                        exit(1)
+
+                    # Wait before polling again
+                    time.sleep(10)
+
         else:
             # Log detailed information about the failed request
             logger.error(f"Request failed with status code {resp.status_code}")
