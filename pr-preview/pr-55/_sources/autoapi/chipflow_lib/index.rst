@@ -20,14 +20,6 @@ Submodules
    /autoapi/chipflow_lib/steps/index
 
 
-Attributes
-----------
-
-.. autoapisummary::
-
-   chipflow_lib.config_schema
-
-
 Exceptions
 ----------
 
@@ -46,6 +38,4 @@ Package Contents
 
    Common base class for all non-exit exceptions.
 
-
-.. py:data:: config_schema
 
