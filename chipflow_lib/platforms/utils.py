@@ -404,7 +404,7 @@ class Process(enum.Enum):
     IHP_SG13G2 = "ihp_sg13g2"
 
     def __str__(self):
-        return f'{self.name}'
+        return f'{self.value}'
 
 
 class LockFile(pydantic.BaseModel):
