@@ -25,7 +25,7 @@ class ParseConfigTestCase(unittest.TestCase):
             config = Config.model_validate(config_dict)
             self.assertEqual(config.chipflow.project_name, "test-chip")
             self.assertEqual(config.chipflow.silicon.package, "pga144")
-            self.assertEqual(str(config.chipflow.silicon.process), "GF130BCD")
+            self.assertEqual(str(config.chipflow.silicon.process), "gf130bcd")
 
     def test_mock_config_parsing(self):
         """Test that the mock chipflow.toml can be parsed with our Pydantic models."""
