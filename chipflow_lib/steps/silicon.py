@@ -128,10 +128,17 @@ class SiliconStep:
                 dep_versions[package] = importlib.metadata.version(package)
             except importlib.metadata.PackageNotFoundError:
                 dep_versions[package] = None
+
         data = {
             "projectId": self.project_name,
             "name": submission_name,
         }
+
+        # Dev only var to select specifc backend version
+        # Check if CHIPFLOW_BACKEND_VERSION exists in the environment and add it to the data dictionary
+        chipflow_backend_version = os.environ.get("CHIPFLOW_BACKEND_VERSION")
+        if chipflow_backend_version:
+            data["chipflow_backend_version"] = chipflow_backend_version
 
         pads = {}
         for iface, port in self.platform._ports.items():
