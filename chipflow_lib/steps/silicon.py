@@ -184,7 +184,9 @@ class SiliconStep:
             files={
                 "rtlil": open(rtlil_path, "rb"),
                 "config": json.dumps(config),
-            })
+            },
+            allow_redirects=False
+            )
 
         # Parse response body
         try:
