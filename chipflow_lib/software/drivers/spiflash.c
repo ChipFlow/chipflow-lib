@@ -7,18 +7,17 @@ extern uint32_t flashio_worker_end;
 
 void spiflash_io(volatile spiflash_regs_t *flash, uint8_t *data, int len, uint8_t wrencmd) {
 	// Flash can't be accessed during IO, so copy to RAM and run that
-    volatile uint32_t func[&flashio_worker_end - &flashio_worker_begin];
+	volatile uint32_t func[&flashio_worker_end - &flashio_worker_begin];
 
-    // Can't execute off flash while talking to it, so copy IO code to SRAM
-    uint32_t *src_ptr = &flashio_worker_begin;
-    volatile uint32_t *dst_ptr = func;
+	uint32_t *src_ptr = &flashio_worker_begin;
+	volatile uint32_t *dst_ptr = func;
 
-    while (src_ptr != &flashio_worker_end)
-        *(dst_ptr++) = *(src_ptr++);
+	while (src_ptr != &flashio_worker_end)
+		*(dst_ptr++) = *(src_ptr++);
 
-    __asm__ volatile ("fence.i" : : : "memory");
+	__asm__ volatile ("fence.i" : : : "memory");
 
-    ((void(*)(uint8_t*, uint8_t*, uint32_t, uint32_t))func)((uint8_t*)flash, data, len, wrencmd);
+	((void(*)(volatile spiflash_regs_t *, uint8_t*, uint32_t, uint32_t))func)(flash, data, len, wrencmd);
 }
 
 uint32_t spiflash_read_id(volatile spiflash_regs_t *flash) {
@@ -70,5 +69,5 @@ void spiflash_set_qspi_flag(volatile spiflash_regs_t *flash) {
 }
 
 void spiflash_set_quad_mode(volatile spiflash_regs_t *flash) {
-    flash->config = (0x3U << 3U) | (0x03U << 1U); // 3 dummy byte, X4 mode
+	flash->ctrl = (flash->ctrl & ~0x007f0000) | 0x00240000;
 }
