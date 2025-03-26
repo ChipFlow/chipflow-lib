@@ -8,10 +8,7 @@
 #define ISSI_ID 0x60
 
 typedef struct __attribute__((packed, aligned(4))) {
-    uint32_t config;
-    uint32_t raw_control;
-    uint32_t raw_tx_data;
-    uint32_t raw_rx_data;
+	uint32_t ctrl;
 } spiflash_regs_t;
 
 void spiflash_io(volatile spiflash_regs_t *flash, uint8_t *data, int len, uint8_t wrencmd);

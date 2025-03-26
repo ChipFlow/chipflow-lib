@@ -1,57 +1,67 @@
+
 .global flashio_worker_begin
 .global flashio_worker_end
 
 .balign 4
 
 flashio_worker_begin:
-# a0 ... flash base address
+# a0 ... address of SPI ctrl reg
 # a1 ... data pointer
 # a2 ... data length
 # a3 ... optional WREN cmd (0 = disable)
 
-mv t3, ra
+# Set CS high, IO0 is output
+li   t1, 0x120
+sh   t1, 0(a0)
 
-# address of SPI ctrl reg
-li   a0, 0xb0000000
-# enter bypass mode
-lbu   t1, 0(a0) 
-ori   t1, t1, 0x1
-sb    t1, 0(a0)
-call flashio_wait_bypass_ready
+# Enable Manual SPI Ctrl
+sb   zero, 3(a0)
 
-beqz a3, flashio_xfer
+# Send optional WREN cmd
+beqz a3, flashio_worker_L1
+li   t5, 8
+andi t2, a3, 0xff
+flashio_worker_L4:
+srli t4, t2, 7
+sb   t4, 0(a0)
+ori  t4, t4, 0x10
+sb   t4, 0(a0)
+slli t2, t2, 1
+andi t2, t2, 0xff
+addi t5, t5, -1
+bnez t5, flashio_worker_L4
+sb   t1, 0(a0)
 
-sb a3, 8(a0) # send wren
-call flashio_wait_bypass_ready
-li t1, 2 # deselect
-sb t1, 4(a0)
-call flashio_wait_bypass_ready
-
-flashio_xfer:
-beqz a2, flashio_done
-lbu t1, 0(a1)
-sb t1, 8(a0) # tx data
-call flashio_wait_bypass_ready
-lbu t1, 12(a0) # rx data
-sb t1, 0(a1)
+# SPI transfer
+flashio_worker_L1:
+beqz a2, flashio_worker_L3
+li   t5, 8
+lbu  t2, 0(a1)
+flashio_worker_L2:
+srli t4, t2, 7
+sb   t4, 0(a0)
+ori  t4, t4, 0x10
+sb   t4, 0(a0)
+lbu  t4, 0(a0)
+andi t4, t4, 2
+srli t4, t4, 1
+slli t2, t2, 1
+or   t2, t2, t4
+andi t2, t2, 0xff
+addi t5, t5, -1
+bnez t5, flashio_worker_L2
+sb   t2, 0(a1)
 addi a1, a1, 1
 addi a2, a2, -1
-j flashio_xfer
+j    flashio_worker_L1
+flashio_worker_L3:
 
-flashio_done:
-# exit bypass mode
-lbu   t1, 0(a0) 
-andi   t1, t1, 0xFE
-sb    t1, 0(a0)
+# Back to MEMIO mode
+li   t1, 0x80
+sb   t1, 3(a0)
 
 fence.i
-mv ra, t3
-ret
 
-flashio_wait_bypass_ready:
-lbu   t1, 4(a0)
-andi t1, t1, 0x1
-beqz t1, flashio_wait_bypass_ready
 ret
 
 .balign 4
