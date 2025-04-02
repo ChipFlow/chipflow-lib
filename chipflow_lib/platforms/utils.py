@@ -19,7 +19,8 @@ from .. import ChipFlowError, _ensure_chipflow_root, _get_cls_by_reference
 
 __all__ = ['PIN_ANNOTATION_SCHEMA', 'PinSignature',
            'OutputPinSignature', 'InputPinSignature', 'BidirPinSignature',
-           'load_pinlock', "PACKAGE_DEFINITIONS", 'top_interfaces']
+           'load_pinlock', "PACKAGE_DEFINITIONS", 'top_interfaces', 'LockFile',
+           'Package', 'PortMap', 'Port']
 
 
 logger = logging.getLogger(__name__)
@@ -257,7 +258,7 @@ class _BareDiePackageDef(_BasePackageDef):
     """
 
     # Used by pydantic to differentate when deserialising
-    type: Literal["_QuadPackageDef"] = "_QuadPackageDef"
+    type: Literal["_BareDiePackageDef"] = "_BareDiePackageDef"
 
     width: int
     height: int
@@ -289,7 +290,7 @@ class _QuadPackageDef(_BasePackageDef):
     """
 
     # Used by pydantic to differentate when deserialising
-    type: Literal["_PGAPackageDef"] = "_PGAPackageDef"
+    type: Literal["_QuadPackageDef"] = "_QuadPackageDef"
 
     width:int
     height: int
@@ -322,7 +323,7 @@ PACKAGE_DEFINITIONS = {
     "cf20": _BareDiePackageDef(name="cf20", width=7, height=3)
 }
 
-PackageDef = Union[_QuadPackageDef, _BasePackageDef]
+PackageDef = Union[_QuadPackageDef, _BareDiePackageDef]
 
 
 class Port(pydantic.BaseModel):

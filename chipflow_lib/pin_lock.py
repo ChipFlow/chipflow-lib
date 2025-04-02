@@ -7,8 +7,15 @@ from pathlib import Path
 from typing import Any, List, Dict, Tuple
 
 from chipflow_lib import _parse_config, _ensure_chipflow_root, ChipFlowError
-from chipflow_lib.platforms import PACKAGE_DEFINITIONS, PIN_ANNOTATION_SCHEMA, top_interfaces
-from chipflow_lib.platforms.utils import LockFile, Package, PortMap, Port
+from chipflow_lib.platforms import (
+        PACKAGE_DEFINITIONS,
+        PIN_ANNOTATION_SCHEMA,
+        top_interfaces,
+        LockFile,
+        Package,
+        PortMap,
+        Port
+)
 from chipflow_lib.config_models import Config
 
 # logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
