@@ -4,6 +4,8 @@ on:
       - main
   pull_request:
   merge_group:
+  schedule:
+    - cron: '0 0 * * *'  # Every day at midnight UTC
 
 name: CI
 jobs:
@@ -85,14 +87,14 @@ jobs:
       - name: Check out source code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          path: chipflow-lib
+            fetch-depth: 0
+            path: chipflow-lib
       - name: Check out chipflow-examples
         uses: actions/checkout@v4
         with:
-          repository: ChipFlow/chipflow-examples
-          fetch-depth: 0
-          path: chipflow-examples
+            repository: ChipFlow/chipflow-examples
+            fetch-depth: 0
+            path: chipflow-examples
 
       - name: Set up PDM
         uses: pdm-project/setup-pdm@v4
