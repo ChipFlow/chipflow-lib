@@ -5,13 +5,11 @@ import logging
 import os
 import subprocess
 
-from dataclasses import dataclass
-
 from amaranth import Module, Signal, Cat, ClockDomain, ClockSignal, ResetSignal
 
-from amaranth.lib import wiring, io
+from amaranth.lib import io
 from amaranth.lib.cdc import FFSynchronizer
-from amaranth.lib.wiring import Component, In, PureInterface
+from amaranth.lib.wiring import PureInterface
 
 from amaranth.back import rtlil
 from amaranth.hdl import Fragment
@@ -23,44 +21,6 @@ from .utils import load_pinlock, Port
 __all__ = ["SiliconPlatformPort", "SiliconPlatform"]
 
 logger = logging.getLogger(__name__)
-
-
-def make_hashable(cls):
-    def __hash__(self):
-        return hash(id(self))
-
-    def __eq__(self, obj):
-        return id(self) == id(obj)
-
-    cls.__hash__ = __hash__
-    cls.__eq__ = __eq__
-    return cls
-
-
-HeartbeatSignature = wiring.Signature({"heartbeat_i": In(1)})
-
-
-@make_hashable
-@dataclass
-class Heartbeat(Component):
-    clock_domain: str = "sync"
-    counter_size: int = 23
-    name: str = "heartbeat"
-
-    def __init__(self, ports):
-        super().__init__(HeartbeatSignature)
-        self.ports = ports
-
-    def elaborate(self, platform):
-        m = Module()
-        # Heartbeat LED (to confirm clock/reset alive)
-        heartbeat_ctr = Signal(self.counter_size)
-        getattr(m.d, self.clock_domain).__iadd__(heartbeat_ctr.eq(heartbeat_ctr + 1))
-
-        heartbeat_buffer = io.Buffer("o", self.ports.heartbeat)
-        m.submodules.heartbeat_buffer = heartbeat_buffer
-        m.d.comb += heartbeat_buffer.o.eq(heartbeat_ctr[-1])
-        return m
 
 
 class SiliconPlatformPort(io.PortLike):
@@ -90,9 +50,6 @@ class SiliconPlatformPort(io.PortLike):
                 self._oe = Signal(port.width, name=f"{component}_{name}__oe", init=-1)
             else:
                 self._oe = Signal(1, name=f"{component}_{name}__oe", init=-1)
-        elif self._direction is io.Direction.Output:
-            # Always create an _oe for output ports
-            self._oe = Signal(1, name=f"{component}_{name}__oe", init=-1)
 
         logger.debug(f"Created SiliconPlatformPort {name}, width={len(port.pins)},dir{self._direction}")
 
@@ -100,30 +57,30 @@ class SiliconPlatformPort(io.PortLike):
         assert self._direction == interface.signature.direction
         if hasattr(interface, 'i'):
             m.d.comb += interface.i.eq(self.i)
-        for d in ['o', 'oe']:
-            if hasattr(interface, d):
-                m.d.comb += getattr(self, d).eq(getattr(interface, d))
+        if hasattr(interface, 'o'):
+            m.d.comb += self.o.eq(interface.o)
+        if hasattr(interface, 'oe') and self._oe is not None:
+            m.d.comb += self.oe.eq(interface.oe)
 
     @property
-
     def i(self):
         if self._i is None:
             raise AttributeError("SiliconPlatformPort with output direction does not have an "
-                               "input signal")
+                                 "input signal")
         return self._i
 
     @property
     def o(self):
         if self._o is None:
             raise AttributeError("SiliconPlatformPort with input direction does not have an "
-                               "output signal")
+                                 "output signal")
         return self._o
 
     @property
     def oe(self):
         if self._oe is None:
-            raise AttributeError("SiliconPlatformPort with input direction does not have an "
-                               "output enable signal")
+            raise AttributeError("SiliconPlatformPort with output or input direction does not have an "
+                                 "output enable signal")
         return self._oe
 
     @property
@@ -217,7 +174,9 @@ class IOBuffer(io.Buffer):
             m.d.comb += i_inv.eq(self.port.i)
         if self.direction in (io.Direction.Output, io.Direction.Bidir):
             m.d.comb += self.port.o.eq(o_inv)
-            m.d.comb += self.port.oe.eq(self.oe)
+            # Only set oe for bidirectional ports
+            if self.direction is io.Direction.Bidir:
+                m.d.comb += self.port.oe.eq(self.oe)
 
         return m
 
