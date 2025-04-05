@@ -1,21 +1,19 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 import argparse
-import importlib.metadata
 import inspect
 import json
 import logging
 import os
 import requests
 import subprocess
-import sys
 import time
 
 import dotenv
 from amaranth import *
 
 from .. import ChipFlowError
-from ..platforms import SiliconPlatform, top_interfaces
+from ..platforms import SiliconPlatform, top_interfaces, load_pinlock
 
 
 logger = logging.getLogger(__name__)
@@ -116,21 +114,6 @@ class SiliconStep:
         if git_dirty:
             logging.warning("Git tree is dirty, submitting anyway!")
             submission_name += "-dirty"
-        dep_versions = {
-            "python": sys.version.split()[0]
-        }
-        for package in (
-            # Upstream packages
-            "yowasp-runtime", "yowasp-yosys",
-            "amaranth", "amaranth-stdio", "amaranth-soc",
-            # ChipFlow packages
-            "chipflow-lib",
-            "amaranth-orchard", "amaranth-vexriscv",
-        ):
-            try:
-                dep_versions[package] = importlib.metadata.version(package)
-            except importlib.metadata.PackageNotFoundError:
-                dep_versions[package] = None
 
         data = {
             "projectId": self.project_name,
@@ -160,20 +143,12 @@ class SiliconStep:
                              f"dir={port.direction}, width={width}")
                 pads[padname] = {'loc': port.pins[0], 'type': port.direction.value}
 
-        # Use the Pydantic models to access configuration data
-        silicon_model = self.config_model.chipflow.silicon
-        config = {
-            "dependency_versions": dep_versions,
-            "silicon": {
-                "process": str(silicon_model.process),
-                "pad_ring": silicon_model.package,
-                "pads": pads,
-                "power": {k: {"type": v.type, "loc": v.loc} for k, v in silicon_model.power.items()}
-            }
-        }
+        pinlock = load_pinlock()
+        config = pinlock.model_dump_json(indent=2)
+
         if dry_run:
             print(f"data=\n{json.dumps(data, indent=2)}")
-            print(f"files['config']=\n{json.dumps(config, indent=2)}")
+            print(f"files['config']=\n{config}")
             return
 
         logger.info(f"Submitting {submission_name} for project {self.project_name}")
@@ -188,7 +163,7 @@ class SiliconStep:
             data=data,
             files={
                 "rtlil": open(rtlil_path, "rb"),
-                "config": json.dumps(config),
+                "config": config,
             },
             allow_redirects=False
             )
