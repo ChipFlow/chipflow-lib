@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import requests
+import requests.exceptions
 import subprocess
 import time
 
@@ -206,21 +207,27 @@ class SiliconStep:
                         exit(1)
 
                     # Attempt to stream logs
-                    with requests.get(
-                        log_stream_url,
-                        auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"]),
-                        stream=True
-                    ) as log_resp:
-                        if log_resp.status_code == 200:
-                            for line in log_resp.iter_lines():
-                                if line:
-                                    print(line.decode("utf-8"))  # Print logs in real-time
-                        elif log_resp.status_code == 404:
-                            logger.error("Log streaming endpoint returned 404: Not Found.")
-                            print("Log streaming failed: Build not found.")
-                            exit(1)  # Exit with failure
-                        else:
-                            logger.warning(f"Failed to stream logs: {log_resp.text}")
+                    try:
+                        with requests.get(
+                            log_stream_url,
+                            auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"]),
+                            stream=True
+                        ) as log_resp:
+                            if log_resp.status_code == 200:
+                                for line in log_resp.iter_lines():
+                                    if line:
+                                        print(line.decode("utf-8"))  # Print logs in real-time
+                            elif log_resp.status_code == 404:
+                                logger.error("Log streaming endpoint returned 404: Not Found.")
+                                print("Log streaming failed: Build not found.")
+                                exit(1)  # Exit with failure
+                            else:
+                                logger.warning(f"Failed to stream logs: {log_resp.text}")
+                    except requests.exceptions.ChunkedEncodingError as e:
+                        logger.error("Log streaming failed due to a premature response termination.")
+                        logger.error(f"Error details: {e}")
+                        print("Log streaming interrupted. Please check the build status manually.")
+    exit(1)  # Exit with failure
                     # Wait before polling again
                     time.sleep(10)
         else:
