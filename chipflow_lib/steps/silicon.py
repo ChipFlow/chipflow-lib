@@ -227,7 +227,6 @@ class SiliconStep:
                         logger.error("Log streaming failed due to a premature response termination.")
                         logger.error(f"Error details: {e}")
                         print("Log streaming interrupted. Please check the build status manually.")
-    exit(1)  # Exit with failure
                     # Wait before polling again
                     time.sleep(10)
         else:
