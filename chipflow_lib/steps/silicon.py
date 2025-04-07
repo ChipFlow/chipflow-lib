@@ -179,6 +179,7 @@ class SiliconStep:
             logger.info(f"Submitted design: {resp_data}")
             build_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}"
             build_status_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/status"
+            log_stream_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/logs?follow=true"
 
             print(f"Design submitted successfully! Build URL: {build_url}")
 
@@ -204,9 +205,24 @@ class SiliconStep:
                         print("Build failed.")
                         exit(1)
 
+                    # Attempt to stream logs
+                    with requests.get(
+                        log_stream_url,
+                        auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"]),
+                        stream=True
+                    ) as log_resp:
+                        if log_resp.status_code == 200:
+                            for line in log_resp.iter_lines():
+                                if line:
+                                    print(line.decode("utf-8"))  # Print logs in real-time
+                        elif log_resp.status_code == 404:
+                            logger.error("Log streaming endpoint returned 404: Not Found.")
+                            print("Log streaming failed: Build not found.")
+                            exit(1)  # Exit with failure
+                        else:
+                            logger.warning(f"Failed to stream logs: {log_resp.text}")
                     # Wait before polling again
                     time.sleep(10)
-
         else:
             # Log detailed information about the failed request
             logger.error(f"Request failed with status code {resp.status_code}")
