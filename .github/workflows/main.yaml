@@ -77,7 +77,7 @@ jobs:
           CHIPFLOW_API_ORIGIN: 'https://build-staging.chipflow.org'
           CHIPFLOW_API_KEY_ID: ${{ secrets.CHIPFLOW_API_KEY_ID }}
           CHIPFLOW_API_KEY_SECRET: ${{ secrets.CHIPFLOW_API_KEY_SECRET }}
-          CHIPFLOW_BACKEND_VERSION: branch-pycopy-fix
+          CHIPFLOW_BACKEND_VERSION: branch-main
 
   test-submit-dry:
     runs-on: ubuntu-latest
