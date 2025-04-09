@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 import logging
 import os
+import re
 import subprocess
 
 from dataclasses import dataclass
@@ -378,6 +379,7 @@ class SiliconPlatform:
         build_dir = os.path.join(os.environ["CHIPFLOW_ROOT"], "build")
         os.makedirs(build_dir, exist_ok=True)
 
+        name = re.sub(r"[-_.]+", "_", name).lower()
         link_script = os.path.join(build_dir, name + "_link.ys")
         with open(link_script, "wb") as script_fp:
             script_fp.write(b"\n".join(yosys_script))
