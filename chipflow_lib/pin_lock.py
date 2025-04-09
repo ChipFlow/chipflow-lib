@@ -6,7 +6,7 @@ from pprint import pformat
 from pathlib import Path
 from typing import Any, List, Dict, Tuple
 
-from chipflow_lib import _parse_config, ChipFlowError
+from chipflow_lib import _parse_config, _ensure_chipflow_root, ChipFlowError
 from chipflow_lib.platforms import PACKAGE_DEFINITIONS, PIN_ANNOTATION_SCHEMA, top_interfaces
 from chipflow_lib.platforms.utils import LockFile, Package, PortMap, Port
 from chipflow_lib.config_models import Config
@@ -86,7 +86,8 @@ def lock_pins() -> None:
     used_pins = set()
     oldlock = None
 
-    lockfile = Path('pins.lock')
+    chipflow_root = _ensure_chipflow_root()
+    lockfile = Path(chipflow_root, 'pins.lock')
     if lockfile.exists():
         json_string = lockfile.read_text()
         oldlock = LockFile.model_validate_json(json_string)
@@ -167,7 +168,7 @@ def lock_pins() -> None:
                        port_map=port_map,
                        metadata=interfaces)
 
-    with open('pins.lock', 'w') as f:
+    with open(lockfile, 'w') as f:
         f.write(newlock.model_dump_json(indent=2, serialize_as_any=True))
 
 
