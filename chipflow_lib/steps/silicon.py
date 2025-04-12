@@ -185,8 +185,11 @@ class SiliconStep:
             print(f"Design submitted successfully! Build URL: {build_url}")
 
             # Poll the status API until the build is completed or failed
+            counter = 0
             if wait:
                 while True:
+                    counter += 1
+                    logger.info(f"Polling build status... (attempt {counter})")
                     status_resp = requests.get(
                         build_status_url,
                         auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"])
@@ -210,6 +213,8 @@ class SiliconStep:
                     # time.sleep(10)
                     # Attempt to stream logs rather than time.sleep
                     try:
+                        if counter > 1:
+                            logger.warning("Log streaming may have been interrupted. Some logs may be missing.")
                         with requests.get(
                             log_stream_url,
                             auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"]),
