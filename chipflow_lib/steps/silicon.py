@@ -219,7 +219,7 @@ class SiliconStep:
                                 if line:
                                     print(line.decode("utf-8"))  # Print logs in real-time
                                     sys.stdout.flush()
-                        else:       
+                        else:
                             logger.warning(f"Failed to stream logs: {log_resp.text}")
                     time.sleep(10)  # Wait before polling again
 
