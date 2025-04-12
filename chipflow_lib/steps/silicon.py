@@ -209,19 +209,23 @@ class SiliconStep:
                     # Wait before polling again
                     # time.sleep(10)
                     # Attempt to stream logs rather than time.sleep
-                    with requests.get(
-                        log_stream_url,
-                        auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"]),
-                        stream=True
-                    ) as log_resp:
-                        if log_resp.status_code == 200:
-                            for line in log_resp.iter_lines():
-                                if line:
-                                    print(line.decode("utf-8"))  # Print logs in real-time
-                                    sys.stdout.flush()
-                        else:
-                            logger.warning(f"Failed to stream logs: {log_resp.text}")
-                    time.sleep(10)  # Wait before polling again
+                    try:
+                        with requests.get(
+                            log_stream_url,
+                            auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"]),
+                            stream=True
+                        ) as log_resp:
+                            if log_resp.status_code == 200:
+                                for line in log_resp.iter_lines():
+                                    if line:
+                                        print(line.decode("utf-8"))  # Print logs in real-time
+                                        sys.stdout.flush()
+                            else:
+                                logger.warning(f"Failed to stream logs: {log_resp.text}")
+                        time.sleep(10)  # Wait before polling again
+                    except requests.RequestException as e:
+                        logger.error(f"Error while streaming logs: {e}")
+                        pass
 
         else:
             # Log detailed information about the failed request
