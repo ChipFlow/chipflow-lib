@@ -6,7 +6,6 @@ import json
 import logging
 import os
 import requests
-import requests.exceptions
 import subprocess
 import time
 
@@ -206,29 +205,23 @@ class SiliconStep:
                         print("Build failed.")
                         exit(1)
 
-                    # Attempt to stream logs
-                    try:
-                        with requests.get(
-                            log_stream_url,
-                            auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"]),
-                            stream=True
-                        ) as log_resp:
-                            if log_resp.status_code == 200:
-                                for line in log_resp.iter_lines():
-                                    if line:
-                                        print(line.decode("utf-8"))  # Print logs in real-time
-                            elif log_resp.status_code == 404:
-                                logger.error("Log streaming endpoint returned 404: Not Found.")
-                                print("Log streaming failed: Build not found.")
-                                exit(1)  # Exit with failure
-                            else:
-                                logger.warning(f"Failed to stream logs: {log_resp.text}")
-                    except requests.exceptions.ChunkedEncodingError as e:
-                        logger.error("Log streaming failed due to a premature response termination.")
-                        logger.error(f"Error details: {e}")
-                        print("Log streaming interrupted. Please check the build status manually.")
                     # Wait before polling again
-                    time.sleep(10)
+                    # time.sleep(10)
+                    # Attempt to stream logs rather than time.sleep
+                    with requests.get(
+                        log_stream_url,
+                        auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"]),
+                        stream=True
+                    ) as log_resp:
+                        if log_resp.status_code == 200:
+                            for line in log_resp.iter_lines():
+                                if line:
+                                    print(line.decode("utf-8"))  # Print logs in real-time
+                                    sys.stdout.flush()
+                        else:       
+                            logger.warning(f"Failed to stream logs: {log_resp.text}")
+                    time.sleep(10)  # Wait before polling again
+
         else:
             # Log detailed information about the failed request
             logger.error(f"Request failed with status code {resp.status_code}")
