@@ -8,6 +8,7 @@ import os
 import requests
 import subprocess
 import time
+import sys
 
 import dotenv
 from amaranth import *
@@ -179,12 +180,15 @@ class SiliconStep:
             logger.info(f"Submitted design: {resp_data}")
             build_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}"
             build_status_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/status"
+            log_stream_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/logs?follow=true"
 
             print(f"Design submitted successfully! Build URL: {build_url}")
 
             # Poll the status API until the build is completed or failed
+            stream_event_counter = 0
             if wait:
                 while True:
+                    logger.info("Polling build status...")
                     status_resp = requests.get(
                         build_status_url,
                         auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"])
@@ -203,10 +207,32 @@ class SiliconStep:
                     elif build_status == "failed":
                         print("Build failed.")
                         exit(1)
-
-                    # Wait before polling again
-                    time.sleep(10)
-
+                    elif build_status == "running":
+                        print("Build running.")
+                        # Wait before polling again
+                        # time.sleep(10)
+                        # Attempt to stream logs rather than time.sleep
+                        try:
+                            if stream_event_counter > 1:
+                                logger.warning("Log streaming may have been interrupted. Some logs may be missing.")
+                                logger.warning(f"Check {build_url}")
+                            stream_event_counter += 1
+                            with requests.get(
+                                log_stream_url,
+                                auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"]),
+                                stream=True
+                            ) as log_resp:
+                                if log_resp.status_code == 200:
+                                    for line in log_resp.iter_lines():
+                                        if line:
+                                            print(line.decode("utf-8"))  # Print logs in real-time
+                                            sys.stdout.flush()
+                                else:
+                                    logger.warning(f"Failed to stream logs: {log_resp.text}")
+                        except requests.RequestException as e:
+                            logger.error(f"Error while streaming logs: {e}")
+                            pass
+                    time.sleep(10)  # Wait before polling again
         else:
             # Log detailed information about the failed request
             logger.error(f"Request failed with status code {resp.status_code}")
