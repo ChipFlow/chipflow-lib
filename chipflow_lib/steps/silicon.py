@@ -8,6 +8,7 @@ import os
 import requests
 import subprocess
 import time
+import sys
 
 import dotenv
 from amaranth import *
@@ -179,12 +180,16 @@ class SiliconStep:
             logger.info(f"Submitted design: {resp_data}")
             build_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}"
             build_status_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/status"
+            log_stream_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/logs?follow=true"
 
             print(f"Design submitted successfully! Build URL: {build_url}")
 
             # Poll the status API until the build is completed or failed
+            counter = 0
             if wait:
                 while True:
+                    counter += 1
+                    logger.info(f"Polling build status... (attempt {counter})")
                     status_resp = requests.get(
                         build_status_url,
                         auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"])
@@ -205,7 +210,28 @@ class SiliconStep:
                         exit(1)
 
                     # Wait before polling again
-                    time.sleep(10)
+                    # time.sleep(10)
+                    # Attempt to stream logs rather than time.sleep
+                    try:
+                        if counter > 1:
+                            logger.warning("Log streaming may have been interrupted. Some logs may be missing.")
+                            logger.warning(f"Check {build_url}")
+                        with requests.get(
+                            log_stream_url,
+                            auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"]),
+                            stream=True
+                        ) as log_resp:
+                            if log_resp.status_code == 200:
+                                for line in log_resp.iter_lines():
+                                    if line:
+                                        print(line.decode("utf-8"))  # Print logs in real-time
+                                        sys.stdout.flush()
+                            else:
+                                logger.warning(f"Failed to stream logs: {log_resp.text}")
+                        time.sleep(10)  # Wait before polling again
+                    except requests.RequestException as e:
+                        logger.error(f"Error while streaming logs: {e}")
+                        pass
 
         else:
             # Log detailed information about the failed request
