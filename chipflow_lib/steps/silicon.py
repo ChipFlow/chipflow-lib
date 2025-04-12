@@ -215,6 +215,7 @@ class SiliconStep:
                     try:
                         if counter > 1:
                             logger.warning("Log streaming may have been interrupted. Some logs may be missing.")
+                            logger.warning(f"Check {build_url}")
                         with requests.get(
                             log_stream_url,
                             auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"]),
