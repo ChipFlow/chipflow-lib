@@ -8,6 +8,7 @@ import os
 import requests
 import subprocess
 import time
+import sys
 
 import dotenv
 from amaranth import *
