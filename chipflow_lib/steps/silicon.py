@@ -116,8 +116,7 @@ class SiliconStep:
                 raise ChipFlowError(
                     "Environment variable `CHIPFLOW_API_KEY` is empty."
                 )
-            
-            
+
         git_head = subprocess.check_output(
             ["git", "-C", os.environ["CHIPFLOW_ROOT"],
              "rev-parse", "--short", "HEAD"],
