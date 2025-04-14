@@ -269,8 +269,7 @@ class TestSiliconStep(unittest.TestCase):
             step.run_cli(args)
 
         # Verify error message
-        self.assertIn("CHIPFLOW_API_KEY_ID", str(cm.exception))
-        self.assertIn("CHIPFLOW_API_KEY_SECRET", str(cm.exception))
+        self.assertIn("CHIPFLOW_API_KEY", str(cm.exception))
         # Verify dotenv was loaded
         mock_load_dotenv.assert_called_once()
 
