@@ -99,22 +99,25 @@ class SiliconStep:
     def submit(self, rtlil_path, *, dry_run=False, wait=False):
         """Submit the design to the ChipFlow cloud builder.
         """
-        # Check for CHIPFLOW_API_KEY_SECRET or CHIPFLOW_API_KEY
-        if not os.environ.get("CHIPFLOW_API_KEY") and not os.environ.get("CHIPFLOW_API_KEY_SECRET"):
-            raise ChipFlowError(
-                "Environment variable `CHIPFLOW_API_KEY` must be set to submit a design."
-            )
-        # Log a deprecation warning if CHIPFLOW_API_KEY_SECRET is used
-        if os.environ.get("CHIPFLOW_API_KEY_SECRET"):
-            logger.warning(
-                "Environment variable `CHIPFLOW_API_KEY_SECRET` is deprecated. "
-                "Please migrate to using `CHIPFLOW_API_KEY` instead."
-            )
-        chipflow_api_key = os.environ.get("CHIPFLOW_API_KEY") or os.environ.get("CHIPFLOW_API_KEY_SECRET")
-        if chipflow_api_key is None:
-            raise ChipFlowError(
-                "Environment variable `CHIPFLOW_API_KEY` is empty."
-            )
+        if not dry_run:
+            # Check for CHIPFLOW_API_KEY_SECRET or CHIPFLOW_API_KEY
+            if not os.environ.get("CHIPFLOW_API_KEY") and not os.environ.get("CHIPFLOW_API_KEY_SECRET"):
+                raise ChipFlowError(
+                    "Environment variable `CHIPFLOW_API_KEY` must be set to submit a design."
+                )
+            # Log a deprecation warning if CHIPFLOW_API_KEY_SECRET is used
+            if os.environ.get("CHIPFLOW_API_KEY_SECRET"):
+                logger.warning(
+                    "Environment variable `CHIPFLOW_API_KEY_SECRET` is deprecated. "
+                    "Please migrate to using `CHIPFLOW_API_KEY` instead."
+                )
+            chipflow_api_key = os.environ.get("CHIPFLOW_API_KEY") or os.environ.get("CHIPFLOW_API_KEY_SECRET")
+            if chipflow_api_key is None:
+                raise ChipFlowError(
+                    "Environment variable `CHIPFLOW_API_KEY` is empty."
+                )
+            
+            
         git_head = subprocess.check_output(
             ["git", "-C", os.environ["CHIPFLOW_ROOT"],
              "rev-parse", "--short", "HEAD"],
