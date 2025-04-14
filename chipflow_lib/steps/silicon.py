@@ -84,17 +84,6 @@ class SiliconStep:
                 raise ChipFlowError(
                     "Key `chipflow.project_id` is not defined in chipflow.toml; "
                     "see https://chipflow.io/beta for details on how to join the beta")
-            # Check for CHIPFLOW_API_KEY_SECRET or CHIPFLOW_API_KEY
-            if not os.environ.get("CHIPFLOW_API_KEY") and not os.environ.get("CHIPFLOW_API_KEY_SECRET"):
-                raise ChipFlowError(
-                    "Environment variable `CHIPFLOW_API_KEY` must be set to submit a design."
-                )
-            # Log a deprecation warning if CHIPFLOW_API_KEY_SECRET is used
-            if os.environ.get("CHIPFLOW_API_KEY_SECRET"):
-                logger.warning(
-                    "Environment variable `CHIPFLOW_API_KEY_SECRET` is deprecated. "
-                    "Please migrate to using `CHIPFLOW_API_KEY` instead."
-                )
 
         rtlil_path = self.prepare()  # always prepare before submission
         if args.action == "submit":
@@ -110,6 +99,17 @@ class SiliconStep:
     def submit(self, rtlil_path, *, dry_run=False, wait=False):
         """Submit the design to the ChipFlow cloud builder.
         """
+        # Check for CHIPFLOW_API_KEY_SECRET or CHIPFLOW_API_KEY
+        if not os.environ.get("CHIPFLOW_API_KEY") and not os.environ.get("CHIPFLOW_API_KEY_SECRET"):
+            raise ChipFlowError(
+                "Environment variable `CHIPFLOW_API_KEY` must be set to submit a design."
+            )
+        # Log a deprecation warning if CHIPFLOW_API_KEY_SECRET is used
+        if os.environ.get("CHIPFLOW_API_KEY_SECRET"):
+            logger.warning(
+                "Environment variable `CHIPFLOW_API_KEY_SECRET` is deprecated. "
+                "Please migrate to using `CHIPFLOW_API_KEY` instead."
+            )
         chipflow_api_key = os.environ.get("CHIPFLOW_API_KEY") or os.environ.get("CHIPFLOW_API_KEY_SECRET")
         if chipflow_api_key is None:
             raise ChipFlowError(
