@@ -84,11 +84,17 @@ class SiliconStep:
                 raise ChipFlowError(
                     "Key `chipflow.project_id` is not defined in chipflow.toml; "
                     "see https://chipflow.io/beta for details on how to join the beta")
-            if ("CHIPFLOW_API_KEY_ID" not in os.environ or
-                    "CHIPFLOW_API_KEY_SECRET" not in os.environ):
+            # Check for CHIPFLOW_API_KEY_SECRET or CHIPFLOW_API_KEY
+            if not os.environ.get("CHIPFLOW_API_KEY") and not os.environ.get("CHIPFLOW_API_KEY_SECRET"):
                 raise ChipFlowError(
-                    "Environment variables `CHIPFLOW_API_KEY_ID` and `CHIPFLOW_API_KEY_SECRET` "
-                    "must be set in order to submit a design")
+                    "Environment variable `CHIPFLOW_API_KEY` must be set to submit a design."
+                )
+            # Log a deprecation warning if CHIPFLOW_API_KEY_SECRET is used
+            if os.environ.get("CHIPFLOW_API_KEY_SECRET"):
+                logger.warning(
+                    "Environment variable `CHIPFLOW_API_KEY_SECRET` is deprecated. "
+                    "Please migrate to using `CHIPFLOW_API_KEY` instead."
+                )
 
         rtlil_path = self.prepare()  # always prepare before submission
         if args.action == "submit":
@@ -104,6 +110,11 @@ class SiliconStep:
     def submit(self, rtlil_path, *, dry_run=False, wait=False):
         """Submit the design to the ChipFlow cloud builder.
         """
+        chipflow_api_key = os.environ.get("CHIPFLOW_API_KEY") or os.environ.get("CHIPFLOW_API_KEY_SECRET")
+        if chipflow_api_key is None:
+            raise ChipFlowError(
+                "Environment variable `CHIPFLOW_API_KEY` is empty."
+            )
         git_head = subprocess.check_output(
             ["git", "-C", os.environ["CHIPFLOW_ROOT"],
              "rev-parse", "--short", "HEAD"],
@@ -160,7 +171,7 @@ class SiliconStep:
             build_submit_url,
             # TODO: This needs to be reworked to accept only one key, auth accepts user and pass
             # TODO: but we want to submit a single key
-            auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"]),
+            auth=(None, chipflow_api_key),
             data=data,
             files={
                 "rtlil": open(rtlil_path, "rb"),
@@ -191,7 +202,7 @@ class SiliconStep:
                     logger.info("Polling build status...")
                     status_resp = requests.get(
                         build_status_url,
-                        auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"])
+                        auth=(None, chipflow_api_key)
                     )
                     if status_resp.status_code != 200:
                         logger.error(f"Failed to fetch build status: {status_resp.text}")
@@ -219,7 +230,7 @@ class SiliconStep:
                             stream_event_counter += 1
                             with requests.get(
                                 log_stream_url,
-                                auth=(os.environ["CHIPFLOW_API_KEY_ID"], os.environ["CHIPFLOW_API_KEY_SECRET"]),
+                                auth=(None, chipflow_api_key),
                                 stream=True
                             ) as log_resp:
                                 if log_resp.status_code == 200:
