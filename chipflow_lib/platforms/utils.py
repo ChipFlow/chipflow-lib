@@ -379,7 +379,7 @@ class _BareDiePackageDef(_BasePackageDef):
         return {0: (_Side.S, 1)}  # South side, pin 1
 
 
-class _QuadPackageDef(_BasePackageDef):
+class _PGAPackageDef(_BasePackageDef):
     """Definiton of a PGA package with `size` pins
 
     This is package with `size` pins, numbered, with the assumption that adjacent pins
@@ -404,9 +404,9 @@ class _QuadPackageDef(_BasePackageDef):
 
     def allocate(self, available: Set[str], width: int) -> List[str]:
         avail_n = sorted(available)
-        logger.debug(f"QuadPackageDef.allocate {width} from {len(avail_n)} remaining: {available}")
+        logger.debug(f"PGAPackageDef.allocate {width} from {len(avail_n)} remaining: {available}")
         ret = _find_contiguous_sequence(self._ordered_pins, avail_n, width)
-        logger.debug(f"QuadPackageDef.returned {ret}")
+        logger.debug(f"PGAPackageDef.returned {ret}")
         assert len(ret) == width
         return ret
 
@@ -472,11 +472,11 @@ class _QuadPackageDef(_BasePackageDef):
 
 # Add any new package types to both PACKAGE_DEFINITIONS and the PackageDef union
 PACKAGE_DEFINITIONS = {
-    "pga144": _QuadPackageDef(name="pga144", width=36, height=36),
+    "pga144": _PGAPackageDef(name="pga144", width=36, height=36),
     "cf20": _BareDiePackageDef(name="cf20", width=7, height=3)
 }
 
-PackageDef = Union[_QuadPackageDef, _BareDiePackageDef, _BasePackageDef]
+PackageDef = Union[_PGAPackageDef, _BareDiePackageDef, _BasePackageDef]
 
 
 class Port(pydantic.BaseModel):
