@@ -76,10 +76,7 @@ jobs:
           pdm run chipflow pin lock
           pdm run chipflow silicon submit --wait
         env:
-          CHIPFLOW_API_ORIGIN: 'https://build-staging.chipflow.org'
-          CHIPFLOW_API_KEY_ID: ${{ secrets.CHIPFLOW_API_KEY_ID }}
-          CHIPFLOW_API_KEY_SECRET: ${{ secrets.CHIPFLOW_API_KEY_SECRET }}
-          CHIPFLOW_BACKEND_VERSION: branch-main
+          CHIPFLOW_API_KEY: ${{ secrets.CHIPFLOW_API_KEY}}
 
   test-submit-dry:
     runs-on: ubuntu-latest
