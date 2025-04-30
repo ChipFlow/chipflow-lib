@@ -51,6 +51,29 @@ You probably won't need to change these if you're starting from an example repos
 ``[chipflow.clocks]``
 ---------------------
 
+.. code-block:: TOML
+
+   [chipflow.clocks]
+   default = 'sys_clk'
+
+This section links the clock domains utilized in the design to specific pads.
+These pads need to be specified in the `[silicon.pads]`_ section with `type`_ equal to ``clock``.
+The ``default`` clock domain is associated with the Amaranth ``sync`` clock domain.
+Currently, only one ``default`` clock domain is supported.
+
+
+``[chipflow.resets]``
+---------------------
+
+.. code-block:: TOML
+
+   [chipflow.resets]
+   default = 'sys_rst_n'
+
+This section identifies the input pads designated for reset functionality.
+These pads need to be specified in the `[silicon.pads]`_ section with `type`_ equal to ``reset``.
+The logic that synchronizes the reset signal with the clock will be generated automatically.
+
 ``[chipflow.silicon]``
 ----------------------
 
@@ -61,7 +84,7 @@ You probably won't need to change these if you're starting from an example repos
    package = "pga144"
 
 
-The ``silicon`` section sets the Foundry ``process`` (i.e. PDK) that we are targeting for manufacturing, and the physical ``package`` we want to place our design inside.
+The ``silicon`` section sets the Foundry ``process`` (i.e. PDK) that we are targeting for manufacturing, and the physical ``package`` (pad ring) we want to place our design inside.
 You'll choose the ``process`` and ``package`` based in the requirements of your design.
 
 Available processes
@@ -80,7 +103,7 @@ Available processes
 | ihp_sg13g2 | pga144     | IHP SG13G2 130nm SiGe     |
 +------------+------------+---------------------------+
 
-Available pad rings (``package``)
+Available pad rings
 ---------------------------------
 
 +----------+-----------+--------------------+------------------------------------+
@@ -97,11 +120,11 @@ Available pad rings (``package``)
 
 
 
-silicon.pads
-============
+_`[silicon.pads]`
+==================
 
 The ``silicon.pads`` section lists special pads. In general you are unlikely to need to add to this.
-Each pad specified with the name used by the design and two parameters: ``type`` and ``loc``.
+Each pad specified with the name used by the design and two parameters: `type`_ and `loc`_.
 
 .. code-block:: TOML
 
@@ -111,8 +134,8 @@ Each pad specified with the name used by the design and two parameters: ``type``
 
 In the above example two pads specified, ``sys_clk`` pad for clock input and ``sys_rst_n`` for reset.
 
-type
-----
+_`type`
+-------
 
 The ``type`` for each pad can be set to one of:
 
@@ -131,8 +154,8 @@ o
 io
    Both input and output.
 
-loc
-----
+_`loc`
+------
 
 This is the physical location of the pad on your chosen pad ring. How these are indexed varies by the pad ring.
 
