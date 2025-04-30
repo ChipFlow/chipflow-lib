@@ -38,7 +38,7 @@ and add the following to your `chipflow.toml`, with the appropriate Python `qual
 
 .. code-block:: TOML
 
-   [chipflow.stepe]
+   [chipflow.steps]
    silicon = "my_design.steps.silicon:SiliconStep"
 
 
@@ -80,17 +80,12 @@ Available processes
 | ihp_sg13g2 | pga144     | IHP SG13G2 130nm SiGe     |
 +------------+------------+---------------------------+
 
-Available pad rings
--------------------
+Available pad rings (``package``)
+---------------------------------
 
 +----------+-----------+--------------------+------------------------------------+
 | Pad ring | Pad count | Pad locations      | Notes                              |
 +==========+===========+====================+====================================+
-+----------+-----------+--------------------+------------------------------------+
-|| cf20    || 20       || ``N1`` ... ``N7`` ||   Bare die package with 20 pins   |
-||         ||          || ``S1`` ... ``S7`` ||                                   |
-||         ||          || ``E1`` ... ``E3`` ||                                   |
-||         ||          || ``W1`` ... ``W3`` ||                                   |
 +----------+-----------+--------------------+------------------------------------+
 | pga144   | 144       | ``1`` ... ``144``  |                                    |
 +----------+-----------+--------------------+------------------------------------+
@@ -105,9 +100,16 @@ Available pad rings
 silicon.pads
 ============
 
-The ``silicon.pads`` section lists special pads. In general you are unlikely to need to add to this. 
+The ``silicon.pads`` section lists special pads. In general you are unlikely to need to add to this.
+Each pad specified with the name used by the design and two parameters: ``type`` and ``loc``.
 
-For each pad, there's a label which is used by our design, and what ``type`` and ``loc`` each pad should be.
+.. code-block:: TOML
+
+   [chipflow.silicon.pads]
+   sys_clk   = { type = "clock", loc = "114" }
+   sys_rst_n = { type = "reset", loc = "115" }
+
+In the above example two pads specified, ``sys_clk`` pad for clock input and ``sys_rst_n`` for reset.
 
 type
 ----
@@ -117,6 +119,9 @@ The ``type`` for each pad can be set to one of:
 clock
    External clock input.
 
+reset
+   External reset input.
+
 i
    Input.
 
@@ -124,7 +129,7 @@ o
    Output.
 
 io
-   Input or output.
+   Both input and output.
 
 loc
 ----
@@ -134,7 +139,7 @@ This is the physical location of the pad on your chosen pad ring. How these are 
 silicon.power
 =============
 
-This section describes how the pads should be connected to the power available on the chosen process.
+This section describes how the pads should be connected to the power available on the chosen process and package.
 
 This is a work in progress, and currently you can use the defaults provided by customer support.
 
