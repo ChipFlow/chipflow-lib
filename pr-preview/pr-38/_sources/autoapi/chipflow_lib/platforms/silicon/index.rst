@@ -31,6 +31,9 @@ Module Contents
        :class:`amaranth.hdl.IOPort` is not an instance of :class:`amaranth.lib.io.PortLike`.
 
 
+   .. py:method:: wire(m, interface)
+
+
    .. py:property:: i
 
 
@@ -54,6 +57,9 @@ Module Contents
 
 
 .. py:class:: SiliconPlatform(config)
+
+   .. py:property:: ports
+
 
    .. py:method:: instantiate_ports(m)
 

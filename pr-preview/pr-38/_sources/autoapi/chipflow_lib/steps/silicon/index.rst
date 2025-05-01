@@ -42,6 +42,9 @@ Module Contents
    .. py:attribute:: config
 
 
+   .. py:attribute:: config_model
+
+
    .. py:attribute:: project_name
 
 
@@ -65,7 +68,7 @@ Module Contents
 
 
 
-   .. py:method:: submit(rtlil_path, *, dry_run=False)
+   .. py:method:: submit(rtlil_path, *, dry_run=False, wait=False)
 
       Submit the design to the ChipFlow cloud builder.
 

@@ -51,7 +51,7 @@
     <link rel="prev" title="chipflow_lib.pin_lock" href="../pin_lock/index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.dev1+g3f9bf3c" />
+  <meta name="docsearch:version" content="0.1.dev1+g22f8eca" />
   </head>
   
   
@@ -337,6 +337,7 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#functions">Functions</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#package-contents">Package Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.SiliconPlatformPort"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.SiliconPlatformPort.wire"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.wire()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.SiliconPlatformPort.i"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.i</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.SiliconPlatformPort.o"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.o</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.SiliconPlatformPort.oe"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.oe</span></code></a></li>
@@ -346,6 +347,7 @@
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.SiliconPlatform"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.SiliconPlatform.ports"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.ports</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.SiliconPlatform.instantiate_ports"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.instantiate_ports()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.SiliconPlatform.request"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.request()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.SiliconPlatform.get_io_buffer"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.get_io_buffer()</span></code></a></li>
@@ -369,6 +371,9 @@
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.PIN_ANNOTATION_SCHEMA"><code class="docutils literal notranslate"><span class="pre">PIN_ANNOTATION_SCHEMA</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.PinSignature"><code class="docutils literal notranslate"><span class="pre">PinSignature</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.PinSignature.direction"><code class="docutils literal notranslate"><span class="pre">PinSignature.direction</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.PinSignature.width"><code class="docutils literal notranslate"><span class="pre">PinSignature.width()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.PinSignature.options"><code class="docutils literal notranslate"><span class="pre">PinSignature.options()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.PinSignature.annotations"><code class="docutils literal notranslate"><span class="pre">PinSignature.annotations()</span></code></a></li>
 </ul>
 </li>
@@ -483,6 +488,19 @@
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="chipflow_lib.platforms.SiliconPlatformPort.wire">
+<span class="sig-name descname"><span class="pre">wire</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interface</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.SiliconPlatformPort.wire" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> (<em>amaranth.Module</em>)</p></li>
+<li><p><strong>interface</strong> (<a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.PureInterface" title="(in Amaranth language &amp; toolchain v0.5.4)"><em>amaranth.lib.wiring.PureInterface</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="chipflow_lib.platforms.SiliconPlatformPort.i">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">i</span></span><a class="headerlink" href="#chipflow_lib.platforms.SiliconPlatformPort.i" title="Link to this definition">#</a></dt>
@@ -524,7 +542,12 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="chipflow_lib.platforms.SiliconPlatform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">SiliconPlatform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.SiliconPlatform" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="chipflow_lib.platforms.SiliconPlatform.ports">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ports</span></span><a class="headerlink" href="#chipflow_lib.platforms.SiliconPlatform.ports" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="chipflow_lib.platforms.SiliconPlatform.instantiate_ports">
 <span class="sig-name descname"><span class="pre">instantiate_ports</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.SiliconPlatform.instantiate_ports" title="Link to this definition">#</a></dt>
 <dd><dl class="field-list simple">
@@ -623,10 +646,38 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="chipflow_lib.platforms.PinSignature">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">PinSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.PinSignature" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">PinSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_have_oe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.PinSignature" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">amaranth.lib.wiring.Signature</span></code></a></p>
 <p>Amaranth Signtaure used to decorate wires that would
-usually be brought out onto a pin on the package.</p>
+usually be brought out onto a port on the package.</p>
+<p>direction: Input, Output or Bidir
+width: width of port
+all_have_oe: For Bidir ports, should Output Enable be per wire or for the whole port
+init: a  <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/guide.html#lang-constcasting" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">const-castable object</span></a> for the initial values of the port</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>direction</strong> (<a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/io.html#amaranth.lib.io.Direction" title="(in Amaranth language &amp; toolchain v0.5.4)"><em>amaranth.lib.io.Direction</em></a>)</p></li>
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>)</p></li>
+<li><p><strong>all_have_oe</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="chipflow_lib.platforms.PinSignature.direction">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">direction</span></span><a class="headerlink" href="#chipflow_lib.platforms.PinSignature.direction" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chipflow_lib.platforms.PinSignature.width">
+<span class="sig-name descname"><span class="pre">width</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.PinSignature.width" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chipflow_lib.platforms.PinSignature.options">
+<span class="sig-name descname"><span class="pre">options</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.PinSignature.options" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="chipflow_lib.platforms.PinSignature.annotations">
 <span class="sig-name descname"><span class="pre">annotations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.PinSignature.annotations" title="Link to this definition">#</a></dt>
@@ -731,6 +782,7 @@ a corresponding interface object. The default implementation provides none.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#functions">Functions</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#package-contents">Package Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.SiliconPlatformPort"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.SiliconPlatformPort.wire"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.wire()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.SiliconPlatformPort.i"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.i</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.SiliconPlatformPort.o"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.o</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.SiliconPlatformPort.oe"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.oe</span></code></a></li>
@@ -740,6 +792,7 @@ a corresponding interface object. The default implementation provides none.</p>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.SiliconPlatform"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.SiliconPlatform.ports"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.ports</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.SiliconPlatform.instantiate_ports"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.instantiate_ports()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.SiliconPlatform.request"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.request()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.SiliconPlatform.get_io_buffer"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.get_io_buffer()</span></code></a></li>
@@ -763,6 +816,9 @@ a corresponding interface object. The default implementation provides none.</p>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.PIN_ANNOTATION_SCHEMA"><code class="docutils literal notranslate"><span class="pre">PIN_ANNOTATION_SCHEMA</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.PinSignature"><code class="docutils literal notranslate"><span class="pre">PinSignature</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.PinSignature.direction"><code class="docutils literal notranslate"><span class="pre">PinSignature.direction</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.PinSignature.width"><code class="docutils literal notranslate"><span class="pre">PinSignature.width()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.PinSignature.options"><code class="docutils literal notranslate"><span class="pre">PinSignature.options()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow_lib.platforms.PinSignature.annotations"><code class="docutils literal notranslate"><span class="pre">PinSignature.annotations()</span></code></a></li>
 </ul>
 </li>

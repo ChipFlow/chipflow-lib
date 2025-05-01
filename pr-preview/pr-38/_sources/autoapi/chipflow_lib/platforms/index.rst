@@ -65,6 +65,9 @@ Package Contents
        :class:`amaranth.hdl.IOPort` is not an instance of :class:`amaranth.lib.io.PortLike`.
 
 
+   .. py:method:: wire(m, interface)
+
+
    .. py:property:: i
 
 
@@ -88,6 +91,9 @@ Package Contents
 
 
 .. py:class:: SiliconPlatform(config)
+
+   .. py:property:: ports
+
 
    .. py:method:: instantiate_ports(m)
 
@@ -143,13 +149,27 @@ Package Contents
    :value: ''
 
 
-.. py:class:: PinSignature(direction, width=1, init=None)
+.. py:class:: PinSignature(direction, width = 1, all_have_oe = False, init=None)
 
    Bases: :py:obj:`amaranth.lib.wiring.Signature`
 
 
    Amaranth Signtaure used to decorate wires that would
-   usually be brought out onto a pin on the package.
+   usually be brought out onto a port on the package.
+
+   direction: Input, Output or Bidir
+   width: width of port
+   all_have_oe: For Bidir ports, should Output Enable be per wire or for the whole port
+   init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
+
+
+   .. py:property:: direction
+
+
+   .. py:method:: width()
+
+
+   .. py:method:: options()
 
 
    .. py:method:: annotations(*args)
