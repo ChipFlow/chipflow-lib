@@ -135,6 +135,16 @@ PinSet = Set[Pin]
 PinList = List[Pin]
 Pins = Union[PinSet, PinList]
 
+class PowerType(enum.Enum):
+    POWER = "power"
+    GROUND = "ground"
+
+class JTAGWireName(enum.Enum):
+    TRST = "trst"
+    TCK = "tck"
+    TMS = "tms"
+    TDI = "tdi"
+    TDO = "tdo"
 
 class _Side(enum.IntEnum):
     N = 1
@@ -227,11 +237,61 @@ class _BasePackageDef(pydantic.BaseModel, abc.ABC):
     @property
     @abc.abstractmethod
     def pins(self) -> PinSet:
+        "Returns the full set of pins for the package"
         ...
 
     @abc.abstractmethod
     def allocate(self, available: PinSet, width: int) -> PinList:
+        """
+        Allocates pins as close to each other as possible from available pins.
+
+        Args:
+            available: set of available pins
+            width: number of pins to allocate
+
+        Returns:
+            An ordered list of pins
+        """
         ...
+
+    @property
+    @abc.abstractmethod
+    def power(self) -> Dict[PowerType, Pin]:
+        """
+        The set of power pins for the package
+        """
+        ...
+
+    @property
+    @abc.abstractmethod
+    def resets(self) -> Dict[int, Pin]:
+        """
+        Numbered set of reset pins for the package
+        """
+        ...
+
+    @property
+    @abc.abstractmethod
+    def clocks(self) -> Dict[int, Pin]:
+        """
+        Numbered set of clock pins for the package
+        """
+        ...
+
+    @property
+    @abc.abstractmethod
+    def jtag(self) -> Dict[JTAGWireName, Pin]:
+        """
+        Map of JTAG pins for the package
+        """
+        ...
+
+    @property
+    @abc.abstractmethod
+    def heartbeat(self) -> Dict[int, Pin]:
+        """
+        Numbered set of heartbeat pins for the package
+        """
 
     def to_string(pins: Pins):
         return [''.join(map(str, t)) for t in pins]
@@ -246,7 +306,7 @@ class _BareDiePackageDef(_BasePackageDef):
     """
 
     # Used by pydantic to differentate when deserialising
-    type: Literal["_QuadPackageDef"] = "_QuadPackageDef"
+    type: Literal["_BareDiePackageDef"] = "_BareDiePackageDef"
 
     width: int
     height: int
@@ -269,8 +329,57 @@ class _BareDiePackageDef(_BasePackageDef):
         assert len(ret) == width
         return ret
 
+    @property
+    def power(self) -> Dict[PowerType, Pin]:
+        """
+        The set of power pins for the package
+        """
+        # Default implementation - to be customized for specific package types
+        return {
+            PowerType.POWER: (_Side.N, 0),  # North side, pin 0
+            PowerType.GROUND: (_Side.S, 0)  # South side, pin 0
+        }
 
-class _QuadPackageDef(_BasePackageDef):
+    @property
+    def resets(self) -> Dict[int, Pin]:
+        """
+        Numbered set of reset pins for the package
+        """
+        # Default implementation with one reset pin
+        return {0: (_Side.N, 1)}  # North side, pin 1
+
+    @property
+    def clocks(self) -> Dict[int, Pin]:
+        """
+        Numbered set of clock pins for the package
+        """
+        # Default implementation with one clock pin
+        return {0: (_Side.N, 2)}  # North side, pin 2
+
+    @property
+    def jtag(self) -> Dict[JTAGWireName, Pin]:
+        """
+        Map of JTAG pins for the package
+        """
+        # Default JTAG pin allocations
+        return {
+            JTAGWireName.TRST: (_Side.W, 0),  # West side, pin 0
+            JTAGWireName.TCK: (_Side.W, 1),   # West side, pin 1
+            JTAGWireName.TMS: (_Side.W, 2),   # West side, pin 2
+            JTAGWireName.TDI: (_Side.W, 3),   # West side, pin 3
+            JTAGWireName.TDO: (_Side.W, 4)    # West side, pin 4
+        }
+
+    @property
+    def heartbeat(self) -> Dict[int, Pin]:
+        """
+        Numbered set of heartbeat pins for the package
+        """
+        # Default implementation with one heartbeat pin
+        return {0: (_Side.S, 1)}  # South side, pin 1
+
+
+class _PGAPackageDef(_BasePackageDef):
     """Definiton of a PGA package with `size` pins
 
     This is package with `size` pins, numbered, with the assumption that adjacent pins
@@ -295,23 +404,79 @@ class _QuadPackageDef(_BasePackageDef):
 
     def allocate(self, available: Set[str], width: int) -> List[str]:
         avail_n = sorted(available)
-        logger.debug(f"QuadPackageDef.allocate {width} from {len(avail_n)} remaining: {available}")
+        logger.debug(f"PGAPackageDef.allocate {width} from {len(avail_n)} remaining: {available}")
         ret = _find_contiguous_sequence(self._ordered_pins, avail_n, width)
-        logger.debug(f"QuadPackageDef.returned {ret}")
+        logger.debug(f"PGAPackageDef.returned {ret}")
         assert len(ret) == width
         return ret
 
     def sortpins(self, pins: Union[List[str], Set[str]]) -> List[str]:
         return sorted(list(pins), key=int)
 
+    @property
+    def power(self) -> Dict[PowerType, Pin]:
+        """
+        The set of power pins for the package
+        """
+        # Default implementation for a PGA package
+        # Use pin numbers for the corners of the package
+        total_pins = self.width * 2 + self.height * 2
+        return {
+            PowerType.POWER: str(1),  # First pin
+            PowerType.GROUND: str(total_pins // 2)  # Middle pin
+        }
+
+    @property
+    def resets(self) -> Dict[int, Pin]:
+        """
+        Numbered set of reset pins for the package
+        """
+        # Default implementation with one reset pin
+        # Use a pin near the beginning of the package
+        return {0: str(2)}  # Second pin
+
+    @property
+    def clocks(self) -> Dict[int, Pin]:
+        """
+        Numbered set of clock pins for the package
+        """
+        # Default implementation with one clock pin
+        # Use a pin near the beginning of the package
+        return {0: str(3)}  # Third pin
+
+    @property
+    def jtag(self) -> Dict[JTAGWireName, Pin]:
+        """
+        Map of JTAG pins for the package
+        """
+        # Default JTAG pin allocations
+        # Use consecutive pins in the middle of the package
+        mid_pin = (self.width * 2 + self.height * 2) // 4
+        return {
+            JTAGWireName.TRST: str(mid_pin),
+            JTAGWireName.TCK: str(mid_pin + 1),
+            JTAGWireName.TMS: str(mid_pin + 2),
+            JTAGWireName.TDI: str(mid_pin + 3),
+            JTAGWireName.TDO: str(mid_pin + 4)
+        }
+
+    @property
+    def heartbeat(self) -> Dict[int, Pin]:
+        """
+        Numbered set of heartbeat pins for the package
+        """
+        # Default implementation with one heartbeat pin
+        # Use the last pin in the package
+        return {0: str(self.width * 2 + self.height * 2 - 1)}
+
 
 # Add any new package types to both PACKAGE_DEFINITIONS and the PackageDef union
 PACKAGE_DEFINITIONS = {
-    "pga144": _QuadPackageDef(name="pga144", width=36, height=36),
+    "pga144": _PGAPackageDef(name="pga144", width=36, height=36),
     "cf20": _BareDiePackageDef(name="cf20", width=7, height=3)
 }
 
-PackageDef = Union[_QuadPackageDef, _BasePackageDef]
+PackageDef = Union[_PGAPackageDef, _BareDiePackageDef, _BasePackageDef]
 
 
 class Port(pydantic.BaseModel):
@@ -331,13 +496,15 @@ class Package(pydantic.BaseModel):
     power: Dict[str, Port] = {}
     clocks: Dict[str, Port] = {}
     resets: Dict[str, Port] = {}
+    jtag: Dict[str, Port] = {}
+    heartbeat: Dict[str, Port] = {}
 
     def check_pad(self, name: str, defn: dict):
         match defn:
             case {"type": "clock"}:
                 return self.clocks[name] if name in self.clocks else None
             case {"type": "reset"}:
-                return self.resets[name] if name in self.clocks else None
+                return self.resets[name] if name in self.resets else None
             case {"type": "power"}:
                 return self.power[name] if name in self.power else None
             case {"type": "ground"}:
@@ -354,9 +521,45 @@ class Package(pydantic.BaseModel):
             case {"type": "power", "loc": loc}:
                 self.power[name] = Port(type="power", pins=[loc], port_name=name)
             case {"type": "ground", "loc": loc}:
-                self.power[name] = Port(type="ground", pins=[loc], port_name=name)
+                self.power[name] = Port(type="ground", pins=[loc])
+            case {"type": "power", "name": name, "voltage": voltage}:
+                # Support for new power pin format
+                # First, get the default pin from the package type
+                power_pin = self.package_type.power[PowerType.POWER]
+                self.power[name] = Port(type="power", pins=[str(power_pin)], options={"voltage": voltage})
+            case {"type": "ground", "name": name}:
+                # Support for new ground pin format
+                ground_pin = self.package_type.power[PowerType.GROUND]
+                self.power[name] = Port(type="ground", pins=[str(ground_pin)])
             case _:
                 pass
+
+    def initialize_from_package_type(self):
+        """Initialize standard pins from package type definitions"""
+        # Set up clocks
+        for clock_id, pin in self.package_type.clocks.items():
+            name = f"clock_{clock_id}"
+            if name not in self.clocks:
+                self.clocks[name] = Port(type="clock", pins=[str(pin)], direction=io.Direction.Input)
+
+        # Set up resets
+        for reset_id, pin in self.package_type.resets.items():
+            name = f"reset_{reset_id}"
+            if name not in self.resets:
+                self.resets[name] = Port(type="reset", pins=[str(pin)], direction=io.Direction.Input)
+
+        # Set up heartbeat pins
+        for hb_id, pin in self.package_type.heartbeat.items():
+            name = f"heartbeat_{hb_id}"
+            if name not in self.heartbeat:
+                self.heartbeat[name] = Port(type="heartbeat", pins=[str(pin)], direction=io.Direction.Output)
+
+        # Set up JTAG pins
+        for jtag_name, pin in self.package_type.jtag.items():
+            name = f"jtag_{jtag_name.value}"
+            direction = io.Direction.Output if jtag_name == JTAGWireName.TDO else io.Direction.Input
+            if name not in self.jtag:
+                self.jtag[name] = Port(type="jtag", pins=[str(pin)], direction=direction)
 
 
 _Interface = Dict[str, Dict[str, Port]]
