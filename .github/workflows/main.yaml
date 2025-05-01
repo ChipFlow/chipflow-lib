@@ -63,9 +63,9 @@ jobs:
       matrix:
         dry: [true, false]
         repo:
-          - name: "chipflow-examples"
+          - name: "ChipFlow/chipflow-examples"
             design: "minimal"
-          - name: "chipflow-test-socs"
+          - name: "ChipFlow/chipflow-test-socs"
             design: "sram"
     env:
       DRY: ${{ matrix.dry && '--dry-run' || '' }}
@@ -73,10 +73,15 @@ jobs:
     name:  ${{ matrix.dry && 'Test Submit - Dry run' || 'Test submit' }}
 
     steps:
+      - name: Check out source code
+        uses: actions/checkout@v4
+        with:
+          path: ${{ github.repo }}
+
       - name: Check out ${{ matrix.repo.name }}
         uses: actions/checkout@v4
         with:
-          repository: ChipFlow/${{ matrix.repo.name }}
+          repository: ${{ matrix.repo.name }}
           fetch-depth: 0
           path: ${{ matrix.repo.name }}
 
@@ -97,7 +102,7 @@ jobs:
         working-directory: ./${{ matrix.repo.name }}
         if: github.event_name == 'pull_request'
         run: |
-          pdm run tools/gen_overrides.py ${{github.head_ref}} > overrides.txt
+          pdm run ../../${{github.repo}}/tools/gen_overrides.py ${{github.head_ref}} > overrides.txt
           echo "Generated overrides:"
           cat overrides.txt
 
