@@ -80,15 +80,15 @@ intersphinx_disabled_domains = ['std']
 # Napoleon settings
 napoleon_google_docstring = True
 napoleon_numpy_docstring = True
+napoleon_use_ivar = True
 napoleon_include_init_with_doc = True
-napoleon_include_private_with_doc = True
 napoleon_include_special_with_doc = True
-napoleon_use_admonition_for_examples = False
-napoleon_use_admonition_for_notes = False
-napoleon_use_admonition_for_references = False
-napoleon_use_ivar = False
-napoleon_use_param = True
-napoleon_use_rtype = True
+napoleon_custom_sections = [
+    ("Arguments", "params_style"), # by default displays as "Parameters"
+    ("Attributes", "params_style"), # by default displays as "Variables", which is confusing
+    ("Members", "params_style"), # `amaranth.lib.wiring` signature members
+]
+
 
 rst_prolog = """
 .. role:: py(code)
