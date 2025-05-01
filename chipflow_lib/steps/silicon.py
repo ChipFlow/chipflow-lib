@@ -225,27 +225,28 @@ class SiliconStep:
                         # Wait before polling again
                         # time.sleep(10)
                         # Attempt to stream logs rather than time.sleep
-                        try:
-                            if stream_event_counter > 1:
-                                logger.warning("Log streaming may have been interrupted. Some logs may be missing.")
-                                logger.warning(f"Check {build_url}")
-                            stream_event_counter += 1
-                            with requests.get(
-                                log_stream_url,
-                                auth=(None, chipflow_api_key),
-                                stream=True
-                            ) as log_resp:
-                                if log_resp.status_code == 200:
-                                    for line in log_resp.iter_lines():
-                                        if line:
-                                            print(line.decode("utf-8"))  # Print logs in real-time
-                                            sys.stdout.flush()
-                                else:
-                                    logger.warning(f"Failed to stream logs: {log_resp.text}")
-                        except requests.RequestException as e:
-                            logger.error(f"Error while streaming logs: {e}")
-                            pass
-                    time.sleep(10)  # Wait before polling again
+
+                        # try:
+                        #     if stream_event_counter > 1:
+                        #         logger.warning("Log streaming may have been interrupted. Some logs may be missing.")
+                        #         logger.warning(f"Check {build_url}")
+                        #     stream_event_counter += 1
+                        #     with requests.get(
+                        #         log_stream_url,
+                        #         auth=(None, chipflow_api_key),
+                        #         stream=True
+                        #     ) as log_resp:
+                        #         if log_resp.status_code == 200:
+                        #             for line in log_resp.iter_lines():
+                        #                 if line:
+                        #                     print(line.decode("utf-8"))  # Print logs in real-time
+                        #                     sys.stdout.flush()
+                        #         else:
+                        #             logger.warning(f"Failed to stream logs: {log_resp.text}")
+                        # except requests.RequestException as e:
+                        #     logger.error(f"Error while streaming logs: {e}")
+                        #     pass
+                    time.sleep(30)  # Wait before polling again
         else:
             # Log detailed information about the failed request
             logger.error(f"Request failed with status code {resp.status_code}")
