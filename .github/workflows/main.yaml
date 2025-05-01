@@ -19,6 +19,22 @@ jobs:
           fetch-depth: 0
       - name: Set up PDM
         uses: pdm-project/setup-pdm@v4
+
+      - name: Generate overrides to use current branch if PR
+        if: github.event_name == 'pull_request'
+        run: |
+          pdm run tools/gen_overrides.py ${{github.head_ref}} > overrides.txt
+          echo "Generated overrides:"
+          cat overrides.txt
+
+      - name: Relock PDM
+        if: github.event_name != 'pull_request'
+        run: pdm lock -d
+
+      - name: Relock PDM (PR)
+        if: github.event_name == 'pull_request'
+        run: pdm lock -d --override overrides.txt
+
       - name: Install dependencies
         run: |
           pdm install
