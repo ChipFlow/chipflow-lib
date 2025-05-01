@@ -6,6 +6,7 @@
 #   "requirements-parser",
 # ]
 # ///
+# SPDX-License-Identifier: BSD-2-Clause
 import os
 import subprocess
 import sys
