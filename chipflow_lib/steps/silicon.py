@@ -20,7 +20,7 @@ from . import StepBase
 from .. import ChipFlowError
 from ..cli import log_level
 from ..platforms import SiliconPlatform, top_interfaces, load_pinlock
-from ..platforms.utils import PinSignature
+from ..platforms.utils import IOSignature
 
 
 logger = logging.getLogger(__name__)
@@ -52,7 +52,7 @@ class SiliconTop(StepBase, Elaboratable):
             for iface_name, member, in iface.items():
                 for name, port in member.items():
                     iface = getattr(top[component], iface_name)
-                    wire = (iface if isinstance(iface.signature, PinSignature)
+                    wire = (iface if isinstance(iface.signature, IOSignature)
                             else getattr(iface, name))
                     platform.ports[port.port_name].wire(m, wire)
         return m
