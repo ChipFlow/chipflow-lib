@@ -7,7 +7,7 @@ from pprint import pformat
 
 from amaranth.lib import io
 
-from chipflow_lib.platforms.utils import PinSignature, OutputPinSignature, InputPinSignature, BidirPinSignature, _PinAnnotation, _PinAnnotationModel
+from chipflow_lib.platforms.utils import IOSignature, OutputIOSignature, InputIOSignature, BidirIOSignature, _PinAnnotation, _PinAnnotationModel
 from chipflow_lib.platforms.utils import PinList, _group_consecutive_items,_find_contiguous_sequence, _Side
 
 
@@ -53,32 +53,32 @@ def test_find_contiguous_sequence():
 
 
 def test_pin_signature():
-    sig_bidir = PinSignature(io.Direction.Bidir, width=8)
-    assert isinstance(sig_bidir, PinSignature)
+    sig_bidir = IOSignature(io.Direction.Bidir, width=8)
+    assert isinstance(sig_bidir, IOSignature)
     assert sig_bidir._direction == io.Direction.Bidir
     assert sig_bidir._width == 8
     assert "o" in sig_bidir.members
     assert "oe" in sig_bidir.members
     assert "i" in sig_bidir.members
 
-    sig_output = OutputPinSignature(width=4)
-    assert isinstance(sig_output, PinSignature)
+    sig_output = OutputIOSignature(width=4)
+    assert isinstance(sig_output, IOSignature)
     assert sig_output._direction == io.Direction.Output
     assert sig_output._width == 4
     assert "o" in sig_output.members
     assert "oe" not in sig_output.members
     assert "i" not in sig_output.members
 
-    sig_input = InputPinSignature(width=2)
-    assert isinstance(sig_input, PinSignature)
+    sig_input = InputIOSignature(width=2)
+    assert isinstance(sig_input, IOSignature)
     assert sig_input._direction == io.Direction.Input
     assert sig_input._width == 2
     assert "o" not in sig_input.members
     assert "oe" not in sig_output.members
     assert "i" in sig_input.members
 
-    sig_bidir_fn = BidirPinSignature(width=1)
-    assert isinstance(sig_bidir_fn, PinSignature)
+    sig_bidir_fn = BidirIOSignature(width=1)
+    assert isinstance(sig_bidir_fn, IOSignature)
     assert sig_bidir_fn._direction == io.Direction.Bidir
     assert sig_bidir_fn._width == 1
     assert "o" in sig_bidir_fn.members

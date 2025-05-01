@@ -12,7 +12,7 @@ from chipflow_lib.platforms.utils import (
     _PinAnnotationModel,
     _PinAnnotation,
     PIN_ANNOTATION_SCHEMA,
-    PinSignature,
+    IOSignature,
     _Side,
     _BasePackageDef,
     _BareDiePackageDef,
@@ -69,12 +69,12 @@ class TestSchemaUtils(unittest.TestCase):
         self.assertEqual(json_data["options"], {})
 
 
-class TestPinSignature(unittest.TestCase):
+class TestIOSignature(unittest.TestCase):
     def test_pin_signature_properties(self):
-        """Test PinSignature properties"""
+        """Test IOSignature properties"""
         # Create signature with options
         options = {"all_have_oe": True, "init": 0}
-        sig = PinSignature(io.Direction.Bidir, width=4, all_have_oe=True, init=0)
+        sig = IOSignature(io.Direction.Bidir, width=4, all_have_oe=True, init=0)
 
         # Test properties
         self.assertEqual(sig.direction, io.Direction.Bidir)
@@ -83,15 +83,15 @@ class TestPinSignature(unittest.TestCase):
 
         # Test __repr__ - actual representation depends on Direction enum's representation
         repr_string = repr(sig)
-        self.assertIn("PinSignature", repr_string)
+        self.assertIn("IOSignature", repr_string)
         self.assertIn("4", repr_string)
         self.assertIn("all_have_oe=True", repr_string)
         self.assertIn("init=0", repr_string)
 
     def test_pin_signature_annotations(self):
-        """Test PinSignature annotations method"""
+        """Test IOSignature annotations method"""
         # Create signature
-        sig = PinSignature(io.Direction.Output, width=8, init=42)
+        sig = IOSignature(io.Direction.Output, width=8, init=42)
 
         # Create a mock object to pass to annotations
         mock_obj = object()

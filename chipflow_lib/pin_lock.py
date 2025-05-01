@@ -43,7 +43,7 @@ def allocate_pins(name: str, member: Dict[str, Any], pins: List[str], port_name:
 
     if member['type'] == 'interface' and 'annotations' in member \
        and PIN_ANNOTATION_SCHEMA in member['annotations']:
-        logger.debug("matched PinSignature {sig}")
+        logger.debug("matched IOSignature {sig}")
         sig = member['annotations'][PIN_ANNOTATION_SCHEMA]
         width = sig['width']
         options = sig['options']
@@ -62,7 +62,7 @@ def allocate_pins(name: str, member: Dict[str, Any], pins: List[str], port_name:
             logger.debug(f"{pin_map},{_map}")
         return pin_map, pins
     elif member['type'] == 'port':
-        logger.warning(f"Port '{name}' has no PinSignature, pin allocation likely to be wrong")
+        logger.warning(f"Port '{name}' has no IOSignature, pin allocation likely to be wrong")
         width = member['width']
         pin_map[name] = {'pins': pins[0:width],
                               'direction': member['dir'],
