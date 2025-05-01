@@ -17,8 +17,8 @@ from pydantic import BaseModel, ConfigDict
 from .. import ChipFlowError, _ensure_chipflow_root, _get_cls_by_reference
 
 
-__all__ = ['PIN_ANNOTATION_SCHEMA', 'PinSignature',
-           'OutputPinSignature', 'InputPinSignature', 'BidirPinSignature',
+__all__ = ['PIN_ANNOTATION_SCHEMA', 'IOSignature',
+           'OutputIOSignature', 'InputIOSignature', 'BidirIOSignature',
            'load_pinlock', "PACKAGE_DEFINITIONS", 'top_interfaces']
 
 
@@ -64,7 +64,7 @@ class _PinAnnotation(meta.Annotation):
 PIN_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("pin-annotation", 0))
 
 
-class PinSignature(wiring.Signature):
+class IOSignature(wiring.Signature):
     """Amaranth Signtaure used to decorate wires that would
     usually be brought out onto a port on the package.
 
@@ -115,19 +115,19 @@ class PinSignature(wiring.Signature):
 
     def __repr__(self):
         opts = ', '.join(f"{k}={v}" for k, v in self._options.items())
-        return f"PinSignature({self._direction}, {self._width}, {opts})"
+        return f"IOSignature({self._direction}, {self._width}, {opts})"
 
 
-def OutputPinSignature(width, **kwargs):
-    return PinSignature(io.Direction.Output, width=width, **kwargs)
+def OutputIOSignature(width, **kwargs):
+    return IOSignature(io.Direction.Output, width=width, **kwargs)
 
 
-def InputPinSignature(width, **kwargs):
-    return PinSignature(io.Direction.Input, width=width, **kwargs)
+def InputIOSignature(width, **kwargs):
+    return IOSignature(io.Direction.Input, width=width, **kwargs)
 
 
-def BidirPinSignature(width, **kwargs):
-    return PinSignature(io.Direction.Bidir, width=width, **kwargs)
+def BidirIOSignature(width, **kwargs):
+    return IOSignature(io.Direction.Bidir, width=width, **kwargs)
 
 
 Pin = Union[tuple, str]
