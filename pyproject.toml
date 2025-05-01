@@ -75,16 +75,12 @@ test-silicon.cmd = "pytest tests/test_silicon_platform.py tests/test_silicon_pla
 chipflow.cmd = "chipflow"
 
 [dependency-groups]
-lint = [
+dev = [
     "ruff>=0.9.2",
-]
-test = [
     "pytest>=7.2.0",
     "pytest-cov>=6.0.0",
-]
-doc = [
     "sphinx-autoapi>=3.5.0",
-    "sphinx>=7.4.7",
+    "sphinx~=7.4.7",
     "furo>=2024.04.27",
 ]
 
