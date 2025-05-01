@@ -17,8 +17,8 @@ from pydantic import BaseModel, ConfigDict
 from .. import ChipFlowError, _ensure_chipflow_root, _get_cls_by_reference
 
 
-__all__ = ['PIN_ANNOTATION_SCHEMA', 'PinSignature',
-           'OutputPinSignature', 'InputPinSignature', 'BidirPinSignature',
+__all__ = ['PIN_ANNOTATION_SCHEMA', 'IOSignature',
+           'OutputIOSignature', 'InputIOSignature', 'BidirIOSignature',
            'load_pinlock', "PACKAGE_DEFINITIONS", 'top_interfaces', 'LockFile',
            'Package', 'PortMap', 'Port']
 
@@ -65,11 +65,11 @@ class _PinAnnotation(meta.Annotation):
 PIN_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("pin-annotation", 0))
 
 
-class PinSignature(wiring.Signature):
+class IOSignature(wiring.Signature):
     """An :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` used to decorate wires that would usually be brought out onto a port on the package.
     This class is generally not directly used.
     Instead, you would typically utilize the more specific
-    :py:obj:`InputPinSignature`, :py:obj:`OutputPinSignature`, or :py:obj:`BidirPinSignature` for defining pin interfaces.
+    :py:obj:`InputIOSignature`, :py:obj:`OutputIOSignature`, or :py:obj:`BidirIOSignature` for defining pin interfaces.
 
     :param direction: Input, Output or Bidir
     :param width: width of port, default is 1
@@ -129,10 +129,10 @@ class PinSignature(wiring.Signature):
 
     def __repr__(self):
         opts = ', '.join(f"{k}={v}" for k, v in self._options.items())
-        return f"PinSignature({self._direction}, {self._width}, {opts})"
+        return f"IOSignature({self._direction}, {self._width}, {opts})"
 
 
-def OutputPinSignature(width, **kwargs):
+def OutputIOSignature(width, **kwargs):
     """This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package output signals
     intended for connection to the physical pads of the integrated circuit package.
 
@@ -140,10 +140,10 @@ def OutputPinSignature(width, **kwargs):
     :type width: int
     :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
     """
-    return PinSignature(io.Direction.Output, width=width, **kwargs)
+    return IOSignature(io.Direction.Output, width=width, **kwargs)
 
 
-def InputPinSignature(width, **kwargs):
+def InputIOSignature(width, **kwargs):
     """This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package input signals
     intended for connection to the physical pads of the integrated circuit package.
 
@@ -151,10 +151,10 @@ def InputPinSignature(width, **kwargs):
     :type width: int
     :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
     """
-    return PinSignature(io.Direction.Input, width=width, **kwargs)
+    return IOSignature(io.Direction.Input, width=width, **kwargs)
 
 
-def BidirPinSignature(width, **kwargs):
+def BidirIOSignature(width, **kwargs):
     """This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package bi-directional signals
     intended for connection to the physical pads of the integrated circuit package.
 
@@ -164,7 +164,7 @@ def BidirPinSignature(width, **kwargs):
     :type all_have_oe: bool, optional
     :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
     """
-    return PinSignature(io.Direction.Bidir, width=width, **kwargs)
+    return IOSignature(io.Direction.Bidir, width=width, **kwargs)
 
 
 Pin = Union[tuple, str]
