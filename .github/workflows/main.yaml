@@ -62,19 +62,29 @@ jobs:
     strategy:
       matrix:
         dry: [true, false]
+        repo:
+          - name: "chipflow-examples"
+            design: "minimal"
+          - name: "chipflow-test-socs"
+            design: "sram"
     env:
       DRY: ${{ matrix.dry && '--dry-run' || '' }}
       IS_DRY: ${{ matrix.dry && '(dry run)' || '' }}
     name:  ${{ matrix.dry && 'Test Submit - Dry run' || 'Test submit' }}
 
     steps:
-      - name: Check out chipflow-examples
+      - name: Check out ${{ matrix.repo.name }}
         uses: actions/checkout@v4
         with:
-          repository: ChipFlow/chipflow-examples
+          repository: ChipFlow/${{ matrix.repo.name }}
           fetch-depth: 0
-          path: chipflow-examples
-          ref: ${{ github.head_ref || 'refs/heads/main' }}
+          path: ${{ matrix.repo.name }}
+
+      - name: Check for branch ${{ github.head_ref }}
+        working-directory: ./${{ matrix.repo.name }}
+        if: github.event_name == 'pull_request'
+        run: |
+          git checkout ${{ github.head_ref }} || echo "Falling back to main"
 
       - name: Set up PDM
         uses: pdm-project/setup-pdm@v4
@@ -84,7 +94,7 @@ jobs:
           cache-dependency-path: './**/pyproject.toml'
 
       - name: Generate overrides to use current branch if PR
-        working-directory: ./chipflow-examples
+        working-directory: ./${{ matrix.repo.name }}
         if: github.event_name == 'pull_request'
         run: |
           pdm run tools/gen_overrides.py ${{github.head_ref}} > overrides.txt
@@ -92,27 +102,27 @@ jobs:
           cat overrides.txt
 
       - name: Relock PDM
-        working-directory: ./chipflow-examples
+        working-directory: ./${{ matrix.repo.name }}
         if: github.event_name != 'pull_request'
         run: pdm lock -d
 
       - name: Relock PDM (PR)
-        working-directory: ./chipflow-examples
+        working-directory: ./${{ matrix.repo.name }}
         if: github.event_name == 'pull_request'
         run: pdm lock -d --override overrides.txt
 
       - name: Install dependencies
-        working-directory: ./chipflow-examples
+        working-directory: ./${{ matrix.repo.name }}
         run: |
           pdm install
 
       - name: Run tests
-        working-directory: ./chipflow-examples
+        working-directory: ./${{ matrix.repo.name }}
         run: |
           pdm test
 
       - name: Submit build ${{ env.is_dry }}
-        working-directory: ./chipflow-examples/minimal
+        working-directory: ./${{ matrix.repo.name }}/${{ matrix.repo.design }}
         run: |
           pdm run chipflow pin lock
           pdm run chipflow silicon submit --wait $DRY
