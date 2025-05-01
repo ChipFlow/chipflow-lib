@@ -1,17 +1,26 @@
+# .github/workflows/deploy.yml
 name: Deploy
 on:
   push:
     branches:
       - main
 jobs:
-  build-docs:
-    uses: ./.github/workflows/build-docs.yml
-    secrets: 
-      gh_token: ${{ github.token }}
-
-  deploy-internal:
+  deploy:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v4
+        with:
+          python-version: 3.12
+          cache: true
+
+      - name: Install dependencies
+        run: pdm install
+
+      - name: Build docs
+        run: pdm docs
 
       - uses: JamesIves/github-pages-deploy-action@v4
         with:
