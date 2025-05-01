@@ -55,75 +55,74 @@ jobs:
         with:
           fetch-depth: 0
       - name: Check source code licenses
-        run: |
-          docker run --platform=linux/amd64 -v ${PWD}:/src ghcr.io/google/addlicense -v -check -l BSD-2-Clause -c "ChipFlow" -s=only -ignore **/__init__.py **/*.py
+        run: ./tools/license_check.sh
 
   test-submit:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dry: [true, false]
+    env:
+      DRY: ${{ matrix.dry && '--dry-run' || '' }}
+      IS_DRY: ${{ matrix.dry && '(dry run)' || '' }}
+    name:  ${{ matrix.dry && 'Test Submit - Dry run' || 'Test submit' }}
+
     steps:
       - name: Check out source code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           path: chipflow-lib
+
       - name: Check out chipflow-examples
         uses: actions/checkout@v4
         with:
           repository: ChipFlow/chipflow-examples
           fetch-depth: 0
           path: chipflow-examples
+          ref: ${{ github.head_ref || 'refs/heads/main' }}
 
       - name: Set up PDM
         uses: pdm-project/setup-pdm@v4
         with:
-          python-version: "3.10"
+          python-version: '3.10'
           cache: true
-          cache-dependency-path: "./**/pyproject.toml"
+          cache-dependency-path: './**/pyproject.toml'
+
+      - name: Generate overrides to use current branch if PR
+        working-directory: ./chipflow-examples
+        if: github.event_name == 'pull_request'
+        run: |
+          pdm run tools/gen_overrides.py ${{github.head_ref}} > overrides.txt
+          echo "Generated overrides:"
+          cat overrides.txt
+
+      - name: Relock PDM
+        working-directory: ./chipflow-examples
+        if: github.event_name != 'pull_request'
+        run: pdm lock -d
+
+      - name: Relock PDM (PR)
+        working-directory: ./chipflow-examples
+        if: github.event_name == 'pull_request'
+        run: pdm lock -d --override overrides.txt
+
       - name: Install dependencies
         working-directory: ./chipflow-examples
         run: |
           pdm install
           pdm run python -m ensurepip
           pdm run python -m pip install -e ../chipflow-lib
+
       - name: Run tests
         working-directory: ./chipflow-examples
         run: |
           pdm test
+
+      - name: Submit build ${{ env.is_dry }}
+        working-directory: ./chipflow-examples/minimal
+        run: |
           pdm run chipflow pin lock
-          pdm run chipflow silicon submit --wait
+          pdm run chipflow silicon submit --wait $DRY
         env:
           CHIPFLOW_API_KEY: ${{ secrets.CHIPFLOW_API_KEY}}
-
-  test-submit-dry:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out source code
-        uses: actions/checkout@v4
-        with:
-            fetch-depth: 0
-            path: chipflow-lib
-      - name: Check out chipflow-examples
-        uses: actions/checkout@v4
-        with:
-            repository: ChipFlow/chipflow-examples
-            fetch-depth: 0
-            path: chipflow-examples
-
-      - name: Set up PDM
-        uses: pdm-project/setup-pdm@v4
-        with:
-          python-version: "3.10"
-          cache: true
-          cache-dependency-path: "./**/pyproject.toml"
-      - name: Install dependencies
-        working-directory: ./chipflow-examples
-        run: |
-          pdm install
-          pdm run python -m ensurepip
-          pdm run python -m pip install -e ../chipflow-lib
-      - name: Run tests
-        working-directory: ./chipflow-examples
-        run: |
-          pdm test
-          pdm run chipflow pin lock
-          pdm run chipflow silicon submit --dry-run
