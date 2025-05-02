@@ -70,7 +70,7 @@ jobs:
           pdm run python -m ensurepip
           pdm run python -m pip install -e ../chipflow-lib
       - name: Run tests
-        working-directory: ./chipflow-examples
+        working-directory: ./chipflow-examples/minimal
         run: |
           pdm test
           pdm run chipflow pin lock
@@ -106,7 +106,7 @@ jobs:
           pdm run python -m ensurepip
           pdm run python -m pip install -e ../chipflow-lib
       - name: Run tests
-        working-directory: ./chipflow-examples
+        working-directory: ./chipflow-examples/minimal
         run: |
           pdm test
           pdm run chipflow pin lock
