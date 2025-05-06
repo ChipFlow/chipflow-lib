@@ -51,7 +51,7 @@
     <link rel="prev" title="ChipFlow Library Documentation" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.dev1+g6a8eb9b" />
+  <meta name="docsearch:version" content="0.1.dev1+g5d8f262" />
   </head>
   
   
@@ -331,23 +331,17 @@
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow"><code class="docutils literal notranslate"><span class="pre">[chipflow]</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow-top"><code class="docutils literal notranslate"><span class="pre">[chipflow.top]</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow-steps"><code class="docutils literal notranslate"><span class="pre">[chipflow.steps]</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow-clocks"><code class="docutils literal notranslate"><span class="pre">[chipflow.clocks]</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow-resets"><code class="docutils literal notranslate"><span class="pre">[chipflow.resets]</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow-silicon"><code class="docutils literal notranslate"><span class="pre">[chipflow.silicon]</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#available-processes">Available processes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#available-pad-rings">Available pad rings</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#silicon-pads"><code class="docutils literal notranslate"><span class="pre">[silicon.pads]</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#silicon-power"><code class="docutils literal notranslate"><span class="pre">[silicon.power]</span></code></a></li>
 </ul>
-</li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#silicon-pads">silicon.pads</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#type">type</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loc">loc</a></li>
-</ul>
-</li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#silicon-power">silicon.power</a></li>
-</ul>
-
             </nav>
         </div>
     </div>
@@ -415,12 +409,28 @@
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">project_name</span></code> is a human-readable identifier for this project. If not set, the tool and library will use the project name configured in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>.</p>
 </section>
+<section id="chipflow-top">
+<h2><code class="docutils literal notranslate"><span class="pre">[chipflow.top]</span></code><a class="headerlink" href="#chipflow-top" title="Link to this heading">#</a></h2>
+<div class="highlight-TOML notranslate"><div class="highlight"><pre><span></span><span class="k">[chipflow.top]</span>
+<span class="n">soc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;my_design.design:MySoC&quot;</span>
+</pre></div>
+</div>
+<p>This section outlines the design modules that need to be instantiated.
+A new top module will be automatically generated, incorporating all specified modules along with their interfaces.
+Each entry follows the format <cite>&lt;instance name&gt; = &lt;module class path&gt;</cite>.</p>
+<p>The instance name is the name the python object will be given in your design, and the <a class="reference internal" href="#term-module-class-path"><span class="xref std std-term">module class path</span></a></p>
+<dl class="simple glossary">
+<dt id="term-module-class-path">module class path<a class="headerlink" href="#term-module-class-path" title="Link to this term">#</a></dt><dd><p>The module class path offers a way to locate Python objects as entry points.
+It consists of a module’s <a class="reference external" href="https://docs.python.org/3/glossary.html#term-qualified-name" title="(in Python v3.13)"><span class="xref std std-term">qualified name</span></a> followed by a colon (:) and then the <a class="reference external" href="https://docs.python.org/3/glossary.html#term-qualified-name" title="(in Python v3.13)"><span class="xref std std-term">qualified name</span></a> of the class within that module.</p>
+</dd>
+</dl>
+</section>
 <section id="chipflow-steps">
 <h2><code class="docutils literal notranslate"><span class="pre">[chipflow.steps]</span></code><a class="headerlink" href="#chipflow-steps" title="Link to this heading">#</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">steps</span></code> section allows overriding or addition to the standard steps available from <a class="reference external" href="https://github.com/ChipFlow/chipflow-lib]">chipflow_lib</a>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">steps</span></code> section allows overriding or addition to the standard steps available from <cite>chipflow_lib</cite>.</p>
 <p>For example, if you want to override the standard silicon preparation step, you could derive from <a class="reference internal" href="autoapi/chipflow_lib/steps/silicon/index.html#chipflow_lib.steps.silicon.SiliconStep" title="chipflow_lib.steps.silicon.SiliconStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">chipflow_lib.steps.silicon.SiliconStep</span></code></a>, add your custom functionality
-and add the following to your <cite>chipflow.toml</cite>, with the appropriate Python <a class="reference external" href="https://docs.python.org/3/glossary.html#term-qualified-name">qualified name</a> :</p>
-<div class="highlight-TOML notranslate"><div class="highlight"><pre><span></span><span class="k">[chipflow.stepe]</span>
+and add the following to your <cite>chipflow.toml</cite>, with the appropriate <a class="reference internal" href="#term-module-class-path"><span class="xref std std-term">module class path</span></a>:</p>
+<div class="highlight-TOML notranslate"><div class="highlight"><pre><span></span><span class="k">[chipflow.steps]</span>
 <span class="n">silicon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;my_design.steps.silicon:SiliconStep&quot;</span>
 </pre></div>
 </div>
@@ -428,6 +438,24 @@ and add the following to your <cite>chipflow.toml</cite>, with the appropriate P
 </section>
 <section id="chipflow-clocks">
 <h2><code class="docutils literal notranslate"><span class="pre">[chipflow.clocks]</span></code><a class="headerlink" href="#chipflow-clocks" title="Link to this heading">#</a></h2>
+<div class="highlight-TOML notranslate"><div class="highlight"><pre><span></span><span class="k">[chipflow.clocks]</span>
+<span class="n">default</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;sys_clk&#39;</span>
+</pre></div>
+</div>
+<p>This section links the clock domains utilized in the design to specific pads.
+These pads need to be specified in the <a class="reference internal" href="#silicon-pads">[silicon.pads]</a> section with the :term:type set to :term:clock.
+The <code class="docutils literal notranslate"><span class="pre">default</span></code> clock domain is associated with the Amaranth <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/guide.html#lang-domains" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref any docutils literal notranslate"><span class="pre">sync</span></code></a> <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/guide.html#lang-clockdomains" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">clock domain</span></a>.
+Currently, only one <code class="docutils literal notranslate"><span class="pre">default</span></code> clock domain is supported.</p>
+</section>
+<section id="chipflow-resets">
+<h2><code class="docutils literal notranslate"><span class="pre">[chipflow.resets]</span></code><a class="headerlink" href="#chipflow-resets" title="Link to this heading">#</a></h2>
+<div class="highlight-TOML notranslate"><div class="highlight"><pre><span></span><span class="k">[chipflow.resets]</span>
+<span class="n">default</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;sys_rst_n&#39;</span>
+</pre></div>
+</div>
+<p>This section identifies the input pads designated for reset functionality.
+These pads need to be specified in the <a class="reference internal" href="#silicon-pads">[silicon.pads]</a> section with the :term:type set to :term:reset.
+The logic that synchronizes the reset signal with the clock will be generated automatically.</p>
 </section>
 <section id="chipflow-silicon">
 <h2><code class="docutils literal notranslate"><span class="pre">[chipflow.silicon]</span></code><a class="headerlink" href="#chipflow-silicon" title="Link to this heading">#</a></h2>
@@ -436,7 +464,7 @@ and add the following to your <cite>chipflow.toml</cite>, with the appropriate P
 <span class="n">package</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;pga144&quot;</span>
 </pre></div>
 </div>
-<p>The <code class="docutils literal notranslate"><span class="pre">silicon</span></code> section sets the Foundry <code class="docutils literal notranslate"><span class="pre">process</span></code> (i.e. PDK) that we are targeting for manufacturing, and the physical <code class="docutils literal notranslate"><span class="pre">package</span></code> we want to place our design inside.
+<p>The <code class="docutils literal notranslate"><span class="pre">silicon</span></code> section sets the Foundry <code class="docutils literal notranslate"><span class="pre">process</span></code> (i.e. PDK) that we are targeting for manufacturing, and the physical <code class="docutils literal notranslate"><span class="pre">package</span></code> (pad ring) we want to place our design inside.
 You’ll choose the <code class="docutils literal notranslate"><span class="pre">process</span></code> and <code class="docutils literal notranslate"><span class="pre">package</span></code> based in the requirements of your design.</p>
 </section>
 <section id="available-processes">
@@ -497,41 +525,12 @@ You’ll choose the <code class="docutils literal notranslate"><span class="pre"
 <td></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><div class="line-block">
-<div class="line">cf20</div>
-<div class="line"><br /></div>
-<div class="line"><br /></div>
-<div class="line"><br /></div>
-</div>
-</td>
-<td><div class="line-block">
-<div class="line">20</div>
-<div class="line"><br /></div>
-<div class="line"><br /></div>
-<div class="line"><br /></div>
-</div>
-</td>
-<td><div class="line-block">
-<div class="line"><code class="docutils literal notranslate"><span class="pre">N1</span></code> … <code class="docutils literal notranslate"><span class="pre">N7</span></code></div>
-<div class="line"><code class="docutils literal notranslate"><span class="pre">S1</span></code> … <code class="docutils literal notranslate"><span class="pre">S7</span></code></div>
-<div class="line"><code class="docutils literal notranslate"><span class="pre">E1</span></code> … <code class="docutils literal notranslate"><span class="pre">E3</span></code></div>
-<div class="line"><code class="docutils literal notranslate"><span class="pre">W1</span></code> … <code class="docutils literal notranslate"><span class="pre">W3</span></code></div>
-</div>
-</td>
-<td><div class="line-block">
-<div class="line">Bare die package with 20 pins</div>
-<div class="line"><br /></div>
-<div class="line"><br /></div>
-<div class="line"><br /></div>
-</div>
-</td>
-</tr>
-<tr class="row-even"><td><p>pga144</p></td>
+<tr class="row-odd"><td><p>pga144</p></td>
 <td><p>144</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1</span></code> … <code class="docutils literal notranslate"><span class="pre">144</span></code></p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><div class="line-block">
+<tr class="row-even"><td><div class="line-block">
 <div class="line">TBA</div>
 <div class="line"><br /></div>
 <div class="line"><br /></div>
@@ -560,34 +559,34 @@ You’ll choose the <code class="docutils literal notranslate"><span class="pre"
 </table>
 </div>
 </section>
-</section>
 <section id="silicon-pads">
-<h1>silicon.pads<a class="headerlink" href="#silicon-pads" title="Link to this heading">#</a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">silicon.pads</span></code> section lists special pads. In general you are unlikely to need to add to this.</p>
-<p>For each pad, there’s a label which is used by our design, and what <code class="docutils literal notranslate"><span class="pre">type</span></code> and <code class="docutils literal notranslate"><span class="pre">loc</span></code> each pad should be.</p>
-<section id="type">
-<h2>type<a class="headerlink" href="#type" title="Link to this heading">#</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">type</span></code> for each pad can be set to one of:</p>
-<dl class="simple">
-<dt>clock</dt><dd><p>External clock input.</p>
+<h2><code class="docutils literal notranslate"><span class="pre">[silicon.pads]</span></code><a class="headerlink" href="#silicon-pads" title="Link to this heading">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">silicon.pads</span></code> section lists special pads. In general you are unlikely to need to add to this.
+Each pad specified with the name used by the design and two parameters: :term:type and <a class="reference internal" href="#term-loc"><span class="xref std std-term">loc</span></a>.</p>
+<div class="highlight-TOML notranslate"><div class="highlight"><pre><span></span><span class="k">[chipflow.silicon.pads]</span>
+<span class="n">sys_clk</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;clock&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;114&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="n">sys_rst_n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;reset&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;115&quot;</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>In the above example two pads specified, <code class="docutils literal notranslate"><span class="pre">sys_clk</span></code> pad for clock input and <code class="docutils literal notranslate"><span class="pre">sys_rst_n</span></code> for reset.</p>
+<dl class="simple glossary">
+<dt id="term-loc">loc<a class="headerlink" href="#term-loc" title="Link to this term">#</a></dt><dd><p>This is the physical location of the pad on your chosen pad ring. How these are indexed varies by the pad ring.</p>
 </dd>
-<dt>i</dt><dd><p>Input.</p>
+<dt id="term-type">type<a class="headerlink" href="#term-type" title="Link to this term">#</a></dt><dd><p>The :term:type for each pad can be set to one of :term:clock or :term:reset.</p>
 </dd>
-<dt>o</dt><dd><p>Output.</p>
+<dt id="term-clock">clock<a class="headerlink" href="#term-clock" title="Link to this term">#</a></dt><dd><p>External clock input.</p>
 </dd>
-<dt>io</dt><dd><p>Input or output.</p>
+<dt id="term-reset">reset<a class="headerlink" href="#term-reset" title="Link to this term">#</a></dt><dd><p>External reset input.</p>
 </dd>
 </dl>
 </section>
-<section id="loc">
-<h2>loc<a class="headerlink" href="#loc" title="Link to this heading">#</a></h2>
-<p>This is the physical location of the pad on your chosen pad ring. How these are indexed varies by the pad ring.</p>
-</section>
-</section>
 <section id="silicon-power">
-<h1>silicon.power<a class="headerlink" href="#silicon-power" title="Link to this heading">#</a></h1>
-<p>This section describes how the pads should be connected to the power available on the chosen process.</p>
+<h2><code class="docutils literal notranslate"><span class="pre">[silicon.power]</span></code><a class="headerlink" href="#silicon-power" title="Link to this heading">#</a></h2>
+<p>This section outlines the connection of pads to the power supply available for the selected process and package.
+These pads are declared with the :term:type and :term:loc parameters, similar to the <a class="reference internal" href="#silicon-pads">[silicon.pads]</a> section.
+Note that in this context, the :term:type parameter can only be <code class="docutils literal notranslate"><span class="pre">ground</span></code> or <code class="docutils literal notranslate"><span class="pre">power</span></code>.</p>
 <p>This is a work in progress, and currently you can use the defaults provided by customer support.</p>
+</section>
 </section>
 
 
@@ -636,23 +635,17 @@ You’ll choose the <code class="docutils literal notranslate"><span class="pre"
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow"><code class="docutils literal notranslate"><span class="pre">[chipflow]</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow-top"><code class="docutils literal notranslate"><span class="pre">[chipflow.top]</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow-steps"><code class="docutils literal notranslate"><span class="pre">[chipflow.steps]</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow-clocks"><code class="docutils literal notranslate"><span class="pre">[chipflow.clocks]</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow-resets"><code class="docutils literal notranslate"><span class="pre">[chipflow.resets]</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow-silicon"><code class="docutils literal notranslate"><span class="pre">[chipflow.silicon]</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#available-processes">Available processes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#available-pad-rings">Available pad rings</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#silicon-pads"><code class="docutils literal notranslate"><span class="pre">[silicon.pads]</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#silicon-power"><code class="docutils literal notranslate"><span class="pre">[silicon.power]</span></code></a></li>
 </ul>
-</li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#silicon-pads">silicon.pads</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#type">type</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loc">loc</a></li>
-</ul>
-</li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#silicon-power">silicon.power</a></li>
-</ul>
-
   </nav></div>
 
 </div></div>
