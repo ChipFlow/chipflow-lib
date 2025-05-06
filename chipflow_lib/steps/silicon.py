@@ -199,6 +199,7 @@ class SiliconStep:
 
             # Poll the status API until the build is completed or failed
             stream_event_counter = 0
+            fail_counter = 0
             if wait:
                 while True:
                     logger.info("Polling build status...")
@@ -207,8 +208,11 @@ class SiliconStep:
                         auth=(None, chipflow_api_key)
                     )
                     if status_resp.status_code != 200:
-                        logger.error(f"Failed to fetch build status: {status_resp.text}")
-                        raise ChipFlowError("Error while checking build status.")
+                        fail_counter += 1
+                        logger.error(f"Failed to fetch build status {fail_counter} times: {status_resp.text}")
+                        if fail_counter > 5:
+                            logger.error(f"Failed to fetch build status {fail_counter} times. Exiting.")
+                            raise ChipFlowError("Error while checking build status.")
 
                     status_data = status_resp.json()
                     build_status = status_data.get("status")
