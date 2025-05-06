@@ -123,7 +123,7 @@ Available processes
 +------------+------------+---------------------------+
 
 Available pad rings
----------------------------------
+-------------------
 
 +----------+-----------+--------------------+------------------------------------+
 | Pad ring | Pad count | Pad locations      | Notes                              |
@@ -138,7 +138,7 @@ Available pad rings
 
 
 ``[silicon.pads]``
-==================
+------------------
 
 The ``silicon.pads`` section lists special pads. In general you are unlikely to need to add to this.
 Each pad specified with the name used by the design and two parameters: :term:type and :term:`loc`.
@@ -167,7 +167,7 @@ In the above example two pads specified, ``sys_clk`` pad for clock input and ``s
 
 
 ``[silicon.power]``
-===================
+-------------------
 
 This section outlines the connection of pads to the power supply available for the selected process and package.
 These pads are declared with the :term:type and :term:loc parameters, similar to the `[silicon.pads]`_ section.

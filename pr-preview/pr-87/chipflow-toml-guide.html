@@ -51,7 +51,7 @@
     <link rel="prev" title="ChipFlow Library Documentation" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.dev1+g66be83f" />
+  <meta name="docsearch:version" content="0.1.dev1+g9e9b2e4" />
   </head>
   
   
@@ -331,7 +331,6 @@
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow"><code class="docutils literal notranslate"><span class="pre">[chipflow]</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow-top"><code class="docutils literal notranslate"><span class="pre">[chipflow.top]</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow-steps"><code class="docutils literal notranslate"><span class="pre">[chipflow.steps]</span></code></a></li>
@@ -340,12 +339,9 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow-silicon"><code class="docutils literal notranslate"><span class="pre">[chipflow.silicon]</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#available-processes">Available processes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#available-pad-rings">Available pad rings</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#silicon-pads"><code class="docutils literal notranslate"><span class="pre">[silicon.pads]</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#silicon-power"><code class="docutils literal notranslate"><span class="pre">[silicon.power]</span></code></a></li>
 </ul>
-</li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#silicon-pads"><code class="docutils literal notranslate"><span class="pre">[silicon.pads]</span></code></a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#silicon-power"><code class="docutils literal notranslate"><span class="pre">[silicon.power]</span></code></a></li>
-</ul>
-
             </nav>
         </div>
     </div>
@@ -563,9 +559,8 @@ You’ll choose the <code class="docutils literal notranslate"><span class="pre"
 </table>
 </div>
 </section>
-</section>
 <section id="silicon-pads">
-<h1><code class="docutils literal notranslate"><span class="pre">[silicon.pads]</span></code><a class="headerlink" href="#silicon-pads" title="Link to this heading">#</a></h1>
+<h2><code class="docutils literal notranslate"><span class="pre">[silicon.pads]</span></code><a class="headerlink" href="#silicon-pads" title="Link to this heading">#</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">silicon.pads</span></code> section lists special pads. In general you are unlikely to need to add to this.
 Each pad specified with the name used by the design and two parameters: :term:type and <a class="reference internal" href="#term-loc"><span class="xref std std-term">loc</span></a>.</p>
 <div class="highlight-TOML notranslate"><div class="highlight"><pre><span></span><span class="k">[chipflow.silicon.pads]</span>
@@ -586,11 +581,12 @@ Each pad specified with the name used by the design and two parameters: :term:ty
 </dl>
 </section>
 <section id="silicon-power">
-<h1><code class="docutils literal notranslate"><span class="pre">[silicon.power]</span></code><a class="headerlink" href="#silicon-power" title="Link to this heading">#</a></h1>
+<h2><code class="docutils literal notranslate"><span class="pre">[silicon.power]</span></code><a class="headerlink" href="#silicon-power" title="Link to this heading">#</a></h2>
 <p>This section outlines the connection of pads to the power supply available for the selected process and package.
 These pads are declared with the :term:type and :term:loc parameters, similar to the <a class="reference internal" href="#silicon-pads">[silicon.pads]</a> section.
 Note that in this context, the :term:type parameter can only be <code class="docutils literal notranslate"><span class="pre">ground</span></code> or <code class="docutils literal notranslate"><span class="pre">power</span></code>.</p>
 <p>This is a work in progress, and currently you can use the defaults provided by customer support.</p>
+</section>
 </section>
 
 
@@ -639,7 +635,6 @@ Note that in this context, the :term:type parameter can only be <code class="doc
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow"><code class="docutils literal notranslate"><span class="pre">[chipflow]</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow-top"><code class="docutils literal notranslate"><span class="pre">[chipflow.top]</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow-steps"><code class="docutils literal notranslate"><span class="pre">[chipflow.steps]</span></code></a></li>
@@ -648,12 +643,9 @@ Note that in this context, the :term:type parameter can only be <code class="doc
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chipflow-silicon"><code class="docutils literal notranslate"><span class="pre">[chipflow.silicon]</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#available-processes">Available processes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#available-pad-rings">Available pad rings</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#silicon-pads"><code class="docutils literal notranslate"><span class="pre">[silicon.pads]</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#silicon-power"><code class="docutils literal notranslate"><span class="pre">[silicon.power]</span></code></a></li>
 </ul>
-</li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#silicon-pads"><code class="docutils literal notranslate"><span class="pre">[silicon.pads]</span></code></a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#silicon-power"><code class="docutils literal notranslate"><span class="pre">[silicon.power]</span></code></a></li>
-</ul>
-
   </nav></div>
 
 </div></div>
