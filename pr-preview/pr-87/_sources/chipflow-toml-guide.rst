@@ -77,7 +77,7 @@ You probably won't need to change these if you're starting from an example repos
 
 This section links the clock domains utilized in the design to specific pads.
 These pads need to be specified in the `[silicon.pads]`_ section with the :term:type set to :term:clock.
-The ``default`` clock domain is associated with the Amaranth `sync <lang-sync>` `clock domain <lang-clockdomains>`.
+The ``default`` clock domain is associated with the Amaranth :any:`sync <lang-domains>` :ref:`clock domain <lang-clockdomains>`.
 Currently, only one ``default`` clock domain is supported.
 
 
