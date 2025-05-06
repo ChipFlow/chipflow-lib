@@ -38,21 +38,23 @@ The ``project_name`` is a human-readable identifier for this project. If not set
 
 This section outlines the design modules that need to be instantiated.
 A new top module will be automatically generated, incorporating all specified modules along with their interfaces.
-Each entry follows the format <``module instance name``>="`\<module class path\>`_".
+Each entry follows the format `<instance name> = <module class path>`.
 
-_`\<module class path\>`
-========================
+The instance name is the name the python object will be given in your design, and the :term:`module class path`
 
-The module class path offers a similar way to locate Python objects as entry points.
-It consists of a module's `qualified name`_ followed by a colon (:) and then the `qualified name`_ of the class within that module.
+.. glossary::
+
+   module class path
+       The module class path offers a way to locate Python objects as entry points.
+       It consists of a module's :term:`qualified name` followed by a colon (:) and then the :term:`qualified name` of the class within that module.
 
 ``[chipflow.steps]``
 --------------------
 
-The ``steps`` section allows overriding or addition to the standard steps available from `chipflow_lib`_.
+The ``steps`` section allows overriding or addition to the standard steps available from `chipflow_lib`.
 
 For example, if you want to override the standard silicon preparation step, you could derive from :class:`chipflow_lib.steps.silicon.SiliconStep`, add your custom functionality
-and add the following to your `chipflow.toml`, with the appropriate `\<module class path\>`_ :
+and add the following to your `chipflow.toml`, with the appropriate :term:`module class path`:
 
 .. code-block:: TOML
 
@@ -63,7 +65,6 @@ and add the following to your `chipflow.toml`, with the appropriate `\<module cl
 You probably won't need to change these if you're starting from an example repository.
 
 .. _chipflow_lib: https://github.com/ChipFlow/chipflow-lib
-.. _qualified name: https://docs.python.org/3/glossary.html#term-qualified-name
 
 
 ``[chipflow.clocks]``
@@ -75,8 +76,8 @@ You probably won't need to change these if you're starting from an example repos
    default = 'sys_clk'
 
 This section links the clock domains utilized in the design to specific pads.
-These pads need to be specified in the `[silicon.pads]`_ section with the `type`_ set to ``clock``.
-The ``default`` clock domain is associated with the Amaranth ``sync`` clock domain.
+These pads need to be specified in the `[silicon.pads]`_ section with the :term:type set to :term:clock.
+The ``default`` clock domain is associated with the Amaranth `sync <lang-sync>` `clock domain <lang-clockdomains>`.
 Currently, only one ``default`` clock domain is supported.
 
 
@@ -89,7 +90,7 @@ Currently, only one ``default`` clock domain is supported.
    default = 'sys_rst_n'
 
 This section identifies the input pads designated for reset functionality.
-These pads need to be specified in the `[silicon.pads]`_ section with the `type`_ set to ``reset``.
+These pads need to be specified in the `[silicon.pads]`_ section with the :term:type set to :term:reset.
 The logic that synchronizes the reset signal with the clock will be generated automatically.
 
 ``[chipflow.silicon]``
@@ -136,13 +137,11 @@ Available pad rings
 +----------+-----------+--------------------+------------------------------------+
 
 
-
-
-_`[silicon.pads]`
+``[silicon.pads]``
 ==================
 
 The ``silicon.pads`` section lists special pads. In general you are unlikely to need to add to this.
-Each pad specified with the name used by the design and two parameters: `type`_ and `loc`_.
+Each pad specified with the name used by the design and two parameters: :term:type and :term:`loc`.
 
 .. code-block:: TOML
 
@@ -152,31 +151,30 @@ Each pad specified with the name used by the design and two parameters: `type`_ 
 
 In the above example two pads specified, ``sys_clk`` pad for clock input and ``sys_rst_n`` for reset.
 
-_`type`
--------
+.. glossary::
 
-The ``type`` for each pad can be set to one of:
+   loc
+       This is the physical location of the pad on your chosen pad ring. How these are indexed varies by the pad ring.
 
-clock
-   External clock input.
+   type
+       The :term:type for each pad can be set to one of :term:clock or :term:reset.
 
-reset
-   External reset input.
+   clock
+       External clock input.
+
+   reset
+       External reset input.
 
 
-_`loc`
-------
-
-This is the physical location of the pad on your chosen pad ring. How these are indexed varies by the pad ring.
-
-silicon.power
-=============
+``[silicon.power]``
+===================
 
 This section outlines the connection of pads to the power supply available for the selected process and package.
-These pads are declared with the ``type`` and `loc`_ parameters, similar to the `[silicon.pads]`_ section.
-Note that in this context, the ``type`` parameter can only be ``ground`` or ``power``.
+These pads are declared with the :term:type and :term:loc parameters, similar to the `[silicon.pads]`_ section.
+Note that in this context, the :term:type parameter can only be ``ground`` or ``power``.
 
 This is a work in progress, and currently you can use the defaults provided by customer support.
 
-
 .. _Caravel Harness: https://caravel-harness.readthedocs.io/en/latest/
+
+
