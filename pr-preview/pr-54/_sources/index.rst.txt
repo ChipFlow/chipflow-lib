@@ -20,7 +20,6 @@ It provides a streamlined workflow from design to fabrication using Python and t
    getting-started
    chipflow-toml-guide
    chipflow-commands
-   advanced-configuration
 
 .. toctree::
    :maxdepth: 1

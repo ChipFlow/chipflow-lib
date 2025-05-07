@@ -63,7 +63,7 @@ We use `PDM <https://pdm-project.org>`__ to manage our dependencies, so
 this will need to be installed. Follow the `PDM install
 instructions <https://pdm-project.org/en/latest/#installation>`__
 
-Once PDM is installed, make sure your in the ``chipflow-examples``
+Once PDM is installed, make sure you are in the ``chipflow-examples``
 directory and then run:
 
 ::
@@ -164,10 +164,6 @@ you can instead call:
 .. |Image showing the link to click| image:: _assets/open-github-desktop.png
 .. |Image showing where to click in GitHub Desktop to open in VSCode| image:: _assets/github-desktop-open.png
 
-
-- Python 3.10+
-- Git
-- PDM (Python Dependency Manager)
 
 Installation
 ------------
