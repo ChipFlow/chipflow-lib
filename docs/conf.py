@@ -41,6 +41,15 @@ html_logo = '_assets/chipflow-logo.svg'
 html_title = "ChipFlow Platform Documentation"
 html_static_path = ['_assets']
 
+html_theme_options = {
+    "dark_css_variables": {
+        "admonition-font-size": "0.9 rem",
+    },
+    "light_css_variables": {
+        "admonition-font-size": "0.9 rem",
+    },
+}
+
 autodoc_typehints = 'description'
 
 autoapi_dirs = [
