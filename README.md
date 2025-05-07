@@ -1,29 +1,26 @@
 # ChipFlow library
 
-This is a small library to make working with the ChipFlow platform easy and straightforward.
+This is a library to make working with the ChipFlow platform easy and straightforward.
 
 ## Installation and usage
 
-This library uses [PDM](https://pdm.fming.dev/) for dependency management, testing, building, and publishing. Install PDM first. Then run:
+See the `ChipFlow docs <https://docs.chipflow.io>`__
 
-```
-pdm install
-```
 
-To run tests, use:
+## Contributing
 
-```shell
-pdm run test
-```
+We warmly accept [PRs](https://github.com/chipFlow/chipflow-lib/pulls)
+and [issues](https://github.com/ChipFlow/chipflow-lib/issues), and are
+always happy for folk to join in [GitHub Discussions](https://github.com/ChipFlow/chipflow-central/discussions)
 
-To run lints, use:
 
-```shell
-pdm run lint
-```
+Code contributions must pass the following checks:
+- `pdm lint`
+- `pdm test`
 
-Your contributions must pass the lint check to be included in the repository.
+Also, do note we have a [DCO](https://developercertificate.org/), and require sign-offs from external contributors.
 
+Happy hacking!
 
 ## License
 
