@@ -20,11 +20,4 @@ It provides a streamlined workflow from design to fabrication using Python and t
    getting-started
    chipflow-toml-guide
    chipflow-commands
-
-.. toctree::
-   :maxdepth: 1
-   :caption: API Reference
-
->>>>>>> b1d188e (Add comprehensive user documentation)
-   autoapi/index
-
+   API Reference <autoapi/index>

@@ -210,9 +210,6 @@
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Getting Started with ChipFlow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-commands.html">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="autoapi/index.html">API Reference</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="autoapi/chipflow_lib/index.html">chipflow_lib</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of chipflow_lib</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html">chipflow_lib.platforms</a></li>
@@ -268,7 +265,7 @@
 <h2>What is ChipFlow?<a class="headerlink" href="#what-is-chipflow" title="Link to this heading">¶</a></h2>
 <p>ChipFlow is an integrated circuit design platform that combines modern hardware design tools with cloud-based manufacturing services. It enables you to:</p>
 <ul class="simple">
-<li><p>Design custom silicon using Python and Amaranth HDL</p></li>
+<li><p>Design custom silicon using <a class="reference external" href="https://www.python.org/">Python</a>  and <a class="reference external" href="https://github.com/amaranth-lang/amaranth">Amaranth HDL</a></p></li>
 <li><p>Simulate and verify your designs</p></li>
 <li><p>Prepare and submit your designs for manufacturing</p></li>
 <li><p>Manage the entire IC design workflow from a single platform</p></li>
@@ -278,14 +275,10 @@
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h2>
 <p>Before you begin:</p>
 <ul class="simple">
-<li><p>Install the latest version of Python: <a class="reference external" href="https://www.python.org/downloads/">Python
-Downloads</a>.</p></li>
-<li><p>Ensure you have git command line tools installed: <a class="reference external" href="https://git-scm.com/downloads">Git
-Downloads</a>.</p></li>
-<li><p>We recommend VS Code as a development environment: <a class="reference external" href="https://code.visualstudio.com/download">VSCode
-Downloads</a>.</p></li>
-<li><p>GitHub Desktop is a great tool for cloning git repos: <a class="reference external" href="https://desktop.github.com/download/">GitHub Desktop
-Downloads</a></p></li>
+<li><p>Install the latest version of <a class="reference external" href="https://www.python.org/downloads/">Python</a>.</p></li>
+<li><p>Ensure you have <a class="reference external" href="https://git-scm.com/downloads">Git command line tools</a>  installed</p></li>
+<li><p>We recommend <a class="reference external" href="https://code.visualstudio.com/download">Visual Studio Code</a> as a development environment</p></li>
+<li><p><a class="reference external" href="https://desktop.github.com/download/">GitHub Desktop</a> is a great tool for workingh with Git repos</p></li>
 </ul>
 </section>
 <section id="clone-chipflow-examples">
@@ -296,18 +289,19 @@ Downloads</a></p></li>
 then go clone [ChipFlow/chipflow-examples](<a class="reference external" href="https://github.com/ChipFlow/chipflow-examples">https://github.com/ChipFlow/chipflow-examples</a>)
 and jump ahead to <a class="reference internal" href="#install-the-dependencies">Install the Dependencies</a></p>
 </div>
-<p>If the git world is new to you, start by <a class="reference external" href="https://github.com/apps/desktop">GitHub
-Desktop</a>. Once its installed, launch
-it. You will be asked to sign in or create an account - we recommend you
+<p>If the git world is new to you, start up <a class="reference external" href="https://github.com/apps/desktop">GitHub
+Desktop</a>. The first time you launch
+it you will be asked to sign in or create an account - we recommend you
 take this moment to create a GitHub account if you don’t already have
-one.</p>
-<p>Come back to <a class="reference external" href="https://github.com/ChipFlow/chipflow-examples">this
-page</a> and click the
-green ‘Code’ button at the top. Select ‘Open with GitHub Desktop’ and
+one!</p>
+<p>Navigate to <a class="reference external" href="https://github.com/ChipFlow/chipflow-examples">the chipflow-examples repository</a>
+and click the green ‘Code’ button at the top. Select ‘Open with GitHub Desktop’ and
 then follow the prompts (N.B. your web browser may have a pop-up to
-authorise opening an external app) <img alt="Image showing the link to click" src="_images/open-github-desktop.png" /></p>
+authorise opening an external app)</p>
+<p><img alt="Image showing the link to click" src="_images/open-github-desktop.png" /></p>
 <p>Once GitHub Desktop has cloned your repo you can click the button to
-open it in VS Code: <img alt="Image showing where to click in GitHub Desktop to open in VSCode" src="_images/github-desktop-open.png" /></p>
+open it in VS Code:</p>
+<p><img alt="Image showing where to click in GitHub Desktop to open in VSCode" src="_images/github-desktop-open.png" /></p>
 </section>
 <section id="install-the-dependencies">
 <h2>Install the dependencies<a class="headerlink" href="#install-the-dependencies" title="Link to this heading">¶</a></h2>
@@ -317,7 +311,7 @@ open it in VS Code: <img alt="Image showing where to click in GitHub Desktop to 
 </div>
 <p>We use <a class="reference external" href="https://pdm-project.org">PDM</a> to manage our dependencies, so
 this will need to be installed. Follow the <a class="reference external" href="https://pdm-project.org/en/latest/#installation">PDM install
-instructions</a></p>
+instructions</a> for your OS.</p>
 <p>Once PDM is installed, make sure you are in the <code class="docutils literal notranslate"><span class="pre">chipflow-examples</span></code>
 directory and then run:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pdm</span> <span class="n">lock</span> <span class="o">-</span><span class="n">d</span>

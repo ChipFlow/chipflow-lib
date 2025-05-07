@@ -8,7 +8,7 @@ What is ChipFlow?
 
 ChipFlow is an integrated circuit design platform that combines modern hardware design tools with cloud-based manufacturing services. It enables you to:
 
-- Design custom silicon using Python and Amaranth HDL
+- Design custom silicon using `Python <https://www.python.org/>`__  and `Amaranth HDL <https://github.com/amaranth-lang/amaranth>`__
 - Simulate and verify your designs
 - Prepare and submit your designs for manufacturing
 - Manage the entire IC design workflow from a single platform
@@ -19,14 +19,10 @@ Prerequisites
 
 Before you begin:
 
-- Install the latest version of Python: `Python
-  Downloads <https://www.python.org/downloads/>`__.
-- Ensure you have git command line tools installed: `Git
-  Downloads <https://git-scm.com/downloads>`__.
-- We recommend VS Code as a development environment: `VSCode
-  Downloads <https://code.visualstudio.com/download>`__.
-- GitHub Desktop is a great tool for cloning git repos: `GitHub Desktop
-  Downloads <https://desktop.github.com/download/>`__
+- Install the latest version of `Python <https://www.python.org/downloads/>`__.
+- Ensure you have `Git command line tools <https://git-scm.com/downloads>`__  installed
+- We recommend `Visual Studio Code <https://code.visualstudio.com/download>`__ as a development environment
+- `GitHub Desktop <https://desktop.github.com/download/>`__ is a great tool for workingh with Git repos
 
 Clone chipflow-examples
 -----------------------
@@ -37,21 +33,26 @@ Clone chipflow-examples
     and jump ahead to `Install the Dependencies`_
 
 
-If the git world is new to you, start by `GitHub
-Desktop <https://github.com/apps/desktop>`__. Once its installed, launch
-it. You will be asked to sign in or create an account - we recommend you
+If the git world is new to you, start up `GitHub
+Desktop <https://github.com/apps/desktop>`__. The first time you launch
+it you will be asked to sign in or create an account - we recommend you
 take this moment to create a GitHub account if you don’t already have
-one.
+one!
 
-Come back to `this
-page <https://github.com/ChipFlow/chipflow-examples>`__ and click the
-green ‘Code’ button at the top. Select ‘Open with GitHub Desktop’ and
+Navigate to `the chipflow-examples repository <https://github.com/ChipFlow/chipflow-examples>`__
+and click the green ‘Code’ button at the top. Select ‘Open with GitHub Desktop’ and
 then follow the prompts (N.B. your web browser may have a pop-up to
-authorise opening an external app) |Image showing the link to click|
+authorise opening an external app)
+
+|Image showing the link to click|
+
 
 Once GitHub Desktop has cloned your repo you can click the button to
-open it in VS Code: |Image showing where to click in GitHub Desktop to
+open it in VS Code:
+
+|Image showing where to click in GitHub Desktop to
 open in VSCode|
+
 
 Install the dependencies
 ------------------------
@@ -61,7 +62,7 @@ Install the dependencies
 
 We use `PDM <https://pdm-project.org>`__ to manage our dependencies, so
 this will need to be installed. Follow the `PDM install
-instructions <https://pdm-project.org/en/latest/#installation>`__
+instructions <https://pdm-project.org/en/latest/#installation>`__ for your OS.
 
 Once PDM is installed, make sure you are in the ``chipflow-examples``
 directory and then run:
@@ -180,5 +181,3 @@ Installation
    .. code-block:: bash
 
       pdm install
-
-
