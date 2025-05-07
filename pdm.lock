@@ -5,24 +5,10 @@
 groups = ["default", "doc", "lint", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:fa2a406d1a574b5afa05ff35eadf2801edfa6640d195d8060a8c0c685b44c921"
+content_hash = "sha256:16f1c148bb979fe3aa07e3f68f07889f19cb07c96aa62aa93a6770a66105e787"
 
 [[metadata.targets]]
 requires_python = ">=3.10"
-
-[[package]]
-name = "accessible-pygments"
-version = "0.0.5"
-requires_python = ">=3.9"
-summary = "A collection of accessible pygments styles"
-groups = ["doc"]
-dependencies = [
-    "pygments>=1.5",
-]
-files = [
-    {file = "accessible_pygments-0.0.5-py3-none-any.whl", hash = "sha256:88ae3211e68a1d0b011504b2ffc1691feafce124b845bd072ab6f9f66f34d4b7"},
-    {file = "accessible_pygments-0.0.5.tar.gz", hash = "sha256:40918d3e6a2b619ad424cb91e556bd3bd8865443d9f22f1dcdf79e33c8046872"},
-]
 
 [[package]]
 name = "alabaster"
@@ -763,27 +749,6 @@ files = [
 ]
 
 [[package]]
-name = "pydata-sphinx-theme"
-version = "0.15.4"
-requires_python = ">=3.9"
-summary = "Bootstrap-based Sphinx theme from the PyData community"
-groups = ["doc"]
-dependencies = [
-    "Babel",
-    "accessible-pygments",
-    "beautifulsoup4",
-    "docutils!=0.17.0",
-    "packaging",
-    "pygments>=2.7",
-    "sphinx>=5",
-    "typing-extensions",
-]
-files = [
-    {file = "pydata_sphinx_theme-0.15.4-py3-none-any.whl", hash = "sha256:2136ad0e9500d0949f96167e63f3e298620040aea8f9c74621959eda5d4cf8e6"},
-    {file = "pydata_sphinx_theme-0.15.4.tar.gz", hash = "sha256:7762ec0ac59df3acecf49fd2f889e1b4565dbce8b88b2e29ee06fdd90645a06d"},
-]
-
-[[package]]
 name = "pygments"
 version = "2.19.1"
 requires_python = ">=3.8"
@@ -1147,21 +1112,6 @@ dependencies = [
 files = [
     {file = "sphinx_basic_ng-1.0.0b2-py3-none-any.whl", hash = "sha256:eb09aedbabfb650607e9b4b68c9d240b90b1e1be221d6ad71d61c52e29f7932b"},
     {file = "sphinx_basic_ng-1.0.0b2.tar.gz", hash = "sha256:9ec55a47c90c8c002b5960c57492ec3021f5193cb26cebc2dc4ea226848651c9"},
-]
-
-[[package]]
-name = "sphinx-book-theme"
-version = "1.1.4"
-requires_python = ">=3.9"
-summary = "A clean book theme for scientific explanations and documentation with Sphinx"
-groups = ["doc"]
-dependencies = [
-    "pydata-sphinx-theme==0.15.4",
-    "sphinx>=6.1",
-]
-files = [
-    {file = "sphinx_book_theme-1.1.4-py3-none-any.whl", hash = "sha256:843b3f5c8684640f4a2d01abd298beb66452d1b2394cd9ef5be5ebd5640ea0e1"},
-    {file = "sphinx_book_theme-1.1.4.tar.gz", hash = "sha256:73efe28af871d0a89bd05856d300e61edce0d5b2fbb7984e84454be0fedfe9ed"},
 ]
 
 [[package]]

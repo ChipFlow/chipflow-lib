@@ -11,6 +11,8 @@ ChipFlow Library Documentation
 
 
 .. toctree::
+   :maxdepth: 2
+   :caption: Contents:
 
    chipflow-toml-guide
-
+   autoapi/index
