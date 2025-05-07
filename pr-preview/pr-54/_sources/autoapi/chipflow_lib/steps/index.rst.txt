@@ -20,7 +20,7 @@ Classes
 Package Contents
 ----------------
 
-.. py:class:: StepBase(config)
+.. py:class:: StepBase(config={})
 
    Bases: :py:obj:`abc.ABC`
 
