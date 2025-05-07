@@ -39,7 +39,7 @@ bool spiflash_is_winbond(volatile spiflash_regs_t *flash) {
 	if ((id & 0x00ff0000) == WINBOND_ID<<16) return true;
 	else return false;
 }
-	
+
 void spiflash_set_qspi_flag(volatile spiflash_regs_t *flash) {
 	uint8_t buffer[8];
 

@@ -14,7 +14,7 @@ mv t3, ra
 # address of SPI ctrl reg
 li   a0, 0xb0000000
 # enter bypass mode
-lbu   t1, 0(a0) 
+lbu   t1, 0(a0)
 ori   t1, t1, 0x1
 sb    t1, 0(a0)
 call flashio_wait_bypass_ready
@@ -40,7 +40,7 @@ j flashio_xfer
 
 flashio_done:
 # exit bypass mode
-lbu   t1, 0(a0) 
+lbu   t1, 0(a0)
 andi   t1, t1, 0xFE
 sb    t1, 0(a0)
 

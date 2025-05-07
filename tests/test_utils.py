@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 import itertools
 import logging
-import pytest #noqa 
+import pytest  #noqa
 
 from pprint import pformat
 
