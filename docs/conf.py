@@ -4,6 +4,8 @@
 # Add parent folder to path so we can pick up module
 import os
 import sys
+from pprint import pformat
+
 sys.path.insert(0, os.path.abspath('../../chipflow_lib'))
 
 from chipflow_lib import __version__
@@ -25,50 +27,38 @@ master_doc = "index"
 # -- General configuration
 
 extensions = [
-    'sphinx.ext.duration',
-    'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
+    'sphinx.ext.autodoc.typehints',
+    'sphinx.ext.doctest',
+    'sphinx.ext.duration',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.napoleon',
     'autoapi.extension',
-    'sphinx.ext.napoleon'
 ]
 
-html_theme = 'sphinx_book_theme'
+html_theme = 'furo'
 html_logo = '_static/chipflow-logo.svg'
 html_title = "ChipFlow Platform Documentation"
 
-
-html_sidebars = {
-    '**': [
-        'relations.html',  # needs 'show_related': True theme option to display
-        'searchbox.html',
-    ]
-}
-
-html_static_path = ['_static']
-
-html_theme_options = {
-    "home_page_in_toc": True,
-    "repository_url": "https://github.com/ChipFlow/chipflow-lib",
-    "repository_branch": "master",
-    "path_to_docs": "docs",
-    "use_repository_button": True,
-    "use_edit_page_button": True,
-    "use_issues_button": True,
-    "show_navbar_depth": 3,
-    # "announcement": "<b>v3.0.0</b> is now out! See the Changelog for details",
-}
-
 autodoc_typehints = 'description'
 
-autoapi_dirs = ["../chipflow_lib"]
+autoapi_dirs = [
+        "../chipflow_lib/platforms",
+        "../chipflow_lib",
+        ]
+autoapi_generate_api_docs = True
+autoapi_template_dir = "_templates/autoapi"
+# autoapi_verbose_visibility = 2
+autoapi_keep_files = True
 autoapi_options = [
     'members',
-    'undoc-members',
     'show-inheritance',
     'show-module-summary',
     'imported-members',
 ]
+
+# Exclude autoapi templates
+exclude_patterns = [autoapi_template_dir]
 
 intersphinx_mapping = {
     'py': ('https://docs.python.org/3/', None),
