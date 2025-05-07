@@ -1,3 +1,7 @@
+"""
+Chipflow library
+"""
+
 import importlib.metadata
 import os
 import sys
@@ -6,7 +10,6 @@ from pathlib import Path
 from pydantic import ValidationError
 
 __version__ = importlib.metadata.version("chipflow_lib")
-
 
 class ChipFlowError(Exception):
     pass

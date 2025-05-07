@@ -99,13 +99,24 @@ class PinSignature(wiring.Signature):
         super().__init__(sig)
 
     @property
-    def direction(self):
+    def direction(self) -> io.Direction:
+        "The direction of the IO port"
         return self._direction
 
-    def width(self):
+    def width(self) -> int:
+        "The width of the IO port, in wires"
         return self._width
 
-    def options(self):
+    def options(self) -> dict:
+        """
+        Options set on the io port at construction
+
+        Valid options are:
+            "all_have_oe": For a bidirectional port, each wire can
+            have it's direction dynamically controlled seperately,
+            so each wire also has a corresponding Output Enable wire.
+            "init": the initial value that this io port will have at power-up and reset.
+        """
         return self._options
 
     def annotations(self, *args):
