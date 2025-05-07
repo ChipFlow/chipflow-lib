@@ -24,10 +24,10 @@ The simulation workflow allows you to test your design in a virtual environment 
 .. code-block:: bash
 
    # Prepare the simulation environment
-   python -m chipflow_lib.cli sim prepare
+   pdm chipflow sim prepare
 
    # Run the simulation tests
-   python -m chipflow_lib.cli sim run
+   pdm chipflow sim run
 
 **Key Configuration:**
 
@@ -58,19 +58,19 @@ Create a test bench file (e.g., `tb.py`) with a class that implements the simula
    class TestBench:
        def __init__(self):
            self.dut = MyDesign()
-           
+
        def elaborate(self, platform):
            m = Module()
            m.submodules.dut = self.dut
-           
+
            # Add stimulus logic here
-           
+
            return m
-           
+
        def sim_traces(self):
            # Return signals to trace in simulation
            return [self.dut.clk, self.dut.reset, self.dut.output]
-           
+
        def sim_test(self, sim):
            # Stimulus generation
            def process():
@@ -78,14 +78,14 @@ Create a test bench file (e.g., `tb.py`) with a class that implements the simula
                yield self.dut.reset.eq(1)
                yield Tick()
                yield self.dut.reset.eq(0)
-               
+
                # Run test vectors
                for i in range(100):
                    yield self.dut.input.eq(i)
                    yield Tick()
                    output = yield self.dut.output
                    print(f"Input: {i}, Output: {output}")
-                   
+
            sim.add_process(process)
 
 Board Workflow
@@ -98,10 +98,10 @@ The board workflow prepares your design for FPGA deployment, which is useful for
 .. code-block:: bash
 
    # Prepare the design for FPGA deployment
-   python -m chipflow_lib.cli board prepare
+   pdm chipflow board prepare
 
    # Deploy to FPGA
-   python -m chipflow_lib.cli board deploy
+   pdm chipflow board deploy
 
 **Key Configuration:**
 
@@ -128,16 +128,16 @@ The silicon workflow is the path to producing actual ASICs through ChipFlow's ma
 .. code-block:: bash
 
    # Prepare design for manufacturing
-   python -m chipflow_lib.cli silicon prepare
+   pdm chipflow silicon prepare
 
    # Validate the design against manufacturing rules
-   python -m chipflow_lib.cli silicon validate
+   pdm chipflow silicon validate
 
    # Submit the design for manufacturing
-   python -m chipflow_lib.cli silicon submit
+   pdm chipflow silicon submit
 
    # Check the status of a submitted design
-   python -m chipflow_lib.cli silicon status
+   pdm chipflow silicon status
 
 **Key Configuration:**
 
@@ -186,8 +186,7 @@ To submit a design, you'll need to set up authentication:
 
    .. code-block:: bash
 
-      CHIPFLOW_API_KEY_ID=your_key_id
-      CHIPFLOW_API_KEY_SECRET=your_key_secret
+      CHIPFLOW_API_KEY=your_key_secret
 
 2. Alternatively, set these as environment variables before submission:
 
@@ -195,7 +194,7 @@ To submit a design, you'll need to set up authentication:
 
       export CHIPFLOW_API_KEY_ID=your_key_id
       export CHIPFLOW_API_KEY_SECRET=your_key_secret
-      python -m chipflow_lib.cli silicon submit
+      pdm chipflow silicon submit
 
 Customizing Workflows
 ---------------------

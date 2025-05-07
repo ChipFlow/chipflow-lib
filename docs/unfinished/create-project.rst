@@ -82,7 +82,7 @@ Creating Your First Project
               # Wire up the blinky LED to an output pin
               led_out = platform.request("led")
               m.d.comb += led_out.eq(self.blinky.led)
-              
+
               return m
 
 Workflow Steps
