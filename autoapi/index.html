@@ -19,18 +19,21 @@
   body {
     --color-code-background: #f8f8f8;
   --color-code-foreground: black;
+  --admonition-font-size: 0.9 rem;
   
   }
   @media not print {
     body[data-theme="dark"] {
       --color-code-background: #202020;
   --color-code-foreground: #d0d0d0;
+  --admonition-font-size: 0.9 rem;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
         --color-code-background: #202020;
   --color-code-foreground: #d0d0d0;
+  --admonition-font-size: 0.9 rem;
   
       }
     }
@@ -202,13 +205,15 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+  <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting Started with ChipFlow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../chipflow-toml-guide.html">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../chipflow-commands.html">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a></li>
 <li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">API Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="chipflow_lib/index.html">chipflow_lib</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of chipflow_lib</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="chipflow_lib/platforms/index.html">chipflow_lib.platforms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chipflow_lib/steps/index.html">chipflow_lib.steps</a></li>
 </ul>
 </li>
 </ul>
@@ -260,6 +265,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="chipflow_lib/index.html">chipflow_lib</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="chipflow_lib/platforms/index.html">chipflow_lib.platforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chipflow_lib/steps/index.html">chipflow_lib.steps</a></li>
 </ul>
 </li>
 </ul>
