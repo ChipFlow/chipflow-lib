@@ -3,8 +3,9 @@
 from doit.cmd_base import ModuleTaskLoader
 from doit.doit_cmd import DoitMain
 
+from . import StepBase
 
-class SimStep:
+class SimStep(StepBase):
     """Simulate the design."""
 
     doit_build_module = None

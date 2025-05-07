@@ -13,6 +13,7 @@ import sys
 import dotenv
 from amaranth import *
 
+from . import StepBase
 from .. import ChipFlowError
 from ..platforms import SiliconPlatform, top_interfaces, load_pinlock
 
@@ -20,7 +21,7 @@ from ..platforms import SiliconPlatform, top_interfaces, load_pinlock
 logger = logging.getLogger(__name__)
 
 
-class SiliconTop(Elaboratable):
+class SiliconTop(StepBase, Elaboratable):
     def __init__(self, config={}):
         self._config = config
 
@@ -53,7 +54,7 @@ class SiliconTop(Elaboratable):
 
 
 class SiliconStep:
-    """Prepare and submit the design for an ASIC."""
+    """Step to Prepare and submit the design for an ASIC."""
     def __init__(self, config):
         self.config = config
 
