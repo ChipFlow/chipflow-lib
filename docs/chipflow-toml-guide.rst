@@ -48,6 +48,8 @@ The instance name is the name the python object will be given in your design, an
        The module class path offers a way to locate Python objects as entry points.
        It consists of a module's :term:`qualified name` followed by a colon (:) and then the :term:`qualified name` of the class within that module.
 
+.. _chipflow-toml-steps:
+
 ``[chipflow.steps]``
 --------------------
 

@@ -15,4 +15,5 @@ ChipFlow Library Documentation
    :caption: Contents:
 
    chipflow-toml-guide
+   chipflow-commands
    autoapi/index
