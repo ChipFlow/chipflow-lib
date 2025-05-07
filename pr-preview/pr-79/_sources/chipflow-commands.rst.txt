@@ -41,4 +41,3 @@ A default simulation driver (the C++ code that runs the simulation) is included 
 ---------------------
 
 If the design contains a CPU, the ``chipflow software build`` command is used to build test firmware for the target CPU. Which C source files to include, and any build options (like the target architecture or enabled RISC-V extensions) can be customised in the ``software/doit_build.py`` doit build script inside the user project.
-

@@ -16,6 +16,7 @@ Submodules
    :maxdepth: 1
 
    /autoapi/chipflow_lib/platforms/index
+   /autoapi/chipflow_lib/steps/index
 
 
 Exceptions
