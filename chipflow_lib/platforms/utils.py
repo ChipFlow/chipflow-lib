@@ -66,12 +66,16 @@ PIN_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("pin-annotation", 0))
 
 
 class PinSignature(wiring.Signature):
-    """Amaranth Signtaure used to decorate wires that would
-    usually be brought out onto a port on the package.
+    """Amaranth Signtaure used to decorate wires that would usually be brought out onto a port on the package.
+    This class is generally not directly used.
+    Instead, you would typically utilize the more specific
+    :py:obj:`InputPinSignature`, :py:obj:`OutputPinSignature`, or :py:obj:`BidirPinSignature` for defining pin interfaces.
 
     direction: Input, Output or Bidir
-    width: width of port
-    all_have_oe: For Bidir ports, should Output Enable be per wire or for the whole port
+    width: width of port, default is 1
+    all_have_oe: controls whether each output wire associated with an individual wire or
+    single Output Enable signal will used for entire port,
+    the default value is False, indicating that each output wire will have its own dedicated Output Enable signal.
     init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
     """
 
@@ -131,14 +135,39 @@ class PinSignature(wiring.Signature):
 
 
 def OutputPinSignature(width, **kwargs):
+    """This creates Amaranth Signtaure used to decorate package output wires
+    that would be connected to the pads on the package.
+    This creates an Amaranth Signature which is then used to decorate output signals
+    intended for connection to the physical pads of the integrated circuit package.
+
+    :param width: specifies the number of individual output wires within this port, each of which will correspond to a separate physical pad on the integrated circuit package.
+    :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
+    """
     return PinSignature(io.Direction.Output, width=width, **kwargs)
 
 
 def InputPinSignature(width, **kwargs):
+    """This creates Amaranth Signtaure used to decorate package input wires
+    that would be connected to the pads on the package.
+    This creates an Amaranth Signature which is then used to decorate input signals
+    intended for connection to the physical pads of the integrated circuit package.
+
+    :param width: specifies the number of individual input wires within this port, each of which will correspond to a separate physical pad on the integrated circuit package.
+    :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
+    """
     return PinSignature(io.Direction.Input, width=width, **kwargs)
 
 
 def BidirPinSignature(width, **kwargs):
+    """This creates Amaranth Signtaure used to decorate package bidirectional wires that would
+    be connected to the pads on the package.
+    This creates an Amaranth Signature which is then used to decorate bi-directional signals
+    intended for connection to the physical pads of the integrated circuit package.
+
+    :param width: specifies the number of individual input/output wires within this port. Each pair of input/output wires will correspond to a separate physical pad on the integrated circuit package.
+    :param all_have_oe: controls whether each output wire associated with an individual output enable wire or single Output Enable signal will be used for entire port, the default value is False, indicating that each output wire will have its own dedicated Output Enable signal.
+    :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
+    """
     return PinSignature(io.Direction.Bidir, width=width, **kwargs)
 
 
