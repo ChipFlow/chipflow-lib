@@ -159,8 +159,8 @@ def InputPinSignature(width, **kwargs):
 
 
 def BidirPinSignature(width, **kwargs):
-    """This creates Amaranth Signtaure used to decorate package bidirectional wires that would
-    be connected to the pads on the package.
+    """This creates Amaranth Signtaure used to decorate package bidirectional wires
+    that would be connected to the pads on the package.
     This creates an Amaranth Signature which is then used to decorate bi-directional signals
     intended for connection to the physical pads of the integrated circuit package.
 
