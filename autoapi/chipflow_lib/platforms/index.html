@@ -267,7 +267,25 @@
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.PinSignature" title="chipflow_lib.platforms.PinSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PinSignature</span></code></a></p></td>
-<td><p>Amaranth Signtaure used to decorate wires that would</p></td>
+<td><p>An <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Amaranth</span> <span class="pre">Signature</span></code></a> used to decorate wires that would usually be brought out onto a port on the package.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.OutputPinSignature" title="chipflow_lib.platforms.OutputPinSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OutputPinSignature</span></code></a>(width, **kwargs)</p></td>
+<td><p>This creates an <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Amaranth</span> <span class="pre">Signature</span></code></a> which is then used to decorate package output signals</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.platforms.InputPinSignature" title="chipflow_lib.platforms.InputPinSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InputPinSignature</span></code></a>(width, **kwargs)</p></td>
+<td><p>This creates an <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Amaranth</span> <span class="pre">Signature</span></code></a> which is then used to decorate package input signals</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.BidirPinSignature" title="chipflow_lib.platforms.BidirPinSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BidirPinSignature</span></code></a>(width, **kwargs)</p></td>
+<td><p>This creates an <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Amaranth</span> <span class="pre">Signature</span></code></a> which is then used to decorate package bi-directional signals</p></td>
 </tr>
 </tbody>
 </table>
@@ -279,18 +297,17 @@
 <dt class="sig sig-object py" id="chipflow_lib.platforms.PinSignature">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">PinSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_have_oe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.PinSignature" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">amaranth.lib.wiring.Signature</span></code></a></p>
-<p>Amaranth Signtaure used to decorate wires that would
-usually be brought out onto a port on the package.</p>
-<p>direction: Input, Output or Bidir
-width: width of port
-all_have_oe: For Bidir ports, should Output Enable be per wire or for the whole port
-init: a  <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/guide.html#lang-constcasting" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">const-castable object</span></a> for the initial values of the port</p>
+<p>An <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Amaranth</span> <span class="pre">Signature</span></code></a> used to decorate wires that would usually be brought out onto a port on the package.
+This class is generally not directly used.
+Instead, you would typically utilize the more specific
+<a class="reference internal" href="#chipflow_lib.platforms.InputPinSignature" title="chipflow_lib.platforms.InputPinSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InputPinSignature</span></code></a>, <a class="reference internal" href="#chipflow_lib.platforms.OutputPinSignature" title="chipflow_lib.platforms.OutputPinSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OutputPinSignature</span></code></a>, or <a class="reference internal" href="#chipflow_lib.platforms.BidirPinSignature" title="chipflow_lib.platforms.BidirPinSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BidirPinSignature</span></code></a> for defining pin interfaces.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>direction</strong> (<a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/io.html#amaranth.lib.io.Direction" title="(in Amaranth language &amp; toolchain v0.5.4)"><em>amaranth.lib.io.Direction</em></a>)</p></li>
-<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>)</p></li>
-<li><p><strong>all_have_oe</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>)</p></li>
+<li><p><strong>direction</strong> (<a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/io.html#amaranth.lib.io.Direction" title="(in Amaranth language &amp; toolchain v0.5.4)"><em>amaranth.lib.io.Direction</em></a>) – Input, Output or Bidir</p></li>
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – width of port, default is 1</p></li>
+<li><p><strong>all_have_oe</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – controls whether each output wire associated with an individual wire or single Output Enable signal will used for entire port, the default value is False, indicating that each output wire will have its own dedicated Output Enable signal.</p></li>
+<li><p><strong>init</strong> – a  <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/guide.html#lang-constcasting" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">const-castable object</span></a> for the initial values of the port</p></li>
 </ul>
 </dd>
 </dl>
@@ -353,6 +370,52 @@ a corresponding interface object. The default implementation provides none.</p>
 
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="chipflow_lib.platforms.OutputPinSignature">
+<span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">OutputPinSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.OutputPinSignature" title="Link to this definition">¶</a></dt>
+<dd><p>This creates an <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Amaranth</span> <span class="pre">Signature</span></code></a> which is then used to decorate package output signals
+intended for connection to the physical pads of the integrated circuit package.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – specifies the number of individual output wires within this port, each of which will correspond to a separate physical pad on the integrated circuit package.</p></li>
+<li><p><strong>init</strong> – a  <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/guide.html#lang-constcasting" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">const-castable object</span></a> for the initial values of the port</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chipflow_lib.platforms.InputPinSignature">
+<span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">InputPinSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.InputPinSignature" title="Link to this definition">¶</a></dt>
+<dd><p>This creates an <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Amaranth</span> <span class="pre">Signature</span></code></a> which is then used to decorate package input signals
+intended for connection to the physical pads of the integrated circuit package.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – specifies the number of individual input wires within this port, each of which will correspond to a separate physical pad on the integrated circuit package.</p></li>
+<li><p><strong>init</strong> – a  <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/guide.html#lang-constcasting" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">const-castable object</span></a> for the initial values of the port</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chipflow_lib.platforms.BidirPinSignature">
+<span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">BidirPinSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.BidirPinSignature" title="Link to this definition">¶</a></dt>
+<dd><p>This creates an <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Amaranth</span> <span class="pre">Signature</span></code></a> which is then used to decorate package bi-directional signals
+intended for connection to the physical pads of the integrated circuit package.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – specifies the number of individual input/output wires within this port. Each pair of input/output wires will correspond to a separate physical pad on the integrated circuit package.</p></li>
+<li><p><strong>all_have_oe</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – controls whether each output wire associated with an individual output enable wire or single Output Enable signal will be used for entire port, the default value is False, indicating that each output wire will have its own dedicated Output Enable signal.</p></li>
+<li><p><strong>init</strong> – a  <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/guide.html#lang-constcasting" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">const-castable object</span></a> for the initial values of the port</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 
@@ -413,6 +476,7 @@ a corresponding interface object. The default implementation provides none.</p>
             <ul>
 <li><a class="reference internal" href="#">chipflow_lib.platforms</a><ul>
 <li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
 <li><a class="reference internal" href="#package-contents">Package Contents</a><ul>
 <li><a class="reference internal" href="#chipflow_lib.platforms.PinSignature"><code class="docutils literal notranslate"><span class="pre">PinSignature</span></code></a><ul>
 <li><a class="reference internal" href="#chipflow_lib.platforms.PinSignature.direction"><code class="docutils literal notranslate"><span class="pre">PinSignature.direction</span></code></a></li>
@@ -421,6 +485,9 @@ a corresponding interface object. The default implementation provides none.</p>
 <li><a class="reference internal" href="#chipflow_lib.platforms.PinSignature.annotations"><code class="docutils literal notranslate"><span class="pre">PinSignature.annotations()</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#chipflow_lib.platforms.OutputPinSignature"><code class="docutils literal notranslate"><span class="pre">OutputPinSignature()</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.platforms.InputPinSignature"><code class="docutils literal notranslate"><span class="pre">InputPinSignature()</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.platforms.BidirPinSignature"><code class="docutils literal notranslate"><span class="pre">BidirPinSignature()</span></code></a></li>
 </ul>
 </li>
 </ul>
