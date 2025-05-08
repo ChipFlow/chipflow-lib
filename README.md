@@ -4,7 +4,7 @@ This is a library to make working with the ChipFlow platform easy and straightfo
 
 ## Installation and usage
 
-See the `ChipFlow docs <https://docs.chipflow.io>`__
+See the [ChipFlow docs](https://docs.chipflow.io)
 
 
 ## Contributing
