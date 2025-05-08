@@ -1,17 +1,9 @@
 ChipFlow Library Documentation
 ==============================
 
-.. image:: _assets/chipflow-logo.svg
-   :width: 200px
-   :class: sd-m-auto
-   :name: landing-page-logo
+``chipflow_lib`` is a Python library and tools for working with the `ChipFlow Platform <https://doc.chipflow.io>`__
 
-
-ChipFlow IC Design Platform
----------------------------
-
-ChipFlow is an open-source platform for designing, testing, and manufacturing custom silicon.
-It provides a streamlined workflow from design to fabrication using Python and the Amaranth HDL.
+It is developed at https://github.com/chipFlow/chipflow-lib/ and licensed `BSD 2-Clause <https://github.com/chipFlow/chipflow-lib/?tab=BSD-2-Clause-1-ov-file>`__
 
 .. toctree::
    :maxdepth: 2
