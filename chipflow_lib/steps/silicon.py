@@ -12,6 +12,7 @@ import sys
 
 import dotenv
 from amaranth import *
+from amaranth.lib.wiring import PureInterface
 
 from . import StepBase
 from .. import ChipFlowError
@@ -46,10 +47,10 @@ class SiliconTop(StepBase, Elaboratable):
         for component, iface in platform.pinlock.port_map.items():
             for iface_name, member, in iface.items():
                 for name, port in member.items():
-                    platform.ports[port.port_name].wire(
-                            m,
-                            getattr(getattr(top[component], iface_name), name)
-                            )
+                    iface = getattr(top[component], iface_name)
+                    wire = (iface if isinstance(iface, PureInterface)
+                            else getattr(iface, name))
+                    platform.ports[port.port_name].wire(m, wire)
         return m
 
 
