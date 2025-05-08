@@ -43,6 +43,9 @@ def count_member_pins(name: str, member: Dict[str, Any]) -> int:
 def allocate_pins(name: str, member: Dict[str, Any], pins: List[str], port_name: str = None) -> Tuple[Dict[str, Port], List[str]]:
     "Allocate pins based of Amaranth member metadata"
 
+    if port_name is None:
+        port_name = name
+
     pin_map = {}
 
     logger.debug(f"allocate_pins: name={name}, pins={pins}")
