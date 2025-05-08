@@ -66,7 +66,7 @@ PIN_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("pin-annotation", 0))
 
 
 class PinSignature(wiring.Signature):
-    """Amaranth Signtaure used to decorate wires that would usually be brought out onto a port on the package.
+    """Amaranth Signature used to decorate wires that would usually be brought out onto a port on the package.
     This class is generally not directly used.
     Instead, you would typically utilize the more specific
     :py:obj:`InputPinSignature`, :py:obj:`OutputPinSignature`, or :py:obj:`BidirPinSignature` for defining pin interfaces.
@@ -133,7 +133,7 @@ class PinSignature(wiring.Signature):
 
 
 def OutputPinSignature(width, **kwargs):
-    """This creates Amaranth Signtaure used to decorate package output wires
+    """This creates Amaranth Signature used to decorate package output wires
     that would be connected to the pads on the package.
     This creates an Amaranth Signature which is then used to decorate output signals
     intended for connection to the physical pads of the integrated circuit package.
@@ -146,7 +146,7 @@ def OutputPinSignature(width, **kwargs):
 
 
 def InputPinSignature(width, **kwargs):
-    """This creates Amaranth Signtaure used to decorate package input wires
+    """This creates Amaranth Signature used to decorate package input wires
     that would be connected to the pads on the package.
     This creates an Amaranth Signature which is then used to decorate input signals
     intended for connection to the physical pads of the integrated circuit package.
@@ -159,7 +159,7 @@ def InputPinSignature(width, **kwargs):
 
 
 def BidirPinSignature(width, **kwargs):
-    """This creates Amaranth Signtaure used to decorate package bidirectional wires
+    """This creates Amaranth Signature used to decorate package bidirectional wires
     that would be connected to the pads on the package.
     This creates an Amaranth Signature which is then used to decorate bi-directional signals
     intended for connection to the physical pads of the integrated circuit package.
