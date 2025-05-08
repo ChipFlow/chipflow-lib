@@ -301,18 +301,13 @@
 This class is generally not directly used.
 Instead, you would typically utilize the more specific
 <a class="reference internal" href="#chipflow_lib.platforms.InputPinSignature" title="chipflow_lib.platforms.InputPinSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InputPinSignature</span></code></a>, <a class="reference internal" href="#chipflow_lib.platforms.OutputPinSignature" title="chipflow_lib.platforms.OutputPinSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OutputPinSignature</span></code></a>, or <a class="reference internal" href="#chipflow_lib.platforms.BidirPinSignature" title="chipflow_lib.platforms.BidirPinSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BidirPinSignature</span></code></a> for defining pin interfaces.</p>
-<p>direction: Input, Output or Bidir
-width: width of port, default is 1
-all_have_oe: controls whether each output wire associated with an individual wire or
-single Output Enable signal will used for entire port,
-the default value is False, indicating that each output wire will have its own dedicated Output Enable signal.
-init: a  <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/guide.html#lang-constcasting" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">const-castable object</span></a> for the initial values of the port</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>direction</strong> (<a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/io.html#amaranth.lib.io.Direction" title="(in Amaranth language &amp; toolchain v0.5.4)"><em>amaranth.lib.io.Direction</em></a>)</p></li>
-<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>)</p></li>
-<li><p><strong>all_have_oe</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>)</p></li>
+<li><p><strong>direction</strong> (<a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/io.html#amaranth.lib.io.Direction" title="(in Amaranth language &amp; toolchain v0.5.4)"><em>amaranth.lib.io.Direction</em></a>) – Input, Output or Bidir</p></li>
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – width of port, default is 1</p></li>
+<li><p><strong>all_have_oe</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – controls whether each output wire associated with an individual wire or single Output Enable signal will used for entire port, the default value is False, indicating that each output wire will have its own dedicated Output Enable signal.</p></li>
+<li><p><strong>init</strong> – a  <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/guide.html#lang-constcasting" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">const-castable object</span></a> for the initial values of the port</p></li>
 </ul>
 </dd>
 </dl>
@@ -385,7 +380,7 @@ intended for connection to the physical pads of the integrated circuit package.<
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>width</strong> – specifies the number of individual output wires within this port, each of which will correspond to a separate physical pad on the integrated circuit package.</p></li>
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – specifies the number of individual output wires within this port, each of which will correspond to a separate physical pad on the integrated circuit package.</p></li>
 <li><p><strong>init</strong> – a  <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/guide.html#lang-constcasting" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">const-castable object</span></a> for the initial values of the port</p></li>
 </ul>
 </dd>
@@ -402,7 +397,7 @@ intended for connection to the physical pads of the integrated circuit package.<
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>width</strong> – specifies the number of individual input wires within this port, each of which will correspond to a separate physical pad on the integrated circuit package.</p></li>
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – specifies the number of individual input wires within this port, each of which will correspond to a separate physical pad on the integrated circuit package.</p></li>
 <li><p><strong>init</strong> – a  <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/guide.html#lang-constcasting" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">const-castable object</span></a> for the initial values of the port</p></li>
 </ul>
 </dd>
@@ -419,8 +414,8 @@ intended for connection to the physical pads of the integrated circuit package.<
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>width</strong> – specifies the number of individual input/output wires within this port. Each pair of input/output wires will correspond to a separate physical pad on the integrated circuit package.</p></li>
-<li><p><strong>all_have_oe</strong> – controls whether each output wire associated with an individual output enable wire or single Output Enable signal will be used for entire port, the default value is False, indicating that each output wire will have its own dedicated Output Enable signal.</p></li>
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – specifies the number of individual input/output wires within this port. Each pair of input/output wires will correspond to a separate physical pad on the integrated circuit package.</p></li>
+<li><p><strong>all_have_oe</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – controls whether each output wire associated with an individual output enable wire or single Output Enable signal will be used for entire port, the default value is False, indicating that each output wire will have its own dedicated Output Enable signal.</p></li>
 <li><p><strong>init</strong> – a  <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/guide.html#lang-constcasting" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">const-castable object</span></a> for the initial values of the port</p></li>
 </ul>
 </dd>
