@@ -71,12 +71,10 @@ class PinSignature(wiring.Signature):
     Instead, you would typically utilize the more specific
     :py:obj:`InputPinSignature`, :py:obj:`OutputPinSignature`, or :py:obj:`BidirPinSignature` for defining pin interfaces.
 
-    direction: Input, Output or Bidir
-    width: width of port, default is 1
-    all_have_oe: controls whether each output wire associated with an individual wire or
-    single Output Enable signal will used for entire port,
-    the default value is False, indicating that each output wire will have its own dedicated Output Enable signal.
-    init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
+    :param direction: Input, Output or Bidir
+    :param width: width of port, default is 1
+    :param all_have_oe: controls whether each output wire associated with an individual wire or single Output Enable signal will used for entire port, the default value is False, indicating that each output wire will have its own dedicated Output Enable signal.
+    :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
     """
 
     def __init__(self, direction: io.Direction, width: int = 1, all_have_oe: bool = False, init = None):
@@ -141,6 +139,7 @@ def OutputPinSignature(width, **kwargs):
     intended for connection to the physical pads of the integrated circuit package.
 
     :param width: specifies the number of individual output wires within this port, each of which will correspond to a separate physical pad on the integrated circuit package.
+    :type width: int
     :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
     """
     return PinSignature(io.Direction.Output, width=width, **kwargs)
@@ -153,6 +152,7 @@ def InputPinSignature(width, **kwargs):
     intended for connection to the physical pads of the integrated circuit package.
 
     :param width: specifies the number of individual input wires within this port, each of which will correspond to a separate physical pad on the integrated circuit package.
+    :type width: int
     :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
     """
     return PinSignature(io.Direction.Input, width=width, **kwargs)
@@ -165,7 +165,9 @@ def BidirPinSignature(width, **kwargs):
     intended for connection to the physical pads of the integrated circuit package.
 
     :param width: specifies the number of individual input/output wires within this port. Each pair of input/output wires will correspond to a separate physical pad on the integrated circuit package.
+    :type width: int
     :param all_have_oe: controls whether each output wire associated with an individual output enable wire or single Output Enable signal will be used for entire port, the default value is False, indicating that each output wire will have its own dedicated Output Enable signal.
+    :type all_have_oe: bool, optional
     :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
     """
     return PinSignature(io.Direction.Bidir, width=width, **kwargs)
