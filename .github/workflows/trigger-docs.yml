@@ -1,0 +1,17 @@
+name: Origin Repository Workflow
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  cross-repo-pipeline:
+    runs-on: ubuntu-latest
+    steps: #here starts the action's setup
+      - name: cross-repo-pipeline-trigger
+        uses: amandastecz/pipeline-trigger@v1.1
+        with:
+          pat-token: ${{ secrets.PAT_TOKEN }} # add a secret called PAT_TOKEN
+          owner: ChipFlow
+          repo: chipflow-docs
