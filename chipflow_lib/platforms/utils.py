@@ -73,7 +73,7 @@ class PinSignature(wiring.Signature):
 
     :param direction: Input, Output or Bidir
     :param width: width of port, default is 1
-    :param all_have_oe: controls whether each output wire associated with an individual wire or single Output Enable signal will used for entire port, the default value is False, indicating that each output wire will have its own dedicated Output Enable signal.
+    :param all_have_oe: controls whether each output wire is associated with an individual Output Enable bit or a single OE bit will be used for entire port, the default value is False, indicating that a single OE bit controls the entire port.
     :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
     """
 
@@ -160,7 +160,7 @@ def BidirPinSignature(width, **kwargs):
 
     :param width: specifies the number of individual input/output wires within this port. Each pair of input/output wires will correspond to a separate physical pad on the integrated circuit package.
     :type width: int
-    :param all_have_oe: controls whether each output wire associated with an individual output enable wire or single Output Enable signal will be used for entire port, the default value is False, indicating that each output wire will have its own dedicated Output Enable signal.
+    :param all_have_oe: controls whether each output wire is associated with an individual Output Enable bit or a single OE bit will be used for entire port, the default value is False, indicating that a single OE bit controls the entire port.
     :type all_have_oe: bool, optional
     :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
     """
