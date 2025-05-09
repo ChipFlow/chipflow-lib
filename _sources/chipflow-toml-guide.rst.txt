@@ -78,7 +78,7 @@ You probably won't need to change these if you're starting from an example repos
    default = 'sys_clk'
 
 This section links the clock domains utilized in the design to specific pads.
-These pads need to be specified in the `[silicon.pads]`_ section with the :term:type set to :term:clock.
+These pads need to be specified in the `[silicon.pads]`_ section with the :term:`type` set to :term:`clock`.
 The ``default`` clock domain is associated with the Amaranth :any:`sync <lang-domains>` :ref:`clock domain <lang-clockdomains>`.
 Currently, only one ``default`` clock domain is supported.
 
@@ -92,7 +92,7 @@ Currently, only one ``default`` clock domain is supported.
    default = 'sys_rst_n'
 
 This section identifies the input pads designated for reset functionality.
-These pads need to be specified in the `[silicon.pads]`_ section with the :term:type set to :term:reset.
+These pads need to be specified in the `[silicon.pads]`_ section with the :term:`type` set to :term:`reset`.
 The logic that synchronizes the reset signal with the clock will be generated automatically.
 
 ``[chipflow.silicon]``
@@ -143,7 +143,7 @@ Available pad rings
 ------------------
 
 The ``silicon.pads`` section lists special pads. In general you are unlikely to need to add to this.
-Each pad specified with the name used by the design and two parameters: :term:type and :term:`loc`.
+Each pad specified with the name used by the design and two parameters: :term:`type` and :term:`loc`.
 
 .. code-block:: TOML
 
@@ -159,7 +159,7 @@ In the above example two pads specified, ``sys_clk`` pad for clock input and ``s
        This is the physical location of the pad on your chosen pad ring. How these are indexed varies by the pad ring.
 
    type
-       The :term:type for each pad can be set to one of :term:clock or :term:reset.
+       The :term:`type` for each pad can be set to one of :term:`clock` or :term:`reset`.
 
    clock
        External clock input.
@@ -172,8 +172,8 @@ In the above example two pads specified, ``sys_clk`` pad for clock input and ``s
 -------------------
 
 This section outlines the connection of pads to the power supply available for the selected process and package.
-These pads are declared with the :term:type and :term:loc parameters, similar to the `[silicon.pads]`_ section.
-Note that in this context, the :term:type parameter can only be ``ground`` or ``power``.
+These pads are declared with the :term:`type` and :term:`loc` parameters, similar to the `[silicon.pads]`_ section.
+Note that in this context, the :term:`type` parameter can only be ``ground`` or ``power``.
 
 This is a work in progress, and currently you can use the defaults provided by customer support.
 
