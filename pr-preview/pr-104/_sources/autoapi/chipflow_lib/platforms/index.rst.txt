@@ -45,7 +45,7 @@ Package Contents
 
    :param direction: Input, Output or Bidir
    :param width: width of port, default is 1
-   :param all_have_oe: controls whether each is output wire associated with an individual Output Enable bit or a single OE bit will be used for entire port, the default value is False, indicating that a single OE bit controls the entire port.
+   :param all_have_oe: controls whether each output wire is associated with an individual Output Enable bit or a single OE bit will be used for entire port, the default value is False, indicating that a single OE bit controls the entire port.
    :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
 
 
