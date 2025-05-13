@@ -1,0 +1,21 @@
+name: Build docs
+on:
+  workflow_call:
+
+jobs:
+  build-docs:
+     runs-on: ubuntu-latest
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v4
+        with:
+          python-version: 3.12
+          cache: true
+
+      - name: Install dependencies
+        run: pdm install
+
+      - name: Build docs
+        run: pdm docs
