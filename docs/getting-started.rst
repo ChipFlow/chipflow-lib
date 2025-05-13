@@ -60,7 +60,7 @@ Install the dependencies
 .. note::
     In VS Code, open up a terminal by pressing :kbd:`Command-p`: (Mac) or :kbd:`C-p` (Windows/Linux).
 
-We use `PDM <https://pdm-project.org>`__ to manage our dependencies, so
+We use `PDM <https://pdm-project.org>`__ to manage our dependencies rather than `'pip``, so
 this will need to be installed. Follow the `PDM install
 instructions <https://pdm-project.org/en/latest/#installation>`__ for your OS.
 
@@ -71,6 +71,8 @@ directory and then run:
 
    pdm lock -d
    pdm install
+
+This will install all the dependencies you need, on the right versions!
 
 Set up the environment
 ----------------------
