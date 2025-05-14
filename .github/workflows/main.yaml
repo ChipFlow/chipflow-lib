@@ -45,61 +45,6 @@ jobs:
         run: ./tools/license_check.sh
 
   test-submit:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        dry: [true, false]
-        repo:
-          - name: "ChipFlow/chipflow-examples"
-            design: "minimal"
-    env:
-      DRY: ${{ matrix.dry && '--dry-run' || '' }}
-      is_dry: ${{ matrix.dry && '(dry run)' || '' }}
-      our_path: "${{ github.workspace}}/${{ github.repo }}"
-      test_repo_path: "${{ github.workspace }}/${{ matrix.repo.name }}"
-
-    name:  ${{ matrix.dry && 'Test Submit - Dry run' || 'Test submit' }}
-
-    steps:
-      - name: Check out source code
-        uses: actions/checkout@v4
-        with:
-          path: ${{ env.our_path }}
-
-      - name: Check out ${{ matrix.repo.name }}
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ matrix.repo.name }}
-          path: ${{ env.test_repo_path }}
-
-      - name: Check for branch ${{ github.head_ref }}
-        working-directory: ${{ env.test_repo_path }}
-        if: github.event_name == 'pull_request'
-        run: |
-          git remote update
-          git checkout ${{ github.head_ref }} || echo "Falling back to main"
-
-      - name: Set up PDM
-        uses: pdm-project/setup-pdm@v4
-        with:
-          python-version: '3.10'
-          cache: true
-          cache-dependency-path: './**/pyproject.toml'
-
-      - name: Install dependencies with multirepo
-        uses: chipflow/pdm-multirepo@v1
-        with:
-          working-directory: ${{ env.test_repo_path }}
-
-      - name: Run tests
-        working-directory: ${{ env.test_repo_path }}
-        run: |
-          pdm test
-
-      - name: Submit build ${{ env.is_dry }}
-        working-directory: ${{ env.test_repo_path }}/${{ matrix.repo.design }}
-        run: |
-          pdm run chipflow pin lock
-          pdm run chipflow silicon submit --wait $DRY
-        env:
-          CHIPFLOW_API_KEY: ${{ secrets.CHIPFLOW_API_KEY}}
+    uses: ./.github/workflows/test-examples.yml
+    secrets:
+      CHIPFLOW_API_KEY: ${{ secrets.CHIPFLOW_API_KEY}}
