@@ -1,0 +1,43 @@
+chipflow_lib.steps
+==================
+
+.. py:module:: chipflow_lib.steps
+
+.. autoapi-nested-parse::
+
+   Steps provide an extensible way to modify the `chipflow` command behavior for a given design
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   chipflow_lib.steps.StepBase
+
+
+Package Contents
+----------------
+
+.. py:class:: StepBase(config={})
+
+   Bases: :py:obj:`abc.ABC`
+
+
+   Helper class that provides a standard way to create an ABC using
+   inheritance.
+
+
+   .. py:method:: build_cli_parser(parser)
+
+      Build the cli parser for this step
+
+
+
+   .. py:method:: run_cli(args)
+
+      Called when this step's is used from `chipflow` command
+
+
+
