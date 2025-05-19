@@ -21,7 +21,6 @@ from ..platforms.utils import PinSignature
 
 logger = logging.getLogger(__name__)
 
-
 class SiliconTop(StepBase, Elaboratable):
     def __init__(self, config={}):
         self._config = config
@@ -191,68 +190,7 @@ class SiliconStep:
             resp_data = resp.text
 
         # Handle response based on status code
-        if resp.status_code == 200:
-            logger.info(f"Submitted design: {resp_data}")
-            build_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}"
-            build_status_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/status"
-            log_stream_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/logs?follow=true"
-
-            print(f"Design submitted successfully! Build URL: {build_url}")
-
-            # Poll the status API until the build is completed or failed
-            stream_event_counter = 0
-            fail_counter = 0
-            if wait:
-                while True:
-                    logger.info("Polling build status...")
-                    status_resp = requests.get(
-                        build_status_url,
-                        auth=(None, chipflow_api_key)
-                    )
-                    if status_resp.status_code != 200:
-                        fail_counter += 1
-                        logger.error(f"Failed to fetch build status {fail_counter} times: {status_resp.text}")
-                        if fail_counter > 5:
-                            logger.error(f"Failed to fetch build status {fail_counter} times. Exiting.")
-                            raise ChipFlowError("Error while checking build status.")
-
-                    status_data = status_resp.json()
-                    build_status = status_data.get("status")
-                    logger.info(f"Build status: {build_status}")
-
-                    if build_status == "completed":
-                        print("Build completed successfully!")
-                        exit(0)
-                    elif build_status == "failed":
-                        print("Build failed.")
-                        exit(1)
-                    elif build_status == "running":
-                        print("Build running.")
-                        # Wait before polling again
-                        # time.sleep(10)
-                        # Attempt to stream logs rather than time.sleep
-                        try:
-                            if stream_event_counter > 1:
-                                logger.warning("Log streaming may have been interrupted. Some logs may be missing.")
-                                logger.warning(f"Check {build_url}")
-                            stream_event_counter += 1
-                            with requests.get(
-                                log_stream_url,
-                                auth=(None, chipflow_api_key),
-                                stream=True
-                            ) as log_resp:
-                                if log_resp.status_code == 200:
-                                    for line in log_resp.iter_lines():
-                                        if line:
-                                            print(line.decode("utf-8"))  # Print logs in real-time
-                                            sys.stdout.flush()
-                                else:
-                                    logger.warning(f"Failed to stream logs: {log_resp.text}")
-                        except requests.RequestException as e:
-                            logger.error(f"Error while streaming logs: {e}")
-                            pass
-                    time.sleep(10)  # Wait before polling again
-        else:
+        if resp.status_code != 200:
             # Log detailed information about the failed request
             logger.error(f"Request failed with status code {resp.status_code}")
             logger.error(f"Request URL: {resp.request.url}")
@@ -268,3 +206,86 @@ class SiliconStep:
             logger.error(f"Response body: {resp_data}")
 
             raise ChipFlowError(f"Failed to submit design: {resp_data}")
+
+        logger.info(f"Submitted design: {resp_data}")
+        build_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}"
+        build_status_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/status"
+        log_stream_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/logs?follow=true"
+
+        print(f"Design submitted successfully! Build URL: {build_url}")
+
+        # Poll the status API until the build is completed or failed
+        timeout = 10.0
+
+        def stream_until_fail_or_done():
+            nonlocal timeout
+            fail_count = 0
+            print_log_warning = False
+            while fail_count < (2*60//timeout):
+                try:
+                   if fail_count > 1:
+                       print_log_warning = True
+                   with requests.get(
+                        log_stream_url,
+                        auth=(None, chipflow_api_key),
+                        stream=True, timeout=timeout
+                    ) as log_resp:
+                        if log_resp.status_code == 200:
+                            for line in log_resp.iter_lines():
+                                if line:
+                                    print(line.decode("utf-8"))  # Print logs in real-time
+                                    sys.stdout.flush()
+                        else:
+                            logger.warning(f"Failed to stream logs: {log_resp.text}")
+                            fail_count += 1
+                except requests.Timeout:
+                    fail_count +=1
+                    continue  #go round again
+                except requests.RequestException as e:
+                    if type(e) is requests.exceptions.ConnectionError and e.response is None:
+                        fail_count +=1
+                        continue  #try again
+                    logger.error(f"Error while streaming logs: {type(e)}:{e} response={e.response}")
+                    return "failed"
+                status_data = status_resp.json()
+                build_status = status_data.get("status")
+                if print_log_warning:
+                    logger.warning("Log streaming may have been interrupted. Some logs may be missing.")
+                    logger.warning(f"Check {build_url}")
+
+                return build_status
+
+
+        if not wait:
+            exit(0)
+
+        fail_count = 0
+        while True:
+            logger.info("Polling build status...")
+            try:
+                status_resp = requests.get(
+                    build_status_url,
+                    auth=(None, chipflow_api_key),
+                    timeout=timeout
+                )
+                if status_resp.status_code != 200:
+                    fail_count += 1
+                    logger.error(f"Failed to fetch build status {fail_count} times: {status_resp.text}")
+                    if fail_count > 5:
+                        logger.error(f"Failed to fetch build status {fail_count} times. Exiting.")
+                        raise ChipFlowError("Error while checking build status.")
+            except requests.Timeout:
+                continue  #go round again
+
+            build_status = stream_until_fail_or_done()
+            if build_status == "completed":
+                print("Build completed successfully!")
+                exit(0)
+            elif build_status == "failed":
+                print("Build failed.")
+                exit(1)
+            elif build_status == "running":
+                print("Build running.")
+                # Wait before polling again
+                time.sleep(0.5)  # Wait before polling again
+
