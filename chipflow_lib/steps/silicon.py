@@ -202,19 +202,26 @@ class SiliconStep:
             # Poll the status API until the build is completed or failed
             stream_event_counter = 0
             fail_counter = 0
+            warned_last = False
+            timeout = 10.0;
+
             if wait:
                 while True:
                     logger.info("Polling build status...")
-                    status_resp = requests.get(
-                        build_status_url,
-                        auth=(None, chipflow_api_key)
-                    )
-                    if status_resp.status_code != 200:
-                        fail_counter += 1
-                        logger.error(f"Failed to fetch build status {fail_counter} times: {status_resp.text}")
-                        if fail_counter > 5:
-                            logger.error(f"Failed to fetch build status {fail_counter} times. Exiting.")
-                            raise ChipFlowError("Error while checking build status.")
+                    try:
+                        status_resp = requests.get(
+                            build_status_url,
+                            auth=(None, chipflow_api_key),
+                            timeout=timeout
+                        )
+                        if status_resp.status_code != 200:
+                            fail_counter += 1
+                            logger.error(f"Failed to fetch build status {fail_counter} times: {status_resp.text}")
+                            if fail_counter > 5:
+                                logger.error(f"Failed to fetch build status {fail_counter} times. Exiting.")
+                                raise ChipFlowError("Error while checking build status.")
+                    except requests.Timeout:
+                        continue  #go round again
 
                     status_data = status_resp.json()
                     build_status = status_data.get("status")
@@ -232,26 +239,31 @@ class SiliconStep:
                         # time.sleep(10)
                         # Attempt to stream logs rather than time.sleep
                         try:
-                            if stream_event_counter > 1:
+                            if stream_event_counter > 1 and not warned_last:
                                 logger.warning("Log streaming may have been interrupted. Some logs may be missing.")
                                 logger.warning(f"Check {build_url}")
-                            stream_event_counter += 1
+                                warned_last = True
                             with requests.get(
                                 log_stream_url,
                                 auth=(None, chipflow_api_key),
-                                stream=True
+                                stream=True, timeout=timeout
                             ) as log_resp:
                                 if log_resp.status_code == 200:
+                                    warned_last = False
                                     for line in log_resp.iter_lines():
                                         if line:
                                             print(line.decode("utf-8"))  # Print logs in real-time
                                             sys.stdout.flush()
                                 else:
                                     logger.warning(f"Failed to stream logs: {log_resp.text}")
+                                    stream_event_counter += 1
+                        except requests.Timeout as e:
+                            continue  #go round again
                         except requests.RequestException as e:
                             logger.error(f"Error while streaming logs: {e}")
+                            stream_event_counter += 1
                             pass
-                    time.sleep(10)  # Wait before polling again
+                    time.sleep(0.5)  # Wait before polling again
         else:
             # Log detailed information about the failed request
             logger.error(f"Request failed with status code {resp.status_code}")
