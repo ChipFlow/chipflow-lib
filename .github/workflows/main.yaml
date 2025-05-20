@@ -45,5 +45,8 @@ jobs:
 
   test-submit:
     uses: ./.github/workflows/test-examples.yml
+    with:
+      CHIPFLOW_BACKEND_VERSION: 'branch-opentracing-batch'
+      CHIPFLOW_API_ORIGIN: "https://build-staging.chipflow.org"
     secrets:
-      CHIPFLOW_API_KEY: ${{ secrets.CHIPFLOW_API_KEY}}
+      CHIPFLOW_API_KEY: ${{ secrets.CHIPFLOW_API_KEY_STAGING }}
