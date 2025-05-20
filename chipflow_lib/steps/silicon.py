@@ -216,10 +216,27 @@ class SiliconStep:
 
         # Poll the status API until the build is completed or failed
         timeout = 10.0
+        fail_count = 0
+
+        def poll_build_status():
+            nonlocal timeout
+            nonlocal fail_count
+            logger.info("Polling build status...")
+            with requests.get(
+                build_status_url,
+                auth=(None, chipflow_api_key),
+                timeout=timeout
+                ) as status_resp:
+                if status_resp.status_code != 200:
+                    fail_count += 1
+                    logger.error(f"Failed to fetch build status {fail_count} times: {status_resp.text}")
+                status_data = status_resp.json()
+                return status_data.get("status")
+                
 
         def stream_until_fail_or_done():
             nonlocal timeout
-            fail_count = 0
+            nonlocal fail_count
             print_log_warning = False
             while fail_count < (2*60//timeout):
                 try:
@@ -244,48 +261,59 @@ class SiliconStep:
                 except requests.RequestException as e:
                     if type(e) is requests.exceptions.ConnectionError and e.response is None:
                         fail_count +=1
+                        logger.warn(f"Issue while streaming logs: {type(e)}:{e} response={e.response}. Trying again.")
                         continue  #try again
                     logger.error(f"Error while streaming logs: {type(e)}:{e} response={e.response}")
-                    return "failed"
-                status_data = status_resp.json()
-                build_status = status_data.get("status")
+                    return False
                 if print_log_warning:
                     logger.warning("Log streaming may have been interrupted. Some logs may be missing.")
                     logger.warning(f"Check {build_url}")
 
-                return build_status
+                return True
 
 
         if not wait:
             exit(0)
 
         fail_count = 0
+        status = "waiting"
         while True:
             logger.info("Polling build status...")
             try:
-                status_resp = requests.get(
-                    build_status_url,
-                    auth=(None, chipflow_api_key),
-                    timeout=timeout
-                )
-                if status_resp.status_code != 200:
-                    fail_count += 1
-                    logger.error(f"Failed to fetch build status {fail_count} times: {status_resp.text}")
-                    if fail_count > 5:
-                        logger.error(f"Failed to fetch build status {fail_count} times. Exiting.")
-                        raise ChipFlowError("Error while checking build status.")
+                status = poll_build_status()
             except requests.Timeout:
-                continue  #go round again
-
-            build_status = stream_until_fail_or_done()
-            if build_status == "completed":
-                print("Build completed successfully!")
-                exit(0)
-            elif build_status == "failed":
-                print("Build failed.")
+                 continue  #go round again
+            except requests.RequestException as e:
+                if type(e) is requests.exceptions.ConnectionError and e.response is None:
+                    fail_count +=1
+                    logger.warn(f"Issue while polling build: {type(e)}:{e} response={e.response}. Trying again.")
+                    continue  #try again
+                logger.error(f"Network error while polling build: {type(e)}:{e} response={e.response}")
                 exit(1)
-            elif build_status == "running":
-                print("Build running.")
-                # Wait before polling again
-                time.sleep(0.5)  # Wait before polling again
+            except Exception as e:
+                logger.error(f"Unexpected error while polling build: {type(e)}:{e}")
+
+            match status:
+                case "completed":
+                    print("Build completed successfully!")
+                    exit(0)
+                case "failed":
+                    print("Build failed.")
+                    exit(1)
+                case "unknown":
+                    continue  # poll again
+                case "running":
+                    print("Build running.")
+
+            if not stream_until_fail_or_done():
+                fail_count += 1
+                logger.warn("Issue while streaming logs. Trying again.")
+
+            if fail_count > 5:
+                logger.error(f"Failed to fetch build status {fail_count} times. Exiting.")
+                raise ChipFlowError("Error while checking build status.")
+            return "unknown"
+
+            # Wait before polling again
+            time.sleep(0.5)  # Wait before polling again
 
