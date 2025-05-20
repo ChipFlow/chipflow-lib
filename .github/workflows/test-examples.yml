@@ -2,6 +2,15 @@ name: Reusable workflow to test everything in chipflow-examples works
 
 on:
   workflow_call:
+    inputs:
+      CHIPFLOW_BACKEND_VERSION:
+        required: false
+        type: string
+        default: 'branch-main'
+      CHIPFLOW_API_ORIGIN:
+        required: false
+        type: string
+        default: 'https://build.chipflow.org'
     secrets:
       CHIPFLOW_API_KEY:
         required: true
@@ -66,3 +75,6 @@ jobs:
           pdm run chipflow silicon submit --wait $DRY
         env:
           CHIPFLOW_API_KEY: ${{ secrets.CHIPFLOW_API_KEY}}
+          CHIPFLOW_API_ORIGIN: ${{ inputs.CHIPFLOW_API_ORIGIN }}
+          CHIPFLOW_BACKEND_VERSION: ${{ inputs.CHIPFLOW_BACKEND_VERSION }}
+
