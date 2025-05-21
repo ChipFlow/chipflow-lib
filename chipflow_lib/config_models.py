@@ -58,6 +58,13 @@ class SiliconConfig(BaseModel):
         return v
 
 
+class BoardType(BaseModel):
+    """Configuration for silicon in chipflow.toml."""
+    board_name: Literal["ULX3S"]
+    board_type: Literal["85F"]
+
+
+
 class StepsConfig(BaseModel):
     """Configuration for steps in chipflow.toml."""
     silicon: str
@@ -69,6 +76,7 @@ class ChipFlowConfig(BaseModel):
     top: Dict[str, Any] = {}
     steps: StepsConfig
     silicon: SiliconConfig
+    board: BoardConfig
     clocks: Optional[Dict[str, str]] = None
     resets: Optional[Dict[str, str]] = None
 

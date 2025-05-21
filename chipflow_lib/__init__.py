@@ -7,6 +7,7 @@ import os
 import sys
 import tomli
 from pathlib import Path
+
 from pydantic import ValidationError
 
 __version__ = importlib.metadata.version("chipflow_lib")
@@ -64,3 +65,5 @@ def _parse_config_file(config_file):
 
         error_str = "\n".join(error_messages)
         raise ChipFlowError(f"Validation error in chipflow.toml:\n{error_str}")
+
+

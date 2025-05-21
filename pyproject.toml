@@ -15,7 +15,7 @@ license = {file = "LICENSE.md"}
 
 requires-python = ">=3.10"
 dependencies = [
-    "amaranth>=0.5,<0.7",
+    "amaranth[builtin-yosys]>=0.5,<0.7",
     "amaranth-soc @ git+https://github.com/amaranth-lang/amaranth-soc",
     "amaranth-boards @ git+https://github.com/amaranth-lang/amaranth-boards",
     "yowasp-yosys>=0.41.0.0",
