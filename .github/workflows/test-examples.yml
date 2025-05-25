@@ -63,6 +63,6 @@ jobs:
         working-directory: ${{ env.test_repo_path }}/${{ matrix.repo.design }}
         run: |
           pdm run chipflow pin lock
-          pdm run chipflow silicon submit --wait $DRY
+          pdm run chipflow silicon submit --wait $DRY | cat
         env:
           CHIPFLOW_API_KEY: ${{ secrets.CHIPFLOW_API_KEY}}
