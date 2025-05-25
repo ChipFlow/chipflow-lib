@@ -65,6 +65,7 @@ class TestCoreUtilities(unittest.TestCase):
         os.environ["CHIPFLOW_ROOT"] = "/test/path"
         sys.path = ["/some/other/path"]
 
+        _ensure_chipflow_root.root = None
         result = _ensure_chipflow_root()
 
         self.assertEqual(result, "/test/path")
@@ -74,6 +75,7 @@ class TestCoreUtilities(unittest.TestCase):
         """Test _ensure_chipflow_root when CHIPFLOW_ROOT is not set"""
         if "CHIPFLOW_ROOT" in os.environ:
             del os.environ["CHIPFLOW_ROOT"]
+        _ensure_chipflow_root.root = None
 
         with mock.patch("os.getcwd", return_value="/mock/cwd"):
             result = _ensure_chipflow_root()
@@ -105,23 +107,6 @@ package = "caravel"
         self.assertIn("chipflow", config)
         self.assertEqual(config["chipflow"]["project_name"], "test_project")
         self.assertEqual(config["chipflow"]["silicon"]["process"], "sky130")
-
-    def test_parse_config_file_invalid_schema(self):
-        """Test _parse_config_file with an invalid config file (schema validation fails)"""
-        # Create a temporary config file with missing required fields
-        config_content = """
-[chipflow]
-project_name = "test_project"
-# Missing required fields: steps, silicon
-"""
-        config_path = os.path.join(self.temp_path, "chipflow.toml")
-        with open(config_path, "w") as f:
-            f.write(config_content)
-
-        with self.assertRaises(ChipFlowError) as cm:
-            _parse_config_file(config_path)
-
-        self.assertIn("Validation error in chipflow.toml", str(cm.exception))
 
     @mock.patch("chipflow_lib._ensure_chipflow_root")
     @mock.patch("chipflow_lib._parse_config_file")

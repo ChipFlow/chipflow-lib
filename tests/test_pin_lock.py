@@ -220,6 +220,7 @@ class TestPinLock(unittest.TestCase):
         # Mock config
         mock_config = {
             "chipflow": {
+                "project_name": "test",
                 "steps": {
                     "silicon": "chipflow_lib.steps.silicon:SiliconStep"
                 },
@@ -340,6 +341,7 @@ class TestPinLock(unittest.TestCase):
         # Mock config
         mock_config = {
             "chipflow": {
+                "project_name": "test",
                 "steps": {
                     "silicon": "chipflow_lib.steps.silicon:SiliconStep"
                 },
@@ -457,6 +459,7 @@ class TestPinLock(unittest.TestCase):
         # Mock config
         mock_config = {
             "chipflow": {
+                "project_name": "test",
                 "steps": {
                     "silicon": "chipflow_lib.steps.silicon:SiliconStep"
                 },
@@ -532,6 +535,7 @@ class TestPinLock(unittest.TestCase):
         # Mock config
         mock_config = {
             "chipflow": {
+                "project_name": "test",
                 "steps": {
                     "silicon": "chipflow_lib.steps.silicon:SiliconStep"
                 },

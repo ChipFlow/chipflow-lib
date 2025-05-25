@@ -5,6 +5,7 @@ import sys
 import traceback
 import logging
 
+from pathlib import Path
 from pprint import pformat
 
 from . import (
@@ -14,13 +15,10 @@ from . import (
 )
 from .pin_lock import PinCommand
 
-
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-
-
 class UnexpectedError(ChipFlowError):
     pass
 
+log_level = logging.WARNING
 
 def run(argv=sys.argv[1:]):
     config = _parse_config()
@@ -43,10 +41,15 @@ def run(argv=sys.argv[1:]):
     parser.add_argument(
         "--verbose", "-v",
         dest="log_level",
-        action="append_const",
-        const=10,
+        action="count",
+        default=0,
         help="increase verbosity of messages; can be supplied multiple times to increase verbosity"
     )
+    parser.add_argument(
+        "--log-file", help=argparse.SUPPRESS,
+        default=None, action="store"
+    )
+
 
     command_argument = parser.add_subparsers(dest="command", required=True)
     for command_name, command in commands.items():
@@ -57,12 +60,27 @@ def run(argv=sys.argv[1:]):
             raise ChipFlowError(f"Encountered error while building CLI argument parser for "
                               f"step `{command_name}`")
 
-    # each verbose flag increases versbosity (e.g. -v -v, -vv, --verbose --verbose)
-    # cute trick using append_const and summing
     args = parser.parse_args(argv)
-    if args.log_level:
-        log_level = max(logging.DEBUG, logging.WARNING - sum(args.log_level))
-        logging.getLogger().setLevel(log_level)
+    global log_level
+    log_level = max(logging.WARNING - args.log_level * 10, 0)
+    logging.getLogger().setLevel(logging.NOTSET)
+
+    # Add stdout handler, with level as set
+    console = logging.StreamHandler(sys.stdout)
+    console.setLevel(log_level)
+    formatter = logging.Formatter('%(name)-13s: %(levelname)-8s %(message)s')
+    console.setFormatter(formatter)
+    logging.getLogger().addHandler(console)
+
+    #Log to file with DEBUG level
+    if args.log_file:
+        filename = Path(args.log_file).absolute()
+        print(f"> Logging to {str(filename)}")
+        fh = logging.FileHandler(filename)
+        fh.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fh.setFormatter(formatter)
+        logging.getLogger().addHandler(fh)
 
     try:
         try:

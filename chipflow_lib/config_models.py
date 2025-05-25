@@ -65,10 +65,10 @@ class StepsConfig(BaseModel):
 
 class ChipFlowConfig(BaseModel):
     """Root configuration for chipflow.toml."""
-    project_name: Optional[str] = None
+    project_name: str
     top: Dict[str, Any] = {}
-    steps: StepsConfig
-    silicon: SiliconConfig
+    steps: Optional[Dict[str, str]] = None
+    silicon: Optional[SiliconConfig] = None
     clocks: Optional[Dict[str, str]] = None
     resets: Optional[Dict[str, str]] = None
 

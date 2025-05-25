@@ -5,16 +5,20 @@ import inspect
 import json
 import logging
 import os
+import re
 import requests
 import subprocess
 import time
-import sys
+import urllib3
 
 import dotenv
+
 from amaranth import *
+from halo import Halo
 
 from . import StepBase
 from .. import ChipFlowError
+from ..cli import log_level
 from ..platforms import SiliconPlatform, top_interfaces, load_pinlock
 from ..platforms.utils import PinSignature
 
@@ -65,6 +69,7 @@ class SiliconStep:
         self.project_name = self.config_model.chipflow.project_name
         self.silicon_config = config["chipflow"]["silicon"]  # Keep for backward compatibility
         self.platform = SiliconPlatform(config)
+        self._log_file = None
 
     def build_cli_parser(self, parser):
         action_argument = parser.add_subparsers(dest="action")
@@ -80,16 +85,16 @@ class SiliconStep:
             default=False, action="store_true")
 
     def run_cli(self, args):
+        load_pinlock()  # check pinlock first so we error cleanly
         if args.action == "submit" and not args.dry_run:
             dotenv.load_dotenv(dotenv_path=dotenv.find_dotenv(usecwd=True))
             if self.project_name is None:
                 raise ChipFlowError(
-                    "Key `chipflow.project_id` is not defined in chipflow.toml; "
-                    "see https://chipflow.io/beta for details on how to join the beta")
+                    "Key `chipflow.project_name` is not defined in chipflow.toml; ")
 
         rtlil_path = self.prepare()  # always prepare before submission
         if args.action == "submit":
-            self.submit(rtlil_path, dry_run=args.dry_run, wait=args.wait)
+            self.submit(rtlil_path, args)
 
     def prepare(self):
         """Elaborate the design and convert it to RTLIL.
@@ -98,10 +103,14 @@ class SiliconStep:
         """
         return self.platform.build(SiliconTop(self.config), name=self.config_model.chipflow.project_name)
 
-    def submit(self, rtlil_path, *, dry_run=False, wait=False):
+    def submit(self, rtlil_path, args):
         """Submit the design to the ChipFlow cloud builder.
+        Options:
+          --dry-run: Don't actually submit
+          --wait: Wait until build has completed. Use '-v' to increase level of verbosity
+          --log-file <file>: Log full debug output to file
         """
-        if not dry_run:
+        if not args.dry_run:
             # Check for CHIPFLOW_API_KEY_SECRET or CHIPFLOW_API_KEY
             if not os.environ.get("CHIPFLOW_API_KEY") and not os.environ.get("CHIPFLOW_API_KEY_SECRET"):
                 raise ChipFlowError(
@@ -113,158 +122,244 @@ class SiliconStep:
                     "Environment variable `CHIPFLOW_API_KEY_SECRET` is deprecated. "
                     "Please migrate to using `CHIPFLOW_API_KEY` instead."
                 )
-            chipflow_api_key = os.environ.get("CHIPFLOW_API_KEY") or os.environ.get("CHIPFLOW_API_KEY_SECRET")
-            if chipflow_api_key is None:
+            self._chipflow_api_key = os.environ.get("CHIPFLOW_API_KEY") or os.environ.get("CHIPFLOW_API_KEY_SECRET")
+            if self._chipflow_api_key is None:
                 raise ChipFlowError(
                     "Environment variable `CHIPFLOW_API_KEY` is empty."
                 )
+        with  Halo(text="Submitting...", spinner="dots") as sp:
+            fh = None
+            submission_name = self.determine_submission_name()
+            data = {
+                "projectId": self.project_name,
+                "name": submission_name,
+            }
 
+            # Dev only var to select specifc backend version
+            # Check if CHIPFLOW_BACKEND_VERSION exists in the environment and add it to the data dictionary
+            chipflow_backend_version = os.environ.get("CHIPFLOW_BACKEND_VERSION")
+            if chipflow_backend_version:
+                data["chipflow_backend_version"] = chipflow_backend_version
+
+            pads = {}
+            for iface, port in self.platform._ports.items():
+                width = len(port.pins)
+                logger.debug(f"Loading port from pinlock: iface={iface}, port={port}, dir={port.direction}, width={width}")
+                if width > 1:
+                    for i in range(width):
+                        padname = f"{iface}{i}"
+                        logger.debug(f"padname={padname}, port={port}, loc={port.pins[i]}, "
+                                    f"dir={port.direction}, width={width}")
+                        pads[padname] = {'loc': port.pins[i], 'type': port.direction.value}
+                else:
+                    padname = f"{iface}"
+
+                    logger.debug(f"padname={padname}, port={port}, loc={port.pins[0]}, "
+                                f"dir={port.direction}, width={width}")
+                    pads[padname] = {'loc': port.pins[0], 'type': port.direction.value}
+
+            pinlock = load_pinlock()
+            config = pinlock.model_dump_json(indent=2)
+
+            if args.dry_run:
+                sp.succeed(f"✅ Design `{data['projectId']}:{data['name']}` ready for submission to ChipFlow cloud!")
+                logger.debug(f"data=\n{json.dumps(data, indent=2)}")
+                logger.debug(f"files['config']=\n{config}")
+                return
+
+            def network_err(e):
+                nonlocal fh, sp
+                sp.text = ""
+                sp.fail("💥 Failed connecting to ChipFlow Cloud due to network error")
+                logger.debug(f"Error while getting build status: {e}")
+                if fh:
+                    fh.close()
+                exit(1)
+
+            sp.info(f"> Submitting {submission_name} for project {self.project_name} to ChipFlow Cloud {'('+os.environ.get('CHIPFLOW_API_ORIGIN')+')' if 'CHIPFLOW_API_ORIGIN' in os.environ else ''}")
+            sp.start("Sending design to ChipFlow Cloud")
+
+            chipflow_api_origin = os.environ.get("CHIPFLOW_API_ORIGIN", "https://build.chipflow.org")
+            build_submit_url = f"{chipflow_api_origin}/build/submit"
+
+            try:
+                resp = requests.post(
+                    build_submit_url,
+                    # TODO: This needs to be reworked to accept only one key, auth accepts user and pass
+                    # TODO: but we want to submit a single key
+                    auth=(None, self._chipflow_api_key),
+                    data=data,
+                    files={
+                        "rtlil": open(rtlil_path, "rb"),
+                        "config": config,
+                    },
+                    allow_redirects=False
+                    )
+            except requests.ConnectTimeout as e:
+               network_err(e)
+            except requests.ConnectionError as e:
+                if type(e.__context__) is urllib3.exceptions.MaxRetryError:
+                    network_err(e)
+            except requests.ConnectTimeout as e:
+               network_err(e)
+
+            # Parse response body
+            try:
+                resp_data = resp.json()
+            except ValueError:
+                resp_data = resp.text
+
+            # Handle response based on status code
+            if resp.status_code == 200:
+                logger.debug(f"Submitted design: {resp_data}")
+                self._build_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}"
+                self._build_status_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/status"
+                self._log_stream_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/logs?follow=true"
+
+                sp.succeed("✅ Design submitted successfully! Build URL: {self._build_url}")
+
+                if args.wait:
+                    exit_code = self._stream_logs(sp, network_err)
+                sp.ok()
+                if fh:
+                    fh.close()
+                exit(exit_code)
+            else:
+                # Log detailed information about the failed request
+                logger.debug(f"Request failed with status code {resp.status_code}")
+                logger.debug(f"Request URL: {resp.request.url}")
+
+                # Log headers with auth information redacted
+                headers = dict(resp.request.headers)
+                if "Authorization" in headers:
+                    headers["Authorization"] = "REDACTED"
+                logger.debug(f"Request headers: {headers}")
+
+                logger.debug(f"Request data: {data}")
+                logger.debug(f"Response headers: {dict(resp.headers)}")
+                logger.debug(f"Response body: {resp_data}")
+                sp.text = ""
+                match resp.status_code:
+                    case 401 | 403:
+                        sp.fail(f"💥  Authorization denied: {resp_data['message']}. It seems CHIPFLOW_API_KEY is set incorreectly!")
+                    case _:
+                        sp.fail(f"💥  Failed to access ChipFlow Cloud: ({resp_data['message']})")
+                if fh:
+                    fh.close()
+                exit(2)
+
+    def _long_poll_stream(self, sp, network_err):
+        steps = self._last_log_steps
+        stream_event_counter = 0
+        # after 4 errors, return to _stream_logs loop and query the build status again
+        while (stream_event_counter < 4):
+            sp.text = "Build running... " + ' -> '.join(steps)
+            try:
+                log_resp = requests.get(
+                    self._log_stream_url,
+                    auth=(None, self._chipflow_api_key),
+                    stream=True,
+                    timeout=(2.0, 60.0)  # fail if connect takes >2s, long poll for 60s at a time
+                )
+                if log_resp.status_code == 200:
+                    for line in log_resp.iter_lines():
+                        line_str = line.decode("utf-8") if line else ""
+                        logger.debug(line_str)
+                        match line_str[0:8]:
+                            case "DEBUG   ":
+                                sp.info(line_str) if log_level <= logging.DEBUG else None
+                            case "INFO    ":
+                                sp.info(line_str) if log_level <= logging.INFO else None
+                                # Some special handling for more user feedback
+                                if line_str.endswith("started"):
+                                    steps = re.findall(r"([0-9a-z_.]+)\:+?", line_str[18:])[0:2]
+                                    sp.text = "Build running... " + ' -> '.join(steps)
+                            case "WARNING ":
+                                sp.info(line_str) if log_level <= logging.WARNING else None
+                            case "ERROR   ":
+                                sp.info(line_str) if log_level <= logging.ERROR else None
+                        sp.start()
+                else:
+                    stream_event_counter +=1
+                    logger.debug(f"Failed to stream logs: {log_resp.text}")
+                    sp.text = "💥 Failed streaming build logs. Trying again!"
+                    break
+            except requests.ConnectTimeout:
+                sp.text = "💥 Failed connecting to ChipFlow Cloud."
+                logger.debug(f"Error while streaming logs: {e}")
+                break
+            except requests.RequestException as e:
+                sp.text = "💥 Failed streaming build logs. Trying again!"
+                logger.debug(f"Error while streaming logs: {e}")
+                stream_event_counter +=1
+                continue
+            except requests.ConnectionError as e:
+                if type(e.__context__) is urllib3.exceptions.ReadTimeoutError:
+                    continue  #just timed out, continue long poll
+
+        # save steps so we coninue where we left off if we manage to reconnect
+        self._last_log_steps = steps
+        return stream_event_counter
+
+    def _stream_logs(self, sp, network_err):
+        sp.start("Streaming the logs...")
+        # Poll the status API until the build is completed or failed
+        fail_counter = 0
+        timeout = 10.0
+        build_status = "pending"
+        stream_event_counter = 0
+        self._last_log_steps = []
+        while fail_counter < 10 and stream_event_counter < 10:
+            sp.text = f"Waiting for build to run... {build_status}"
+            time.sleep(timeout)  # Wait before polling
+            try:
+                status_resp = requests.get(
+                    self._build_status_url,
+                    auth=(None, self._chipflow_api_key),
+                    timeout=timeout
+                )
+            except (requests.ConnectTimeout, requests.ConnectionError, requests.ConnectTimeout) as e:
+               network_err(e)
+
+            if status_resp.status_code != 200:
+                sp.text = "💥 Error connecting to ChipFlow Cloud. Trying again! "
+                fail_counter += 1
+                logger.debug(f"Failed to fetch build status {fail_counter} times: {status_resp.text}")
+                continue
+
+            status_data = status_resp.json()
+            build_status = status_data.get("status")
+            logger.debug(f"Build status: {build_status}")
+
+            sp.text = f"Polling build status... {build_status}"
+
+            if build_status == "completed":
+                sp.succeed("✅ Build completed successfully!")
+                return 0
+            elif build_status == "failed":
+                sp.succeed("❌ Build failed.")
+                return 1
+            elif build_status == "running":
+                stream_event_counter += self._long_poll_stream(sp, network_err)
+
+        if fail_counter >=10 or stream_event_counter >= 10:
+            sp.text = ""
+            sp.fail("💥 Failed fetching build status. Perhaps you hit a network error?")
+            logger.debug(f"Failed to fetch build status {fail_counter} times and failed streaming {stream_event_counter} times. Exiting.")
+            return 2
+
+    def determine_submission_name(self):
+        if "CHIPFLOW_SUBMISSION_NAME" in os.environ:
+            return os.environ["CHIPFLOW_SUBMISSION_NAME"]
         git_head = subprocess.check_output(
             ["git", "-C", os.environ["CHIPFLOW_ROOT"],
-             "rev-parse", "--short", "HEAD"],
+            "rev-parse", "--short", "HEAD"],
             encoding="ascii").rstrip()
         git_dirty = bool(subprocess.check_output(
             ["git", "-C", os.environ["CHIPFLOW_ROOT"],
-             "status", "--porcelain", "--untracked-files=no"]))
+            "status", "--porcelain", "--untracked-files=no"]))
         submission_name = git_head
         if git_dirty:
-            logging.warning("Git tree is dirty, submitting anyway!")
+            logger.warning("Git tree is dirty, submitting anyway!")
             submission_name += "-dirty"
-
-        data = {
-            "projectId": self.project_name,
-            "name": submission_name,
-        }
-
-        # Dev only var to select specifc backend version
-        # Check if CHIPFLOW_BACKEND_VERSION exists in the environment and add it to the data dictionary
-        chipflow_backend_version = os.environ.get("CHIPFLOW_BACKEND_VERSION")
-        if chipflow_backend_version:
-            data["chipflow_backend_version"] = chipflow_backend_version
-
-        pads = {}
-        for iface, port in self.platform._ports.items():
-            width = len(port.pins)
-            logger.debug(f"iface={iface}, port={port}, dir={port.direction}, width={width}")
-            if width > 1:
-                for i in range(width):
-                    padname = f"{iface}{i}"
-                    logger.debug(f"padname={padname}, port={port}, loc={port.pins[i]}, "
-                                 f"dir={port.direction}, width={width}")
-                    pads[padname] = {'loc': port.pins[i], 'type': port.direction.value}
-            else:
-                padname = f"{iface}"
-
-                logger.debug(f"padname={padname}, port={port}, loc={port.pins[0]}, "
-                             f"dir={port.direction}, width={width}")
-                pads[padname] = {'loc': port.pins[0], 'type': port.direction.value}
-
-        pinlock = load_pinlock()
-        config = pinlock.model_dump_json(indent=2)
-
-        if dry_run:
-            print(f"data=\n{json.dumps(data, indent=2)}")
-            print(f"files['config']=\n{config}")
-            return
-
-        logger.info(f"Submitting {submission_name} for project {self.project_name}")
-        chipflow_api_origin = os.environ.get("CHIPFLOW_API_ORIGIN", "https://build.chipflow.org")
-        build_submit_url = f"{chipflow_api_origin}/build/submit"
-
-        resp = requests.post(
-            build_submit_url,
-            # TODO: This needs to be reworked to accept only one key, auth accepts user and pass
-            # TODO: but we want to submit a single key
-            auth=(None, chipflow_api_key),
-            data=data,
-            files={
-                "rtlil": open(rtlil_path, "rb"),
-                "config": config,
-            },
-            allow_redirects=False
-            )
-
-        # Parse response body
-        try:
-            resp_data = resp.json()
-        except ValueError:
-            resp_data = resp.text
-
-        # Handle response based on status code
-        if resp.status_code == 200:
-            logger.info(f"Submitted design: {resp_data}")
-            build_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}"
-            build_status_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/status"
-            log_stream_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/logs?follow=true"
-
-            print(f"Design submitted successfully! Build URL: {build_url}")
-
-            # Poll the status API until the build is completed or failed
-            stream_event_counter = 0
-            fail_counter = 0
-            if wait:
-                while True:
-                    logger.info("Polling build status...")
-                    status_resp = requests.get(
-                        build_status_url,
-                        auth=(None, chipflow_api_key)
-                    )
-                    if status_resp.status_code != 200:
-                        fail_counter += 1
-                        logger.error(f"Failed to fetch build status {fail_counter} times: {status_resp.text}")
-                        if fail_counter > 5:
-                            logger.error(f"Failed to fetch build status {fail_counter} times. Exiting.")
-                            raise ChipFlowError("Error while checking build status.")
-
-                    status_data = status_resp.json()
-                    build_status = status_data.get("status")
-                    logger.info(f"Build status: {build_status}")
-
-                    if build_status == "completed":
-                        print("Build completed successfully!")
-                        exit(0)
-                    elif build_status == "failed":
-                        print("Build failed.")
-                        exit(1)
-                    elif build_status == "running":
-                        print("Build running.")
-                        # Wait before polling again
-                        # time.sleep(10)
-                        # Attempt to stream logs rather than time.sleep
-                        try:
-                            if stream_event_counter > 1:
-                                logger.warning("Log streaming may have been interrupted. Some logs may be missing.")
-                                logger.warning(f"Check {build_url}")
-                            stream_event_counter += 1
-                            with requests.get(
-                                log_stream_url,
-                                auth=(None, chipflow_api_key),
-                                stream=True
-                            ) as log_resp:
-                                if log_resp.status_code == 200:
-                                    for line in log_resp.iter_lines():
-                                        if line:
-                                            print(line.decode("utf-8"))  # Print logs in real-time
-                                            sys.stdout.flush()
-                                else:
-                                    logger.warning(f"Failed to stream logs: {log_resp.text}")
-                        except requests.RequestException as e:
-                            logger.error(f"Error while streaming logs: {e}")
-                            pass
-                    time.sleep(10)  # Wait before polling again
-        else:
-            # Log detailed information about the failed request
-            logger.error(f"Request failed with status code {resp.status_code}")
-            logger.error(f"Request URL: {resp.request.url}")
-
-            # Log headers with auth information redacted
-            headers = dict(resp.request.headers)
-            if "Authorization" in headers:
-                headers["Authorization"] = "REDACTED"
-            logger.error(f"Request headers: {headers}")
-
-            logger.error(f"Request data: {data}")
-            logger.error(f"Response headers: {dict(resp.headers)}")
-            logger.error(f"Response body: {resp_data}")
-
-            raise ChipFlowError(f"Failed to submit design: {resp_data}")
+        return submission_name

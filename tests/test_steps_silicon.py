@@ -1,20 +1,49 @@
 # amaranth: UnusedElaboratable=no
 
 # SPDX-License-Identifier: BSD-2-Clause
-import os
-import unittest
-from unittest import mock
 import argparse
+import json
+import os
 import tempfile
+import unittest
+
+from pathlib import Path
+from unittest import mock
 
 
 from amaranth import Module
+import tomli_w
 
-from chipflow_lib import ChipFlowError
+from chipflow_lib import (
+    ChipFlowError,
+    _ensure_chipflow_root,
+)
+
+from chipflow_lib.cli import run as cli_run
 from chipflow_lib.steps.silicon import SiliconStep, SiliconTop
 
+DEFAULT_PINLOCK = {
+    "process" : "ihp_sg13g2",
+    "package" : {
+        "package_type": {
+        "type": "_QuadPackageDef",
+        "name": "pga144",
+        "width": 36,
+        "height": 36
+        },
+    },
+    "port_map" : {},
+    "metadata" : {},
+}
 
 class TestSiliconStep(unittest.TestCase):
+    def writeConfig(self, config, pinlock=DEFAULT_PINLOCK):
+        tmppath = Path(self.temp_dir.name)
+        with open(tmppath / "chipflow.toml", "w") as f:
+            f.write(tomli_w.dumps(config))
+        with open(tmppath / "pins.lock", "w") as f:
+            f.write(json.dumps(pinlock))
+
     def setUp(self):
         # Create a temporary directory for tests
         self.temp_dir = tempfile.TemporaryDirectory()
@@ -26,6 +55,7 @@ class TestSiliconStep(unittest.TestCase):
             os.environ, {"CHIPFLOW_ROOT": self.temp_dir.name}
         )
         self.chipflow_root_patcher.start()
+        _ensure_chipflow_root.root = None
 
         # Create basic config for tests
         self.config = {
@@ -48,11 +78,13 @@ class TestSiliconStep(unittest.TestCase):
                 }
             }
         }
+        self.writeConfig(self.config)
 
     def tearDown(self):
         self.chipflow_root_patcher.stop()
         os.chdir(self.original_cwd)
         self.temp_dir.cleanup()
+
 
     @mock.patch("chipflow_lib.steps.silicon.SiliconTop")
     def test_init(self, mock_silicontop_class):
@@ -214,8 +246,7 @@ class TestSiliconStep(unittest.TestCase):
         mock_silicontop_class.assert_called_once_with(self.config)
 
     @mock.patch("chipflow_lib.steps.silicon.SiliconStep.prepare")
-    @mock.patch("chipflow_lib.steps.silicon.dotenv.load_dotenv")
-    def test_run_cli_submit_missing_project_name(self, mock_load_dotenv, mock_prepare):
+    def test_run_cli_submit_missing_project_name(self, mock_prepare):
         """Test run_cli with submit action but missing project name"""
         # Setup config without project_name
         config_no_project = {
@@ -229,28 +260,20 @@ class TestSiliconStep(unittest.TestCase):
                 }
             }
         }
+        self.writeConfig(config_no_project)
 
         # Add environment variables
         with mock.patch.dict(os.environ, {
             "CHIPFLOW_API_KEY_ID": "api_key_id",
-            "CHIPFLOW_API_KEY_SECRET": "api_key_secret"
+            "CHIPFLOW_API_KEY_SECRET": "api_key_secret",
+            "CHIPFLOW_SUBMISSION_NAME": "test",
         }):
-            # Create mock args
-            args = mock.MagicMock()
-            args.action = "submit"
-            args.dry_run = False
-
-            # Create SiliconStep instance
-            step = SiliconStep(config_no_project)
-
             # Test for exception
             with self.assertRaises(ChipFlowError) as cm:
-                step.run_cli(args)
+                cli_run(["silicon","submit","--dry-run"])
 
-            # Verify error message mentions project_id
-            self.assertIn("project_id", str(cm.exception))
-            # Verify dotenv was loaded
-            mock_load_dotenv.assert_called_once()
+            # Verify error message mentions project_name
+            self.assertIn("project_name", str(cm.exception))
 
     @mock.patch("chipflow_lib.steps.silicon.SiliconStep.prepare")
     @mock.patch("chipflow_lib.steps.silicon.dotenv.load_dotenv")
