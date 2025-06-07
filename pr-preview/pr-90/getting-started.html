@@ -2,10 +2,12 @@
 <html class="no-js" lang="en" data-content_root="./">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" />
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Intro to chipflow.toml" href="chipflow-toml-guide.html" /><link rel="prev" title="ChipFlow Library Documentation" href="index.html" />
 
-    <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 --><title>Python Module Index - ChipFlow Platform Documentation</title>
-<link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
+        <title>Getting Started with ChipFlow - ChipFlow Platform Documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -180,7 +182,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -204,8 +206,8 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started with ChipFlow</a></li>
+<ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Getting Started with ChipFlow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-commands.html">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="autoapi/index.html">API Reference</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -235,7 +237,13 @@
           <span>Back to top</span>
         </a>
         <div class="content-icon-container">
-          <div class="theme-toggle-container theme-toggle-content">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/getting-started.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle">
               <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
@@ -244,52 +252,186 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          
-<section class="domainindex-section">
-  <h1>Python Module Index</h1>
-  <div class="domainindex-jumpbox"><a href="#cap-c"><strong>c</strong></a></div>
+          <section id="getting-started-with-chipflow">
+<h1>Getting Started with ChipFlow<a class="headerlink" href="#getting-started-with-chipflow" title="Link to this heading">¶</a></h1>
+<p>Welcome to ChipFlow! This guide will help you get started with the ChipFlow IC design platform, which simplifies the process of designing, testing, and manufacturing custom silicon.</p>
+<section id="what-is-chipflow">
+<h2>What is ChipFlow?<a class="headerlink" href="#what-is-chipflow" title="Link to this heading">¶</a></h2>
+<p>ChipFlow is an integrated circuit design platform that combines modern hardware design tools with cloud-based manufacturing services. It enables you to:</p>
+<ul class="simple">
+<li><p>Design custom silicon using <a class="reference external" href="https://www.python.org/">Python</a>  and <a class="reference external" href="https://github.com/amaranth-lang/amaranth">Amaranth HDL</a></p></li>
+<li><p>Simulate and verify your designs</p></li>
+<li><p>Prepare and submit your designs for manufacturing</p></li>
+<li><p>Manage the entire IC design workflow from a single platform</p></li>
+</ul>
 </section>
-<table class="domainindex-table">
-  <tr class="pcap">
-    <td></td><td>&#160;</td><td></td>
-  </tr>
-  <tr class="cap" id="cap-c">
-    <td></td><td><strong>c</strong></td><td></td>
-  </tr>
-  <tr>
-    <td><img src="_static/minus.png" class="toggler"
-              id="toggle-1" style="display: none" alt="-" /></td>
-    <td>
-        <a href="autoapi/chipflow_lib/index.html#module-chipflow_lib"><code class="xref">chipflow_lib</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="autoapi/chipflow_lib/platforms/index.html#module-chipflow_lib.platforms"><code class="xref">chipflow_lib.platforms</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="autoapi/chipflow_lib/steps/index.html#module-chipflow_lib.steps"><code class="xref">chipflow_lib.steps</code></a></td><td>
-    <em></em></td>
-  </tr>
-</table>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h2>
+<p>Before you begin:</p>
+<ul class="simple">
+<li><p>Install the latest version of <a class="reference external" href="https://www.python.org/downloads/">Python</a>.</p></li>
+<li><p>Ensure you have <a class="reference external" href="https://git-scm.com/downloads">Git command line tools</a>  installed</p></li>
+<li><p>We recommend <a class="reference external" href="https://code.visualstudio.com/download">Visual Studio Code</a> as a development environment</p></li>
+<li><p><a class="reference external" href="https://desktop.github.com/download/">GitHub Desktop</a> is a great tool for workingh with Git repos</p></li>
+</ul>
+</section>
+<section id="clone-chipflow-examples">
+<h2>Clone chipflow-examples<a class="headerlink" href="#clone-chipflow-examples" title="Link to this heading">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you’re familiar with the <a class="reference external" href="https://git-scm.com/">Git</a> command line
+then go clone [ChipFlow/chipflow-examples](<a class="reference external" href="https://github.com/ChipFlow/chipflow-examples">https://github.com/ChipFlow/chipflow-examples</a>)
+and jump ahead to <a class="reference internal" href="#install-the-dependencies">Install the Dependencies</a></p>
+</div>
+<p>If the git world is new to you, start up <a class="reference external" href="https://github.com/apps/desktop">GitHub
+Desktop</a>. The first time you launch
+it you will be asked to sign in or create an account - we recommend you
+take this moment to create a GitHub account if you don’t already have
+one!</p>
+<p>Navigate to <a class="reference external" href="https://github.com/ChipFlow/chipflow-examples">the chipflow-examples repository</a>
+and click the green ‘Code’ button at the top. Select ‘Open with GitHub Desktop’ and
+then follow the prompts (N.B. your web browser may have a pop-up to
+authorise opening an external app)</p>
+<p><img alt="Image showing the link to click" src="_images/open-github-desktop.png" /></p>
+<p>Once GitHub Desktop has cloned your repo you can click the button to
+open it in VS Code:</p>
+<p><img alt="Image showing where to click in GitHub Desktop to open in VSCode" src="_images/github-desktop-open.png" /></p>
+</section>
+<section id="install-the-dependencies">
+<h2>Install the dependencies<a class="headerlink" href="#install-the-dependencies" title="Link to this heading">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In VS Code, open up a terminal by pressing <kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">Command</kbd>-<kbd class="kbd docutils literal notranslate">p</kbd></kbd>: (Mac) or <kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">C</kbd>-<kbd class="kbd docutils literal notranslate">p</kbd></kbd> (Windows/Linux).</p>
+</div>
+<p>We use <a class="reference external" href="https://pdm-project.org">PDM</a> to manage our dependencies, so
+this will need to be installed. Follow the <a class="reference external" href="https://pdm-project.org/en/latest/#installation">PDM install
+instructions</a> for your OS.</p>
+<p>Once PDM is installed, make sure you are in the <code class="docutils literal notranslate"><span class="pre">chipflow-examples</span></code>
+directory and then run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pdm</span> <span class="n">lock</span> <span class="o">-</span><span class="n">d</span>
+<span class="n">pdm</span> <span class="n">install</span>
+</pre></div>
+</div>
+</section>
+<section id="set-up-the-environment">
+<h2>Set up the environment<a class="headerlink" href="#set-up-the-environment" title="Link to this heading">¶</a></h2>
+<p>Generate your API key by going to <a class="reference external" href="https://build.chipflow.org/">https://build.chipflow.org/</a> and logging in with your GitHub account.</p>
+<p>Click on the ‘User’ menu, then on ‘Create/Refresh API Key’ Your new API key will appear at the
+top.</p>
+<figure class="align-default" id="id1">
+<img alt="Image showing a newly generated API Key" src="_images/api-key.png" />
+<figcaption>
+<p><span class="caption-text">Image showing a newly generated API Key</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>Next, create a file called <code class="docutils literal notranslate"><span class="pre">.env</span></code> at the top level in the
+<code class="docutils literal notranslate"><span class="pre">chipflow-examples</span></code> directory, containing the line below, substituting
+your key from the page above:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CHIPFLOW_API_KEY</span><span class="o">=&lt;</span><span class="n">Paste</span> <span class="n">your</span> <span class="n">key</span> <span class="n">here</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="running-a-chip-build">
+<h2>Running a chip build<a class="headerlink" href="#running-a-chip-build" title="Link to this heading">¶</a></h2>
+<p>First choose a design to test. Here we will use the <code class="docutils literal notranslate"><span class="pre">minimal</span></code> design.</p>
+<p>Change into the <code class="docutils literal notranslate"><span class="pre">minimal</span></code> directory in <code class="docutils literal notranslate"><span class="pre">chipflow-examples</span></code> to use
+this design. Now we need to ‘lock’ our pins - the ChipFlow tooling will
+then automatically allocate inputs and outputs from your design to pins
+on the chip.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pdm</span> <span class="n">run</span> <span class="n">chipflow</span> <span class="n">pin</span> <span class="n">lock</span>
+</pre></div>
+</div>
+<p>We can now simulate and test the design by running:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">sim</span><span class="o">-</span><span class="n">check</span>
+</pre></div>
+</div>
+<p>You should see the simulation model being built and run - and a small
+test firmware running on the simulated System-on-a-Chip (aided by our
+local friendly cat!)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>pdm run chipflow sim
+-- build_sim_cxxrtl
+-- build_sim
+pdm run chipflow software
+-- gather_depencencies
+-- build_software_elf
+-- build_software
+cd build/sim &amp;&amp; ./sim_soc
+🐱: nyaa~!
+SoC type: CA7F100F
+Flash ID: CA7CA7FF
+Quad mode
+pdm run json-compare design/tests/events_reference.json build/sim/events.json
+Event logs are identical
+</pre></div>
+</div>
+<p>Now you are ready to try building this design into a chip! To submit
+your design to ChipFlow Platform where it will be built into GDS, run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pdm</span> <span class="n">run</span> <span class="n">chipflow</span> <span class="n">silicon</span> <span class="n">submit</span>
+</pre></div>
+</div>
+<p>This should return something like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>INFO:chipflow_lib.steps.silicon:Submitting c23dab6-dirty for project chipflow-examples-minimal
+INFO:chipflow_lib.steps.silicon:Submitted design: {&#39;build_id&#39;: &#39;3f51a69c-b3e3-4fd3-88fd-52826ac5e5dd&#39;}
+Design submitted successfully! Build URL: https://build-staging.chipflow.org//build/3f51a69c-b3e3-4fd3-88fd-52826ac5e5dd
+</pre></div>
+</div>
+<p>Your design will now start building: pictures and logs of the build are
+available at build URL that is returned, once it is complete.</p>
+<p>If you would like to get the build logs streamed to your command-line,
+you can instead call:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pdm</span> <span class="n">run</span> <span class="n">chipflow</span> <span class="n">silicon</span> <span class="n">submit</span> <span class="o">--</span><span class="n">wait</span>
+</pre></div>
+</div>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
+<ol class="arabic">
+<li><p>Clone the ChipFlow repository:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ChipFlow/chipflow-lib.git
+<span class="nb">cd</span><span class="w"> </span>chipflow-lib
+</pre></div>
+</div>
+</li>
+<li><p>Install dependencies using PDM:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pdm<span class="w"> </span>install
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+</section>
 
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          
-          
+          <a class="next-page" href="chipflow-toml-guide.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="index.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Home</div>
+                
+              </div>
+            </a>
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -308,8 +450,33 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Getting Started with ChipFlow</a><ul>
+<li><a class="reference internal" href="#what-is-chipflow">What is ChipFlow?</a></li>
+<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li><a class="reference internal" href="#clone-chipflow-examples">Clone chipflow-examples</a></li>
+<li><a class="reference internal" href="#install-the-dependencies">Install the dependencies</a></li>
+<li><a class="reference internal" href="#set-up-the-environment">Set up the environment</a></li>
+<li><a class="reference internal" href="#running-a-chip-build">Running a chip build</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

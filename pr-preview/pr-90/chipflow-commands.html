@@ -2,10 +2,12 @@
 <html class="no-js" lang="en" data-content_root="./">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" />
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="API Reference" href="autoapi/index.html" /><link rel="prev" title="Intro to chipflow.toml" href="chipflow-toml-guide.html" />
 
-    <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 --><title>Python Module Index - ChipFlow Platform Documentation</title>
-<link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
+        <title>The chipflow command - ChipFlow Platform Documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -180,7 +182,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -204,10 +206,10 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started with ChipFlow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="chipflow-commands.html">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="autoapi/index.html">API Reference</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="autoapi/chipflow_lib/index.html">chipflow_lib</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of chipflow_lib</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html">chipflow_lib.platforms</a></li>
@@ -235,7 +237,13 @@
           <span>Back to top</span>
         </a>
         <div class="content-icon-container">
-          <div class="theme-toggle-container theme-toggle-content">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/chipflow-commands.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle">
               <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
@@ -244,52 +252,78 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          
-<section class="domainindex-section">
-  <h1>Python Module Index</h1>
-  <div class="domainindex-jumpbox"><a href="#cap-c"><strong>c</strong></a></div>
+          <section id="the-chipflow-command">
+<h1>The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command<a class="headerlink" href="#the-chipflow-command" title="Link to this heading">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> tool enables you to simulate your design or submit it to the ChipFlow cloud build service.
+It implements several subcommands, which can be customised or added to in the <code class="docutils literal notranslate"><span class="pre">steps</span></code> section of <a class="reference internal" href="chipflow-toml-guide.html#chipflow-toml-steps"><span class="std std-ref">chipflow.toml</span></a>.</p>
+<section id="chipflow-pin-lock">
+<h2><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">pin</span> <span class="pre">lock</span></code><a class="headerlink" href="#chipflow-pin-lock" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">pin</span> <span class="pre">lock</span></code> command performs pin locking for the current design.
+For every new top level interface with containing external pins with a <code class="docutils literal notranslate"><span class="pre">IOSignature</span></code> that is discovered, the necessary number of package pins is allocated and the mapping saved in the <code class="docutils literal notranslate"><span class="pre">pins.lock</span></code> file.
+This means that, unless the <code class="docutils literal notranslate"><span class="pre">pins.lock</span></code> file is deleted or manually modified, the pin assignments of all existing pins will always remain the same.</p>
 </section>
-<table class="domainindex-table">
-  <tr class="pcap">
-    <td></td><td>&#160;</td><td></td>
-  </tr>
-  <tr class="cap" id="cap-c">
-    <td></td><td><strong>c</strong></td><td></td>
-  </tr>
-  <tr>
-    <td><img src="_static/minus.png" class="toggler"
-              id="toggle-1" style="display: none" alt="-" /></td>
-    <td>
-        <a href="autoapi/chipflow_lib/index.html#module-chipflow_lib"><code class="xref">chipflow_lib</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="autoapi/chipflow_lib/platforms/index.html#module-chipflow_lib.platforms"><code class="xref">chipflow_lib.platforms</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="autoapi/chipflow_lib/steps/index.html#module-chipflow_lib.steps"><code class="xref">chipflow_lib.steps</code></a></td><td>
-    <em></em></td>
-  </tr>
-</table>
+<section id="chipflow-silicon">
+<h2><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">silicon</span></code><a class="headerlink" href="#chipflow-silicon" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">silicon</span></code> subcommand is used to send the design to the cloud builder for build and tapeout. In general, it would be run inside GitHub Actions as part of a CI job.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">silicon</span> <span class="pre">prepare</span></code> links the design, including all Amaranth modules and any external Verilog components, into a single RTLIL file that is ready to be sent to the cloud builder.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">silicon</span> <span class="pre">submit</span></code> sends the linked design along with the <code class="docutils literal notranslate"><span class="pre">pins.lock</span></code> file containing pinout information to the ChipFlow cloud service for the build. With the <code class="docutils literal notranslate"><span class="pre">--dry-run</span></code> argument, it can be used for a local test that the design is ready to be submitted.</p></li>
+</ul>
+</div></blockquote>
+<p>Submitting the design to the cloud requires the <code class="docutils literal notranslate"><span class="pre">CHIPFLOW_API_KEY</span></code> environment variable to be set with a valid API key obtained from the cloud interface.</p>
+</section>
+<section id="chipflow-sim">
+<h2><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">sim</span></code><a class="headerlink" href="#chipflow-sim" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">sim</span> <span class="pre">build</span></code> command is used to build a CXXRTL simulation of the design; converting the design to a fast compiled C++ format along with C++ models of any peripherals.</p>
+<p>Extra C++ model files for the simulation, and any custom build steps required, can be added to the <code class="docutils literal notranslate"><span class="pre">sim/doit_build.py</span></code> <a class="reference external" href="https://pydoit.org/">doit</a> build script inside the user project.</p>
+<p>A default simulation driver (the C++ code that runs the simulation) is included as <a class="reference external" href="https://github.com/ChipFlow/chipflow-examples/blob/main/minimal/design/sim/main.cc">main.cc</a> in the example projects. This code:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Instantiates the user design; and the simulation models for the peripherals (SPI flash, UART and GPIO)</p></li>
+<li><p>Initialises the CXXRTL debug agent, which is required to perform debugging with the <a class="reference external" href="https://github.com/amaranth-lang/rtl-debugger">RTL Debugger</a> VS Code extension</p></li>
+<li><p>Configures input and output JSON files for stimuli and results respectively (for automated integration testing)</p></li>
+<li><p>Runs the design for 3,000,000 clock cycles</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="chipflow-software">
+<h2><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">software</span></code><a class="headerlink" href="#chipflow-software" title="Link to this heading">¶</a></h2>
+<p>If the design contains a CPU, the <code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">software</span> <span class="pre">build</span></code> command is used to build test firmware for the target CPU. Which C source files to include, and any build options (like the target architecture or enabled RISC-V extensions) can be customised in the <code class="docutils literal notranslate"><span class="pre">software/doit_build.py</span></code> doit build script inside the user project.</p>
+</section>
+</section>
 
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          
-          
+          <a class="next-page" href="autoapi/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">API Reference</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="chipflow-toml-guide.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></div>
+                
+              </div>
+            </a>
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -308,8 +342,30 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a><ul>
+<li><a class="reference internal" href="#chipflow-pin-lock"><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">pin</span> <span class="pre">lock</span></code></a></li>
+<li><a class="reference internal" href="#chipflow-silicon"><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">silicon</span></code></a></li>
+<li><a class="reference internal" href="#chipflow-sim"><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">sim</span></code></a></li>
+<li><a class="reference internal" href="#chipflow-software"><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">software</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
