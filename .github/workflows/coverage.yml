@@ -24,7 +24,7 @@ jobs:
           cache: true
 
       - name: Install dependencies with multirepo
-        uses: chipflow/pdm-multirepo@v1
+        uses: chipflow/pdm-multirepo@v3
 
       - name: Build coverage file
         run: |
