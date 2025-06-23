@@ -29,7 +29,8 @@ Clone chipflow-examples
 
 .. note::
     If you’re familiar with the `Git <https://git-scm.com/>`__ command line
-    then go clone [ChipFlow/chipflow-examples](https://github.com/ChipFlow/chipflow-examples)
+    then go clone `ChipFlow/chipflow-examples <https://github.com/ChipFlow/chipflow-examples>`,
+    switch to the `release branch <https://github.com/ChipFlow/chipflow-examples/tree/release>`,
     and jump ahead to `Install the Dependencies`_
 
 
@@ -39,7 +40,7 @@ it you will be asked to sign in or create an account - we recommend you
 take this moment to create a GitHub account if you don’t already have
 one!
 
-Navigate to `the chipflow-examples repository <https://github.com/ChipFlow/chipflow-examples>`__
+Navigate to `the chipflow-examples repository release branch <https://github.com/ChipFlow/chipflow-examples/tree/release>`__
 and click the green ‘Code’ button at the top. Select ‘Open with GitHub Desktop’ and
 then follow the prompts (N.B. your web browser may have a pop-up to
 authorise opening an external app)
@@ -165,19 +166,3 @@ you can instead call:
 .. |Image showing the link to click| image:: _assets/open-github-desktop.png
 .. |Image showing where to click in GitHub Desktop to open in VSCode| image:: _assets/github-desktop-open.png
 
-
-Installation
-------------
-
-1. Clone the ChipFlow repository:
-
-   .. code-block:: bash
-
-      git clone https://github.com/ChipFlow/chipflow-lib.git
-      cd chipflow-lib
-
-2. Install dependencies using PDM:
-
-   .. code-block:: bash
-
-      pdm install
