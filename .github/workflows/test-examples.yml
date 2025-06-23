@@ -40,7 +40,15 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           git remote update
-          git checkout ${{ github.head_ref }} || echo "Falling back to main"
+          git checkout ${{ github.head_ref }} || echo "${{github.head_ref}} not found, checking base ${{github.base_ref}}"
+
+      - name: Check for branch ${{ github.base_ref }}
+        working-directory: ${{ env.test_repo_path }}
+        if: github.event_name == 'pull_request'
+        run: |
+          git remote update
+          git checkout ${{ github.base_ref }} || echo "${{github.base_ref}} not found Falling back to main"
+
 
       - name: Set up PDM
         uses: pdm-project/setup-pdm@v4
