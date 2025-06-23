@@ -29,7 +29,7 @@ Clone chipflow-examples
 
 .. note::
     If you’re familiar with the `Git <https://git-scm.com/>`__ command line
-    then go clone [ChipFlow/chipflow-examples](https://github.com/ChipFlow/chipflow-examples)
+    then go clone `ChipFlow/chipflow-examples <https://github.com/ChipFlow/chipflow-examples>`
     and jump ahead to `Install the Dependencies`_
 
 
