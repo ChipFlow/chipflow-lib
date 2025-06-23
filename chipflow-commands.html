@@ -265,7 +265,7 @@ It implements several subcommands, which can be customised or added to in the <c
 <section id="chipflow-pin-lock">
 <h2><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">pin</span> <span class="pre">lock</span></code><a class="headerlink" href="#chipflow-pin-lock" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">pin</span> <span class="pre">lock</span></code> command performs pin locking for the current design.
-For every new top level interface with containing external pins with a <code class="docutils literal notranslate"><span class="pre">PinSignature</span></code> that is discovered, the necessary number of package pins is allocated and the mapping saved in the <code class="docutils literal notranslate"><span class="pre">pins.lock</span></code> file.
+For every new top level interface with containing external pins with a <code class="docutils literal notranslate"><span class="pre">IOSignature</span></code> that is discovered, the necessary number of package pins is allocated and the mapping saved in the <code class="docutils literal notranslate"><span class="pre">pins.lock</span></code> file.
 This means that, unless the <code class="docutils literal notranslate"><span class="pre">pins.lock</span></code> file is deleted or manually modified, the pin assignments of all existing pins will always remain the same.</p>
 </section>
 <section id="chipflow-silicon">

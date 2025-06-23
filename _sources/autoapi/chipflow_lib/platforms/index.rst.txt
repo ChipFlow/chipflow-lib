@@ -17,7 +17,7 @@ Classes
 
 .. autoapisummary::
 
-   chipflow_lib.platforms.PinSignature
+   chipflow_lib.platforms.IOSignature
 
 
 Functions
@@ -25,15 +25,15 @@ Functions
 
 .. autoapisummary::
 
-   chipflow_lib.platforms.OutputPinSignature
-   chipflow_lib.platforms.InputPinSignature
-   chipflow_lib.platforms.BidirPinSignature
+   chipflow_lib.platforms.OutputIOSignature
+   chipflow_lib.platforms.InputIOSignature
+   chipflow_lib.platforms.BidirIOSignature
 
 
 Package Contents
 ----------------
 
-.. py:class:: PinSignature(direction, width = 1, all_have_oe = False, init=None)
+.. py:class:: IOSignature(direction, width = 1, all_have_oe = False, init=None)
 
    Bases: :py:obj:`amaranth.lib.wiring.Signature`
 
@@ -41,7 +41,7 @@ Package Contents
    An :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` used to decorate wires that would usually be brought out onto a port on the package.
    This class is generally not directly used.
    Instead, you would typically utilize the more specific
-   :py:obj:`InputPinSignature`, :py:obj:`OutputPinSignature`, or :py:obj:`BidirPinSignature` for defining pin interfaces.
+   :py:obj:`InputIOSignature`, :py:obj:`OutputIOSignature`, or :py:obj:`BidirIOSignature` for defining pin interfaces.
 
    :param direction: Input, Output or Bidir
    :param width: width of port, default is 1
@@ -88,7 +88,7 @@ Package Contents
 
 
 
-.. py:function:: OutputPinSignature(width, **kwargs)
+.. py:function:: OutputIOSignature(width, **kwargs)
 
    This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package output signals
    intended for connection to the physical pads of the integrated circuit package.
@@ -98,7 +98,7 @@ Package Contents
    :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
 
 
-.. py:function:: InputPinSignature(width, **kwargs)
+.. py:function:: InputIOSignature(width, **kwargs)
 
    This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package input signals
    intended for connection to the physical pads of the integrated circuit package.
@@ -108,7 +108,7 @@ Package Contents
    :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
 
 
-.. py:function:: BidirPinSignature(width, **kwargs)
+.. py:function:: BidirIOSignature(width, **kwargs)
 
    This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package bi-directional signals
    intended for connection to the physical pads of the integrated circuit package.

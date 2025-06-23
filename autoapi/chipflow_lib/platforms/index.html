@@ -266,7 +266,7 @@
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.PinSignature" title="chipflow_lib.platforms.PinSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PinSignature</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.IOSignature" title="chipflow_lib.platforms.IOSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IOSignature</span></code></a></p></td>
 <td><p>An <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Amaranth</span> <span class="pre">Signature</span></code></a> used to decorate wires that would usually be brought out onto a port on the package.</p></td>
 </tr>
 </tbody>
@@ -278,13 +278,13 @@
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.OutputPinSignature" title="chipflow_lib.platforms.OutputPinSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OutputPinSignature</span></code></a>(width, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.OutputIOSignature" title="chipflow_lib.platforms.OutputIOSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OutputIOSignature</span></code></a>(width, **kwargs)</p></td>
 <td><p>This creates an <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Amaranth</span> <span class="pre">Signature</span></code></a> which is then used to decorate package output signals</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.platforms.InputPinSignature" title="chipflow_lib.platforms.InputPinSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InputPinSignature</span></code></a>(width, **kwargs)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.platforms.InputIOSignature" title="chipflow_lib.platforms.InputIOSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InputIOSignature</span></code></a>(width, **kwargs)</p></td>
 <td><p>This creates an <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Amaranth</span> <span class="pre">Signature</span></code></a> which is then used to decorate package input signals</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.BidirPinSignature" title="chipflow_lib.platforms.BidirPinSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BidirPinSignature</span></code></a>(width, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.BidirIOSignature" title="chipflow_lib.platforms.BidirIOSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BidirIOSignature</span></code></a>(width, **kwargs)</p></td>
 <td><p>This creates an <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Amaranth</span> <span class="pre">Signature</span></code></a> which is then used to decorate package bi-directional signals</p></td>
 </tr>
 </tbody>
@@ -294,13 +294,13 @@
 <section id="package-contents">
 <h2>Package Contents<a class="headerlink" href="#package-contents" title="Link to this heading">¶</a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.PinSignature">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">PinSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_have_oe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.PinSignature" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="chipflow_lib.platforms.IOSignature">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">IOSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_have_oe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.IOSignature" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">amaranth.lib.wiring.Signature</span></code></a></p>
 <p>An <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Amaranth</span> <span class="pre">Signature</span></code></a> used to decorate wires that would usually be brought out onto a port on the package.
 This class is generally not directly used.
 Instead, you would typically utilize the more specific
-<a class="reference internal" href="#chipflow_lib.platforms.InputPinSignature" title="chipflow_lib.platforms.InputPinSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InputPinSignature</span></code></a>, <a class="reference internal" href="#chipflow_lib.platforms.OutputPinSignature" title="chipflow_lib.platforms.OutputPinSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OutputPinSignature</span></code></a>, or <a class="reference internal" href="#chipflow_lib.platforms.BidirPinSignature" title="chipflow_lib.platforms.BidirPinSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BidirPinSignature</span></code></a> for defining pin interfaces.</p>
+<a class="reference internal" href="#chipflow_lib.platforms.InputIOSignature" title="chipflow_lib.platforms.InputIOSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InputIOSignature</span></code></a>, <a class="reference internal" href="#chipflow_lib.platforms.OutputIOSignature" title="chipflow_lib.platforms.OutputIOSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OutputIOSignature</span></code></a>, or <a class="reference internal" href="#chipflow_lib.platforms.BidirIOSignature" title="chipflow_lib.platforms.BidirIOSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BidirIOSignature</span></code></a> for defining pin interfaces.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -312,8 +312,8 @@ Instead, you would typically utilize the more specific
 </dd>
 </dl>
 <dl class="py property">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.PinSignature.direction">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">direction</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/io.html#amaranth.lib.io.Direction" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="pre">amaranth.lib.io.Direction</span></a></em><a class="headerlink" href="#chipflow_lib.platforms.PinSignature.direction" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="chipflow_lib.platforms.IOSignature.direction">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">direction</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/io.html#amaranth.lib.io.Direction" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="pre">amaranth.lib.io.Direction</span></a></em><a class="headerlink" href="#chipflow_lib.platforms.IOSignature.direction" title="Link to this definition">¶</a></dt>
 <dd><p>The direction of the IO port</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -323,8 +323,8 @@ Instead, you would typically utilize the more specific
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.PinSignature.width">
-<span class="sig-name descname"><span class="pre">width</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.PinSignature.width" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="chipflow_lib.platforms.IOSignature.width">
+<span class="sig-name descname"><span class="pre">width</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.IOSignature.width" title="Link to this definition">¶</a></dt>
 <dd><p>The width of the IO port, in wires</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -334,8 +334,8 @@ Instead, you would typically utilize the more specific
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.PinSignature.options">
-<span class="sig-name descname"><span class="pre">options</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.PinSignature.options" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="chipflow_lib.platforms.IOSignature.options">
+<span class="sig-name descname"><span class="pre">options</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.IOSignature.options" title="Link to this definition">¶</a></dt>
 <dd><p>Options set on the io port at construction</p>
 <dl class="simple">
 <dt>Valid options are:</dt><dd><p>“all_have_oe”: For a bidirectional port, each wire can
@@ -352,8 +352,8 @@ so each wire also has a corresponding Output Enable wire.
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.PinSignature.annotations">
-<span class="sig-name descname"><span class="pre">annotations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.PinSignature.annotations" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="chipflow_lib.platforms.IOSignature.annotations">
+<span class="sig-name descname"><span class="pre">annotations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.IOSignature.annotations" title="Link to this definition">¶</a></dt>
 <dd><p>Annotate an interface object.</p>
 <p>Subclasses of <code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> may override this method to provide annotations for
 a corresponding interface object. The default implementation provides none.</p>
@@ -371,8 +371,8 @@ a corresponding interface object. The default implementation provides none.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.OutputPinSignature">
-<span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">OutputPinSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.OutputPinSignature" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="chipflow_lib.platforms.OutputIOSignature">
+<span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">OutputIOSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.OutputIOSignature" title="Link to this definition">¶</a></dt>
 <dd><p>This creates an <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Amaranth</span> <span class="pre">Signature</span></code></a> which is then used to decorate package output signals
 intended for connection to the physical pads of the integrated circuit package.</p>
 <dl class="field-list simple">
@@ -386,8 +386,8 @@ intended for connection to the physical pads of the integrated circuit package.<
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.InputPinSignature">
-<span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">InputPinSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.InputPinSignature" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="chipflow_lib.platforms.InputIOSignature">
+<span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">InputIOSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.InputIOSignature" title="Link to this definition">¶</a></dt>
 <dd><p>This creates an <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Amaranth</span> <span class="pre">Signature</span></code></a> which is then used to decorate package input signals
 intended for connection to the physical pads of the integrated circuit package.</p>
 <dl class="field-list simple">
@@ -401,8 +401,8 @@ intended for connection to the physical pads of the integrated circuit package.<
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.BidirPinSignature">
-<span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">BidirPinSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.BidirPinSignature" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="chipflow_lib.platforms.BidirIOSignature">
+<span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">BidirIOSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.BidirIOSignature" title="Link to this definition">¶</a></dt>
 <dd><p>This creates an <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Amaranth</span> <span class="pre">Signature</span></code></a> which is then used to decorate package bi-directional signals
 intended for connection to the physical pads of the integrated circuit package.</p>
 <dl class="field-list simple">
@@ -478,16 +478,16 @@ intended for connection to the physical pads of the integrated circuit package.<
 <li><a class="reference internal" href="#classes">Classes</a></li>
 <li><a class="reference internal" href="#functions">Functions</a></li>
 <li><a class="reference internal" href="#package-contents">Package Contents</a><ul>
-<li><a class="reference internal" href="#chipflow_lib.platforms.PinSignature"><code class="docutils literal notranslate"><span class="pre">PinSignature</span></code></a><ul>
-<li><a class="reference internal" href="#chipflow_lib.platforms.PinSignature.direction"><code class="docutils literal notranslate"><span class="pre">PinSignature.direction</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.platforms.PinSignature.width"><code class="docutils literal notranslate"><span class="pre">PinSignature.width()</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.platforms.PinSignature.options"><code class="docutils literal notranslate"><span class="pre">PinSignature.options()</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.platforms.PinSignature.annotations"><code class="docutils literal notranslate"><span class="pre">PinSignature.annotations()</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.platforms.IOSignature"><code class="docutils literal notranslate"><span class="pre">IOSignature</span></code></a><ul>
+<li><a class="reference internal" href="#chipflow_lib.platforms.IOSignature.direction"><code class="docutils literal notranslate"><span class="pre">IOSignature.direction</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.platforms.IOSignature.width"><code class="docutils literal notranslate"><span class="pre">IOSignature.width()</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.platforms.IOSignature.options"><code class="docutils literal notranslate"><span class="pre">IOSignature.options()</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.platforms.IOSignature.annotations"><code class="docutils literal notranslate"><span class="pre">IOSignature.annotations()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#chipflow_lib.platforms.OutputPinSignature"><code class="docutils literal notranslate"><span class="pre">OutputPinSignature()</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.platforms.InputPinSignature"><code class="docutils literal notranslate"><span class="pre">InputPinSignature()</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.platforms.BidirPinSignature"><code class="docutils literal notranslate"><span class="pre">BidirPinSignature()</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.platforms.OutputIOSignature"><code class="docutils literal notranslate"><span class="pre">OutputIOSignature()</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.platforms.InputIOSignature"><code class="docutils literal notranslate"><span class="pre">InputIOSignature()</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.platforms.BidirIOSignature"><code class="docutils literal notranslate"><span class="pre">BidirIOSignature()</span></code></a></li>
 </ul>
 </li>
 </ul>

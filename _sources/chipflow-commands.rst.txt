@@ -10,7 +10,7 @@ It implements several subcommands, which can be customised or added to in the ``
 ---------------------
 
 The ``chipflow pin lock`` command performs pin locking for the current design.
-For every new top level interface with containing external pins with a ``PinSignature`` that is discovered, the necessary number of package pins is allocated and the mapping saved in the ``pins.lock`` file.
+For every new top level interface with containing external pins with a ``IOSignature`` that is discovered, the necessary number of package pins is allocated and the mapping saved in the ``pins.lock`` file.
 This means that, unless the ``pins.lock`` file is deleted or manually modified, the pin assignments of all existing pins will always remain the same.
 
 ``chipflow silicon``
