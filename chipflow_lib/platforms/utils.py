@@ -6,7 +6,7 @@ import pathlib
 import pydantic
 
 from collections import OrderedDict, deque
-from collections.abc import MutableMapping
+from collections.abc import MutableMapping, Iterable
 from pprint import pformat
 from typing import Set, List, Dict, Optional, Union, Literal
 
@@ -73,11 +73,16 @@ class IOSignature(wiring.Signature):
 
     :param direction: Input, Output or Bidir
     :param width: width of port, default is 1
-    :param all_have_oe: controls whether each output wire is associated with an individual Output Enable bit or a single OE bit will be used for entire port, the default value is False, indicating that a single OE bit controls the entire port.
+    :param invert: Polarity inversion. If the value is a simple :class:`bool`, it specifies inversion for
+         the entire port. If the value is an iterable of :class:`bool`, the iterable must have the
+         same length as the width of :py:`io`, and the inversion is specified for individual wires.
+    :param all_have_oe: controls whether each output wire is associated with an individual Output Enable bit
+         or a single OE bit will be used for entire port, the default value is False, indicating that a
+         single OE bit controls the entire port.
     :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
     """
 
-    def __init__(self, direction: io.Direction, width: int = 1, all_have_oe: bool = False, init = None):
+    def __init__(self, direction: io.Direction, width: int = 1, invert: Union[bool,Iterable[bool]] = False, all_have_oe: bool = False, init = None):
         self._direction = direction
         self._width = width
         self._init = init
@@ -98,6 +103,17 @@ class IOSignature(wiring.Signature):
                 "all_have_oe": all_have_oe,
                 "init": init,
                 }
+        match invert:
+            case bool():
+                self._invert = (invert,) * self._width
+            case Iterable():
+              self._invert = tuple(invert)
+              if len(self._invert) != self._width:
+                  raise ValueError(f"Length of 'invert' ({len(self._invert)}) doesn't match "
+                                   f"length of 'io' ({len(self._io)})")
+            case _:
+                raise TypeError(f"'invert' must be a bool or iterable of bool, not {invert!r}")
+
 
         super().__init__(sig)
 
@@ -109,6 +125,10 @@ class IOSignature(wiring.Signature):
     def width(self) -> int:
         "The width of the IO port, in wires"
         return self._width
+
+    def invert(self) -> int:
+        "A tuple as wide as the IO port, with a bool for the polarity inversion for each wire"
+        return self._invert
 
     def options(self) -> dict:
         """
@@ -356,6 +376,7 @@ class Port(pydantic.BaseModel):
     pins: List[str]
     port_name: str
     direction: Optional[str] = None
+    invert: Union[bool, Iterable[bool]] = False
     options: Optional[dict] = None
 
     @property

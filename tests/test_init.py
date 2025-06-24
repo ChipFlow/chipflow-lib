@@ -3,8 +3,9 @@ import os
 import sys
 import unittest
 import tempfile
-from unittest import mock
 
+from pathlib import Path
+from unittest import mock
 
 from chipflow_lib import (
     ChipFlowError,
@@ -68,7 +69,7 @@ class TestCoreUtilities(unittest.TestCase):
         _ensure_chipflow_root.root = None
         result = _ensure_chipflow_root()
 
-        self.assertEqual(result, "/test/path")
+        self.assertEqual(result, Path("/test/path"))
         self.assertIn("/test/path", sys.path)
 
     def test_ensure_chipflow_root_not_set(self):
@@ -80,7 +81,7 @@ class TestCoreUtilities(unittest.TestCase):
         with mock.patch("os.getcwd", return_value="/mock/cwd"):
             result = _ensure_chipflow_root()
 
-            self.assertEqual(result, "/mock/cwd")
+            self.assertEqual(result, Path("/mock/cwd"))
             self.assertEqual(os.environ["CHIPFLOW_ROOT"], "/mock/cwd")
             self.assertIn("/mock/cwd", sys.path)
 
