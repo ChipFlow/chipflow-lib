@@ -44,7 +44,7 @@ def _ensure_chipflow_root():
 
     if os.environ["CHIPFLOW_ROOT"] not in sys.path:
         sys.path.append(os.environ["CHIPFLOW_ROOT"])
-    _ensure_chipflow_root.root = os.environ["CHIPFLOW_ROOT"]
+    _ensure_chipflow_root.root = Path(os.environ["CHIPFLOW_ROOT"]).absolute()
     return _ensure_chipflow_root.root
 
 
