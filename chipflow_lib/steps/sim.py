@@ -72,7 +72,6 @@ class ContextTaskLoader(TaskLoader2):
             task_list.append(dict_to_task(d))
         return task_list
 
-
 class SimStep(StepBase):
     def __init__(self, config):
         self._platform = SimPlatform(config)
