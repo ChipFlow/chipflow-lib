@@ -20,7 +20,6 @@ from . import StepBase
 from .. import ChipFlowError
 from ..cli import log_level
 from ..platforms import SiliconPlatform, top_interfaces, load_pinlock
-from ..platforms.utils import IOSignature
 
 
 logger = logging.getLogger(__name__)
