@@ -200,8 +200,8 @@ class SiliconStep:
             except requests.ConnectionError as e:
                 if type(e.__context__) is urllib3.exceptions.MaxRetryError:
                     network_err(e)
-            except requests.ConnectTimeout as e:
-               network_err(e)
+            except requests.exceptions.ReadTimeout as e:
+                network_err(e)
 
             # Parse response body
             try:
@@ -288,7 +288,7 @@ class SiliconStep:
                 sp.text = "💥 Failed connecting to ChipFlow Cloud."
                 logger.debug(f"Error while streaming logs: {e}")
                 break
-            except requests.RequestException as e:
+            except (requests.RequestException, requests.exceptions.ReadTimeout) as e:
                 sp.text = "💥 Failed streaming build logs. Trying again!"
                 logger.debug(f"Error while streaming logs: {e}")
                 stream_event_counter +=1
@@ -320,6 +320,11 @@ class SiliconStep:
                 )
             except (requests.ConnectTimeout, requests.ConnectionError, requests.ConnectTimeout) as e:
                network_err(e)
+            except requests.exceptions.ReadTimeout as e:
+                sp.text = "💥 Error connecting to ChipFlow Cloud. Trying again! "
+                fail_counter += 1
+                logger.debug(f"Failed to fetch build status{fail_counter} times: {e}")
+                continue
 
             if status_resp.status_code != 200:
                 sp.text = "💥 Error connecting to ChipFlow Cloud. Trying again! "
