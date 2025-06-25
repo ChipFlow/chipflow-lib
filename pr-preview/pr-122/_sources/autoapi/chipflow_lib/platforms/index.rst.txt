@@ -33,7 +33,7 @@ Functions
 Package Contents
 ----------------
 
-.. py:class:: IOSignature(direction, width = 1, all_have_oe = False, init=None)
+.. py:class:: IOSignature(direction, width = 1, invert = False, all_have_oe = False, init=None)
 
    Bases: :py:obj:`amaranth.lib.wiring.Signature`
 
@@ -45,7 +45,12 @@ Package Contents
 
    :param direction: Input, Output or Bidir
    :param width: width of port, default is 1
-   :param all_have_oe: controls whether each output wire is associated with an individual Output Enable bit or a single OE bit will be used for entire port, the default value is False, indicating that a single OE bit controls the entire port.
+   :param invert: Polarity inversion. If the value is a simple :class:`bool`, it specifies inversion for
+        the entire port. If the value is an iterable of :class:`bool`, the iterable must have the
+        same length as the width of :py:`io`, and the inversion is specified for individual wires.
+   :param all_have_oe: controls whether each output wire is associated with an individual Output Enable bit
+        or a single OE bit will be used for entire port, the default value is False, indicating that a
+        single OE bit controls the entire port.
    :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
 
 
@@ -59,6 +64,12 @@ Package Contents
    .. py:method:: width()
 
       The width of the IO port, in wires
+
+
+
+   .. py:method:: invert()
+
+      A tuple as wide as the IO port, with a bool for the polarity inversion for each wire
 
 
 
