@@ -6,8 +6,11 @@ on:
       CHIPFLOW_API_KEY:
         required: true
 
+permissions:
+  contents: write
+
 jobs:
-  test-submit:
+  test-all:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -15,6 +18,7 @@ jobs:
         repo:
           - name: "ChipFlow/chipflow-examples"
             design: "minimal"
+            artifact: chipflow-examples
     env:
       DRY: ${{ matrix.dry && '--dry-run' || '' }}
       is_dry: ${{ matrix.dry && '(dry run)' || '' }}
@@ -36,18 +40,34 @@ jobs:
           path: ${{ env.test_repo_path }}
 
       - name: Check for branch ${{ github.head_ref }}
+        id: check-head-ref
         working-directory: ${{ env.test_repo_path }}
         if: github.event_name == 'pull_request'
         run: |
           git remote update
-          git checkout ${{ github.head_ref }} || echo "${{github.head_ref}} not found, checking base ${{github.base_ref}}"
+          git checkout ${{ github.head_ref }}
+          if [ $? -eq 0 ]; then
+             echo "Using branch ${{github.head_ref}}"
+             echo "found-branch=1\n" >> $GITHUB_OUTPUT
+          else
+             echo "${{github.head_ref}} not found, checking base ${{github.base_ref}}"
+             echo "found-branch=0\n" >> $GITHUB_OUTPUT
+          fi
 
       - name: Check for branch ${{ github.base_ref }}
-        working-directory: ${{ env.test_repo_path }}
-        if: github.event_name == 'pull_request'
+        id: check-base-ref
+        working-directory: ${{ env.test_repo_path }}x
+        if: github.event_name == 'pull_request' && steps.check-head-ref == 0
         run: |
           git remote update
-          git checkout ${{ github.base_ref }} || echo "${{github.base_ref}} not found Falling back to main"
+          git checkout ${{ github.base_ref }}
+          if [ $? -eq 0 ]; then
+             echo "Using branch ${{github.base_ref}}"
+             echo "found-branch=1\n" >> $GITHUB_OUTPUT
+          else
+          || echo "${{github.base_ref}} not found Falling back to main"
+             echo "found-branch=0\n" >> $GITHUB_OUTPUT
+          fi
 
 
       - name: Set up PDM
@@ -65,12 +85,33 @@ jobs:
       - name: Run tests
         working-directory: ${{ env.test_repo_path }}
         run: |
-          pdm test
+          pdm test-cov
+
+      - name: Run sim
+        working-directory: ${{ env.test_repo_path }}/${{ matrix.repo.design }}
+        run: |
+          pdm run coverage run -a ../.venv/bin/chipflow pin lock
+          pdm run coverage run -a ../.venv/bin/chipflow sim
+          pdm run coverage run -a ../.venv/bin/chipflow software
+          ./build/sim/sim_soc
 
       - name: Submit build ${{ env.is_dry }}
         working-directory: ${{ env.test_repo_path }}/${{ matrix.repo.design }}
         run: |
-          pdm run chipflow pin lock
-          pdm run chipflow silicon submit --wait $DRY | cat
+          pdm run coverage run -a ../.venv/bin/chipflow pin lock
+          pdm run coverage run -a ../.venv/bin/chipflow silicon submit --wait $DRY | cat
         env:
           CHIPFLOW_API_KEY: ${{ secrets.CHIPFLOW_API_KEY}}
+
+      - name: Generate coverage report
+        working-directory: ${{ env.test_repo_path }}/${{ matrix.repo.design }}
+        run: pdm run coverage html
+
+      - name: deploy to Github Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: '${{ env.test_repo_path }}/${{ matrix.repo.design }}/htmlcov/'
+          branch: gh-pages
+          clean: false
+          force: false
+          target-folder: coverage-${{matrix.artifact}}-${{matrix.dry}}
