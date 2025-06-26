@@ -20,13 +20,21 @@ class UnexpectedError(ChipFlowError):
 
 log_level = logging.WARNING
 
+
+DEFAULT_STEPS = {
+    "silicon": "chipflow_lib.steps.silicon:SiliconStep",
+    "sim": "chipflow_lib.steps.sim:SimStep",
+}
+
+
 def run(argv=sys.argv[1:]):
     config = _parse_config()
 
     commands = {}
     commands["pin"] = PinCommand(config)
 
-    for step_name, step_reference in config["chipflow"]["steps"].items():
+    steps = DEFAULT_STEPS | config["chipflow"]["steps"]
+    for step_name, step_reference in steps.items():
         step_cls = _get_cls_by_reference(step_reference, context=f"step `{step_name}`")
         try:
             commands[step_name] = step_cls(config)
