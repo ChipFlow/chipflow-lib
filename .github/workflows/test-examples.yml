@@ -108,10 +108,11 @@ jobs:
         run: pdm run coverage html
 
       - name: deploy to Github Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+        uses: robtaylor/github-pages-deploy-action@10882fae8fe8df6ed2aec9be2ac59f7c828c898c
         with:
           folder: '${{ env.test_repo_path }}/${{ matrix.repo.design }}/htmlcov/'
           branch: gh-pages
           clean: false
           force: false
+          silent: false
           target-folder: coverage-${{matrix.artifact}}-${{matrix.dry}}
