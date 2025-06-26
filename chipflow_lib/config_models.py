@@ -58,11 +58,6 @@ class SiliconConfig(BaseModel):
         return v
 
 
-class StepsConfig(BaseModel):
-    """Configuration for steps in chipflow.toml."""
-    silicon: str
-
-
 class ChipFlowConfig(BaseModel):
     """Root configuration for chipflow.toml."""
     project_name: str
