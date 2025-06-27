@@ -148,29 +148,12 @@ These pads are declared with the :term:type parameter, along with a name and oth
 
 Note that in this context, the :term:type parameter can only be ``ground`` or ``power``.
 
-The package definition provides default locations for standard pins like power, ground, clocks, and resets. You only need to specify the name and properties.
+The package definition provides default locations for pins needed for bringup and test, like core power, ground, clock and reset, along with JTAG. These are called:
 
 [chipflow.silicon.power]
 vdd = { type = "power", name = "vdd", voltage = "1.8V" }
 gnd = { type = "ground", name = "gnd" }
 ```
-
-
-``[silicon.power]``
--------------------
-
-This section outlines the connection of pads to the power supply available for the selected process and package.
-These pads are declared with the :term:type parameter, along with a name and other optional information, like voltage.
-
-Note that in this context, the :term:type parameter can only be ``ground`` or ``power``.
-
-[chipflow.silicon.power]
-vdd = { type = "power", name = "vdd", voltage = "1.8V" }
-gnd = { type = "ground", name = "gnd" }
-```
-
-In the new format, the package definition provides default locations for standard pins like power, ground, clocks, and resets. You only need to specify the name and properties.
-
 
 .. glossary::
 

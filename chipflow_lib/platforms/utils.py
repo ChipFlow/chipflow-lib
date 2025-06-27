@@ -78,6 +78,8 @@ class IOSignature(wiring.Signature):
     :param direction: Input, Output or Bidir
     :param width: width of port, default is 1
     :param all_have_oe: controls whether each output wire is associated with an individual Output Enable bit or a single OE bit will be used for entire port, the default value is False, indicating that a single OE bit controls the entire port.
+    :param allocate_power: Whether a power line should be allocated with this interface
+    :param power_voltage: Voltage range of the allocated power
     :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
     """
 
@@ -196,10 +198,16 @@ JTAGSignature = wiring.Signature({
 })
 
 @dataclass
+class VoltageRange:
+    min: Optional[float] = None
+    max: Optional[float] = None
+
+@dataclass
 class PowerPins:
-    "A matched pair of power pins"
+    "A matched pair of power pins, with optional notation of the voltage range"
     power: Pin
     ground: Pin
+    voltage: VoltageRange
     def to_set(self) -> Set[Pin]:
         return set(asdict(self).values())
 
@@ -525,7 +533,8 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
     @abc.abstractmethod
     def allocate_pins(self, lockfile: Optional[LockFile]) -> LockFile:
         """
-        Allocate package pins to the registered component
+        Allocate package pins to the registered component.
+        Pins should be allocated in the most usable way for *users* of the packaged IC.
 
         Returns: `LockFile` data structure represnting the allocation of interfaces to pins
 
@@ -536,7 +545,12 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
 
     @property
     def bringup_pins(self) -> BringupPins:
-        "To aid bringup, these are always in the same place for each package type."
+        """
+        To aid bringup, these are always in the same place for each package type.
+        Should include core power, clock and reset.
+
+        Power, clocks and resets needed for non-core are allocated with the port.
+        """
         ...
 
     def _to_string(pins: Pins):
@@ -615,6 +629,7 @@ class QuadPackageDef(BasePackageDef):
     This includes the following types of package:
     .. csv-table:
     :header: "Package", "Description"
+    "QFN", "quad flat no-leads package. It's assumed the bottom pad is connected to substrate."
     "BQFP", "bumpered quad flat package"
     "BQFPH", "bumpered quad flat package with heat spreader"
     "CQFP", "ceramic quad flat package"
@@ -791,11 +806,13 @@ class GAPackageDef(BasePackageDef):
 
     def model_post_init(self, __context):
         def int_to_alpha(i: int):
+            "Covert int to alpha representation, starting at 1"
+            valid_letters = "ABCDEFGHJKLMPRSTUVWXY"
             out = ''
             while i > 0:
-                char = i % 26
-                i = i // 26
-                out = chr(ord('A')+char-1) + out
+                char = i % len(valid_letters)
+                i = i // len(valid_letters)
+                out = valid_letters[char-1] + out
             return out
 
         def pins_for_range(h1, h2, w1, w2):
