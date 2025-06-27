@@ -139,6 +139,7 @@ class SiliconPlatformPort(io.PortLike):
     def invert(self):
         return self._invert
 
+
     def __len__(self):
         if self._direction is io.Direction.Input:
             return len(self._i)
