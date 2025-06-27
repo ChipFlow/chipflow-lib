@@ -4,19 +4,155 @@ import logging
 import os
 import sys
 from pathlib import Path
+from pprint import pformat
+from typing import List, Optional
 
 from amaranth import *
-from amaranth.lib import io
+from amaranth.lib import io, meta, wiring
 from amaranth.back import rtlil  # type: ignore[reportAttributeAccessIssue]
+from amaranth.hdl import _ir, _ast
 from amaranth.hdl._ir import PortDirection
 from amaranth.lib.cdc import FFSynchronizer
+from pydantic import BaseModel, ConfigDict
 
-from ._utils import load_pinlock
+from .. import ChipFlowError
+from ._utils import load_pinlock, _chipflow_schema_uri
 
 
-__all__ = ["SimPlatform"]
 logger = logging.getLogger(__name__)
+__all__ = ["SimPlatform", "SimModelSignature", "BuildObject", "CxxBuildObject"]
 
+
+class BuildObject(BaseModel):
+    """
+    Represents an object built from a compiled language
+
+    Attributes:
+        capabilities: arbitary list of capability identifiers
+    """
+    capabilities: List[str]
+
+class CxxBuildObject(BuildObject):
+    """
+    Represents an object built from C++
+
+    Attributes:
+        cpp_files: C++ files used to define the model
+        hpp_files: C++ header files to define the model interfaces
+    """
+    cpp_files: Optional[List[Path]] = None
+    hpp_files: Optional[List[Path]] = None
+
+
+class _SimModelAnnotationModel(BaseModel):
+    model_config = ConfigDict(use_enum_values=True)
+    direction: io.Direction
+    width: int
+    options: dict = {}
+
+    @classmethod
+    def _annotation_schema(cls):
+        schema = _SimModelAnnotationModel.model_json_schema()
+        schema['$schema'] = "https://json-schema.org/draft/2020-12/schema"
+        schema['$id'] = _chipflow_schema_uri("sim-model-annotation", 0)
+        return schema
+
+    def __init__(self, **kwargs):
+        kwargs['url'] = _chipflow_schema_uri("sim-model-annotation", 0)
+        super().__init__(**kwargs)
+
+
+class _SimModelAnnotation(meta.Annotation):
+    schema = _SimModelAnnotationModel._annotation_schema()
+
+    def __init__(self, **kwargs):
+        self.model = _SimModelAnnotationModel(**kwargs)
+
+    @property
+    def origin(self):  # type: ignore
+        return self.model
+
+    def as_json(self):  # type: ignore
+        return self.model.model_dump()
+
+
+PIN_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("sim-model-annotation", 0))
+
+
+class SimModelSignature(wiring.Signature):
+    """An :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` used to attach simulation models to wires
+
+    For C++ based models, the model implmentation must at minimum implement the following interface:
+
+    .. code-block:: cpp
+
+        class {
+        public:
+            std::string name
+            void step(unsigned timestamp);
+        }
+
+    Models that need to be loaded with a dataset at startup should also implement:
+
+    .. code-block:: cpp
+        {
+            load_data(const std::string &filename, unsigned offset)
+        }
+    and annotate with the "load-data" capability.
+
+    :param cpp_class: C++ class name for the model implmentation
+    :param capabilities: List of capabilities of the model. Currently only supported is:
+        - 'load-data'
+    :param: build: A `BuildObject` which contains the described class and implementation
+    """
+
+    def __init__(self, cpp_class: str,
+                 build: BuildObject,
+                 capabilities: Optional[List[str]] = None
+                 ):
+        self._cpp_class = cpp_class
+        self._build = build
+        self._capabilities = capabilities
+        super().__init__()
+
+    def annotations(self, *args):
+        annotations = wiring.Signature.annotations(self, *args)
+        sim_model_annotation = _SimModelAnnotation(cpp_class=self._cpp_class, build=self._build,
+                                                   capabilities=self._capabilities)
+        return annotations + (sim_model_annotation,)
+
+    def __repr__(self):
+        return f"SimModelSignature({self._cpp_class}, {self._cpp_files}, {self._hpp_files}, {self._capabilities})"
+
+
+def print_fragment(fragment, ports=(), name="top", *, emit_src=True, **kwargs):
+    assert isinstance(fragment, (_ir.Fragment, _ir.Design))
+    name_map = _ast.SignalDict()
+    netlist = _ir.build_netlist(fragment, ports=ports, name=name, **kwargs)
+    top = netlist.modules[0]
+    print(f"netlist =\n{pformat(netlist)}")
+    #print(f"src_loc={netlist.src_loc}")
+    print(f"io_ports=\n{pformat(netlist.io_ports)}\n\nsignals={netlist.signals}\n\nsignal_fields={netlist.signal_fields}\n\nname_map={name_map}")
+
+
+def dump(elaboratable, name="top", platform=None, *, ports=None, emit_src=True, **kwargs):
+    if (ports is None and
+            hasattr(elaboratable, "signature") and
+            isinstance(elaboratable.signature, wiring.Signature)):
+        ports = {}
+        for path, member, value in elaboratable.signature.flatten(elaboratable):
+            if isinstance(value, _ast.ValueCastable):
+                value = value.as_value()
+            if isinstance(value, _ast.Value):
+                if member.flow == wiring.In:
+                    dir = _ir.PortDirection.Input
+                else:
+                    dir = _ir.PortDirection.Output
+                ports["__".join(map(str, path))] = (value, dir)
+    elif ports is None:
+        raise TypeError("The `convert()` function requires a `ports=` argument")
+    fragment = _ir.Fragment.get(elaboratable, platform)
+    print_fragment(fragment, ports, name, emit_src=emit_src, **kwargs)
 
 class SimPlatform:
 
@@ -47,6 +183,7 @@ class SimPlatform:
 
         print("elaborating design")
         output = rtlil.convert(e, name="sim_top", ports=ports, platform=self)
+        dump(e, name="sim_top", ports=ports, platform=self)
 
         top_rtlil = Path(self.build_dir) / "sim_soc.il"
         with open(top_rtlil, "w") as rtlil_file:
