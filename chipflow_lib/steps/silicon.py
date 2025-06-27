@@ -219,7 +219,6 @@ class SiliconStep:
 
                 if args.wait:
                     exit_code = self._stream_logs(sp, network_err)
-                sp.ok()
                 if fh:
                     fh.close()
                 exit(exit_code)
@@ -317,7 +316,6 @@ class SiliconStep:
                     auth=(None, self._chipflow_api_key),
                     timeout=timeout
                 )
-            except (requests.ConnectTimeout, requests.ConnectionError, requests.ConnectTimeout) as e:
                network_err(e)
             except requests.exceptions.ReadTimeout as e:
                 sp.text = "💥 Error connecting to ChipFlow Cloud. Trying again! "
