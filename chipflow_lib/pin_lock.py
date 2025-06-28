@@ -29,6 +29,7 @@ def lock_pins() -> None:
     # Get package definition from dict instead of Pydantic model
     package_name = config_dict["chipflow"]["silicon"]["package"]
     package_def = PACKAGE_DEFINITIONS[package_name]
+    process = config_dict["chipflow"]["silicon"]["process"]
 
     top = top_components(config_dict)
 
@@ -36,7 +37,7 @@ def lock_pins() -> None:
     for name, component in top.items():
         package_def.register_component(name, component)
 
-    newlock = package_def.allocate_pins(oldlock)
+    newlock = package_def.allocate_pins(process, oldlock)
 
     with open(lockfile, 'w') as f:
         f.write(newlock.model_dump_json(indent=2, serialize_as_any=True))
@@ -47,9 +48,10 @@ class PinCommand:
         self.config = config
 
     def build_cli_parser(self, parser):
+        assert inspect.getdoc(self.lock) is not None
         action_argument = parser.add_subparsers(dest="action")
         action_argument.add_parser(
-            "lock", help=inspect.getdoc(self.lock).splitlines()[0])
+            "lock", help=inspect.getdoc(self.lock).splitlines()[0])  # type: ignore
 
     def run_cli(self, args):
         logger.debug(f"command {args}")

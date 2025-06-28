@@ -42,7 +42,7 @@ tms_pin = jtag_pins[JTAGWireName.TMS]  # Get the TMS pin
 ### Creating a Package with Default Pins
 
 ```python
-from chipflow_lib.platforms.utils import Package, PACKAGE_DEFINITIONS
+from chipflow_lib.platforms.utils import PACKAGE_DEFINITIONS
 
 # Create a package with a specific package definition
 package = Package(package_type=PACKAGE_DEFINITIONS["pga144"])

@@ -78,26 +78,23 @@ class TestQuadPackage(unittest.TestCase):
 class TestPackage(unittest.TestCase):
     def setUp(self):
         self.package_def = BareDiePackageDef(name="test_package", width=8, height=4)
-        self.package = Package(package_type=self.package_def)
+        self.package = Package(type=self.package_def)
 
     def test_package_initialization(self):
         """Test basic package initialization"""
-        self.assertIsNotNone(self.package.package_type)
-        self.assertEqual(self.package.package_type.name, "test_package")
-        self.assertEqual(self.package.package_type.width, 8)
-        self.assertEqual(self.package.package_type.height, 4)
+        self.assertIsNotNone(self.package.type)
+        self.assertEqual(self.package.type.name, "test_package")
+        self.assertEqual(self.package.type.width, 8)
+        self.assertEqual(self.package.type.height, 4)
 
     def test_package_type_access(self):
         """Test accessing package type properties through Package"""
         # Should be able to access package type bringup pins
-        bringup_pins = self.package.package_type.bringup_pins
+        bringup_pins = self.package.type.bringup_pins
         self.assertIsNotNone(bringup_pins)
 
         # Test package discriminator
-        self.assertEqual(self.package.package_type.package_type, "BareDiePackageDef")
-
-        # Basic test of Package structure
-        self.assertIsInstance(self.package.package_type, BareDiePackageDef)
+        self.assertEqual(self.package.type.package_type, "BareDiePackageDef")
 
 
 class TestGAPackage(unittest.TestCase):

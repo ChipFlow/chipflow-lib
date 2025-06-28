@@ -25,12 +25,10 @@ from chipflow_lib.steps.silicon import SiliconStep, SiliconTop
 DEFAULT_PINLOCK = {
     "process" : "ihp_sg13g2",
     "package" : {
-        "package_type": {
         "package_type": "QuadPackageDef",
         "name": "pga144",
         "width": 36,
         "height": 36
-        },
     },
     "port_map" : {},
     "metadata" : {},

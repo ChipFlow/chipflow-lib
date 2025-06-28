@@ -88,7 +88,7 @@ class IOModel(TypedDict):
     """
 
     width: NotRequired[int]
-    direction: NotRequired[io.Direction]
+    direction: NotRequired[Annotated[io.Direction, PlainSerializer(lambda x: str(x))]]
     all_have_oe: NotRequired[bool]
     allocate_power: NotRequired[bool]
     power_voltage: NotRequired[VoltageRange]
@@ -214,7 +214,7 @@ def BidirIOSignature(width:int , **kwargs: Unpack[IOModel]):
     return IOSignature(**kwargs)
 
 
-Pin = Union[tuple, str, int]
+Pin = Union[Tuple[Any,...], str, int]
 PinSet = Set[Pin]
 PinList = List[Pin]
 Pins = Union[PinSet, PinList]
@@ -400,12 +400,9 @@ def _allocate_pins(name: str, member: Dict[str, Any], pins: List[str], port_name
         logger.debug(f"matched PinSignature {sig}")
         name = name
         width = sig['width']
-        options = sig['options']
         pin_map[name] = {'pins': pins[0:width],
-                         'direction': sig['direction'],
                          'type': 'io',
-                         'port_name': port_name,
-                         'options': options}
+                         'port_name': port_name } | sig
         logger.debug(f"added '{name}':{pin_map[name]} to pin_map")
         return pin_map, pins[width:]
     elif member['type'] == 'interface':
@@ -501,17 +498,16 @@ class LockFile(pydantic.BaseModel):
     metadata: dict
 
 
-PackageDef = Union['GAPackageDef', 'QuadPackageDef', 'BareDiePackageDef', 'BasePackageDef']
-
+PackageDef = Union['GAPackageDef', 'QuadPackageDef', 'BareDiePackageDef']
 
 class Package(pydantic.BaseModel):
     """
     Serialisable identifier for a defined packaging option
     """
-    package_type: PackageDef = pydantic.Field(discriminator="package_type")
+    type: PackageDef = pydantic.Field(discriminator="package_type")
 
 
-def _linear_allocate_components(interfaces: dict, lockfile: LockFile , allocate, unallocated) -> PortMap:
+def _linear_allocate_components(interfaces: dict, lockfile: LockFile | None, allocate, unallocated) -> PortMap:
     port_map = PortMap()
     for component, iface in interfaces.items():
         for k, v in iface['interface']['members'].items():
@@ -534,7 +530,7 @@ def _linear_allocate_components(interfaces: dict, lockfile: LockFile , allocate,
             else:
                 pins = allocate(unallocated, width)
                 if len(pins) == 0:
-                    raise ChipFlowError("No pins were allocated by {package}")
+                    raise ChipFlowError("No pins were allocated")
                 logger.debug(f"allocated range: {pins}")
                 unallocated = unallocated - set(pins)
                 _map, _ = _allocate_pins(k, v, pins)
@@ -558,9 +554,6 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
 
     """
 
-     # Used by pydantic to differentate when deserialising,
-    # override appropriately when you subclass
-    package_type: Literal["BasePackageDef"] = "BasePackageDef"
     name: str
 
     def model_post_init(self, __context):
@@ -579,7 +572,7 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
 
 
     @abc.abstractmethod
-    def allocate_pins(self, lockfile: Optional[LockFile]) -> LockFile:
+    def allocate_pins(self, process: 'Process', lockfile: Optional[LockFile]) -> LockFile:
         """
         Allocate package pins to the registered component.
         Pins should be allocated in the most usable way for *users* of the packaged IC.
@@ -622,16 +615,16 @@ class BareDiePackageDef(BasePackageDef):
     height: int
 
     def model_post_init(self, __context):
-        pins = (
-            set(itertools.product((_Side.N, _Side.S), range(self.width)))
-            | set(itertools.product((_Side.W, _Side.E), range(self.height)))
-            - set(self.bringup_pins.to_set())
-        )
-        self._ordered_pins = sorted(pins)
+        pins = set(itertools.product((_Side.N, _Side.S), range(self.width)))
+        pins |= set(itertools.product((_Side.W, _Side.E), range(self.height)))
+        pins -= set(self.bringup_pins.to_set())
+
+        self._ordered_pins: List[Pin] = sorted(pins)
         return super().model_post_init(__context)
 
-    def allocate_pins(self, lockfile: LockFile|None) -> 'LockFile':
-        return _linear_allocate_components(self._interfaces, lockfile, self._allocate, set(self._ordered_pins))
+    def allocate_pins(self, process: 'Process', lockfile: LockFile|None) -> LockFile:
+        portmap =  _linear_allocate_components(self._interfaces, lockfile, self._allocate, set(self._ordered_pins))
+        return LockFile(package=Package(type=self), process=process, metadata=self._interfaces, port_map=portmap)
 
     @property
     def bringup_pins(self) -> BringupPins:
@@ -703,19 +696,20 @@ class QuadPackageDef(BasePackageDef):
     allocate_jtag: bool = True
 
     def model_post_init(self, __context):
-        pins =(
-            set([i for i in range(1, self.width * 2 + self.height * 2)])
-            - set(self._power)
-            - self._jtag.to_set()
-        )
-        self._ordered_pins = sorted(pins)
+        pins = set([i for i in range(1, self.width * 2 + self.height * 2)])
+        pins.difference_update(*[x.to_set() for x in self._power])
+        pins.difference_update(self._jtag.to_set())
+
+        self._ordered_pins: List[Pin] = sorted(pins)
         return super().model_post_init(__context)
 
-    def allocate_pins(self, lockfile: LockFile|None) -> 'LockFile':
-        return _linear_allocate_components(self._interfaces, lockfile, self._allocate, set(self._ordered_pins))
+    def allocate_pins(self, process: 'Process', lockfile: LockFile|None) -> 'LockFile':
+        portmap = _linear_allocate_components(self._interfaces, lockfile, self._allocate, set(self._ordered_pins))
+        return LockFile(package=Package(type=self), process=process, metadata=self._interfaces, port_map=portmap)
 
-    def _allocate(self, available: Set[int], width: int) -> List[int]:
-        avail_n = sorted(available)
+
+    def _allocate(self, available: Set[int], width: int) -> List[Pin]:
+        avail_n: List[Pin] = sorted(available)
         logger.debug(f"QuadPackageDef.allocate {width} from {len(avail_n)} remaining: {available}")
         ret = _find_contiguous_sequence(self._ordered_pins, avail_n, width)
         logger.debug(f"QuadPackageDef.returned {ret}")
@@ -743,19 +737,23 @@ class QuadPackageDef(BasePackageDef):
         pins = []
         n = (self.width + self.height)//12
         # Left
-        pins.append(self.height//2 + self.height//2 +1)
+        p = self.height//2 + self.height//2
+        pins.append(PowerPins(p, p +1))
         # Bottom
         start = self.height
         if n > 2:
-            pins.append(start + self.width//2 + self.width//2 +1)
+            p = start + self.width//2 + self.width//2
+            pins.append(PowerPins(p, p+1))
         # Right
         start = start + self.width
         if n > 1:
-            pins.append(start + self.height//2 + self.height//2 +1)
+            p = start + self.height//2 + self.height//2
+            pins.append(PowerPins(p, p+1))
         # Top
         start = start + self.height
         if n > 3:
-            pins.append(start + self.width//2 + self.width//2 +1)
+            p = start + self.width//2 + self.width//2
+            pins.append(PowerPins(p, p+1))
         return pins
 
 
@@ -861,11 +859,11 @@ class GAPackageDef(BasePackageDef):
                 out = valid_letters[char-1] + out
             return out
 
-        def pins_for_range(h1: int, h2: int, w1: int, w2: int) -> Set[GAPin]:
+        def pins_for_range(h1: int, h2: int, w1: int, w2: int) -> Set[Pin]:
             pins = [GAPin(int_to_alpha(h),w) for h in range(h1, h2) for w in range(w1, w2)]
             return set(pins)
 
-        def sort_by_quadrant(pins: Set[GAPin]) -> List[GAPin]:
+        def sort_by_quadrant(pins: Set[GAPin]) -> List[Pin]:
             quadrants:List[Set[GAPin]] = [set(), set(), set(), set()]
             midline_h = int_to_alpha(self.height // 2)
             midline_w = self.width // 2
@@ -883,6 +881,7 @@ class GAPackageDef(BasePackageDef):
                 ret.append(sorted(quadrants[q]))
             return ret
 
+        self._ordered_pins: List[Pin] = []
         match self.layout_type:
             case GALayout.FULL:
                 pins = pins_for_range(1, self.height, 1, self.width)
@@ -917,8 +916,9 @@ class GAPackageDef(BasePackageDef):
         return super().model_post_init(__context)
 
 
-    def allocate_pins(self, lockfile: LockFile|None) -> 'LockFile':
-        return _linear_allocate_components(self._interfaces, lockfile, self._allocate, set(self._ordered_pins))
+    def allocate_pins(self, process: 'Process', lockfile: LockFile|None) -> 'LockFile':
+        portmap = _linear_allocate_components(self._interfaces, lockfile, self._allocate, set(self._ordered_pins))
+        return LockFile(package=Package(type=self), process=process, metadata=self._interfaces, port_map=portmap)
 
     def _allocate(self, available: Set[str], width: int) -> List[str]:
         avail_n = sorted(available)
