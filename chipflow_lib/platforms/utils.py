@@ -693,7 +693,6 @@ class QuadPackageDef(BasePackageDef):
 
     width:int
     height: int
-    allocate_jtag: bool = True
 
     def model_post_init(self, __context):
         pins = set([i for i in range(1, self.width * 2 + self.height * 2)])
