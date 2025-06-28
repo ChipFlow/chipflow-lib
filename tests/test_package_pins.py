@@ -15,7 +15,7 @@ class TestBareDiePackage(unittest.TestCase):
         self.assertEqual(self.package.name, "test_package")
         self.assertEqual(self.package.width, 8)
         self.assertEqual(self.package.height, 4)
-        self.assertEqual(self.package.type, "BareDiePackageDef")
+        self.assertEqual(self.package.package_type, "BareDiePackageDef")
 
     def test_bringup_pins(self):
         """Test bringup pins configuration"""
@@ -49,7 +49,7 @@ class TestQuadPackage(unittest.TestCase):
         self.assertEqual(self.package.name, "test_package")
         self.assertEqual(self.package.width, 36)
         self.assertEqual(self.package.height, 36)
-        self.assertEqual(self.package.type, "QuadPackageDef")
+        self.assertEqual(self.package.package_type, "QuadPackageDef")
         self.assertTrue(self.package.allocate_jtag)  # Default should be True
 
     def test_bringup_pins(self):
@@ -94,7 +94,7 @@ class TestPackage(unittest.TestCase):
         self.assertIsNotNone(bringup_pins)
 
         # Test package discriminator
-        self.assertEqual(self.package.package_type.type, "BareDiePackageDef")
+        self.assertEqual(self.package.package_type.package_type, "BareDiePackageDef")
 
         # Basic test of Package structure
         self.assertIsInstance(self.package.package_type, BareDiePackageDef)
@@ -133,7 +133,7 @@ class TestGAPackage(unittest.TestCase):
         self.assertTrue(issubclass(GAPackageDef, BasePackageDef))
 
         # Test that it has the correct type discriminator
-        self.assertEqual(GAPackageDef.model_fields['type'].default, 'GAPackageDef')
+        self.assertEqual(GAPackageDef.model_fields['package_type'].default, 'GAPackageDef')
 
     def test_gapackagedef_field_types(self):
         """Test GAPackageDef field definitions"""
@@ -157,7 +157,7 @@ class TestGAPackage(unittest.TestCase):
         self.assertTrue(issubclass(GAPackageDef, pydantic.BaseModel))
 
         # Test that it has the expected type field in model_fields
-        self.assertIn('type', GAPackageDef.model_fields)
+        self.assertIn('package_type', GAPackageDef.model_fields)
 
     def test_missing_pins_configuration(self):
         """Test missing pins configuration"""

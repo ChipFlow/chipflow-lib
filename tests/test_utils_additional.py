@@ -4,6 +4,7 @@
 import unittest
 from unittest import mock
 
+from amaranth import Const
 from amaranth.lib import io
 
 from chipflow_lib import ChipFlowError
@@ -20,25 +21,25 @@ class TestIOSignature(unittest.TestCase):
     def test_pin_signature_properties(self):
         """Test IOSignature properties"""
         # Create signature with options
-        options = {"all_have_oe": True, "init": 0}
-        sig = IOSignature(io.Direction.Bidir, width=4, all_have_oe=True, init=0)
+        sig = IOSignature(direction=io.Direction.Bidir, width=4, all_have_oe=True, init=Const.cast(0))
 
         # Test properties
         self.assertEqual(sig.direction, io.Direction.Bidir)
-        self.assertEqual(sig.width(), 4)
-        self.assertEqual(sig.options(), options)
+        self.assertEqual(sig.width, 4)
+        assert 'all_have_oe' in sig.model
+        self.assertEqual(sig.model['all_have_oe'], True)
 
         # Test __repr__ - actual representation depends on Direction enum's representation
         repr_string = repr(sig)
         self.assertIn("IOSignature", repr_string)
         self.assertIn("4", repr_string)
         self.assertIn("all_have_oe=True", repr_string)
-        self.assertIn("init=0", repr_string)
+        self.assertIn("init=(const 1'd0)", repr_string)
 
     def test_pin_signature_annotations(self):
         """Test IOSignature annotations method"""
         # Create signature
-        sig = IOSignature(io.Direction.Output, width=8, init=42)
+        sig = IOSignature(direction=io.Direction.Output, width=8, init=Const.cast(42))
 
         # Create a mock object to pass to annotations
         mock_obj = object()
@@ -61,18 +62,19 @@ class TestIOSignature(unittest.TestCase):
 
         # Verify the annotation was found and has correct values
         self.assertIsNotNone(pin_annotation, "Pin annotation not found in annotations")
+        assert pin_annotation is not None
         json_data = pin_annotation.as_json()
-        self.assertEqual(json_data['direction'], "o")
+        self.assertEqual(json_data['direction'], io.Direction.Output)
         self.assertEqual(json_data['width'], 8)
-        self.assertEqual(json_data['options']['init'], 42)
+        self.assertEqual(json_data['init']['value'], 42)
 
 
 class TestPortMap(unittest.TestCase):
     def test_portmap_creation(self):
         """Test creation of PortMap"""
         # Create port
-        port1 = Port(type="input", pins=["1"], port_name="test_port", direction="i")
-        port2 = Port(type="output", pins=["2"], port_name="port2", direction="o")
+        port1 = Port(type="input", pins=["1"], port_name="test_port", direction=io.Direction.Input)
+        port2 = Port(type="output", pins=["2"], port_name="port2", direction=io.Direction.Output)
 
         # Create a dictionary with the right structure
         data = {
@@ -117,10 +119,10 @@ class TestPortMap(unittest.TestCase):
     def test_portmap_methods(self):
         """Test PortMap helper methods"""
         # Create an empty PortMap
-        port_map = PortMap({})
+        port_map = PortMap()
 
         # Test _add_port with a new component and interface
-        port1 = Port(type="input", pins=["1"], port_name="port1", direction="i")
+        port1 = Port(type="input", pins=["1"], port_name="port1", direction=io.Direction.Input)
         port_map._add_port("comp1", "iface1", "port1", port1)
 
         self.assertIn("comp1", port_map)
@@ -130,8 +132,8 @@ class TestPortMap(unittest.TestCase):
 
         # Test _add_ports with a new interface
         ports = {
-            "port2": Port(type="output", pins=["2"], port_name="port2", direction="o"),
-            "port3": Port(type="output", pins=["3"], port_name="port3", direction="o")
+            "port2": Port(type="output", pins=["2"], port_name="port2", direction=io.Direction.Output),
+            "port3": Port(type="output", pins=["3"], port_name="port3", direction=io.Direction.Output)
         }
         port_map._add_ports("comp1", "iface2", ports)
 
@@ -144,8 +146,8 @@ class TestPortMap(unittest.TestCase):
         self.assertEqual(result, {"port1": port1})
 
         # Test get_ports with non-existent component
-        result = port_map.get_ports("non_existent", "iface1")
-        self.assertIsNone(result)
+        with self.assertRaises(KeyError):
+            result = port_map.get_ports("non_existent", "iface1")
 
 
 class TestPackageDefinitions(unittest.TestCase):
@@ -158,7 +160,7 @@ class TestPackageDefinitions(unittest.TestCase):
         self.assertEqual(cf20_pkg.name, "cf20")
         self.assertEqual(cf20_pkg.width, 7)
         self.assertEqual(cf20_pkg.height, 3)
-        self.assertEqual(cf20_pkg.type, "BareDiePackageDef")
+        self.assertEqual(cf20_pkg.package_type, "BareDiePackageDef")
 
 
 class TestPackage(unittest.TestCase):

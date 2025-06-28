@@ -11,10 +11,10 @@ logger = logging.getLogger(__name__)
 
 
 def test_pin_signature():
-    sig_bidir = IOSignature(io.Direction.Bidir, width=8)
+    sig_bidir = IOSignature(direction=io.Direction.Bidir, width=8)
     assert isinstance(sig_bidir, IOSignature)
     assert sig_bidir.direction == io.Direction.Bidir
-    assert sig_bidir.width() == 8
+    assert sig_bidir.width == 8
     assert "o" in sig_bidir.members
     assert "oe" in sig_bidir.members
     assert "i" in sig_bidir.members
@@ -22,7 +22,7 @@ def test_pin_signature():
     sig_output = OutputIOSignature(width=4)
     assert isinstance(sig_output, IOSignature)
     assert sig_output.direction == io.Direction.Output
-    assert sig_output.width() == 4
+    assert sig_output.width == 4
     assert "o" in sig_output.members
     assert "oe" not in sig_output.members
     assert "i" not in sig_output.members
@@ -30,7 +30,7 @@ def test_pin_signature():
     sig_input = InputIOSignature(width=2)
     assert isinstance(sig_input, IOSignature)
     assert sig_input.direction == io.Direction.Input
-    assert sig_input.width() == 2
+    assert sig_input.width == 2
     assert "o" not in sig_input.members
     assert "oe" not in sig_input.members
     assert "i" in sig_input.members
@@ -38,7 +38,7 @@ def test_pin_signature():
     sig_bidir_fn = BidirIOSignature(width=1)
     assert isinstance(sig_bidir_fn, IOSignature)
     assert sig_bidir_fn.direction == io.Direction.Bidir
-    assert sig_bidir_fn.width() == 1
+    assert sig_bidir_fn.width == 1
     assert "o" in sig_bidir_fn.members
     assert "oe" in sig_bidir_fn.members
     assert "i" in sig_bidir_fn.members
@@ -46,7 +46,7 @@ def test_pin_signature():
 
 def test_pin_signature_annotations():
     """Test IOSignature annotations functionality"""
-    sig = IOSignature(io.Direction.Input, width=16)
+    sig = IOSignature(direction=io.Direction.Input, width=16)
 
     # Create a mock object to pass to annotations
     mock_obj = object()
@@ -67,21 +67,8 @@ def test_pin_signature_annotations():
 
     assert pin_annotation is not None
     json_data = pin_annotation.as_json()
-    assert json_data["direction"] == "i"
+    assert json_data["direction"] == io.Direction.Input
     assert json_data["width"] == 16
-
-
-def test_pin_signature_options():
-    """Test IOSignature with various options"""
-    sig = IOSignature(io.Direction.Bidir, width=8, all_have_oe=True, init=42)
-
-    options = sig.options()
-    assert options["all_have_oe"]
-    assert options["init"] == 42
-
-    # Test bidir with all_have_oe=True should have width-sized oe
-    assert "oe" in sig.members
-    # The exact width of oe depends on implementation, but it should exist
 
 
 def test_signature_factory_functions():
@@ -90,16 +77,14 @@ def test_signature_factory_functions():
     # Test OutputIOSignature factory
     output_sig = OutputIOSignature(width=32, init=0x12345678)
     assert output_sig.direction == io.Direction.Output
-    assert output_sig.width() == 32
-    assert output_sig.options()["init"] == 0x12345678
+    assert output_sig.width == 32
 
     # Test InputIOSignature factory
     input_sig = InputIOSignature(width=16)
     assert input_sig.direction == io.Direction.Input
-    assert input_sig.width() == 16
+    assert input_sig.width == 16
 
     # Test BidirIOSignature factory
     bidir_sig = BidirIOSignature(width=8, all_have_oe=True)
     assert bidir_sig.direction == io.Direction.Bidir
-    assert bidir_sig.width() == 8
-    assert bidir_sig.options()["all_have_oe"]
+    assert bidir_sig.width == 8

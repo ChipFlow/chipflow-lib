@@ -26,7 +26,7 @@ DEFAULT_PINLOCK = {
     "process" : "ihp_sg13g2",
     "package" : {
         "package_type": {
-        "type": "QuadPackageDef",
+        "package_type": "QuadPackageDef",
         "name": "pga144",
         "width": 36,
         "height": 36

@@ -11,16 +11,31 @@ from dataclasses import dataclass, asdict
 from enum import Enum, IntEnum, StrEnum
 from math import ceil, floor
 from pprint import pformat
-from typing import Any, Dict, List, Set, Tuple, Optional, Union, Literal
+from typing import (
+    Any, Dict, List, Set,
+    Tuple, Optional, Union, Literal,
+    Annotated
+)
+from typing_extensions import (
+    TypedDict, Unpack, NotRequired
+)
 
+
+from amaranth import Const
 from amaranth.lib import wiring, io, meta
 from amaranth.lib.wiring import In, Out
-from pydantic import BaseModel, ConfigDict
+from pydantic import (
+        ConfigDict, TypeAdapter, PlainSerializer,
+        WithJsonSchema, with_config,
+        GetCoreSchemaHandler
+        )
+from pydantic_core import core_schema, CoreSchema
+
 
 from .. import ChipFlowError, _ensure_chipflow_root, _get_cls_by_reference
 
 
-__all__ = ['PIN_ANNOTATION_SCHEMA', 'IOSignature',
+__all__ = ['IO_ANNOTATION_SCHEMA', 'IOSignature',
            'OutputIOSignature', 'InputIOSignature', 'BidirIOSignature',
            'load_pinlock', "PACKAGE_DEFINITIONS", 'top_components', 'LockFile',
            'Package', 'PortMap', 'Port',
@@ -34,39 +49,72 @@ def _chipflow_schema_uri(name: str, version: int) -> str:
     return f"https://api.chipflow.com/schemas/{version}/{name}"
 
 
-class _PinAnnotationModel(BaseModel):
-    model_config = ConfigDict(use_enum_values=True)
-    direction: io.Direction
-    width: int
-    options: dict = {}
-
-    @classmethod
-    def _annotation_schema(cls):
-        schema = _PinAnnotationModel.model_json_schema()
-        schema['$schema'] = "https://json-schema.org/draft/2020-12/schema"
-        schema['$id'] = _chipflow_schema_uri("pin-annotation", 0)
-        return schema
-
-    def __init__(self, **kwargs):
-        kwargs['url'] = _chipflow_schema_uri("pin-annotation", 0)
-        super().__init__(**kwargs)
+@dataclass
+class VoltageRange:
+    min: Optional[float] = None
+    max: Optional[float] = None
 
 
-class _PinAnnotation(meta.Annotation):
-    schema = _PinAnnotationModel._annotation_schema()
+IO_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("pin-annotation", 0))
 
-    def __init__(self, **kwargs):
-        self.model = _PinAnnotationModel(**kwargs)
+ConstSerializer = PlainSerializer(
+        lambda x: {"width": x._shape._width, "signed": x._shape._signed, "value": x._value},
+        #TypedDict('ConstSerialize', {"width": int, "signed": bool, "value": int})
+        )
+ConstSchema = WithJsonSchema({
+    "title": "Const",
+    "type": "object",
+    "properties": {
+        "width": {"title": "Width", "type": "integer", "minimum":0},
+        "signed": {"title": "Signed", "type": "boolean"},
+        "value": {"title": "Value", "type": "integer"}
+    },
+    "required": ["width", "signed", "value"]
+})
+
+@with_config(ConfigDict(use_enum_values=True, arbitrary_types_allowed=True))
+class IOModel(TypedDict):
+    """
+    Options for IO Ports
+    Attributes:
+        direction: Input, Output or Bidir
+        width: width of port, default is 1
+        all_have_oe: controls whether each output wire is associated with an individual Output Enable bit
+            or a single OE bit will be used for entire port, the default value is False, indicating that a
+            single OE bit controls the entire port.
+        allocate_power: Whether a power line should be allocated with this interface
+        power_voltage: Voltage range of the allocated power
+        init: a :ref:`Const` value for the initial values of the port
+    """
+
+    width: NotRequired[int]
+    direction: NotRequired[io.Direction]
+    all_have_oe: NotRequired[bool]
+    allocate_power: NotRequired[bool]
+    power_voltage: NotRequired[VoltageRange]
+    init: NotRequired[Annotated[Const, ConstSerializer, ConstSchema]]
+
+def io_annotation_schema():
+    PydanticModel = TypeAdapter(IOModel)
+    schema = PydanticModel.json_schema()
+    schema['$schema'] = "https://json-schema.org/draft/2020-12/schema"
+    schema['$id'] = IO_ANNOTATION_SCHEMA
+    return schema
+
+
+class _IOAnnotation(meta.Annotation):
+    "Infrastructure for `Amaranth annotations <amaranth.lib.meta.Annotation>`"
+    schema = io_annotation_schema()
+
+    def __init__(self, model:IOModel):
+        self._model = model
 
     @property
     def origin(self):  # type: ignore
-        return self.model
+        return self._model
 
     def as_json(self):  # type: ignore
-        return self.model.model_dump()
-
-
-PIN_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("pin-annotation", 0))
+        return TypeAdapter(IOModel).dump_python(self._model)
 
 
 class IOSignature(wiring.Signature):
@@ -75,19 +123,15 @@ class IOSignature(wiring.Signature):
     Instead, you would typically utilize the more specific
     :py:obj:`InputIOSignature`, :py:obj:`OutputIOSignature`, or :py:obj:`BidirIOSignature` for defining pin interfaces.
 
-    :param direction: Input, Output or Bidir
-    :param width: width of port, default is 1
-    :param all_have_oe: controls whether each output wire is associated with an individual Output Enable bit or a single OE bit will be used for entire port, the default value is False, indicating that a single OE bit controls the entire port.
-    :param allocate_power: Whether a power line should be allocated with this interface
-    :param power_voltage: Voltage range of the allocated power
-    :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
-    """
+   """
 
-    def __init__(self, direction: io.Direction, width: int = 1, all_have_oe: bool = False, init = None):
-        self._direction = direction
-        self._width = width
-        self._init = init
-        match direction:
+    def __init__(self, **kwargs: Unpack[IOModel]):
+        model = IOModel(**kwargs)
+        assert 'width' in model
+        assert 'direction' in model
+        width = model['width']
+        all_have_oe = model['all_have_oe'] if 'all_have_oe' in model else False
+        match model['direction']:
             case io.Direction.Bidir:
                 sig = {
                     "o": Out(width),
@@ -100,45 +144,36 @@ class IOSignature(wiring.Signature):
                 sig = {"o": Out(width)}
             case _:
                 assert False
-        self._options = {
-                "all_have_oe": all_have_oe,
-                "init": init,
-                }
-
+        self._model = model
         super().__init__(sig)
 
     @property
     def direction(self) -> io.Direction:
         "The direction of the IO port"
-        return self._direction
+        return self._model['direction']
 
+    @property
     def width(self) -> int:
         "The width of the IO port, in wires"
-        return self._width
+        return self._model['width']
 
-    def options(self) -> dict:
-        """
-        Options set on the io port at construction
+    @property
+    def model(self) -> IOModel:
+        "The `IOModel` of this signature"
+        return self._model
 
-        Valid options are:
-            "all_have_oe": For a bidirectional port, each wire can
-            have it's direction dynamically controlled seperately,
-            so each wire also has a corresponding Output Enable wire.
-            "init": the initial value that this io port will have at power-up and reset.
-        """
-        return self._options
+    def annotations(self, *args):  # type: ignore
+        annotations = wiring.Signature.annotations(self, *args)  # type: ignore
 
-    def annotations(self, *args):
-        annotations = wiring.Signature.annotations(self, *args)
-        pin_annotation = _PinAnnotation(direction=self._direction, width=self._width, options=self._options)
-        return annotations + (pin_annotation,)
+        io_annotation = _IOAnnotation(self._model)
+        return annotations + (io_annotation,)  # type: ignore
+
 
     def __repr__(self):
-        opts = ', '.join(f"{k}={v}" for k, v in self._options.items())
-        return f"IOSignature({self._direction}, {self._width}, {opts})"
+        return f"IOSignature({','.join('{0}={1!r}'.format(k,v) for k,v in self._model.items())})"
 
 
-def OutputIOSignature(width, **kwargs):
+def OutputIOSignature(width: int, **kwargs: Unpack[IOModel]):
     """This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package output signals
     intended for connection to the physical pads of the integrated circuit package.
 
@@ -146,10 +181,12 @@ def OutputIOSignature(width, **kwargs):
     :type width: int
     :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
     """
-    return IOSignature(io.Direction.Output, width=width, **kwargs)
+    kwargs['width'] = width
+    kwargs['direction'] = io.Direction.Output
+    return IOSignature(**kwargs)
 
 
-def InputIOSignature(width, **kwargs):
+def InputIOSignature(width:int, **kwargs: Unpack[IOModel]):
     """This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package input signals
     intended for connection to the physical pads of the integrated circuit package.
 
@@ -157,10 +194,12 @@ def InputIOSignature(width, **kwargs):
     :type width: int
     :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
     """
-    return IOSignature(io.Direction.Input, width=width, **kwargs)
+    kwargs['width'] = width
+    kwargs['direction'] = io.Direction.Input
+    return IOSignature(**kwargs)
 
 
-def BidirIOSignature(width, **kwargs):
+def BidirIOSignature(width:int , **kwargs: Unpack[IOModel]):
     """This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package bi-directional signals
     intended for connection to the physical pads of the integrated circuit package.
 
@@ -170,7 +209,9 @@ def BidirIOSignature(width, **kwargs):
     :type all_have_oe: bool, optional
     :param init: a  :ref:`const-castable object <lang-constcasting>` for the initial values of the port
     """
-    return IOSignature(io.Direction.Bidir, width=width, **kwargs)
+    kwargs['width'] = width
+    kwargs['direction'] = io.Direction.Bidir
+    return IOSignature(**kwargs)
 
 
 Pin = Union[tuple, str, int]
@@ -198,16 +239,11 @@ JTAGSignature = wiring.Signature({
 })
 
 @dataclass
-class VoltageRange:
-    min: Optional[float] = None
-    max: Optional[float] = None
-
-@dataclass
 class PowerPins:
     "A matched pair of power pins, with optional notation of the voltage range"
     power: Pin
     ground: Pin
-    voltage: VoltageRange
+    voltage: Optional[VoltageRange] = None
     def to_set(self) -> Set[Pin]:
         return set(asdict(self).values())
 
@@ -251,7 +287,7 @@ class Port(pydantic.BaseModel):
     type: str
     pins: List[str] | None  # None implies must be allocated at end
     port_name: str
-    direction: Optional[str] = None
+    direction: Optional[io.Direction] = None
     options: Optional[dict] = None
 
     @property
@@ -261,7 +297,7 @@ class Port(pydantic.BaseModel):
 
 def _group_consecutive_items(ordering: PinList, lst: PinList) -> OrderedDict[int, List[PinList]]:
     if not lst:
-        return {}
+        return OrderedDict()
 
     grouped = []
     last = lst[0]
@@ -283,7 +319,7 @@ def _group_consecutive_items(ordering: PinList, lst: PinList) -> OrderedDict[int
         last = item
 
     grouped.append(current_group)
-    d = {}
+    d = OrderedDict()
     for g in grouped:
         # logger.debug(f"adding to group {len(g)} pins {g}")
         d.setdefault(len(g), []).append(g)
@@ -334,8 +370,8 @@ def _count_member_pins(name: str, member: Dict[str, Any]) -> int:
         f"{member['annotations'] if 'annotations' in member else 'no annotations'}"
     )
     if member['type'] == 'interface' and 'annotations' in member \
-       and PIN_ANNOTATION_SCHEMA in member['annotations']:
-        return member['annotations'][PIN_ANNOTATION_SCHEMA]['width']
+       and IO_ANNOTATION_SCHEMA in member['annotations']:
+        return member['annotations'][IO_ANNOTATION_SCHEMA]['width']
     elif member['type'] == 'interface':
         width = 0
         for n, v in member['members'].items():
@@ -343,9 +379,10 @@ def _count_member_pins(name: str, member: Dict[str, Any]) -> int:
         return width
     elif member['type'] == 'port':
         return member['width']
+    return 0
 
 
-def _allocate_pins(name: str, member: Dict[str, Any], pins: List[str], port_name: str = None) -> Tuple[Dict[str, Port], List[str]]:
+def _allocate_pins(name: str, member: Dict[str, Any], pins: List[str], port_name: Optional[str] = None) -> Tuple[Dict[str, Port], List[str]]:
     "Allocate pins based of Amaranth member metadata"
 
     if port_name is None:
@@ -357,9 +394,9 @@ def _allocate_pins(name: str, member: Dict[str, Any], pins: List[str], port_name
     logger.debug(f"member={pformat(member)}")
 
     if member['type'] == 'interface' and 'annotations' in member \
-       and PIN_ANNOTATION_SCHEMA in member['annotations']:
+       and IO_ANNOTATION_SCHEMA in member['annotations']:
         logger.debug("matched IOSignature {sig}")
-        sig = member['annotations'][PIN_ANNOTATION_SCHEMA]
+        sig = member['annotations'][IO_ANNOTATION_SCHEMA]
         logger.debug(f"matched PinSignature {sig}")
         name = name
         width = sig['width']
@@ -396,26 +433,29 @@ def _allocate_pins(name: str, member: Dict[str, Any], pins: List[str], port_name
 Interface = Dict[str, Port]
 Component = Dict[str, Interface]
 
-class PortMap(pydantic.RootModel[Dict[str, Component]], MutableMapping):
+class PortMap(MutableMapping[str, Component]):
+    def __init__(self, data = {}):
+        self.map: Dict[str, Component]  = data
+        return super().__init__()
     "Represents a mapping of `Port`s to Package pins, grouped by `Component` and  `Interface`"
     def __getitem__(self, key: str):
         "Gets an `Component` from the map by name"
-        return self.root[key]
+        return self.map[key]
 
     def __setitem__(self, key: str, value: Component):
         "Adds or modifies a `Component` in the map by name"
-        self.root[key] = value
+        self.map[key] = value
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: str):
         "Deletes a `Component` in the map by name"
-        del self.root[key]
+        del self.map[key]
 
     def __iter__(self):
         "Iterates `Component`s in the map by name"
-        return iter(self.root)
+        return iter(self.map)
 
     def __len__(self):
-        return len(self.root)
+        return len(self.map)
 
     def _add_port(self, component: str, interface: str, port_name: str, port: Port):
         "Internally used by a `PackageDef`"
@@ -434,8 +474,16 @@ class PortMap(pydantic.RootModel[Dict[str, Component]], MutableMapping):
     def get_ports(self, component: str, interface: str) -> Dict[str, Port]:
         "List the ports allocated in this PortMap for the given `Component` and `Interface`"
         if component not in self:
-            return None
+            raise KeyError(f"'{component}' not found in {self}")
         return self[component][interface]
+
+    @classmethod
+    def __get_pydantic_core_schema__(cls, source_type: Any, handler: GetCoreSchemaHandler):
+         return core_schema.dict_schema(
+            keys_schema=core_schema.str_schema(),
+            values_schema=core_schema.any_schema()
+        )
+
 
 
 class LockFile(pydantic.BaseModel):
@@ -460,10 +508,10 @@ class Package(pydantic.BaseModel):
     """
     Serialisable identifier for a defined packaging option
     """
-    package_type: PackageDef = pydantic.Field(discriminator="type")
+    package_type: PackageDef = pydantic.Field(discriminator="package_type")
 
 
-def _linear_allocate_components(interfaces: dict, lockfile: LockFile , allocate, unallocated) -> Tuple[PortMap, PinSet]:
+def _linear_allocate_components(interfaces: dict, lockfile: LockFile , allocate, unallocated) -> PortMap:
     port_map = PortMap()
     for component, iface in interfaces.items():
         for k, v in iface['interface']['members'].items():
@@ -476,7 +524,7 @@ def _linear_allocate_components(interfaces: dict, lockfile: LockFile , allocate,
             if old_ports:
                 logger.debug(f"  {iface}.{k} found in pins.lock, reusing")
                 logger.debug(pformat(old_ports))
-                old_width = sum([len(p.pins) for p in old_ports.values()])
+                old_width = sum([len(p.pins) for p in old_ports.values() if p.pins is not None])
                 if old_width != width:
                     raise ChipFlowError(
                         f"top level interface has changed size. "
@@ -512,7 +560,7 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
 
      # Used by pydantic to differentate when deserialising,
     # override appropriately when you subclass
-    type: Literal["BasePackageDef"] = "BasePackageDef"
+    package_type: Literal["BasePackageDef"] = "BasePackageDef"
     name: str
 
     def model_post_init(self, __context):
@@ -553,11 +601,8 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
         """
         ...
 
-    def _to_string(pins: Pins):
-        return [''.join(map(str, t)) for t in pins]
-
     def _sortpins(self, pins: Pins) -> PinList:
-        return list(pins).sort()
+        return sorted(list(pins))
 
 
 class BareDiePackageDef(BasePackageDef):
@@ -571,7 +616,7 @@ class BareDiePackageDef(BasePackageDef):
     """
 
     # Used by pydantic to differentate when deserialising
-    type: Literal["BareDiePackageDef"] = "BareDiePackageDef"
+    package_type: Literal["BareDiePackageDef"] = "BareDiePackageDef"
 
     width: int
     height: int
@@ -651,7 +696,7 @@ class QuadPackageDef(BasePackageDef):
     """
 
     # Used by pydantic to differentate when deserialising
-    type: Literal["QuadPackageDef"] = "QuadPackageDef"
+    package_type: Literal["QuadPackageDef"] = "QuadPackageDef"
 
     width:int
     height: int
@@ -680,10 +725,10 @@ class QuadPackageDef(BasePackageDef):
     @property
     def bringup_pins(self) -> BringupPins:
         return BringupPins(
-            core_power=[self._power],
-            core_clock={0: 2},
-            core_reset={0: 1},
-            core_heartbeat={0: self.width * 2 + self.height * 2 - 1},
+            core_power=self._power,
+            core_clock=2,
+            core_reset=1,
+            core_heartbeat=self.width * 2 + self.height * 2 - 1,
             core_jtag=self._jtag
         )
 
@@ -722,21 +767,22 @@ class QuadPackageDef(BasePackageDef):
         # Default JTAG pin allocations
         # Use consecutive pins at the start of the package
         start_pin = 2
-        if self.allocate_jtag:
-            return JTAGPins(
-                trst=start_pin,
-                tck=start_pin + 1,
-                tms=start_pin + 2,
-                tdi=start_pin + 3,
-                tdo=start_pin + 4
-            )
-        else:
-            return {}
+        return JTAGPins(
+            trst=start_pin,
+            tck=start_pin + 1,
+            tms=start_pin + 2,
+            tdi=start_pin + 3,
+            tdo=start_pin + 4
+        )
 
 @dataclass
 class GAPin:
     h: str
     w: int
+    def __lt__(self, other):
+        if self.h == other.h:
+            return self.w < other.w
+        return self.h < other.h
 
 class GALayout(StrEnum):
     FULL = "full"
@@ -794,7 +840,7 @@ class GAPackageDef(BasePackageDef):
     """
 
     # Used by pydantic to differentate when deserialising
-    type: Literal["GAPackageDef"] = "GAPackageDef"
+    package_type: Literal["GAPackageDef"] = "GAPackageDef"
 
     width:int
     height: int
@@ -815,22 +861,23 @@ class GAPackageDef(BasePackageDef):
                 out = valid_letters[char-1] + out
             return out
 
-        def pins_for_range(h1, h2, w1, w2):
-            return set([[GAPin(int_to_alpha(h),w) for h in range(h1, h2)] for w in range(w1, w2)])
+        def pins_for_range(h1: int, h2: int, w1: int, w2: int) -> Set[GAPin]:
+            pins = [GAPin(int_to_alpha(h),w) for h in range(h1, h2) for w in range(w1, w2)]
+            return set(pins)
 
         def sort_by_quadrant(pins: Set[GAPin]) -> List[GAPin]:
-            quadrants = [set(), set(), set(), set()]
+            quadrants:List[Set[GAPin]] = [set(), set(), set(), set()]
             midline_h = int_to_alpha(self.height // 2)
             midline_w = self.width // 2
             for pin in pins:
                 if pin.h < midline_h and pin.w < midline_w:
-                    quadrants[0] |= pin
+                    quadrants[0].add(pin)
                 if pin.h >= midline_h and pin.w < midline_w:
-                    quadrants[1] != pin
+                    quadrants[1].add(pin)
                 if pin.h < midline_h and pin.w >= midline_w:
-                    quadrants[2] != pin
+                    quadrants[2].add(pin)
                 if pin.h >= midline_h and pin.w >= midline_w:
-                    quadrants[3] != pin
+                    quadrants[3].add(pin)
             ret = []
             for q in range(0,3):
                 ret.append(sorted(quadrants[q]))
@@ -843,22 +890,26 @@ class GAPackageDef(BasePackageDef):
                 self._ordered_pins = sort_by_quadrant(pins)
 
             case GALayout.PERIMETER:
+                assert self.channel_width is not None
                 pins = pins_for_range(1, self.height, 1, self.width) - \
                        pins_for_range(1 + self.channel_width, self.height-self.channel_width,  1 + self.channel_width, self.width - self.channel_width)
                 pins -= self.bringup_pins.to_set()
                 self._ordered_pins = sort_by_quadrant(pins)
 
             case GALayout.ISLAND:
+                assert self.channel_width is not None
+                assert self.island_width is not None
                 outer_pins = pins_for_range(1, self.height, 1, self.width) - \
                              pins_for_range(1 + self.channel_width, self.height-self.channel_width,  1 + self.channel_width, self.width - self.channel_width)
-                pins -= self.bringup_pins.to_set()
+                outer_pins -= self.bringup_pins.to_set()
                 inner_pins = pins_for_range(ceil(self.height/ 2 - self.island_width /2), floor(self.height/2 + self.island_width /2),
                                             ceil(self.width / 2 - self.island_width /2), floor(self.width /2 + self.island_width /2))
                 # TODO, allocate island as power
                 self._ordered_pins = sort_by_quadrant(outer_pins) + sorted(inner_pins)
 
             case GALayout.CHANNEL:
-                pins = pins_for_range(1, self.channel_width + 1, 1, self.width) + \
+                assert self.channel_width is not None
+                pins = pins_for_range(1, self.channel_width + 1, 1, self.width) | \
                        pins_for_range(self.height - self.channel_width, self.height, 1, self.width)
                 pins -= self.bringup_pins.to_set()
                 self._ordered_pins = sort_by_quadrant(pins)
@@ -880,10 +931,10 @@ class GAPackageDef(BasePackageDef):
     @property
     def bringup_pins(self) -> BringupPins:
         return BringupPins(
-            core_power=[self._power],
-            core_clock={0: str(2)},
-            core_reset={0: str(1)},
-            core_heartbeat={0: str(self.width * 2 + self.height * 2 - 1)},
+            core_power=self._power,
+            core_clock=2,
+            core_reset=1,
+            core_heartbeat=self.width * 2 + self.height * 2 - 1,
             core_jtag=self._jtag
         )
 
@@ -894,20 +945,20 @@ class GAPackageDef(BasePackageDef):
 
 
     @property
-    def _jtag(self) -> Dict[JTAGWire, Pin]:
+    def _jtag(self) -> JTAGPins:
         """
         Map of JTAG pins for the package
         """
         # Default JTAG pin allocations
         # Use consecutive pins at the start of the package
         start_pin = 3
-        return {
-            JTAGWire.TRST: str(start_pin),
-            JTAGWire.TCK: str(start_pin + 1),
-            JTAGWire.TMS: str(start_pin + 2),
-            JTAGWire.TDI: str(start_pin + 3),
-            JTAGWire.TDO: str(start_pin + 4)
-        }
+        return JTAGPins(
+            trst=start_pin,
+            tck=start_pin + 1,
+            tms=start_pin + 2,
+            tdi=start_pin + 3,
+            tdo=start_pin + 4
+        )
 
     @property
     def heartbeat(self) -> Dict[int, Pin]:
@@ -922,7 +973,7 @@ class GAPackageDef(BasePackageDef):
 # Add any new package types to both PACKAGE_DEFINITIONS and the PackageDef union
 PACKAGE_DEFINITIONS = {
     "pga144": QuadPackageDef(name="pga144", width=36, height=36),
-    "cf20": BareDiePackageDef(name="cf20", width=7, height=3, allocate_jtag=False)
+    "cf20": BareDiePackageDef(name="cf20", width=7, height=3)
 }
 
 class Process(Enum):
