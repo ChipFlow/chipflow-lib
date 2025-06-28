@@ -88,7 +88,7 @@ class IOModel(TypedDict):
     """
 
     width: NotRequired[int]
-    direction: NotRequired[Annotated[io.Direction, PlainSerializer(lambda x: str(x))]]
+    direction: NotRequired[Annotated[io.Direction, PlainSerializer(lambda x: x.value)]]
     all_have_oe: NotRequired[bool]
     allocate_power: NotRequired[bool]
     power_voltage: NotRequired[VoltageRange]

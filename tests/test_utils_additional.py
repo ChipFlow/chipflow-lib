@@ -64,7 +64,7 @@ class TestIOSignature(unittest.TestCase):
         self.assertIsNotNone(pin_annotation, "Pin annotation not found in annotations")
         assert pin_annotation is not None
         json_data = pin_annotation.as_json()
-        self.assertEqual(json_data['direction'], io.Direction.Output)
+        self.assertEqual(json_data['direction'], 'o')
         self.assertEqual(json_data['width'], 8)
         self.assertEqual(json_data['init']['value'], 42)
 
@@ -170,11 +170,11 @@ class TestPackage(unittest.TestCase):
         package_type = PACKAGE_DEFINITIONS["cf20"]
 
         # Create package
-        package = Package(package_type=package_type)
+        package = Package(type=package_type)
 
         # Check properties
-        self.assertEqual(package.package_type, package_type)
-        self.assertEqual(package.package_type.name, "cf20")
+        self.assertEqual(package.type, package_type)
+        self.assertEqual(package.type.name, "cf20")
 
 
 class TestPort(unittest.TestCase):

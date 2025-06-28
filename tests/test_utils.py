@@ -67,7 +67,7 @@ def test_pin_signature_annotations():
 
     assert pin_annotation is not None
     json_data = pin_annotation.as_json()
-    assert json_data["direction"] == io.Direction.Input
+    assert json_data["direction"] == 'i'
     assert json_data["width"] == 16
 
 
