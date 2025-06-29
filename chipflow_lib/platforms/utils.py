@@ -14,7 +14,7 @@ from pprint import pformat
 from typing import (
     Any, Dict, List, Set,
     Tuple, Optional, Union, Literal,
-    Annotated
+    Annotated, NamedTuple
 )
 from typing_extensions import (
     TypedDict, Unpack, NotRequired
@@ -173,7 +173,7 @@ class IOSignature(wiring.Signature):
         return f"IOSignature({','.join('{0}={1!r}'.format(k,v) for k,v in self._model.items())})"
 
 
-def OutputIOSignature(width: int, **kwargs: Unpack[IOModel]):
+def OutputIOSignature(width: int, **kwargs: Unpack[IOModel]):  # type: ignore[reportGeneralTypeIssues]
     """This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package output signals
     intended for connection to the physical pads of the integrated circuit package.
 
@@ -186,7 +186,7 @@ def OutputIOSignature(width: int, **kwargs: Unpack[IOModel]):
     return IOSignature(**kwargs)
 
 
-def InputIOSignature(width:int, **kwargs: Unpack[IOModel]):
+def InputIOSignature(width:int, **kwargs: Unpack[IOModel]):  # type: ignore[reportGeneralTypeIssues]
     """This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package input signals
     intended for connection to the physical pads of the integrated circuit package.
 
@@ -199,7 +199,7 @@ def InputIOSignature(width:int, **kwargs: Unpack[IOModel]):
     return IOSignature(**kwargs)
 
 
-def BidirIOSignature(width:int , **kwargs: Unpack[IOModel]):
+def BidirIOSignature(width:int , **kwargs: Unpack[IOModel]):  # type: ignore[reportGeneralTypeIssues]
     """This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package bi-directional signals
     intended for connection to the physical pads of the integrated circuit package.
 
@@ -743,8 +743,7 @@ class QuadPackageDef(BasePackageDef):
             tdo=start_pin + 4
         )
 
-@dataclass
-class GAPin:
+class GAPin(NamedTuple):
     h: str
     w: int
     def __lt__(self, other):
@@ -829,7 +828,7 @@ class GAPackageDef(BasePackageDef):
                 out = valid_letters[char-1] + out
             return out
 
-        def pins_for_range(h1: int, h2: int, w1: int, w2: int) -> Set[Pin]:
+        def pins_for_range(h1: int, h2: int, w1: int, w2: int) -> Set[GAPin]:
             pins = [GAPin(int_to_alpha(h),w) for h in range(h1, h2) for w in range(w1, w2)]
             return set(pins)
 
@@ -890,7 +889,7 @@ class GAPackageDef(BasePackageDef):
         portmap = _linear_allocate_components(self._interfaces, lockfile, self._allocate, set(self._ordered_pins))
         return LockFile(package=Package(type=self), process=process, metadata=self._interfaces, port_map=portmap)
 
-    def _allocate(self, available: Set[str], width: int) -> List[str]:
+    def _allocate(self, available: Set[Pin], width: int) -> List[Pin]:
         avail_n = sorted(available)
         logger.debug(f"GAPackageDef.allocate {width} from {len(avail_n)} remaining: {available}")
         ret = _find_contiguous_sequence(self._ordered_pins, avail_n, width)
