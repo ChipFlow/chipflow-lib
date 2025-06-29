@@ -87,34 +87,34 @@ class TestPortMap(unittest.TestCase):
         }
 
         # Create a PortMap
-        port_map = PortMap(data)
+        port_map = PortMap(ports=data)
 
         # Basic checks
-        self.assertEqual(len(port_map), 1)
-        self.assertIn("comp1", port_map)
-        self.assertIn("iface1", port_map["comp1"])
-        self.assertIn("port1", port_map["comp1"]["iface1"])
-        self.assertEqual(port_map["comp1"]["iface1"]["port1"], port1)
+        self.assertEqual(len(port_map.ports), 1)
+        self.assertIn("comp1", port_map.ports)
+        self.assertIn("iface1", port_map.ports["comp1"])
+        self.assertIn("port1", port_map.ports["comp1"]["iface1"])
+        self.assertEqual(port_map.ports["comp1"]["iface1"]["port1"], port1)
 
     def test_portmap_mutable_mapping(self):
         """Test PortMap MutableMapping methods"""
         # Create an empty PortMap
-        port_map = PortMap({})
+        port_map = PortMap()
 
         # Test __setitem__ and __getitem__
-        port_map["comp1"] = {"iface1": {"port1": Port(type="input", pins=["1"], port_name="port1")}}
-        self.assertIn("comp1", port_map)
-        self.assertEqual(port_map["comp1"]["iface1"]["port1"].pins, ["1"])
+        port_map.ports["comp1"] = {"iface1": {"port1": Port(type="input", pins=["1"], port_name="port1")}}
+        self.assertIn("comp1", port_map.ports)
+        self.assertEqual(port_map.ports["comp1"]["iface1"]["port1"].pins, ["1"])
 
         # Test __delitem__
-        del port_map["comp1"]
-        self.assertNotIn("comp1", port_map)
+        del port_map.ports["comp1"]
+        self.assertNotIn("comp1", port_map.ports)
 
         # Test __iter__ and __len__
-        port_map["comp1"] = {"iface1": {}}
-        port_map["comp2"] = {"iface2": {}}
-        self.assertEqual(len(port_map), 2)
-        self.assertEqual(set(port_map), {"comp1", "comp2"})
+        port_map.ports["comp1"] = {"iface1": {}}
+        port_map.ports["comp2"] = {"iface2": {}}
+        self.assertEqual(len(port_map.ports), 2)
+        self.assertEqual(set(port_map.ports), {"comp1", "comp2"})
 
     def test_portmap_methods(self):
         """Test PortMap helper methods"""
@@ -125,10 +125,10 @@ class TestPortMap(unittest.TestCase):
         port1 = Port(type="input", pins=["1"], port_name="port1", direction=io.Direction.Input)
         port_map._add_port("comp1", "iface1", "port1", port1)
 
-        self.assertIn("comp1", port_map)
-        self.assertIn("iface1", port_map["comp1"])
-        self.assertIn("port1", port_map["comp1"]["iface1"])
-        self.assertEqual(port_map["comp1"]["iface1"]["port1"], port1)
+        self.assertIn("comp1", port_map.ports)
+        self.assertIn("iface1", port_map.ports["comp1"])
+        self.assertIn("port1", port_map.ports["comp1"]["iface1"])
+        self.assertEqual(port_map.ports["comp1"]["iface1"]["port1"], port1)
 
         # Test _add_ports with a new interface
         ports = {
@@ -137,9 +137,9 @@ class TestPortMap(unittest.TestCase):
         }
         port_map._add_ports("comp1", "iface2", ports)
 
-        self.assertIn("iface2", port_map["comp1"])
-        self.assertEqual(len(port_map["comp1"]["iface2"]), 2)
-        self.assertEqual(port_map["comp1"]["iface2"]["port2"].pins, ["2"])
+        self.assertIn("iface2", port_map.ports["comp1"])
+        self.assertEqual(len(port_map.ports["comp1"]["iface2"]), 2)
+        self.assertEqual(port_map.ports["comp1"]["iface2"]["port2"].pins, ["2"])
 
         # Test get_ports
         result = port_map.get_ports("comp1", "iface1")

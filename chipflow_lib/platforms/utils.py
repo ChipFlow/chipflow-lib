@@ -285,7 +285,7 @@ class _Side(IntEnum):
 
 class Port(pydantic.BaseModel):
     type: str
-    pins: List[str] | None  # None implies must be allocated at end
+    pins: List[Pin] | None  # None implies must be allocated at end
     port_name: str
     direction: Optional[io.Direction] = None
     options: Optional[dict] = None
@@ -430,57 +430,28 @@ def _allocate_pins(name: str, member: Dict[str, Any], pins: List[str], port_name
 Interface = Dict[str, Port]
 Component = Dict[str, Interface]
 
-class PortMap(MutableMapping[str, Component]):
-    def __init__(self, data = {}):
-        self.map: Dict[str, Component]  = data
-        return super().__init__()
-    "Represents a mapping of `Port`s to Package pins, grouped by `Component` and  `Interface`"
-    def __getitem__(self, key: str):
-        "Gets an `Component` from the map by name"
-        return self.map[key]
-
-    def __setitem__(self, key: str, value: Component):
-        "Adds or modifies a `Component` in the map by name"
-        self.map[key] = value
-
-    def __delitem__(self, key: str):
-        "Deletes a `Component` in the map by name"
-        del self.map[key]
-
-    def __iter__(self):
-        "Iterates `Component`s in the map by name"
-        return iter(self.map)
-
-    def __len__(self):
-        return len(self.map)
+class PortMap(pydantic.BaseModel):
+    ports: Dict[str, Component] = {}
 
     def _add_port(self, component: str, interface: str, port_name: str, port: Port):
         "Internally used by a `PackageDef`"
-        if component not in self:
-            self[component] = {}
-        if interface not in self[component]:
-            self[component][interface] = {}
-        self[component][interface][port_name] = port
+        if component not in self.ports:
+            self.ports[component] = {}
+        if interface not in self.ports[component]:
+            self.ports[component][interface] = {}
+        self.ports[component][interface][port_name] = port
 
     def _add_ports(self, component: str, interface: str, ports: Dict[str, Port]):
         "Internally used by a `PackageDef`"
-        if component not in self:
-            self[component] = {}
-        self[component][interface] = ports
+        if component not in self.ports:
+            self.ports[component] = {}
+        self.ports[component][interface] = ports
 
     def get_ports(self, component: str, interface: str) -> Dict[str, Port]:
         "List the ports allocated in this PortMap for the given `Component` and `Interface`"
-        if component not in self:
+        if component not in self.ports:
             raise KeyError(f"'{component}' not found in {self}")
-        return self[component][interface]
-
-    @classmethod
-    def __get_pydantic_core_schema__(cls, source_type: Any, handler: GetCoreSchemaHandler):
-         return core_schema.dict_schema(
-            keys_schema=core_schema.str_schema(),
-            values_schema=core_schema.any_schema()
-        )
-
+        return self.ports[component][interface]
 
 
 class LockFile(pydantic.BaseModel):

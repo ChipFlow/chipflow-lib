@@ -3,6 +3,7 @@ import inspect
 import logging
 
 from pathlib import Path
+from pprint import pformat
 
 from chipflow_lib import _parse_config, _ensure_chipflow_root
 from chipflow_lib.platforms import top_components, LockFile, PACKAGE_DEFINITIONS
@@ -23,7 +24,7 @@ def lock_pins() -> None:
 
     if lockfile.exists():
         oldlock = LockFile.model_validate_json(lockfile.read_text())
-
+    print(f"Old Lock =\n{pformat(oldlock)}")
     print(f"Locking pins: {'using pins.lock' if lockfile.exists() else ''}")
 
     # Get package definition from dict instead of Pydantic model

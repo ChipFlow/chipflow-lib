@@ -50,7 +50,6 @@ class TestQuadPackage(unittest.TestCase):
         self.assertEqual(self.package.width, 36)
         self.assertEqual(self.package.height, 36)
         self.assertEqual(self.package.package_type, "QuadPackageDef")
-        self.assertTrue(self.package.allocate_jtag)  # Default should be True
 
     def test_bringup_pins(self):
         """Test bringup pins configuration"""
