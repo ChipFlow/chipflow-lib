@@ -28,6 +28,7 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "pydantic>=2.8",
     "halo>=0.0.31",
+    "pyrefly>=0.21.0",
 ]
 
 [project.scripts]
@@ -42,8 +43,8 @@ build-backend = "pdm.backend"
 # Development workflow configuration
 
 [tool.pyright]
-diagnosticMode=false
-typeCheckingMode = "off"
+diagnosticMode=true
+typeCheckingMode = "standard"
 reportInvalidTypeForm = false
 reportMissingImports = false
 reportUnboundVariable = false
@@ -71,7 +72,7 @@ test.cmd = "pytest"
 test-cov.cmd = "pytest --cov=chipflow_lib --cov-report=term"
 test-cov-html.cmd = "pytest --cov=chipflow_lib --cov-report=html"
 test-docs.cmd = "sphinx-build -b doctest docs/ docs/_build"
-lint.cmd = "ruff check"
+lint.composite = [ "ruff check", "pyrefly check"]
 docs.cmd = "sphinx-build docs/ docs/_build/ -W --keep-going"
 test-silicon.cmd = "pytest tests/test_silicon_platform.py tests/test_silicon_platform_additional.py tests/test_silicon_platform_amaranth.py tests/test_silicon_platform_build.py tests/test_silicon_platform_port.py --cov=chipflow_lib.platforms.silicon --cov-report=term"
 _check-project.call = "tools.check_project:main"

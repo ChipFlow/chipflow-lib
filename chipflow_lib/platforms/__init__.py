@@ -10,6 +10,6 @@ from .silicon import *
 from .sim import *
 from .utils import *
 
-__all__ = ['PIN_ANNOTATION_SCHEMA', 'IOSignature',
+__all__ = ['IO_ANNOTATION_SCHEMA', 'IOSignature',
            'OutputIOSignature', 'InputIOSignature', 'BidirIOSignature',
-           'load_pinlock', "PACKAGE_DEFINITIONS", 'top_interfaces']
+           'load_pinlock', "PACKAGE_DEFINITIONS", 'top_components']

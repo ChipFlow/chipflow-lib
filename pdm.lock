@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:bb86e1855ac53725d0586b78d8ffe646006fbcd553adc418381a51b2ddb87205"
+content_hash = "sha256:ac119e3830cb2cf068c3c23604ee6f5bb07fe3f195c2a8529167f1736d874c61"
 
 [[metadata.targets]]
 requires_python = ">=3.10"
@@ -60,6 +60,36 @@ summary = "System on Chip toolkit for Amaranth HDL"
 groups = ["default"]
 dependencies = [
     "amaranth<0.6,>=0.5",
+]
+
+[[package]]
+name = "amaranth-yosys"
+version = "0.50.0.0.post113"
+requires_python = "~=3.8"
+summary = "Specialized WebAssembly build of Yosys used by Amaranth HDL"
+groups = ["default"]
+dependencies = [
+    "importlib-resources>=1.4; python_version < \"3.9\"",
+    "wasmtime<35,>=1",
+]
+files = [
+    {file = "amaranth_yosys-0.50.0.0.post113-py3-none-any.whl", hash = "sha256:b294c3ad637da758aef0ad58962d3e8b249862461a1650890ac1f76b54d44caf"},
+]
+
+[[package]]
+name = "amaranth"
+version = "0.5.6"
+extras = ["builtin-yosys"]
+requires_python = "~=3.8"
+summary = "Amaranth hardware definition language"
+groups = ["default"]
+dependencies = [
+    "amaranth-yosys>=0.40",
+    "amaranth==0.5.6",
+]
+files = [
+    {file = "amaranth-0.5.6-py3-none-any.whl", hash = "sha256:88c64d8849769c576eaecd7add5869765e921b0573658fc7562edf2b350a6476"},
+    {file = "amaranth-0.5.6.tar.gz", hash = "sha256:e6439af40248d76f9f9d761769edb7fd4bcf4bdd120fbc48bad20c72e349d97b"},
 ]
 
 [[package]]
@@ -798,6 +828,24 @@ groups = ["dev"]
 files = [
     {file = "pygments-2.19.2-py3-none-any.whl", hash = "sha256:86540386c03d588bb81d44bc3928634ff26449851e99741617ecb9037ee5ec0b"},
     {file = "pygments-2.19.2.tar.gz", hash = "sha256:636cb2477cec7f8952536970bc533bc43743542f70392ae026374600add5b887"},
+]
+
+[[package]]
+name = "pyrefly"
+version = "0.21.0"
+requires_python = ">=3.8"
+summary = "A faster Python type checker written in Rust"
+groups = ["default"]
+files = [
+    {file = "pyrefly-0.21.0-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:b44e6172421de12fa14d380bcd416fa64d474aec9f1829e6985b18471b1fcee1"},
+    {file = "pyrefly-0.21.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:0d7ea3b86ac3c8680b290389ca3706cbbb046899247a963ac7384c57880e6f2f"},
+    {file = "pyrefly-0.21.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:101ecb84b0442e85a92bcb15a2dfd844f7a6abae8f980661849c71102447443e"},
+    {file = "pyrefly-0.21.0-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:b934004ddcdcbe55efeb732d0c0155a781a184e374fec9cd031e819ac1b92eff"},
+    {file = "pyrefly-0.21.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:0c66446bc5f7e912dab923adf93f636307c834ab53ddd9422e56d101910d960a"},
+    {file = "pyrefly-0.21.0-py3-none-win32.whl", hash = "sha256:a4cb8acf2dc831759cb43fa0326e07085cb21da7202212e70d9478bfc40b7a28"},
+    {file = "pyrefly-0.21.0-py3-none-win_amd64.whl", hash = "sha256:765d19f2b48d5dd3dae0752676e2d6e388025fa6337947031ff628160b8cf568"},
+    {file = "pyrefly-0.21.0-py3-none-win_arm64.whl", hash = "sha256:a3fc4fffb625a5610b68fc3bf07e4d33b5b1c279512e0251b3d3d4f7c3ed1541"},
+    {file = "pyrefly-0.21.0.tar.gz", hash = "sha256:e05a083047dcba25e730c7e0c70b3dc48ba420f17ef73265f169bc95f487a99d"},
 ]
 
 [[package]]
