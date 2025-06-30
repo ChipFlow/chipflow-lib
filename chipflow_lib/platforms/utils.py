@@ -89,8 +89,9 @@ class _IOModelOptions(TypedDict):
 class IOModel(_IOModelOptions):
     """
     Options for IO Ports
+
     Attributes:
-        direction: Input, Output or Bidir
+        direction: `io.Direction.Input`, `io.Direction.Output` or `io.Direction.Bidir`
         width: width of port, default is 1
         all_have_oe: controls whether each output wire is associated with an individual Output Enable bit
             or a single OE bit will be used for entire port, the default value is False, indicating that a
@@ -1048,10 +1049,18 @@ PACKAGE_DEFINITIONS = {
 }
 
 class Process(Enum):
+    """
+    IC manufacturing process
+    """
+    #: Skywater foundry open-source 130nm process
     SKY130 = "sky130"
+    #: GlobalFoundries open-source 130nm process
     GF180 = "gf180"
+    #: Pragmatic Semiconductor FlexIC process (old)
     HELVELLYN2 = "helvellyn2"
+    #: GlobalFoundries 130nm BCD process
     GF130BCD = "gf130bcd"
+    #: IHP open source 130nm SiGe Bi-CMOS process
     IHP_SG13G2 = "ihp_sg13g2"
 
     def __str__(self):

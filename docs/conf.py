@@ -34,6 +34,9 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
     'autoapi.extension',
+    'sphinxcontrib.autoprogram',
+    'sphinxcontrib.autodoc_pydantic',
+    'sphinx_design',
 ]
 
 html_theme = 'furo'
@@ -96,6 +99,11 @@ napoleon_custom_sections = [
 rst_prolog = """
 .. role:: py(code)
    :language: python
+"""
+
+rst_epilog = """
+.. |required| replace:: :bdg-primary-line:`Required`
+.. |optional| replace:: :bdg-secondary-line:`Optional`
 """
 
 # -- Options for EPUB output

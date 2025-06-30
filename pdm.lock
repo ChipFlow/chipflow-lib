@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:31b3d4d2bb30e5f67de68924029f0831667e96efce9a4f8279ac1c661d15f3d0"
+content_hash = "sha256:0a7c305f9a8ac960ec917a197305d71154cc7c4df552d1ff6dee1ea1a214ce18"
 
 [[metadata.targets]]
 requires_python = ">=3.11"
@@ -111,7 +111,7 @@ name = "annotated-types"
 version = "0.7.0"
 requires_python = ">=3.8"
 summary = "Reusable constraint types to use with typing.Annotated"
-groups = ["default"]
+groups = ["default", "dev"]
 dependencies = [
     "typing-extensions>=4.0.0; python_version < \"3.9\"",
 ]
@@ -143,6 +143,22 @@ groups = ["default"]
 files = [
     {file = "attrs-25.3.0-py3-none-any.whl", hash = "sha256:427318ce031701fea540783410126f03899a97ffc6f61596ad581ac2e40e3bc3"},
     {file = "attrs-25.3.0.tar.gz", hash = "sha256:75d7cefc7fb576747b2c81b4442d4d4a1ce0900973527c011d1030fd3bf4af1b"},
+]
+
+[[package]]
+name = "autodoc-pydantic"
+version = "2.2.0"
+requires_python = "<4.0.0,>=3.8.1"
+summary = "Seamlessly integrate pydantic models in your Sphinx documentation."
+groups = ["dev"]
+dependencies = [
+    "Sphinx>=4.0",
+    "importlib-metadata>1; python_version <= \"3.8\"",
+    "pydantic-settings<3.0.0,>=2.0",
+    "pydantic<3.0.0,>=2.0",
+]
+files = [
+    {file = "autodoc_pydantic-2.2.0-py3-none-any.whl", hash = "sha256:8c6a36fbf6ed2700ea9c6d21ea76ad541b621fbdf16b5a80ee04673548af4d95"},
 ]
 
 [[package]]
@@ -685,7 +701,7 @@ name = "pydantic"
 version = "2.11.7"
 requires_python = ">=3.9"
 summary = "Data validation using Python type hints"
-groups = ["default"]
+groups = ["default", "dev"]
 dependencies = [
     "annotated-types>=0.6.0",
     "pydantic-core==2.33.2",
@@ -702,7 +718,7 @@ name = "pydantic-core"
 version = "2.33.2"
 requires_python = ">=3.9"
 summary = "Core functionality for Pydantic validation and serialization"
-groups = ["default"]
+groups = ["default", "dev"]
 dependencies = [
     "typing-extensions!=4.7.0,>=4.6.0",
 ]
@@ -762,6 +778,22 @@ files = [
     {file = "pydantic_core-2.33.2-pp311-pypy311_pp73-musllinux_1_1_x86_64.whl", hash = "sha256:82f68293f055f51b51ea42fafc74b6aad03e70e191799430b90c13d643059ebb"},
     {file = "pydantic_core-2.33.2-pp311-pypy311_pp73-win_amd64.whl", hash = "sha256:329467cecfb529c925cf2bbd4d60d2c509bc2fb52a20c1045bf09bb70971a9c1"},
     {file = "pydantic_core-2.33.2.tar.gz", hash = "sha256:7cb8bc3605c29176e1b105350d2e6474142d7c1bd1d9327c4a9bdb46bf827acc"},
+]
+
+[[package]]
+name = "pydantic-settings"
+version = "2.10.1"
+requires_python = ">=3.9"
+summary = "Settings management using Pydantic"
+groups = ["dev"]
+dependencies = [
+    "pydantic>=2.7.0",
+    "python-dotenv>=0.21.0",
+    "typing-inspection>=0.4.0",
+]
+files = [
+    {file = "pydantic_settings-2.10.1-py3-none-any.whl", hash = "sha256:a60952460b99cf661dc25c29c0ef171721f98bfcb52ef8d9ea4c943d7c8cc796"},
+    {file = "pydantic_settings-2.10.1.tar.gz", hash = "sha256:06f0062169818d0f5524420a360d632d5857b83cffd4d42fe29597807a1614ee"},
 ]
 
 [[package]]
@@ -849,7 +881,7 @@ name = "python-dotenv"
 version = "1.1.1"
 requires_python = ">=3.9"
 summary = "Read key-value pairs from a .env file and set them as environment variables"
-groups = ["default"]
+groups = ["default", "dev"]
 files = [
     {file = "python_dotenv-1.1.1-py3-none-any.whl", hash = "sha256:31f23644fe2602f88ff55e1f5c79ba497e01224ee7737937930c448e4d0e24dc"},
     {file = "python_dotenv-1.1.1.tar.gz", hash = "sha256:a8a6399716257f45be6a007360200409fce5cda2661e3dec71d23dc15f6189ab"},
@@ -1161,6 +1193,20 @@ files = [
 ]
 
 [[package]]
+name = "sphinx-autodoc-typehints"
+version = "2.3.0"
+requires_python = ">=3.9"
+summary = "Type hints (PEP 484) support for the Sphinx autodoc extension"
+groups = ["dev"]
+dependencies = [
+    "sphinx>=7.3.5",
+]
+files = [
+    {file = "sphinx_autodoc_typehints-2.3.0-py3-none-any.whl", hash = "sha256:3098e2c6d0ba99eacd013eb06861acc9b51c6e595be86ab05c08ee5506ac0c67"},
+    {file = "sphinx_autodoc_typehints-2.3.0.tar.gz", hash = "sha256:535c78ed2d6a1bad393ba9f3dfa2602cf424e2631ee207263e07874c38fde084"},
+]
+
+[[package]]
 name = "sphinx-basic-ng"
 version = "1.0.0b2"
 requires_python = ">=3.7"
@@ -1175,6 +1221,20 @@ files = [
 ]
 
 [[package]]
+name = "sphinx-design"
+version = "0.6.1"
+requires_python = ">=3.9"
+summary = "A sphinx extension for designing beautiful, view size responsive web components."
+groups = ["dev"]
+dependencies = [
+    "sphinx<9,>=6",
+]
+files = [
+    {file = "sphinx_design-0.6.1-py3-none-any.whl", hash = "sha256:b11f37db1a802a183d61b159d9a202314d4d2fe29c163437001324fe2f19549c"},
+    {file = "sphinx_design-0.6.1.tar.gz", hash = "sha256:b44eea3719386d04d765c1a8257caca2b3e6f8421d7b3a5e742c0fd45f84e632"},
+]
+
+[[package]]
 name = "sphinxcontrib-applehelp"
 version = "2.0.0"
 requires_python = ">=3.9"
@@ -1183,6 +1243,20 @@ groups = ["dev"]
 files = [
     {file = "sphinxcontrib_applehelp-2.0.0-py3-none-any.whl", hash = "sha256:4cd3f0ec4ac5dd9c17ec65e9ab272c9b867ea77425228e68ecf08d6b28ddbdb5"},
     {file = "sphinxcontrib_applehelp-2.0.0.tar.gz", hash = "sha256:2f29ef331735ce958efa4734873f084941970894c6090408b079c61b2e1c06d1"},
+]
+
+[[package]]
+name = "sphinxcontrib-autoprogram"
+version = "0.1.9"
+requires_python = ">=3.8"
+summary = "Documenting CLI programs"
+groups = ["dev"]
+dependencies = [
+    "Sphinx>=1.2",
+]
+files = [
+    {file = "sphinxcontrib-autoprogram-0.1.9.tar.gz", hash = "sha256:219655507fadca29b3062b5d86c37d94db48f03bde4b58d61526872bf72f57cc"},
+    {file = "sphinxcontrib_autoprogram-0.1.9-py2.py3-none-any.whl", hash = "sha256:79a5282d7640337e4bf11f624970a43709f1b704c5c59a59756d45e824db5301"},
 ]
 
 [[package]]
@@ -1332,7 +1406,7 @@ name = "typing-inspection"
 version = "0.4.1"
 requires_python = ">=3.9"
 summary = "Runtime typing introspection tools"
-groups = ["default"]
+groups = ["default", "dev"]
 dependencies = [
     "typing-extensions>=4.12.0",
 ]

@@ -63,10 +63,6 @@ include = [
 select = ["E4", "E7", "E9", "F", "W291", "W293"]
 ignore = ['F403', 'F405']
 
-
-
-
-
 [tool.pdm.version]
 source = "scm"
 
@@ -93,6 +89,10 @@ dev = [
     "pyright>=1.1.392",
     "amaranth-stubs>=0.1.1",
     "pyrefly>=0.21.0",
+    "sphinxcontrib-autoprogram>=0.1.9",
+    "sphinx-autodoc-typehints>=2.3.0",
+    "autodoc-pydantic>=2.2.0",
+    "sphinx-design>=0.6.1",
 ]
 
 [tool.pytest.ini_options]
