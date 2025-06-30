@@ -37,7 +37,7 @@ class SiliconTop(StepBase, Elaboratable):
 
         # heartbeat led (to confirm clock/reset alive)
         if (self._config.chipflow.silicon.debug and
-           self._config.chipflow.silicon.debug.heartbeat):
+           self._config.chipflow.silicon.debug.get('heartbeat', False)):
             heartbeat_ctr = Signal(23)
             m.d.sync += heartbeat_ctr.eq(heartbeat_ctr + 1)
             m.d.comb += platform.request("heartbeat").o.eq(heartbeat_ctr[-1])

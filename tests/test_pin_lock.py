@@ -4,31 +4,44 @@ import unittest
 from unittest import mock
 import tempfile
 
+from amaranth.lib import io
 
 from chipflow_lib import ChipFlowError
 from chipflow_lib.platforms.utils import (
-    _count_member_pins as count_member_pins,
-    _allocate_pins as allocate_pins
+    IOModel,
+    Port,
+    PortMap,
+    Package,
+    PACKAGE_DEFINITIONS
 )
+from chipflow_lib.config_models import Config, ChipFlowConfig, SiliconConfig
 
 # Define a MockPackageType for testing
 class MockPackageType:
     """Mock for package type class used in tests"""
     def __init__(self, name="test_package"):
         self.name = name
+        self.package_type = "MockPackageType"
         self.pins = set([str(i) for i in range(1, 100)])  # Create pins 1-99
         self.allocated_pins = []
         self._interfaces = {}
+        self._components = {}
         # Create mocks for the methods
-        self.register_component = mock.MagicMock()
+        self.register_component = mock.MagicMock(side_effect=self._register_component)
         self.allocate_pins = mock.MagicMock()
         self.allocate = mock.MagicMock(side_effect=self._allocate)
+        self.bringup_pins = mock.PropertyMock()
 
         # Setup allocate_pins to return a mock LockFile
         mock_lockfile = mock.MagicMock()
         self.allocate_pins.return_value = mock_lockfile
 
-    def sortpins(self, pins):
+    def _register_component(self, name, component):
+        """Mock implementation of register_component"""
+        self._components[name] = component
+        self._interfaces[name] = {'interface': {'members': {}}}
+
+    def _sortpins(self, pins):
         return sorted(list(pins))
 
     def _allocate(self, available, width):
@@ -37,6 +50,10 @@ class MockPackageType:
         allocated = available_list[:width]
         self.allocated_pins.append(allocated)
         return allocated
+
+    def _get_package(self):
+        """Mock implementation of _get_package"""
+        return Package(type=self)
 
 
 class TestPinLock(unittest.TestCase):
@@ -54,124 +71,31 @@ class TestPinLock(unittest.TestCase):
         os.chdir(self.original_cwd)
         self.temp_dir.cleanup()
 
-    def test_count_member_pins_interface_with_annotation(self):
-        """Test count_member_pins with an interface that has annotation"""
-        PIN_ANNOTATION_SCHEMA = "https://api.chipflow.com/schemas/0/pin-annotation"
-        member_data = {
-            "type": "interface",
-            "annotations": {
-                PIN_ANNOTATION_SCHEMA: {
-                    "width": 8
-                }
-            }
-        }
-        result = count_member_pins("test_interface", member_data)
-        self.assertEqual(result, 8)
+    def test_public_api_imports(self):
+        """Test that public API classes can be imported and used"""
+        # Test IOModel creation
+        model = IOModel(width=4, direction=io.Direction.Input)
+        self.assertEqual(model['width'], 4)
+        self.assertEqual(model['direction'], io.Direction.Input)
 
-    def test_count_member_pins_interface_without_annotation(self):
-        """Test count_member_pins with an interface that has no annotation"""
-        member_data = {
-            "type": "interface",
-            "members": {
-                "sub1": {
-                    "type": "port",
-                    "width": 4
-                },
-                "sub2": {
-                    "type": "port",
-                    "width": 6
-                }
-            }
-        }
-        result = count_member_pins("test_interface", member_data)
-        self.assertEqual(result, 10)  # 4 + 6
+        # Test Port creation
+        port = Port(type="test", pins=["1", "2"], port_name="test_port", iomodel=model)
+        self.assertEqual(port.type, "test")
+        self.assertEqual(port.pins, ["1", "2"])
 
-    def test_count_member_pins_port(self):
-        """Test count_member_pins with a direct port"""
-        member_data = {
-            "type": "port",
-            "width": 16
-        }
-        result = count_member_pins("test_port", member_data)
-        self.assertEqual(result, 16)
+        # Test PortMap creation
+        port_map = PortMap()
+        self.assertIsInstance(port_map, PortMap)
 
-    def test_allocate_pins_interface_with_annotation(self):
-        """Test allocate_pins with an interface that has annotation"""
-        PIN_ANNOTATION_SCHEMA = "https://api.chipflow.com/schemas/0/pin-annotation"
-        member_data = {
-            "type": "interface",
-            "annotations": {
-                PIN_ANNOTATION_SCHEMA: {
-                    "width": 4,
-                    "direction": "io",
-                    "options": {"all_have_oe": True}
-                }
-            }
-        }
-        pins = ["pin1", "pin2", "pin3", "pin4", "pin5", "pin6"]
+    def test_package_definitions_public_api(self):
+        """Test that PACKAGE_DEFINITIONS is accessible as public API"""
+        self.assertIn("cf20", PACKAGE_DEFINITIONS)
+        self.assertIn("pga144", PACKAGE_DEFINITIONS)
 
-        pin_map, remaining_pins = allocate_pins("test_interface", member_data, pins)
-
-        # Check that correct pins were allocated
-        self.assertIn("test_interface", pin_map)
-        self.assertEqual(pin_map["test_interface"]["pins"], pins[:4])
-        self.assertEqual(pin_map["test_interface"]["direction"], "io")
-
-        # Check remaining pins
-        self.assertEqual(remaining_pins, pins[4:])
-
-    def test_allocate_pins_interface_without_annotation(self):
-        """Test allocate_pins with an interface that has no annotation"""
-        member_data = {
-            "type": "interface",
-            "members": {
-                "sub1": {
-                    "type": "port",
-                    "width": 2,
-                    "dir": "i"
-                },
-                "sub2": {
-                    "type": "port",
-                    "width": 3,
-                    "dir": "o"
-                }
-            }
-        }
-        pins = ["pin1", "pin2", "pin3", "pin4", "pin5", "pin6"]
-
-        pin_map, remaining_pins = allocate_pins("test_interface", member_data, pins)
-
-        # Check that correct pins were allocated
-        self.assertIn("sub1", pin_map)
-        self.assertEqual(pin_map["sub1"]["pins"], pins[:2])
-        self.assertEqual(pin_map["sub1"]["direction"], "i")
-
-        self.assertIn("sub2", pin_map)
-        self.assertEqual(pin_map["sub2"]["pins"], pins[2:5])
-        self.assertEqual(pin_map["sub2"]["direction"], "o")
-
-        # Check remaining pins
-        self.assertEqual(remaining_pins, pins[5:])
-
-    def test_allocate_pins_port(self):
-        """Test allocate_pins with a direct port"""
-        member_data = {
-            "type": "port",
-            "width": 3,
-            "dir": "i"
-        }
-        pins = ["pin1", "pin2", "pin3", "pin4"]
-
-        pin_map, remaining_pins = allocate_pins("test_port", member_data, pins, port_name="my_port")
-
-        # Check that correct pins were allocated
-        self.assertIn("test_port", pin_map)
-        self.assertEqual(pin_map["test_port"]["pins"], pins[:3])
-        self.assertEqual(pin_map["test_port"]["direction"], "i")
-        self.assertEqual(pin_map["test_port"]["port_name"], "my_port")
-
-        # Check remaining pins
-        self.assertEqual(remaining_pins, pins[3:])
+        # Test that package definitions have expected properties
+        cf20 = PACKAGE_DEFINITIONS["cf20"]
+        self.assertEqual(cf20.name, "cf20")
+        self.assertEqual(cf20.package_type, "BareDiePackageDef")
 
     @mock.patch("chipflow_lib.pin_lock.lock_pins")
     def test_pin_command_mocked(self, mock_lock_pins):
@@ -224,27 +148,23 @@ class TestPinLock(unittest.TestCase):
         # Setup mocks
         mock_exists.return_value = False  # No existing pins.lock
 
-        # Mock config
-        mock_config = {
-            "chipflow": {
-                "project_name": "test",
-                "steps": {
-                    "silicon": "chipflow_lib.steps.silicon:SiliconStep"
+        # Mock config - create proper Config object
+        mock_config = Config(chipflow=ChipFlowConfig(
+            project_name="test",
+            steps={"silicon": "chipflow_lib.steps.silicon:SiliconStep"},
+            silicon=SiliconConfig(
+                process="ihp_sg13g2",
+                package="cf20",
+                pads={
+                    "clk": {"type": "clock", "loc": "1"},
+                    "rst": {"type": "reset", "loc": "2"}
                 },
-                "silicon": {
-                    "process": "ihp_sg13g2",
-                    "package": "cf20",
-                    "pads": {
-                        "clk": {"type": "clock", "loc": "1"},
-                        "rst": {"type": "reset", "loc": "2"}
-                    },
-                    "power": {
-                        "vdd": {"type": "power", "loc": "3"},
-                        "gnd": {"type": "ground", "loc": "4"}
-                    }
+                power={
+                    "vdd": 3.3,
+                    "gnd": 0.0
                 }
-            }
-        }
+            )
+        ))
         mock_parse_config.return_value = mock_config
 
         # Mock top_components
@@ -278,8 +198,8 @@ class TestPinLock(unittest.TestCase):
         lock_pins()
 
         # Verify the package definition was used
-        self.assertTrue(mock_package_type.register_component.called)
-        self.assertTrue(mock_package_type.allocate_pins.called)
+        mock_package_type.register_component.assert_called()
+        mock_package_type.allocate_pins.assert_called()
 
         # Verify write was called with the JSON data
         file_handle = mock_open.return_value.__enter__.return_value
@@ -319,27 +239,23 @@ class TestPinLock(unittest.TestCase):
         # Make model_dump_json return a valid JSON string
         mock_new_lock.model_dump_json.return_value = '{"test": "json"}'
 
-        # Mock config
-        mock_config = {
-            "chipflow": {
-                "project_name": "test",
-                "steps": {
-                    "silicon": "chipflow_lib.steps.silicon:SiliconStep"
+        # Mock config - create proper Config object
+        mock_config = Config(chipflow=ChipFlowConfig(
+            project_name="test",
+            steps={"silicon": "chipflow_lib.steps.silicon:SiliconStep"},
+            silicon=SiliconConfig(
+                process="ihp_sg13g2",
+                package="cf20",
+                pads={
+                    "clk": {"type": "clock", "loc": "1"},
+                    "rst": {"type": "reset", "loc": "2"}
                 },
-                "silicon": {
-                    "process": "ihp_sg13g2",
-                    "package": "cf20",
-                    "pads": {
-                        "clk": {"type": "clock", "loc": "1"},
-                        "rst": {"type": "reset", "loc": "2"}
-                    },
-                    "power": {
-                        "vdd": {"type": "power", "loc": "3"},
-                        "gnd": {"type": "ground", "loc": "4"}
-                    }
+                power={
+                    "vdd": 3.3,
+                    "gnd": 0.0
                 }
-            }
-        }
+            )
+        ))
         mock_parse_config.return_value = mock_config
 
         # Mock top_components

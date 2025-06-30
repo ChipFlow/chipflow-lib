@@ -41,5 +41,5 @@ class SiliconPlatformTestCase(unittest.TestCase):
 
         with self.assertRaisesRegex(
                 ChipFlowError,
-                r"^Only a single clock domain, called 'sync', may be used$"):
+                r"^Only a single clock domain, called 'sync', may be used: foo$"):
             SiliconPlatform(self.config).build(m)

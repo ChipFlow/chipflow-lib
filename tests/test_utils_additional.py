@@ -10,6 +10,7 @@ from amaranth.lib import io
 from chipflow_lib import ChipFlowError
 from chipflow_lib.platforms.utils import (
     IOSignature,
+    IOModel,
     Package,
     Port,
     PortMap,
@@ -26,8 +27,8 @@ class TestIOSignature(unittest.TestCase):
         # Test properties
         self.assertEqual(sig.direction, io.Direction.Bidir)
         self.assertEqual(sig.width, 4)
-        assert 'all_have_oe' in sig.model
-        self.assertEqual(sig.model['all_have_oe'], True)
+        assert 'all_have_oe' in sig.options
+        self.assertEqual(sig.options['all_have_oe'], True)
 
         # Test __repr__ - actual representation depends on Direction enum's representation
         repr_string = repr(sig)
@@ -73,8 +74,8 @@ class TestPortMap(unittest.TestCase):
     def test_portmap_creation(self):
         """Test creation of PortMap"""
         # Create port
-        port1 = Port(type="input", pins=["1"], port_name="test_port", direction=io.Direction.Input)
-        port2 = Port(type="output", pins=["2"], port_name="port2", direction=io.Direction.Output)
+        port1 = Port(type="input", pins=["1"], port_name="test_port", iomodel=IOModel(width=1, direction=io.Direction.Input))
+        port2 = Port(type="output", pins=["2"], port_name="port2", iomodel=IOModel(width=1, direction=io.Direction.Output))
 
         # Create a dictionary with the right structure
         data = {
@@ -102,7 +103,7 @@ class TestPortMap(unittest.TestCase):
         port_map = PortMap()
 
         # Test __setitem__ and __getitem__
-        port_map.ports["comp1"] = {"iface1": {"port1": Port(type="input", pins=["1"], port_name="port1")}}
+        port_map.ports["comp1"] = {"iface1": {"port1": Port(type="input", pins=["1"], port_name="port1", iomodel=IOModel(width=1, direction=io.Direction.Input))}}
         self.assertIn("comp1", port_map.ports)
         self.assertEqual(port_map.ports["comp1"]["iface1"]["port1"].pins, ["1"])
 
@@ -122,7 +123,7 @@ class TestPortMap(unittest.TestCase):
         port_map = PortMap()
 
         # Test _add_port with a new component and interface
-        port1 = Port(type="input", pins=["1"], port_name="port1", direction=io.Direction.Input)
+        port1 = Port(type="input", pins=["1"], port_name="port1", iomodel=IOModel(width=1, direction=io.Direction.Input))
         port_map._add_port("comp1", "iface1", "port1", port1)
 
         self.assertIn("comp1", port_map.ports)
@@ -132,8 +133,8 @@ class TestPortMap(unittest.TestCase):
 
         # Test _add_ports with a new interface
         ports = {
-            "port2": Port(type="output", pins=["2"], port_name="port2", direction=io.Direction.Output),
-            "port3": Port(type="output", pins=["3"], port_name="port3", direction=io.Direction.Output)
+            "port2": Port(type="output", pins=["2"], port_name="port2", iomodel=IOModel(width=1, direction=io.Direction.Output)),
+            "port3": Port(type="output", pins=["3"], port_name="port3", iomodel=IOModel(width=1, direction=io.Direction.Output))
         }
         port_map._add_ports("comp1", "iface2", ports)
 
@@ -181,14 +182,16 @@ class TestPort(unittest.TestCase):
     def test_port_width(self):
         """Test Port.width property"""
         # Create port with multiple pins
-        port = Port(type="test", pins=["1", "2", "3"], port_name="test_port")
+        port = Port(type="test", pins=["1", "2", "3"], port_name="test_port", iomodel=IOModel(width=3, direction=io.Direction.Input))
 
         # Check width
         self.assertEqual(port.width, 3)
 
         # Test port with no pins
-        port_no_pins = Port(type="test", pins=None, port_name="test_port")
-        self.assertEqual(port_no_pins.width, 0)
+        port_no_pins = Port(type="test", pins=None, port_name="test_port", iomodel=IOModel(width=0, direction=io.Direction.Input))
+        # When pins=None, width property should fail since it can't verify consistency
+        with self.assertRaises(AssertionError):
+            _ = port_no_pins.width
 
 
 @mock.patch('chipflow_lib.platforms.utils.LockFile.model_validate_json')
@@ -231,7 +234,7 @@ class TestLoadPinlock(unittest.TestCase):
             load_pinlock()
 
         # Check error message
-        self.assertIn("Lockfile pins.lock not found", str(cm.exception))
+        self.assertIn("Lockfile `pins.lock` not found", str(cm.exception))
         mock_ensure_chipflow_root.assert_called_once()
         mock_exists.assert_called_once()
         mock_read_text.assert_not_called()
