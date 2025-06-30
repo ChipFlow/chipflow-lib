@@ -316,7 +316,6 @@ class SiliconStep:
                     auth=(None, self._chipflow_api_key),
                     timeout=timeout
                 )
-               network_err(e)
             except requests.exceptions.ReadTimeout as e:
                 sp.text = "💥 Error connecting to ChipFlow Cloud. Trying again! "
                 fail_counter += 1
