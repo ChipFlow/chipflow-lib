@@ -7,14 +7,14 @@ from amaranth.lib import wiring, io
 from amaranth.lib.wiring import PureInterface
 
 from chipflow_lib.platforms.silicon import SiliconPlatformPort
-from chipflow_lib.platforms.utils import Port
+from chipflow_lib.platforms.utils import Port, IOModel
 
 
 class TestSiliconPlatformPort(unittest.TestCase):
     def test_init_input_port(self):
         # Test initialization with input direction
-        port_obj = Port(type="input", pins=["1", "2", "3"], port_name="test_input",
-                         direction="i", options={})
+        iomodel = IOModel(width=3, direction=io.Direction.Input)
+        port_obj = Port(type="input", pins=["1", "2", "3"], port_name="test_input", iomodel=iomodel)
         spp = SiliconPlatformPort("comp", "test_input", port_obj)
 
         self.assertEqual(spp.direction, io.Direction.Input)
@@ -30,8 +30,8 @@ class TestSiliconPlatformPort(unittest.TestCase):
 
     def test_init_output_port(self):
         # Test initialization with output direction
-        port_obj = Port(type="output", pins=["1", "2"], port_name="test_output",
-                         direction="o", options={})
+        iomodel = IOModel(width=2, direction=io.Direction.Output)
+        port_obj = Port(type="output", pins=["1", "2"], port_name="test_output", iomodel=iomodel)
         spp = SiliconPlatformPort("comp", "test_output", port_obj)
 
         self.assertEqual(spp.direction, io.Direction.Output)
@@ -46,8 +46,8 @@ class TestSiliconPlatformPort(unittest.TestCase):
 
     def test_init_bidir_port(self):
         # Test initialization with bidirectional direction
-        port_obj = Port(type="bidir", pins=["1", "2", "3", "4"], port_name="test_bidir",
-                         direction="io", options={"all_have_oe": False})
+        iomodel = IOModel(width=4, direction=io.Direction.Bidir, all_have_oe=False)
+        port_obj = Port(type="bidir", pins=["1", "2", "3", "4"], port_name="test_bidir", iomodel=iomodel)
         spp = SiliconPlatformPort("comp", "test_bidir", port_obj)
 
         self.assertEqual(spp.direction, io.Direction.Bidir)
@@ -66,8 +66,8 @@ class TestSiliconPlatformPort(unittest.TestCase):
 
     def test_init_bidir_port_all_have_oe(self):
         # Test initialization with bidirectional direction and all_have_oe=True
-        port_obj = Port(type="bidir", pins=["1", "2", "3"], port_name="test_bidir",
-                         direction="io", options={"all_have_oe": True})
+        iomodel = IOModel(width=3, direction=io.Direction.Bidir, all_have_oe=True)
+        port_obj = Port(type="bidir", pins=["1", "2", "3"], port_name="test_bidir", iomodel=iomodel)
         spp = SiliconPlatformPort("comp", "test_bidir", port_obj)
 
         self.assertEqual(spp.direction, io.Direction.Bidir)
@@ -81,40 +81,40 @@ class TestSiliconPlatformPort(unittest.TestCase):
 
     def test_len_input_port(self):
         # Test __len__ with input direction
-        port_obj = Port(type="input", pins=["1", "2", "3"], port_name="test_input",
-                         direction="i", options={})
+        iomodel = IOModel(width=3, direction=io.Direction.Input)
+        port_obj = Port(type="input", pins=["1", "2", "3"], port_name="test_input", iomodel=iomodel)
         spp = SiliconPlatformPort("comp", "test_input", port_obj)
 
         self.assertEqual(len(spp), 3)  # Should match the port width
 
     def test_len_output_port(self):
         # Test __len__ with output direction
-        port_obj = Port(type="output", pins=["1", "2"], port_name="test_output",
-                         direction="o", options={})
+        iomodel = IOModel(width=2, direction=io.Direction.Output)
+        port_obj = Port(type="output", pins=["1", "2"], port_name="test_output", iomodel=iomodel)
         spp = SiliconPlatformPort("comp", "test_output", port_obj)
 
         self.assertEqual(len(spp), 2)  # Should match the port width
 
     def test_len_bidir_port(self):
         # Test __len__ with bidirectional direction
-        port_obj = Port(type="bidir", pins=["1", "2", "3", "4"], port_name="test_bidir",
-                         direction="io", options={"all_have_oe": False})
+        iomodel = IOModel(width=4, direction=io.Direction.Bidir, all_have_oe=False)
+        port_obj = Port(type="bidir", pins=["1", "2", "3", "4"], port_name="test_bidir", iomodel=iomodel)
         spp = SiliconPlatformPort("comp", "test_bidir", port_obj)
 
         self.assertEqual(len(spp), 4)  # Should match the port width
 
     def test_len_bidir_port_all_have_oe(self):
         # Test __len__ with bidirectional direction and all_have_oe=True
-        port_obj = Port(type="bidir", pins=["1", "2", "3"], port_name="test_bidir",
-                         direction="io", options={"all_have_oe": True})
+        iomodel = IOModel(width=3, direction=io.Direction.Bidir, all_have_oe=True)
+        port_obj = Port(type="bidir", pins=["1", "2", "3"], port_name="test_bidir", iomodel=iomodel)
         spp = SiliconPlatformPort("comp", "test_bidir", port_obj)
 
         self.assertEqual(len(spp), 3)  # Should match the port width
 
     def test_getitem(self):
         # Test __getitem__
-        port_obj = Port(type="bidir", pins=["1", "2", "3"], port_name="test_bidir",
-                         direction="io", options={"all_have_oe": True})
+        iomodel = IOModel(width=3, direction=io.Direction.Bidir, all_have_oe=True)
+        port_obj = Port(type="bidir", pins=["1", "2", "3"], port_name="test_bidir", iomodel=iomodel)
         spp = SiliconPlatformPort("comp", "test_bidir", port_obj)
 
         # Get a slice of the port
@@ -124,8 +124,8 @@ class TestSiliconPlatformPort(unittest.TestCase):
 
     def test_invert(self):
         # Test __invert__ for a bidirectional port since it has all signal types
-        port_obj = Port(type="bidir", pins=["1", "2", "3"], port_name="test_bidir",
-                         direction="io", options={"all_have_oe": True})
+        iomodel = IOModel(width=3, direction=io.Direction.Bidir, all_have_oe=True)
+        port_obj = Port(type="bidir", pins=["1", "2", "3"], port_name="test_bidir", iomodel=iomodel)
         spp = SiliconPlatformPort("comp", "test_bidir", port_obj)
 
         inverted_port = ~spp
@@ -135,10 +135,10 @@ class TestSiliconPlatformPort(unittest.TestCase):
 
     def test_add(self):
         # Test __add__
-        port_obj1 = Port(type="input", pins=["1", "2"], port_name="test_input1",
-                          direction="i", options={})
-        port_obj2 = Port(type="input", pins=["3", "4"], port_name="test_input2",
-                          direction="i", options={})
+        iomodel1 = IOModel(width=2, direction=io.Direction.Input)
+        port_obj1 = Port(type="input", pins=["1", "2"], port_name="test_input1", iomodel=iomodel1)
+        iomodel2 = IOModel(width=2, direction=io.Direction.Input)
+        port_obj2 = Port(type="input", pins=["3", "4"], port_name="test_input2", iomodel=iomodel2)
         spp1 = SiliconPlatformPort("comp", "test_input1", port_obj1)
         spp2 = SiliconPlatformPort("comp", "test_input2", port_obj2)
 
@@ -148,8 +148,8 @@ class TestSiliconPlatformPort(unittest.TestCase):
 
     def test_wire_input(self):
         # Test wire method with a mock input interface
-        port_obj = Port(type="input", pins=["1", "2", "3"], port_name="test_input",
-                         direction="i", options={})
+        iomodel = IOModel(width=3, direction=io.Direction.Input)
+        port_obj = Port(type="input", pins=["1", "2", "3"], port_name="test_input", iomodel=iomodel)
         spp = SiliconPlatformPort("comp", "test_input", port_obj)
 
         # Create a mock interface
@@ -175,8 +175,8 @@ class TestSiliconPlatformPort(unittest.TestCase):
 
     def test_wire_output(self):
         # Test wire method with a mock output interface to cover line 105
-        port_obj = Port(type="output", pins=["1", "2"], port_name="test_output",
-                         direction="o", options={})
+        iomodel = IOModel(width=2, direction=io.Direction.Output)
+        port_obj = Port(type="output", pins=["1", "2"], port_name="test_output", iomodel=iomodel)
         spp = SiliconPlatformPort("comp", "test_output", port_obj)
 
         # Create a mock interface
@@ -203,8 +203,8 @@ class TestSiliconPlatformPort(unittest.TestCase):
 
     def test_wire_bidir(self):
         # Test wire method with a mock bidirectional interface to cover both cases
-        port_obj = Port(type="bidir", pins=["1", "2", "3"], port_name="test_bidir",
-                         direction="io", options={"all_have_oe": True})
+        iomodel = IOModel(width=3, direction=io.Direction.Bidir, all_have_oe=True)
+        port_obj = Port(type="bidir", pins=["1", "2", "3"], port_name="test_bidir", iomodel=iomodel)
         spp = SiliconPlatformPort("comp", "test_bidir", port_obj)
 
         # Create a mock interface
@@ -236,8 +236,8 @@ class TestSiliconPlatformPort(unittest.TestCase):
 
     def test_repr(self):
         # Test the __repr__ method for a bidirectional port
-        port_obj = Port(type="bidir", pins=["1", "2", "3"], port_name="test_bidir",
-                         direction="io", options={"all_have_oe": True})
+        iomodel = IOModel(width=3, direction=io.Direction.Bidir, all_have_oe=True)
+        port_obj = Port(type="bidir", pins=["1", "2", "3"], port_name="test_bidir", iomodel=iomodel)
         spp = SiliconPlatformPort("comp", "test_bidir", port_obj)
 
         # Get the representation
