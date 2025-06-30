@@ -1,0 +1,510 @@
+chipflow_lib.platforms
+======================
+
+.. py:module:: chipflow_lib.platforms
+
+.. autoapi-nested-parse::
+
+   Platform definititions
+   ----------------------
+
+   This module defines the functionality you use in you code to target the ChipFlow platform
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   chipflow_lib.platforms.SiliconPlatformPort
+   chipflow_lib.platforms.IOSignature
+   chipflow_lib.platforms.IOModel
+   chipflow_lib.platforms.LockFile
+   chipflow_lib.platforms.Package
+   chipflow_lib.platforms.PortMap
+   chipflow_lib.platforms.Port
+   chipflow_lib.platforms.Process
+   chipflow_lib.platforms.GAPackageDef
+   chipflow_lib.platforms.QuadPackageDef
+   chipflow_lib.platforms.BareDiePackageDef
+   chipflow_lib.platforms.BasePackageDef
+   chipflow_lib.platforms.JTAGPins
+   chipflow_lib.platforms.PowerPins
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   chipflow_lib.platforms.OutputIOSignature
+   chipflow_lib.platforms.InputIOSignature
+   chipflow_lib.platforms.BidirIOSignature
+
+
+Package Contents
+----------------
+
+.. py:class:: SiliconPlatformPort(component, name, port, *, invert = False)
+
+   Bases: :py:obj:`amaranth.lib.io.PortLike`
+
+
+   Represents an abstract library I/O port that can be passed to a buffer.
+
+   The port types supported by most platforms are :class:`SingleEndedPort` and
+   :class:`DifferentialPort`. Platforms may define additional port types where appropriate.
+
+   .. note::
+
+       :class:`amaranth.hdl.IOPort` is not an instance of :class:`amaranth.lib.io.PortLike`.
+
+
+   .. py:property:: direction
+
+      Direction of the port.
+
+      :rtype: :class:`Direction`
+
+
+.. py:class:: IOSignature(**kwargs)
+
+   Bases: :py:obj:`amaranth.lib.wiring.Signature`
+
+
+   An :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` used to decorate wires that would usually be brought out onto a port on the package.
+   This class is generally not directly used.
+   Instead, you would typically utilize the more specific
+   :py:obj:`InputIOSignature`, :py:obj:`OutputIOSignature`, or :py:obj:`BidirIOSignature` for defining pin interfaces.
+
+
+
+   .. py:property:: direction
+      :type: amaranth.lib.io.Direction
+
+
+      The direction of the IO port
+
+
+   .. py:property:: width
+      :type: int
+
+
+      The width of the IO port, in wires
+
+
+   .. py:property:: model
+      :type: IOModel
+
+
+      The `IOModel` of this signature
+
+
+   .. py:method:: annotations(*args)
+
+      Annotate an interface object.
+
+      Subclasses of :class:`Signature` may override this method to provide annotations for
+      a corresponding interface object. The default implementation provides none.
+
+      See :mod:`amaranth.lib.meta` for details.
+
+      :returns: :py:`tuple()`
+      :rtype: iterable of :class:`~.meta.Annotation`
+
+
+
+.. py:class:: IOModel
+
+   Bases: :py:obj:`_IOModelOptions`
+
+
+   Options for IO Ports
+
+   :Attributes: * **direction** -- `io.Direction.Input`, `io.Direction.Output` or `io.Direction.Bidir`
+                * **width** -- width of port, default is 1
+                * **all_have_oe** -- controls whether each output wire is associated with an individual Output Enable bit
+                  or a single OE bit will be used for entire port, the default value is False, indicating that a
+                  single OE bit controls the entire port.
+                * **allocate_power** -- Whether a power line should be allocated with this interface.  NB there is only one of these, so IO with multiple IO power domains must be split up.
+                * **power_voltage** -- Voltage range of the allocated power
+                * **clock_domain_i** -- the name of the `Amaranth.ClockDomain` for input. NB there is only one of these, so IO with multiple input clocks must be split up.
+                * **clock_domain_o** -- the name of the `Amaranth.ClockDomain` for output. NB there is only one of these, so IO with multiple output clocks must be split up.
+                * **init** -- a :ref:`Const` value for the initial values of the port
+
+
+.. py:function:: OutputIOSignature(width, **kwargs)
+
+   This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package output signals
+   intended for connection to the physical pads of the integrated circuit package.
+
+   :param width: specifies the number of individual output wires within this port, each of which will correspond to a separate physical pad on the integrated circuit package.
+
+
+.. py:function:: InputIOSignature(width, **kwargs)
+
+   This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package input signals
+   intended for connection to the physical pads of the integrated circuit package.
+
+   :param width: specifies the number of individual input wires within this port, each of which will correspond to a separate physical pad on the integrated circuit package.
+
+
+.. py:function:: BidirIOSignature(width, **kwargs)
+
+   This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package bi-directional signals
+   intended for connection to the physical pads of the integrated circuit package.
+
+   :param width: specifies the number of individual input/output wires within this port. Each pair of input/output wires will correspond to a separate physical pad on the integrated circuit package.
+
+
+.. py:class:: LockFile(/, **data)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   Representation of a pin lock file.
+
+   :Attributes: * **package** -- Information about the physical package
+                * **port_map** -- Mapping of components to interfaces to port
+                * **metadata** -- Amaranth metadata, for reference
+
+
+.. py:class:: Package(/, **data)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   Serialisable identifier for a defined packaging option
+   :Attributes: **type** -- Package type
+
+
+.. py:class:: PortMap(/, **data)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   !!! abstract "Usage Documentation"
+       [Models](../concepts/models.md)
+
+   A base class for creating Pydantic models.
+
+   :Attributes: * **__class_vars__** -- The names of the class variables defined on the model.
+                * **__private_attributes__** -- Metadata about the private attributes of the model.
+                * **__signature__** -- The synthesized `__init__` [`Signature`][inspect.Signature] of the model.
+                * **__pydantic_complete__** -- Whether model building is completed, or if there are still undefined fields.
+                * **__pydantic_core_schema__** -- The core schema of the model.
+                * **__pydantic_custom_init__** -- Whether the model has a custom `__init__` function.
+                * **__pydantic_decorators__** -- Metadata containing the decorators defined on the model.
+                  This replaces `Model.__validators__` and `Model.__root_validators__` from Pydantic V1.
+                * **__pydantic_generic_metadata__** -- Metadata for generic models; contains data used for a similar purpose to
+                  __args__, __origin__, __parameters__ in typing-module generics. May eventually be replaced by these.
+                * **__pydantic_parent_namespace__** -- Parent namespace of the model, used for automatic rebuilding of models.
+                * **__pydantic_post_init__** -- The name of the post-init method for the model, if defined.
+                * **__pydantic_root_model__** -- Whether the model is a [`RootModel`][pydantic.root_model.RootModel].
+                * **__pydantic_serializer__** -- The `pydantic-core` `SchemaSerializer` used to dump instances of the model.
+                * **__pydantic_validator__** -- The `pydantic-core` `SchemaValidator` used to validate instances of the model.
+                * **__pydantic_fields__** -- A dictionary of field names and their corresponding [`FieldInfo`][pydantic.fields.FieldInfo] objects.
+                * **__pydantic_computed_fields__** -- A dictionary of computed field names and their corresponding [`ComputedFieldInfo`][pydantic.fields.ComputedFieldInfo] objects.
+                * **__pydantic_extra__** -- A dictionary containing extra values, if [`extra`][pydantic.config.ConfigDict.extra]
+                  is set to `'allow'`.
+                * **__pydantic_fields_set__** -- The names of fields explicitly set during instantiation.
+                * **__pydantic_private__** -- Values of private attributes set on the model instance.
+
+
+   .. py:method:: get_ports(component, interface)
+
+      List the ports allocated in this PortMap for the given `Component` and `Interface`
+
+
+
+.. py:class:: Port(/, **data)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   !!! abstract "Usage Documentation"
+       [Models](../concepts/models.md)
+
+   A base class for creating Pydantic models.
+
+   :Attributes: * **__class_vars__** -- The names of the class variables defined on the model.
+                * **__private_attributes__** -- Metadata about the private attributes of the model.
+                * **__signature__** -- The synthesized `__init__` [`Signature`][inspect.Signature] of the model.
+                * **__pydantic_complete__** -- Whether model building is completed, or if there are still undefined fields.
+                * **__pydantic_core_schema__** -- The core schema of the model.
+                * **__pydantic_custom_init__** -- Whether the model has a custom `__init__` function.
+                * **__pydantic_decorators__** -- Metadata containing the decorators defined on the model.
+                  This replaces `Model.__validators__` and `Model.__root_validators__` from Pydantic V1.
+                * **__pydantic_generic_metadata__** -- Metadata for generic models; contains data used for a similar purpose to
+                  __args__, __origin__, __parameters__ in typing-module generics. May eventually be replaced by these.
+                * **__pydantic_parent_namespace__** -- Parent namespace of the model, used for automatic rebuilding of models.
+                * **__pydantic_post_init__** -- The name of the post-init method for the model, if defined.
+                * **__pydantic_root_model__** -- Whether the model is a [`RootModel`][pydantic.root_model.RootModel].
+                * **__pydantic_serializer__** -- The `pydantic-core` `SchemaSerializer` used to dump instances of the model.
+                * **__pydantic_validator__** -- The `pydantic-core` `SchemaValidator` used to validate instances of the model.
+                * **__pydantic_fields__** -- A dictionary of field names and their corresponding [`FieldInfo`][pydantic.fields.FieldInfo] objects.
+                * **__pydantic_computed_fields__** -- A dictionary of computed field names and their corresponding [`ComputedFieldInfo`][pydantic.fields.ComputedFieldInfo] objects.
+                * **__pydantic_extra__** -- A dictionary containing extra values, if [`extra`][pydantic.config.ConfigDict.extra]
+                  is set to `'allow'`.
+                * **__pydantic_fields_set__** -- The names of fields explicitly set during instantiation.
+                * **__pydantic_private__** -- Values of private attributes set on the model instance.
+
+
+.. py:class:: Process(*args, **kwds)
+
+   Bases: :py:obj:`enum.Enum`
+
+
+   IC manufacturing process
+
+
+.. py:class:: GAPackageDef(/, **data)
+
+   Bases: :py:obj:`BasePackageDef`
+
+
+   Definiton of a grid array package, with pins or pads in a regular array of 'width' by 'height' pins
+   on the left and right
+
+   The pins are identified by a 2-tuple of row and column, counting from the bottom left hand corner when looking at the underside of the package.
+   Rows are identfied by letter (A-Z), and columns are identified by number.
+
+   The grid may be complete (i.e. width * height pins) or there may be pins/pads missing (Often a square in the middle of the package (AKA P, but this model doesn't
+   require this). The missing pins from the grid are identified either by the `missing_pins` field or the `perimeter` field
+
+   :Attributes: * **width** -- The number of pins across on the top and bottom edges
+                * **hieght** -- The number of pins high on the left and right edges
+                * **layout_type** (*GALayoutType*) -- Pin layout type
+                * **channel_width** -- For `GALayoutType.PERIMETER`, `GALayoutType.CHANNEL`, `GALayoutType.ISLAND` the number of initial rows before a gap
+                * **island_width** -- for `GALayoutType.ISLAND`, the width and height of the inner island
+                * **missing_pins** -- Used for more exotic types instead of channel_width & island_width. Can be used in conjection with the above.
+                * **additional_pins** -- Adds pins on top of any of the configuration above
+
+   This includes the following types of package:
+   .. csv-table:
+   :header: Package, Description
+   CPGA, Ceramic Pin Grid Array
+   OPGA, Organic Pin Grid Array
+   SPGA, Staggared Pin Grid Array
+   CABGA: chip array ball grid array
+   CBGA and PBGA denote the ceramic or plastic substrate material to which the array is attached.
+   CTBGA, thin chip array ball grid array
+   CVBGA, very thin chip array ball grid array
+   DSBGA, die-size ball grid array
+   FBGA, fine ball grid array / fine pitch ball grid array (JEDEC-Standard[9]) or
+   FCmBGA, flip chip molded ball grid array
+   LBGA, low-profile ball grid array
+   LFBGA, low-profile fine-pitch ball grid array
+   MBGA, micro ball grid array
+   MCM-PBGA, multi-chip module plastic ball grid array
+   nFBGA, New Fine Ball Grid Array
+   PBGA, plastic ball grid array
+   SuperBGA (SBGA), super ball grid array
+   TABGA, tape array BGA
+   TBGA, thin BGA
+   TEPBGA, thermally enhanced plastic ball grid array
+   TFBGA or thin and fine ball grid array
+   UFBGA and UBGA and ultra fine ball grid array based on pitch ball grid array.
+   VFBGA, very fine pitch ball grid array
+   WFBGA, very very thin profile fine pitch ball grid array
+   wWLB, Embedded wafer level ball grid array
+
+
+   .. py:method:: model_post_init(__context)
+
+      Override this method to perform additional initialization after `__init__` and `model_construct`.
+      This is useful if you want to do some validation that requires the entire model to be initialized.
+
+
+
+   .. py:method:: allocate_pins(config, process, lockfile)
+
+      Allocate package pins to the registered component.
+      Pins should be allocated in the most usable way for *users* of the packaged IC.
+
+      Returns: `LockFile` data structure represnting the allocation of interfaces to pins
+
+      :raises UnableToAllocate: Raised if the port was unable to be allocated.
+
+
+
+   .. py:property:: bringup_pins
+      :type: BringupPins
+
+
+      To aid bringup, these are always in the same place for each package type.
+      Should include core power, clock and reset.
+
+      Power, clocks and resets needed for non-core are allocated with the port.
+
+
+   .. py:property:: heartbeat
+      :type: Dict[int, Pin]
+
+
+      Numbered set of heartbeat pins for the package
+
+
+.. py:class:: QuadPackageDef(/, **data)
+
+   Bases: :py:obj:`BasePackageDef`
+
+
+   Definiton of a package a row of 'width* pins on the top and bottom of the package and 'height' pins
+   on the left and right
+
+   The pins are numbered anti-clockwise from the top left hand pin.
+
+   This includes the following types of package:
+   .. csv-table:
+   :header: "Package", "Description"
+   "QFN", "quad flat no-leads package. It's assumed the bottom pad is connected to substrate."
+   "BQFP", "bumpered quad flat package"
+   "BQFPH", "bumpered quad flat package with heat spreader"
+   "CQFP", "ceramic quad flat package"
+   "EQFP", "plastic enhanced quad flat package"
+   "FQFP", "fine pitch quad flat package"
+   "LQFP", "low profile quad flat package"
+   "MQFP", "metric quad flat package"
+   "NQFP", "near chip-scale quad flat package."
+   "SQFP", "small quad flat package"
+   "TQFP", "thin quad flat package"
+   "VQFP", "very small quad flat package"
+   "VTQFP", "very thin quad flat package"
+   "TDFN", "thin dual flat no-lead package."
+   "CERQUAD", "low-cost CQFP"
+
+   :Attributes: * **width** -- The number of pins across on the top and bottom edges
+                * **hight** -- The number of pins high on the left and right edges
+
+
+   .. py:method:: model_post_init(__context)
+
+      Override this method to perform additional initialization after `__init__` and `model_construct`.
+      This is useful if you want to do some validation that requires the entire model to be initialized.
+
+
+
+   .. py:method:: allocate_pins(config, process, lockfile)
+
+      Allocate package pins to the registered component.
+      Pins should be allocated in the most usable way for *users* of the packaged IC.
+
+      Returns: `LockFile` data structure represnting the allocation of interfaces to pins
+
+      :raises UnableToAllocate: Raised if the port was unable to be allocated.
+
+
+
+   .. py:property:: bringup_pins
+      :type: BringupPins
+
+
+      To aid bringup, these are always in the same place for each package type.
+      Should include core power, clock and reset.
+
+      Power, clocks and resets needed for non-core are allocated with the port.
+
+
+.. py:class:: BareDiePackageDef(/, **data)
+
+   Bases: :py:obj:`BasePackageDef`
+
+
+   Definition of a package with pins on four sides, labelled north, south, east, west
+   with an integer identifier within each side, indicating pads across or down from top-left corner
+
+   :Attributes: * **width** (*int*) -- Number of die pads on top and bottom sides
+                * **height** (*int*) -- Number of die pads on left and right sides
+
+
+   .. py:method:: model_post_init(__context)
+
+      Override this method to perform additional initialization after `__init__` and `model_construct`.
+      This is useful if you want to do some validation that requires the entire model to be initialized.
+
+
+
+   .. py:method:: allocate_pins(config, process, lockfile)
+
+      Allocate package pins to the registered component.
+      Pins should be allocated in the most usable way for *users* of the packaged IC.
+
+      Returns: `LockFile` data structure represnting the allocation of interfaces to pins
+
+      :raises UnableToAllocate: Raised if the port was unable to be allocated.
+
+
+
+   .. py:property:: bringup_pins
+      :type: BringupPins
+
+
+      To aid bringup, these are always in the same place for each package type.
+      Should include core power, clock and reset.
+
+      Power, clocks and resets needed for non-core are allocated with the port.
+
+
+.. py:class:: BasePackageDef(/, **data)
+
+   Bases: :py:obj:`pydantic.BaseModel`, :py:obj:`abc.ABC`
+
+
+   Abstract base class for the definition of a package
+   Serialising this or any derived classes results in the
+   description of the package
+
+   :Attributes: * **name** (*str*) -- The name of the package
+                * **lockfile** -- Optional exisiting LockFile for the mapping
+
+
+   .. py:method:: model_post_init(__context)
+
+      Override this method to perform additional initialization after `__init__` and `model_construct`.
+      This is useful if you want to do some validation that requires the entire model to be initialized.
+
+
+
+   .. py:method:: register_component(name, component)
+
+      Registers a port to be allocated to the pad ring and pins
+
+      :param component: Amaranth `wiring.Component` to allocate
+
+
+
+   .. py:method:: allocate_pins(config, process, lockfile)
+      :abstractmethod:
+
+
+      Allocate package pins to the registered component.
+      Pins should be allocated in the most usable way for *users* of the packaged IC.
+
+      Returns: `LockFile` data structure represnting the allocation of interfaces to pins
+
+      :raises UnableToAllocate: Raised if the port was unable to be allocated.
+
+
+
+   .. py:property:: bringup_pins
+      :type: BringupPins
+
+
+      To aid bringup, these are always in the same place for each package type.
+      Should include core power, clock and reset.
+
+      Power, clocks and resets needed for non-core are allocated with the port.
+
+
+.. py:class:: JTAGPins
+
+   Pins for a JTAG interface
+
+
+.. py:class:: PowerPins
+
+   A matched pair of power pins, with optional notation of the voltage range
+
+
