@@ -198,6 +198,7 @@ class IOSignature(wiring.Signature):
         assert type(self._model['invert']) is tuple
         return self._model['invert']
 
+    @property
     def options(self) -> _IOModelOptions:
         """
         Options set on the io port at construction

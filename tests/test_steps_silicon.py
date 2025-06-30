@@ -21,6 +21,7 @@ from chipflow_lib import (
 
 from chipflow_lib.cli import run as cli_run
 from chipflow_lib.steps.silicon import SiliconStep, SiliconTop
+from chipflow_lib.config_models import Config, ChipFlowConfig, SiliconConfig
 
 DEFAULT_PINLOCK = {
     "process" : "ihp_sg13g2",
@@ -89,12 +90,24 @@ class TestSiliconStep(unittest.TestCase):
     @mock.patch("chipflow_lib.steps.silicon.SiliconTop")
     def test_init(self, mock_silicontop_class):
         """Test SiliconStep initialization"""
-        step = SiliconStep(self.config)
+        # Create proper Config object
+        config_obj = Config(chipflow=ChipFlowConfig(
+            project_name="test_project",
+            steps={"silicon": "chipflow_lib.steps.silicon:SiliconStep"},
+            top={"mock_component": "module.MockComponent"},
+            silicon=SiliconConfig(
+                package="cf20",
+                process="ihp_sg13g2",
+                debug={"heartbeat": True},
+                pads={},
+                power={}
+            )
+        ))
+
+        step = SiliconStep(config_obj)
 
         # Check that attributes are correctly set
-        self.assertEqual(step.config, self.config)
-        self.assertEqual(step.project_name, "test_project")
-        self.assertEqual(step.silicon_config, self.config["chipflow"]["silicon"])
+        self.assertEqual(step.config, config_obj)
         # Check that SiliconPlatform was initialized correctly
         self.assertIsNotNone(step.platform)
 
@@ -111,8 +124,22 @@ class TestSiliconStep(unittest.TestCase):
         # Mock top_components to avoid UnusedElaboratable
         mock_top_components.return_value = {"mock_component": mock.MagicMock()}
 
+        # Create proper Config object
+        config_obj = Config(chipflow=ChipFlowConfig(
+            project_name="test_project",
+            steps={"silicon": "chipflow_lib.steps.silicon:SiliconStep"},
+            top={"mock_component": "module.MockComponent"},
+            silicon=SiliconConfig(
+                package="cf20",
+                process="ihp_sg13g2",
+                debug={"heartbeat": True},
+                pads={},
+                power={}
+            )
+        ))
+
         # Create SiliconStep instance
-        step = SiliconStep(self.config)
+        step = SiliconStep(config_obj)
 
         # Call the method
         result = step.prepare()
@@ -124,7 +151,7 @@ class TestSiliconStep(unittest.TestCase):
         self.assertEqual(args[0], mock_silicontop)
         # Verify the name parameter
         self.assertEqual(kwargs["name"], "test_project")
-        self.assertEqual(mock_silicontop_class.call_args[0][0], self.config)
+        self.assertEqual(mock_silicontop_class.call_args[0][0], config_obj)
 
         # Check result
         self.assertEqual(result, "/path/to/rtlil")
@@ -202,7 +229,21 @@ class TestSiliconStep(unittest.TestCase):
             args.dry_run = False
 
             # Create SiliconStep instance
-            step = SiliconStep(self.config)
+            # Create proper Config object
+            config_obj = Config(chipflow=ChipFlowConfig(
+                project_name="test_project",
+                steps={"silicon": "chipflow_lib.steps.silicon:SiliconStep"},
+                top={"mock_component": "module.MockComponent"},
+                silicon=SiliconConfig(
+                    package="cf20",
+                    process="ihp_sg13g2",
+                    debug={"heartbeat": True},
+                    pads={},
+                    power={}
+                )
+            ))
+
+            step = SiliconStep(config_obj)
 
             # Call the method
             step.run_cli(args)
@@ -225,7 +266,7 @@ class TestSiliconStep(unittest.TestCase):
         mock_platform = mock_platform_class.return_value
         mock_platform.build.return_value = "/path/to/rtlil"
         mock_top_components.return_value = {"mock_component": mock.MagicMock()}
-        mock_platform.pinlock.port_map = {}
+        mock_platform.pinlock.port_map.ports = {}
 
         # Create mock args
         args = mock.MagicMock()
@@ -511,7 +552,21 @@ class TestSiliconStep(unittest.TestCase):
             "CHIPFLOW_API_KEY_SECRET": "api_key_secret"
         }):
             # Create SiliconStep with mocked platform
-            step = SiliconStep(self.config)
+            # Create proper Config object
+            config_obj = Config(chipflow=ChipFlowConfig(
+                project_name="test_project",
+                steps={"silicon": "chipflow_lib.steps.silicon:SiliconStep"},
+                top={"mock_component": "module.MockComponent"},
+                silicon=SiliconConfig(
+                    package="cf20",
+                    process="ihp_sg13g2",
+                    debug={"heartbeat": True},
+                    pads={},
+                    power={}
+                )
+            ))
+
+            step = SiliconStep(config_obj)
 
             # Mock print and capture output
             with mock.patch("builtins.print") as mock_print:
@@ -576,7 +631,21 @@ class TestSiliconStep(unittest.TestCase):
             "CHIPFLOW_API_KEY_SECRET": "api_key_secret"
         }):
             # Create SiliconStep with mocked platform
-            step = SiliconStep(self.config)
+            # Create proper Config object
+            config_obj = Config(chipflow=ChipFlowConfig(
+                project_name="test_project",
+                steps={"silicon": "chipflow_lib.steps.silicon:SiliconStep"},
+                top={"mock_component": "module.MockComponent"},
+                silicon=SiliconConfig(
+                    package="cf20",
+                    process="ihp_sg13g2",
+                    debug={"heartbeat": True},
+                    pads={},
+                    power={}
+                )
+            ))
+
+            step = SiliconStep(config_obj)
 
             # Test for exception
             with self.assertRaises(ChipFlowError) as cm:
@@ -592,24 +661,16 @@ class TestSiliconStep(unittest.TestCase):
 class TestSiliconTop(unittest.TestCase):
     def setUp(self):
         # Create basic config for tests
-        self.config = {
-            "chipflow": {
-                "project_name": "test_project",
-                "steps": {
-                    "silicon": "chipflow_lib.steps.silicon:SiliconStep"
-                },
-                "top": {
-                    "mock_component": "module.MockComponent"
-                },
-                "silicon": {
-                    "package": "cf20",
-                    "process": "ihp_sg13g2",
-                    "debug": {
-                        "heartbeat": True
-                    }
-                }
-            }
-        }
+        self.config = Config(chipflow=ChipFlowConfig(
+            project_name="test_project",
+            steps={"silicon": "chipflow_lib.steps.silicon:SiliconStep"},
+            top={"mock_component": "module.MockComponent"},
+            silicon=SiliconConfig(
+                package="cf20",
+                process="ihp_sg13g2",
+                debug={"heartbeat": True}
+            )
+        ))
 
     def test_init(self):
         """Test SiliconTop initialization"""
@@ -621,7 +682,7 @@ class TestSiliconTop(unittest.TestCase):
         """Test SiliconTop elaborate method"""
         # Create mock platform
         platform = mock.MagicMock()
-        platform.pinlock.port_map = {
+        platform.pinlock.port_map.ports = {
             "comp1": {
                 "iface1": {
                     "port1": mock.MagicMock(port_name="test_port")
@@ -666,28 +727,20 @@ class TestSiliconTop(unittest.TestCase):
     def test_elaborate_no_heartbeat(self, mock_top_components, mock_platform_class):
         """Test SiliconTop elaborate without heartbeat"""
         # Config without heartbeat
-        config_no_heartbeat = {
-            "chipflow": {
-                "project_name": "test_project",
-                "steps": {
-                    "silicon": "chipflow_lib.steps.silicon:SiliconStep"
-                },
-                "top": {
-                    "mock_component": "module.MockComponent"
-                },
-                "silicon": {
-                    "package": "cf20",
-                    "process": "ihp_sg13g2",
-                    "debug": {
-                        "heartbeat": False
-                    }
-                }
-            }
-        }
+        config_no_heartbeat = Config(chipflow=ChipFlowConfig(
+            project_name="test_project",
+            steps={"silicon": "chipflow_lib.steps.silicon:SiliconStep"},
+            top={"mock_component": "module.MockComponent"},
+            silicon=SiliconConfig(
+                package="cf20",
+                process="ihp_sg13g2",
+                debug={"heartbeat": False}
+            )
+        ))
 
         # Create mock platform
         platform = mock_platform_class.return_value
-        platform.pinlock.port_map = {}
+        platform.pinlock.port_map.ports = {}
 
         # Setup top_components mock
         mock_top_components.return_value = {}
@@ -724,7 +777,7 @@ class TestSiliconTop(unittest.TestCase):
 
         # Create a mock platform with a heartbeat port
         platform = mock.MagicMock()
-        platform.pinlock.port_map = {}
+        platform.pinlock.port_map.ports = {}
         platform.ports = {
             "heartbeat": mock.MagicMock()
         }
