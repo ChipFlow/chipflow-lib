@@ -77,7 +77,7 @@ class SimPlatform:
 
         for clock, name in self._config["chipflow"]["clocks"].items():
             if name not in pinlock.package.clocks:
-                raise ChipFlowError("Unable to find clock {name} in pinlock")
+                raise ChipFlowError(f"Unable to find clock {name} in pinlock")
 
             port_data = pinlock.package.clocks[name]
             port = io.SimulationPort(io.Direction.Input, port_data.width, invert=True, name=f"clock-{name}")
