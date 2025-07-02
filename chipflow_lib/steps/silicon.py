@@ -16,7 +16,7 @@ import dotenv
 from amaranth import *
 from halo import Halo
 
-from . import StepBase
+from . import StepBase, _wire_up_ports
 from .. import ChipFlowError
 from ..cli import log_level
 from ..platforms import SiliconPlatform, top_interfaces, load_pinlock
@@ -44,16 +44,7 @@ class SiliconTop(StepBase, Elaboratable):
         top, interfaces = top_interfaces(self._config)
         logger.debug(f"SiliconTop top = {top}, interfaces={interfaces}")
 
-        for n, t in top.items():
-            setattr(m.submodules, n, t)
-
-        for component, iface in platform.pinlock.port_map.items():
-            for iface_name, member, in iface.items():
-                for name, port in member.items():
-                    iface = getattr(top[component], iface_name)
-                    wire = (iface if isinstance(iface.signature, IOSignature)
-                            else getattr(iface, name))
-                    platform.ports[port.port_name].wire(m, wire)
+        _wire_up_ports(m, top, platform)
         return m
 
 

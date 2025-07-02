@@ -12,8 +12,8 @@ from doit.task import dict_to_task
 
 from amaranth import *
 
+from . import StepBase, _wire_up_ports
 from .. import ChipFlowError, _ensure_chipflow_root
-from . import StepBase
 from ..platforms import SimPlatform, top_interfaces
 from ..platforms.sim import VARIABLES, TASKS, DOIT_CONFIG
 
@@ -92,22 +92,7 @@ class SimStep(StepBase):
         top, interfaces = top_interfaces(self._config)
         logger.debug(f"SiliconTop top = {top}, interfaces={interfaces}")
 
-        for n, t in top.items():
-            setattr(m.submodules, n, t)
-
-        for component, iface in self._platform._pinlock.port_map.items():
-            for iface_name, member, in iface.items():
-                for name, port in member.items():
-                    iface = getattr(top[component], iface_name)
-                    wire = (iface if isinstance(iface.signature, IOSignature)
-                            else getattr(iface, name))
-                    port = self._platform._ports[port.port_name]
-                    if hasattr(wire, 'i'):
-                        m.d.comb += wire.i.eq(port.i)
-                    for d in ['o', 'oe']:
-                        if hasattr(wire, d):
-                            m.d.comb += getattr(port, d).eq(getattr(wire, d))
-
+        _wire_up_ports(m, top, self._platform)
 
         #FIXME: common source for build dir
         self._platform.build(m)

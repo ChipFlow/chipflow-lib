@@ -292,7 +292,7 @@ class SiliconPlatform:
             setattr(m.submodules, reset, rst_buffer)
             setattr(m.submodules, reset + "_sync", FFSynchronizer(rst_buffer.i, ResetSignal()))
 
-        self.pinlock = pinlock
+        self._pinlock = pinlock
 
     def request(self, name=None, **kwargs):
         if "$" in name:
