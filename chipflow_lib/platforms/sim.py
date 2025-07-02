@@ -81,7 +81,7 @@ class SimPlatform:
                 raise ChipFlowError(f"Unable to find clock {name} in pinlock")
 
             port_data = pinlock.package.clocks[name]
-            port = io.SimulationPort(io.Direction.Input, port_data.width, invert=True, name=f"clock-{name}")
+            port = io.SimulationPort(io.Direction.Input, port_data.width, name=f"clock-{name}")
             self._ports[name] = port
 
             if clock == 'default':
@@ -93,7 +93,7 @@ class SimPlatform:
 
         for reset, name in self._config["chipflow"]["resets"].items():
             port_data = pinlock.package.resets[name]
-            port = io.SimulationPort(io.Direction.Input, port_data.width, invert=port.invert, name=f"clock-{name}", )
+            port = io.SimulationPort(io.Direction.Input, port_data.width, name=f"reset-{name}", )
             self._ports[name] = port
             rst_buffer = io.Buffer("i", port)
             setattr(m.submodules, reset, rst_buffer)
