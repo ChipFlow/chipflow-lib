@@ -14,7 +14,6 @@ from amaranth.hdl._ir import PortDirection
 from amaranth.lib.cdc import FFSynchronizer
 from pydantic import BaseModel, ConfigDict
 
-from .. import ChipFlowError
 from .utils import load_pinlock, _chipflow_schema_uri
 
 __all__ = ["SimPlatform", "SimModelSignature", "BuildObject", "CxxBuildObject"]
@@ -110,16 +109,17 @@ class SimModelSignature(wiring.Signature):
         self._cpp_class = cpp_class
         self._build = build
         self._capabilities = capabilities
-        super().__init__()
+        super().__init__(members={})
 
     def annotations(self, *args):
+        "Used by Amaranth to fetch the annotations"
         annotations = wiring.Signature.annotations(self, *args)
         sim_model_annotation = _SimModelAnnotation(cpp_class=self._cpp_class, build=self._build,
                                                    capabilities=self._capabilities)
-        return annotations + (sim_model_annotation,)
+        return annotations + (sim_model_annotation,)  #type: ignore[reportOperatorIssue]
 
     def __repr__(self):
-        return f"SimModelSignature({self._cpp_class}, {self._cpp_files}, {self._hpp_files}, {self._capabilities})"
+        return f"SimModelSignature({self._cpp_class}, {self._build}, {self._capabilities})"
 
 
 def print_fragment(fragment, ports=(), name="top", *, emit_src=True, **kwargs):
@@ -137,11 +137,11 @@ def dump(elaboratable, name="top", platform=None, *, ports=None, emit_src=True, 
             hasattr(elaboratable, "signature") and
             isinstance(elaboratable.signature, wiring.Signature)):
         ports = {}
-        for path, member, value in elaboratable.signature.flatten(elaboratable):
+        for path, flow, value in elaboratable.signature.flatten(elaboratable):
             if isinstance(value, _ast.ValueCastable):
                 value = value.as_value()
             if isinstance(value, _ast.Value):
-                if member.flow == wiring.In:
+                if flow == wiring.In:
                     dir = _ir.PortDirection.Input
                 else:
                     dir = _ir.PortDirection.Output
