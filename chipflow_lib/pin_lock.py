@@ -62,6 +62,9 @@ def allocate_pins(name: str, member: Dict[str, Any], pins: List[str], port_name:
                          'type': 'io',
                          'port_name': port_name,
                          'options': options}
+        if 'invert' in sig and sig['invert']:
+            pin_map[name]['invert'] = sig['invert']
+
         logger.debug(f"added '{name}':{pin_map[name]} to pin_map")
         return pin_map, pins[width:]
     elif member['type'] == 'interface':

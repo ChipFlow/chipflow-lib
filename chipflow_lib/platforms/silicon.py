@@ -139,6 +139,7 @@ class SiliconPlatformPort(io.PortLike):
     def invert(self):
         return self._invert
 
+
     def __len__(self):
         if self._direction is io.Direction.Input:
             return len(self._i)
@@ -270,7 +271,7 @@ class SiliconPlatform:
 
         for clock, name in self._config["chipflow"]["clocks"].items():
             if name not in pinlock.package.clocks:
-                raise ChipFlowError("Unable to find clock {name} in pinlock")
+                raise ChipFlowError(f"Unable to find clock {name} in pinlock")
 
             port_data = pinlock.package.clocks[name]
             port = SiliconPlatformPort(component, name, port_data, invert=True)
@@ -291,7 +292,7 @@ class SiliconPlatform:
             setattr(m.submodules, reset, rst_buffer)
             setattr(m.submodules, reset + "_sync", FFSynchronizer(rst_buffer.i, ResetSignal()))
 
-        self.pinlock = pinlock
+        self._pinlock = pinlock
 
     def request(self, name=None, **kwargs):
         if "$" in name:
