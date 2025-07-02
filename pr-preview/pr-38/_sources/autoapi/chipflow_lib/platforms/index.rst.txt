@@ -79,7 +79,6 @@ Package Contents
    :py:obj:`InputIOSignature`, :py:obj:`OutputIOSignature`, or :py:obj:`BidirIOSignature` for defining pin interfaces.
 
 
-
    .. py:property:: direction
       :type: amaranth.lib.io.Direction
 
@@ -94,11 +93,17 @@ Package Contents
       The width of the IO port, in wires
 
 
-   .. py:property:: model
-      :type: IOModel
+   .. py:property:: invert
+      :type: collections.abc.Iterable[bool]
 
 
-      The `IOModel` of this signature
+      A tuple as wide as the IO port, with a bool for the polarity inversion for each wire
+
+
+   .. py:method:: options()
+
+      Options set on the io port at construction
+
 
 
    .. py:method:: annotations(*args)
@@ -127,6 +132,9 @@ Package Contents
                 * **all_have_oe** -- controls whether each output wire is associated with an individual Output Enable bit
                   or a single OE bit will be used for entire port, the default value is False, indicating that a
                   single OE bit controls the entire port.
+                * **invert** -- Polarity inversion. If the value is a simple :class:`bool`, it specifies inversion for
+                  the entire port. If the value is an iterable of :class:`bool`, the iterable must have the
+                  same length as the width of :py:`io`, and the inversion is specified for individual wires.
                 * **allocate_power** -- Whether a power line should be allocated with this interface.  NB there is only one of these, so IO with multiple IO power domains must be split up.
                 * **power_voltage** -- Voltage range of the allocated power
                 * **clock_domain_i** -- the name of the `Amaranth.ClockDomain` for input. NB there is only one of these, so IO with multiple input clocks must be split up.
