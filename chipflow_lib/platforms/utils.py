@@ -376,7 +376,7 @@ class Port(pydantic.BaseModel):
     pins: List[str]
     port_name: str
     direction: Optional[str] = None
-    invert: Union[bool, Iterable[bool]] = False
+    invert: Optional[Iterable[bool]] = None
     options: Optional[dict] = None
 
     @property
