@@ -100,10 +100,11 @@ Package Contents
       A tuple as wide as the IO port, with a bool for the polarity inversion for each wire
 
 
-   .. py:method:: options()
+   .. py:property:: options
+      :type: _IOModelOptions
+
 
       Options set on the io port at construction
-
 
 
    .. py:method:: annotations(*args)
