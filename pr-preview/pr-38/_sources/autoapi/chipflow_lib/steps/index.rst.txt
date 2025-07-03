@@ -95,3 +95,9 @@ Package Contents
 
 
 
+   .. py:method:: build(*args)
+
+      builds the design
+
+
+
