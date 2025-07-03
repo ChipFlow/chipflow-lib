@@ -332,17 +332,16 @@ class Port(pydantic.BaseModel):
 
     @property
     def direction(self):
-        assert self.pins and 'direction' in self.iomodel
-        assert len(self.pins) == self.iomodel['direction']
+        assert 'direction' in self.iomodel
         return self.iomodel['direction']
 
     @property
-    def invert(self) -> Iterable[bool]:
-        assert self.pins and 'invert' in self.iomodel
-        print(type(self.iomodel['invert']))
-        assert type(self.iomodel['invert']) is tuple
-        assert len(self.pins) == len(self.iomodel['invert'])
-        return self.iomodel['invert']
+    def invert(self) -> Iterable[bool] | None:
+        if 'invert' in self.iomodel:
+            assert type(self.iomodel['invert']) is tuple
+            return self.iomodel['invert']
+        else:
+            return None
 
 
 def _group_consecutive_items(ordering: PinList, lst: PinList) -> OrderedDict[int, List[PinList]]:

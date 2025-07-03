@@ -77,7 +77,8 @@ class SimStep(StepBase):
         self._platform = SimPlatform(config)
         self._config = config
 
-    def build(self):
+    def build(self, *args):
+        print("building sim")
         m = Module()
         self._platform.instantiate_ports(m)
 

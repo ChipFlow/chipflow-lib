@@ -41,10 +41,16 @@ class StepBase(ABC):
 
     def run_cli(self, args):
         "Called when this step's is used from `chipflow` command"
+        self.build()
+
+    def build(self, *args):
+        "builds the design"
         ...
 
 def _wire_up_ports(m: Module, top, platform):
+    print("wiring up ports:")
     for n, t in top.items():
+        print(">  {n}:{t}")
         setattr(m.submodules, n, t)
 
     for component, iface in platform._pinlock.port_map.ports.items():
@@ -54,8 +60,8 @@ def _wire_up_ports(m: Module, top, platform):
 
         for iface_name, member, in iface.items():
             for name, port in member.items():
-
                 iface = getattr(top[component], iface_name)
+                logger.debug(f"Wiring up {iface}")
                 wire = (iface if isinstance(iface.signature, IOSignature)
                         else getattr(iface, name))
                 inv_mask = sum(inv << bit for bit, inv in enumerate(port.invert))
