@@ -19,7 +19,7 @@ Each package type (PGA, bare die, etc.) defines its own implementation of these 
 ### Getting Default Pins
 
 ```python
-from chipflow_lib.platforms.utils import PACKAGE_DEFINITIONS, PowerType, JTAGWireName
+from chipflow_lib.platforms._utils import PACKAGE_DEFINITIONS, PowerType, JTAGWireName
 
 # Get a package definition
 package_def = PACKAGE_DEFINITIONS["pga144"]
@@ -42,7 +42,7 @@ tms_pin = jtag_pins[JTAGWireName.TMS]  # Get the TMS pin
 ### Creating a Package with Default Pins
 
 ```python
-from chipflow_lib.platforms.utils import PACKAGE_DEFINITIONS
+from chipflow_lib.platforms._utils import PACKAGE_DEFINITIONS
 
 # Create a package with a specific package definition
 package = Package(package_type=PACKAGE_DEFINITIONS["pga144"])

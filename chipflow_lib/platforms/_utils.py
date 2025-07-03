@@ -5,7 +5,7 @@ import pathlib
 import pydantic
 
 from collections import OrderedDict, deque
-from collections.abc import Iterable
+from collections.abc import Iterable, Callable
 from pprint import pformat
 from typing import Set, List, Dict, Optional, Union, Literal, Tuple
 
@@ -26,42 +26,69 @@ from amaranth.lib import wiring, io, meta
 from amaranth.lib.wiring import In, Out
 from pydantic import (
         ConfigDict, TypeAdapter, PlainSerializer,
-        WithJsonSchema
+        WithJsonSchema, WrapValidator, Field
         )
 
 
 from .. import ChipFlowError, _ensure_chipflow_root, _get_cls_by_reference
+from .._appresponse import AppResponseModel, OmitIfNone
 
 if TYPE_CHECKING:
-    from ..config_models import Config
-
-__all__ = ['IO_ANNOTATION_SCHEMA', 'IOSignature', 'IOModel',
-           'OutputIOSignature', 'InputIOSignature', 'BidirIOSignature',
-           'load_pinlock', "PACKAGE_DEFINITIONS", 'top_components', 'LockFile',
-           'Package', 'PortMap', 'Port', 'Process',
-           'GAPackageDef', 'QuadPackageDef', 'BareDiePackageDef', 'BasePackageDef',
-           'BringupPins', 'JTAGPins', 'PowerPins']
-
-
+    from .._config_models import Config
 logger = logging.getLogger(__name__)
 
 
-def _chipflow_schema_uri(name: str, version: int) -> str:
+def chipflow_schema_uri(name: str, version: int) -> str:
     return f"https://api.chipflow.com/schemas/{version}/{name}"
 
 
+Voltage = Annotated[
+              float,
+              PlainSerializer(lambda x: f'{x:.1e}V', return_type=str),
+              WrapValidator(lambda v, h: h(v.strip('Vv ') if isinstance(v, str) else h(v)))
+          ]
+
+
+class VoltageRange(AppResponseModel):
+    min: Annotated[Optional[Voltage], OmitIfNone()] = None
+    max: Annotated[Optional[Voltage], OmitIfNone()] = None
+    typical: Annotated[Optional[Voltage], OmitIfNone()] = None
+
+
+class PowerDomain(AppResponseModel):
+    voltage: Voltage | VoltageRange
+    type: Annotated[Optional[str], OmitIfNone()] = None
+
+
+# TODO: validation checks
+ComponentName = str
+InterfaceName = str
+PowerDomainName = str
+InterfacePowerDomainName = str
+
+
 @dataclass
-class VoltageRange:
-    min: Optional[float] = None
-    max: Optional[float] = None
+class PowerConfigDomains:
+    pads: Optional[Dict[PowerDomainName, PowerDomain]] = None
 
 
-IO_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("pin-annotation", 0))
+@dataclass
+class PowerConfig:
+    domains: PowerConfigDomains
+    allocation: Optional[Dict[ComponentName ,
+                            Dict[InterfaceName, dict | str]
+                      ]
+                 ] = None
+
+
+IO_ANNOTATION_SCHEMA = str(chipflow_schema_uri("pin-annotation", 0))
+
 
 ConstSerializer = PlainSerializer(
         lambda x: {"width": x._shape._width, "signed": x._shape._signed, "value": x._value},
-        #TypedDict('ConstSerialize', {"width": int, "signed": bool, "value": int})
         )
+
+
 ConstSchema = WithJsonSchema({
     "title": "Const",
     "type": "object",
@@ -75,18 +102,16 @@ ConstSchema = WithJsonSchema({
 
 
 @pydantic.with_config(ConfigDict(arbitrary_types_allowed=True))  # type: ignore[reportCallIssue]
-class _IOModelOptions(TypedDict):
+class IOModelOptions(TypedDict):
     invert: NotRequired[bool|Tuple[bool, ...]]
     all_have_oe: NotRequired[bool]
-    allocate_power: NotRequired[bool]
-    power_voltage: NotRequired[VoltageRange]
-    clock_domain_i: NotRequired[str]
-    clock_domain_o: NotRequired[str]
+    interface_power_domains: NotRequired[List[InterfacePowerDomainName]]
+    clock_domain: NotRequired[str]
     init: NotRequired[Annotated[Const, ConstSerializer, ConstSchema]]
 
 
 @pydantic.with_config(ConfigDict(arbitrary_types_allowed=True))  # type: ignore[reportCallIssue]
-class IOModel(_IOModelOptions):
+class IOModel(IOModelOptions):
     """
     Options for IO Ports
 
@@ -99,15 +124,372 @@ class IOModel(_IOModelOptions):
         invert: Polarity inversion. If the value is a simple :class:`bool`, it specifies inversion for
             the entire port. If the value is an iterable of :class:`bool`, the iterable must have the
             same length as the width of :py:`io`, and the inversion is specified for individual wires.
-        allocate_power: Whether a power line should be allocated with this interface.  NB there is only one of these, so IO with multiple IO power domains must be split up.
-        power_voltage: Voltage range of the allocated power
-        clock_domain_i: the name of the `Amaranth.ClockDomain` for input. NB there is only one of these, so IO with multiple input clocks must be split up.
-        clock_domain_o: the name of the `Amaranth.ClockDomain` for output. NB there is only one of these, so IO with multiple output clocks must be split up.
+        allocate_power: Whether a io power domain should be set on this interface.  NB there is only one of these, so IO with multiple IO power domains must be split up.
+        interface_power_domains: the name of the available power domains on the interface
+        clock_domain: the name of the `Amaranth.ClockDomain` for this port. NB there is only one of these, so IO with multiple input clocks must be split up.
         init: a :ref:`Const` value for the initial values of the port
     """
 
     width: int
     direction: Annotated[io.Direction, PlainSerializer(lambda x: x.value)]
+
+
+Pin = Tuple[Any,...] | str | int
+PinSet = Set[Pin]
+PinList = List[Pin]
+Pins = PinSet | PinList
+
+@dataclass
+class PowerPins:
+    "A matched pair of power pins, with optional notation of the voltage range"
+    power: Pin
+    ground: Pin
+    def _to_set(self) -> Set[Pin]:
+        return set(asdict(self).values())
+
+@dataclass
+class JTAGPins:
+    "Pins for a JTAG interface"
+    trst: Pin
+    tck: Pin
+    tms: Pin
+    tdi: Pin
+    tdo: Pin
+
+    def _to_set(self) -> Set[Pin]:
+        return set(asdict(self).values())
+
+@dataclass
+class BringupPins:
+    core_power: List[PowerPins]
+    core_clock: Pin
+    core_reset: Pin
+    core_heartbeat: Pin
+    core_jtag: JTAGPins
+
+    def _to_set(self) -> Set[Pin]:
+        return {p for pp in self.core_power for p in asdict(pp).values()} | \
+               set([self.core_clock, self.core_reset, self.core_heartbeat]) | \
+               self.core_jtag._to_set()
+
+class PadPowerDomain(pydantic.BaseModel):
+    io: str
+    internal: str
+
+class PadPowerDomains(StrEnum):
+    IO = 'io'
+    INTERNAL = 'internal'
+
+class PortModel(AppResponseModel):
+    "Configuration information for a platform port"
+    type: str
+    pins: List[Pin] | None  # None implies must be allocated at end
+    port_name: str
+    iomodel: IOModel
+    power_allocation: Dict[InterfacePowerDomainName, PowerDomainName] = {}
+    pad_power_domains: Annotated[Optional[PadPowerDomain, OmitIfNone()]] = None
+
+    def model_post_init(self, __context):
+        logger.debug(f"Instantiating port {self.port_name}: {self}")
+        # every interface gets a default domain for the pad
+        if 'interface_power_domain' not in self.iomodel:
+            self.iomodel['interface_power_domains'] = ['default']
+        elif 'default' not in self.iomodel['interface_power_domains']:
+            self.iomodel['interface_power_domains'] = ['default'].extend(self.iomodel['interface_power_domain'])
+
+        return super().model_post_init(__context)
+
+    @property
+    def width(self):
+        assert 'width' in self.iomodel
+        if self.pins:
+            assert len(self.pins) == self.iomodel['width']
+        return self.iomodel['width']
+
+    @property
+    def direction(self):
+        assert 'direction' in self.iomodel
+        return self.iomodel['direction']
+
+    @property
+    def invert(self) -> Iterable[bool] | None:
+        if 'invert' in self.iomodel:
+            assert isinstance(self.iomodel['invert'], tuple)
+            return self.iomodel['invert']
+        else:
+            return None
+
+    @property
+    def interface_power_domains(self) -> List[str]:
+        if 'interface_power_domains' in self.iomodel:
+            return self.iomodel['interface_power_domains']
+        else:
+            return []
+
+
+Interface = OrderedDict[str, PortModel]
+Component = OrderedDict[str, Interface]
+AllocateFunc = Callable[[PinSet, int], PinList]
+
+
+def create_ports(name: str, member: Dict[str, Any], port_name: str) -> Interface:
+    "Allocate pins based of Amaranth member metadata"
+    pin_map = Interface()
+
+    logger.debug(f"create_ports: name={name}")
+    logger.debug(f"member={pformat(member)}")
+
+    if member['type'] == 'interface' and 'annotations' in member \
+       and IO_ANNOTATION_SCHEMA in member['annotations']:
+        model:IOModel = member['annotations'][IO_ANNOTATION_SCHEMA]
+        logger.debug(f"matched IOSignature {model}")
+        pin_map[name] = PortModel(type='io', port_name=port_name, iomodel=model, pins=None)
+        logger.debug(f"added '{name}':{pin_map[name]} to pin_map")
+        return pin_map
+    elif member['type'] == 'interface':
+        for k, v in member['members'].items():
+            port_name = '_'.join([name, k])
+            _map = create_ports(name=k, member=v, port_name=port_name)
+            pin_map |= _map
+            logger.debug(f"{pin_map},{_map}")
+        return pin_map
+    elif member['type'] == 'port':
+        logger.warning(f"PortModel '{name}' has no IOSignature, pin allocation likely to be wrong")
+        width = member['width']
+        model = IOModel(width=int(width), direction=io.Direction(member['dir']))
+        pin_map[name] = PortModel(type='io', port_name=port_name, iomodel=model, pins=None)
+        logger.debug(f"added '{name}':{pin_map[name]} to pin_map")
+        return pin_map
+    else:
+        logging.debug(f"Shouldnt get here. member = {member}")
+        assert False
+
+
+class PortMap(pydantic.BaseModel):
+    ports: OrderedDict[str, Component] = OrderedDict()
+    pad_power_domains: Dict[PowerDomainName, PowerDomain] = {}
+
+    def get_ports(self, component: str, interface: str) -> Interface:
+        "List the ports allocated in this PortMap for the given `Component` and `Interface`"
+        if component not in self.ports:
+            raise KeyError(f"'{component}' not found in {self}")
+        return self.ports[component][interface]
+
+    def get_clocks(self) -> List[PortModel]:
+        ret = []
+        for n, c in self.ports.items():
+            for cn, i in c.items():
+                for ni, p in i.items():
+                    if p.type == "clock":
+                        ret.append(p)
+        return ret
+
+    def get_resets(self) -> List[PortModel]:
+        ret = []
+        for n, c in self.ports.items():
+            for cn, i in c.items():
+                for ni, p in i.items():
+                    if p.type == "reset":
+                        ret.append(p)
+        return ret
+
+    def add_port(self, component: str, interface: str, port_name: str, port: PortModel):
+        "Internally used by a `PackageDef`"
+        if component not in self.ports:
+            self.ports[component] = Component()
+        if interface not in self.ports[component]:
+            self.ports[component][interface] = Interface()
+        self.ports[component][interface][port_name] = port
+
+    def add_ports(self, component: str, interface: str, ports: Interface):
+        "Internally used by a `PackageDef`"
+        if component not in self.ports:
+            self.ports[component] = Component()
+        self.ports[component][interface] = ports
+
+    def populate(self, interfaces: dict, lockfile: Optional['LockFile'] = None):
+        for component, ann in interfaces.items():
+            for interface, v in ann['interface']['members'].items():
+                logger.debug(f"Interface {component}.{interface}:")
+                logger.debug(pformat(v))
+                width = count_member_pins(interface, v)
+                logger.debug(f"  {interface}: total {width} pins")
+                old_ports = lockfile.port_map.get_ports(component, interface) if lockfile else None
+
+                if old_ports:
+                    logger.debug(f"  {component}.{interface} found in pins.lock, reusing")
+                    logger.debug(pformat(old_ports))
+                    old_width = sum([len(p.pins) for p in old_ports.values() if p.pins is not None and p.type == 'io'])
+                    if old_width != width:
+                        raise ChipFlowError(
+                            f"Interface {component}.{interface} has changed size. "
+                            f"Old size = {old_width}, new size = {width}"
+                        )
+                    self.add_ports(component, interface, old_ports)
+                else:
+                    print(f"Creating ports for component: {component}, interface: {interface}")
+                    if component not in self.ports:
+                        self.ports[component] = Component()
+                    self.ports[component][interface] = create_ports(interface, v, interface)
+
+    def create_power_ports(self, component, interface):
+        power_allocation:Dict[InterfacePowerDomainName, PowerDomainName] = {}
+        for pn, p in self.ports[component][interface].items():
+            if p.power_allocation:
+                logger.debug(f"Creating power ports for {component}.{interface}.{pn}")
+                power_allocation |= p.power_allocation
+        for ipd, ppd in power_allocation.items():
+            prefix = f"_power_{ipd}_{ppd}"
+            power_port = prefix + "_vdd"
+            pad_power_domain = f"{ppd}"
+            if power_port not in self.ports[component][interface]:
+                self.ports[component][interface][power_port] = PortModel(type='power', pins=None, port_name=power_port,
+                        pad_power_domain=pad_power_domain, iomodel=IOModel(width=1, direction=io.Direction.Input))
+
+            power_port = prefix + "_vss"
+            if power_port not in self.ports[component][interface]:
+                self.ports[component][interface][power_port] = PortModel(type='power', pins=None, port_name=power_port,
+                        pad_power_domain=pad_power_domain, iomodel=IOModel(width=1, direction=io.Direction.Input))
+
+    def check_core_power(self, core_domain, _type, voltage):
+        if core_domain not in self.pad_power_domains:
+            self.pad_power_domains[core_domain] = PowerDomain(type=_type, voltage=voltage)
+        else:
+            if self.pad_power_domains[core_domain].type != _type:
+                raise ChipFlowError("Default core_domain power domain must be type 'io")
+
+    def allocate_power(self, config: 'Config'):
+        "Allocate power domains to top level ports"
+
+        # instantiate port-side power domains
+        if config.chipflow.power and config.chipflow.power.domains and config.chipflow.power.domains.pads:
+            self.pad_power_domains = config.chipflow.power.domains.pads
+        else:
+            self.pad_power_domains = {}
+
+        self.check_core_power('_io', 'io', 3.3)
+        self.check_core_power('_core', 'core', 1.8)
+
+        # ensure default mappings exist
+        if config.chipflow.power and config.chipflow.power.allocation:
+            allocation_config = config.chipflow.power.allocation
+        else:
+            allocation_config = {}
+
+        # convert nested dict structure into a mapping ic_power_domain:[component, interface, {port,} {ip power domain}]
+        def map_ports(c, i, *, port_power_domain, port_name=None, interface_power_domain=None):
+            # a bit verbose but easier to understand, I hope..
+            if port_power_domain not in self.pad_power_domains:
+                raise ChipFlowError(f"'{port_power_domain}' is not a known power domain in {c}.{i}{'.'+port_name if port_name else ''}{'.'+interface_power_domain if interface_power_domain else ''} = '{port_power_domain}')")
+            if interface_power_domain:
+                if port_name:
+                    p = self.ports[c][i][port_name]
+                    if interface_power_domain not in p.interface_power_domains:
+                        raise ChipFlowError(f"{interface_power_domain} not found in {c}.{i}.{p} power domains ({p.interface_power_domains}")
+                        p.port_power_domain = port_power_domain
+                        self.interface_power_allocation[interface_power_domain] = port_power_domain
+                else:
+                    for p in self.ports[c][i].values():
+                        if p.type != io:
+                            continue
+                        if interface_power_domain in p.interface_power_domains:
+                            if interface_power_domain in p.power_allocation \
+                            and p.power_allocation[interface_power_domain] != port_power_domain:
+                                raise ChipFlowError(f"Clash in power domain mappings for {c}.{i}.{p}: {port_power_domain} differs from previously set {p.power_allocation[interface_power_domain]} for {interface_power_domain}")
+
+                            p.power_allocation[interface_power_domain] = port_power_domain
+            else:
+                if port_name:
+                    # first one considered default
+                    p = self.ports[c][i][port_name]
+                    if not p.interface_power_domains:
+                        raise ChipFlowError(f"No power domains available for {c}.{i}.{port_name}")
+                    interface_power_domain = p.interface_power_domains[0]
+                    p.power_allocation[interface_power_domain] = port_power_domain
+                else:
+                    for p in self.ports[c][i].values():
+                        if p.interface_power_domains:
+                            interface_power_domain = p.interface_power_domains[0]
+                            p.power_allocation[interface_power_domain] = port_power_domain
+
+        # must be an easier way to do this...
+        for c, v in allocation_config.items():
+            if c not in self.ports:
+                raise ChipFlowError(f"In [chipflow.power.allocation], '{c}' is not a top level component")
+            if not isinstance(v, dict):
+                raise ChipFlowError(f"Malformed [chipflow.power.allocation] section: {c} = {v}")
+            for i, v in v.items():
+                if i not in self.ports[c]:
+                    raise ChipFlowError(f"In [chipflow.silicon.power], '{i}' is not an interface of {c}")
+                if isinstance(v, str):
+                    map_ports(c, i, port_power_domain=v)
+                if isinstance(v, dict):
+                    for x, v in v.items():
+                        print([p.interface_power_domains for p in self.ports[c][i].values() if p.interface_power_domains])
+                        # is x a port name?
+                        if x in self.ports[c][i]:
+                            if isinstance(v, str):
+                                map_ports(c, i, port_name=x, port_power_domain=v)
+                            elif isinstance(v, dict):
+                                for y, v in v.items():
+                                    map_ports(c, i, port_name=x, interface_power_domain=y, port_power_domain=v)
+                            else:
+                                raise ChipFlowError(f"Malformed [chipflow.power.allocation] section: {c}.{i}.{x} = {v} ('{v}' is not a valid power domain)")
+                        # is x an interface-side power domain?
+                        elif any(x in p.interface_power_domains for p in self.ports[c][i].values() if p.interface_power_domains):
+                            if not isinstance(v, str):
+                                raise ChipFlowError(f"Malformed [chipflow.power.allocation] section: {c}.{i}.{x} = {v},  ('{x}' isnot a valid power domain)")
+                            else:
+                                # map interface-side power domain x to port-side power domain v
+                                map_ports(c, i, interface_power_domain=x, port_power_domain=v)
+                        else:
+                            raise ChipFlowError(f"Malformed [chipflow.power.allocation] section: {c}.{i}.{x} = {v} (unable to interpret '{x}')")
+
+                self.create_power_ports(c, i)
+        # apply default case
+        for c, v in self.ports.items():
+            for i, v in v.items():
+                for p in v.values():
+                    if not p.power_allocation:
+                        p.power_allocation = {'default': '_io'}
+                    elif 'default' not in p.power_allocation:
+                        p.power_allocation |= {'default': '_io'}
+
+                self.create_power_ports(c, i)
+
+    def allocate_pins(self, config: 'Config', allocate: AllocateFunc, unallocated: Set[Pin]) -> None:
+        logger.debug("Allocating pins")
+        def flatten_dict(d, parent_key='', sep='.'):
+            items = []
+            for k, v in d.items():
+                new_key = f"{parent_key}{sep}{k}" if parent_key else k
+                if isinstance(v, dict):
+                    items.extend(flatten_dict(v, new_key, sep=sep).items())
+                else:
+                    items.append((new_key, v))
+            return dict(items)
+        # group by pad power domains
+        ports = flatten_dict(self.ports)
+
+        for pd in self.pad_power_domains:
+            for name, port in ports.items():
+                if port.pad_power_domain == pd:
+                    logger.debug(f"Allocating pins for {name}: {port}")
+                    pins = allocate(unallocated, port.width)
+                    if len(pins) == 0:  # TODO turn this into an exception?
+                        raise ChipFlowError("No pins were allocated")
+                    # logger.debug(f"allocated range: {pins}")
+                    unallocated = unallocated - set(pins)
+                    port.pins = pins
+
+def construct_portmap(config: 'Config', interfaces: dict, lockfile: Optional['LockFile'], core: Component, allocate: AllocateFunc, unallocated: Set[Pin]) -> PortMap:
+    portmap = PortMap()
+    portmap.populate(interfaces, lockfile)
+    portmap.ports['_core'] = core
+    portmap.allocate_power(config)
+    portmap.allocate_pins(config, allocate, unallocated)
+    return portmap
+
 
 def io_annotation_schema():
     class Model(pydantic.BaseModel):
@@ -120,7 +502,7 @@ def io_annotation_schema():
     return schema
 
 
-class _IOAnnotation(meta.Annotation):
+class IOAnnotation(meta.Annotation):
     "Infrastructure for `Amaranth annotations <amaranth.lib.meta.Annotation>`"
     schema = io_annotation_schema()
 
@@ -143,6 +525,8 @@ class IOSignature(wiring.Signature):
     """
 
     def __init__(self, **kwargs: Unpack[IOModel]):
+        # runtime check..
+        assert set(kwargs.keys()).issubset(set(IOModel.__annotations__.keys()))
         model = IOModel(**kwargs)
         assert 'width' in model
         assert 'direction' in model
@@ -175,10 +559,8 @@ class IOSignature(wiring.Signature):
         else:
             model['invert'] = (False,) * width
 
-        if 'clock_domain_i' not in model:
-            model['clock_domain_i'] = 'sync'
-        if 'clock_domain_o' not in model:
-            model['clock_domain_o'] = 'sync'
+        if 'clock_domain' not in model:
+            model['clock_domain'] = 'sync'
 
         self._model = model
         super().__init__(sig)
@@ -200,7 +582,7 @@ class IOSignature(wiring.Signature):
         return self._model['invert']
 
     @property
-    def options(self) -> _IOModelOptions:
+    def options(self) -> IOModelOptions:
         """
         Options set on the io port at construction
         """
@@ -209,7 +591,7 @@ class IOSignature(wiring.Signature):
     def annotations(self, *args):  # type: ignore
         annotations = wiring.Signature.annotations(self, *args)  # type: ignore
 
-        io_annotation = _IOAnnotation(self._model)
+        io_annotation = IOAnnotation(self._model)
         return annotations + (io_annotation,)  # type: ignore
 
 
@@ -217,7 +599,7 @@ class IOSignature(wiring.Signature):
         return f"IOSignature({','.join('{0}={1!r}'.format(k,v) for k,v in self._model.items())})"
 
 
-def OutputIOSignature(width: int, **kwargs: Unpack[_IOModelOptions]):
+def OutputIOSignature(width: int, **kwargs: Unpack[IOModelOptions]):
     """This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package output signals
     intended for connection to the physical pads of the integrated circuit package.
 
@@ -227,7 +609,7 @@ def OutputIOSignature(width: int, **kwargs: Unpack[_IOModelOptions]):
     return IOSignature(**model)
 
 
-def InputIOSignature(width: int, **kwargs: Unpack[_IOModelOptions]):  # type: ignore[reportGeneralTypeIssues]
+def InputIOSignature(width: int, **kwargs: Unpack[IOModelOptions]):  # type: ignore[reportGeneralTypeIssues]
     """This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package input signals
     intended for connection to the physical pads of the integrated circuit package.
 
@@ -238,7 +620,7 @@ def InputIOSignature(width: int, **kwargs: Unpack[_IOModelOptions]):  # type: ig
     return IOSignature(**model)
 
 
-def BidirIOSignature(width: int, **kwargs: Unpack[_IOModelOptions]):  # type: ignore[reportGeneralTypeIssues]
+def BidirIOSignature(width: int, **kwargs: Unpack[IOModelOptions]):  # type: ignore[reportGeneralTypeIssues]
     """This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package bi-directional signals
     intended for connection to the physical pads of the integrated circuit package.
 
@@ -249,14 +631,10 @@ def BidirIOSignature(width: int, **kwargs: Unpack[_IOModelOptions]):  # type: ig
     return IOSignature(**model)
 
 
-Pin = Union[Tuple[Any,...], str, int]
-PinSet = Set[Pin]
-PinList = List[Pin]
-Pins = Union[PinSet, PinList]
-
 class PowerType(StrEnum):
     POWER = "power"
     GROUND = "ground"
+
 
 class JTAGWire(StrEnum):
     TRST = "trst"
@@ -273,42 +651,8 @@ JTAGSignature = wiring.Signature({
     JTAGWire.TDO: Out(OutputIOSignature(1)),
 })
 
-@dataclass
-class PowerPins:
-    "A matched pair of power pins, with optional notation of the voltage range"
-    power: Pin
-    ground: Pin
-    voltage: Optional[VoltageRange] = None
-    def to_set(self) -> Set[Pin]:
-        return set(asdict(self).values())
 
-@dataclass
-class JTAGPins:
-    "Pins for a JTAG interface"
-    trst: Pin
-    tck: Pin
-    tms: Pin
-    tdi: Pin
-    tdo: Pin
-
-    def to_set(self) -> Set[Pin]:
-        return set(asdict(self).values())
-
-@dataclass
-class BringupPins:
-    core_power: List[PowerPins]
-    core_clock: Pin
-    core_reset: Pin
-    core_heartbeat: Pin
-    core_jtag: JTAGPins
-
-    def to_set(self) -> Set[Pin]:
-        return {p for pp in self.core_power for p in asdict(pp).values()} | \
-               set([self.core_clock, self.core_reset, self.core_heartbeat]) | \
-               self.core_jtag.to_set()
-
-
-class _Side(IntEnum):
+class Side(IntEnum):
     N = 1
     E = 2
     S = 3
@@ -318,33 +662,7 @@ class _Side(IntEnum):
         return f'{self.name}'
 
 
-class Port(pydantic.BaseModel):
-    type: str
-    pins: List[Pin] | None  # None implies must be allocated at end
-    port_name: str
-    iomodel: IOModel
-
-    @property
-    def width(self):
-        assert self.pins and 'width' in self.iomodel
-        assert len(self.pins) == self.iomodel['width']
-        return self.iomodel['width']
-
-    @property
-    def direction(self):
-        assert 'direction' in self.iomodel
-        return self.iomodel['direction']
-
-    @property
-    def invert(self) -> Iterable[bool] | None:
-        if 'invert' in self.iomodel:
-            assert type(self.iomodel['invert']) is tuple
-            return self.iomodel['invert']
-        else:
-            return None
-
-
-def _group_consecutive_items(ordering: PinList, lst: PinList) -> OrderedDict[int, List[PinList]]:
+def group_consecutive_items(ordering: PinList, lst: PinList) -> OrderedDict[int, List[PinList]]:
     if not lst:
         return OrderedDict()
 
@@ -352,17 +670,17 @@ def _group_consecutive_items(ordering: PinList, lst: PinList) -> OrderedDict[int
     last = lst[0]
     current_group = [last]
 
-    logger.debug(f"_group_consecutive_items starting with {current_group}")
+    # logger.debug(f"_group_consecutive_items starting with {current_group}")
 
     for item in lst[1:]:
         idx = ordering.index(last)
         next = ordering[idx + 1] if idx < len(ordering) - 1 else None
-        logger.debug(f"inspecting {item}, index {idx}, next {next}")
+        # logger.debug(f"inspecting {item}, index {idx}, next {next}")
         if item == next:
             current_group.append(item)
-            logger.debug("found consecutive, adding to current group")
+            # logger.debug("found consecutive, adding to current group")
         else:
-            logger.debug("found nonconsecutive, creating new group")
+            # logger.debug("found nonconsecutive, creating new group")
             grouped.append(current_group)
             current_group = [item]
         last = item
@@ -375,7 +693,7 @@ def _group_consecutive_items(ordering: PinList, lst: PinList) -> OrderedDict[int
     return d
 
 
-def _find_contiguous_sequence(ordering: PinList, lst: PinList, total: int) -> PinList:
+def find_contiguous_sequence(ordering: PinList, lst: PinList, total: int) -> PinList:
     """Find the next sequence of n consecutive numbers in a sorted list
 
     Args:
@@ -389,7 +707,7 @@ def _find_contiguous_sequence(ordering: PinList, lst: PinList, total: int) -> Pi
     if not lst or len(lst) < total:
         raise ChipFlowError("Invalid request to find_contiguous_argument")
 
-    grouped = _group_consecutive_items(ordering, lst)
+    grouped = group_consecutive_items(ordering, lst)
 
     ret = []
     n = total
@@ -412,7 +730,7 @@ def _find_contiguous_sequence(ordering: PinList, lst: PinList, total: int) -> Pi
 
     return ret
 
-def _count_member_pins(name: str, member: Dict[str, Any]) -> int:
+def count_member_pins(name: str, member: Dict[str, Any]) -> int:
     "Counts the pins from amaranth metadata"
     logger.debug(
         f"count_pins {name} {member['type']} "
@@ -420,100 +738,18 @@ def _count_member_pins(name: str, member: Dict[str, Any]) -> int:
     )
     if member['type'] == 'interface' and 'annotations' in member \
        and IO_ANNOTATION_SCHEMA in member['annotations']:
-        return member['annotations'][IO_ANNOTATION_SCHEMA]['width']
+        ioport = member['annotations'][IO_ANNOTATION_SCHEMA]
+        width = ioport['width']
+        return width
     elif member['type'] == 'interface':
         width = 0
         for n, v in member['members'].items():
-            width += _count_member_pins('_'.join([name, n]), v)
+            width += count_member_pins('_'.join([name, n]), v)
         return width
     elif member['type'] == 'port':
+        logger.warning(f"Port '{name}' has no IOSignature, pin allocation likely to be wrong")
         return member['width']
     return 0
-
-
-def _allocate_pins(name: str, member: Dict[str, Any], pins: List[Pin], port_name: Optional[str] = None) -> Tuple[Dict[str, Port], List[Pin]]:
-    "Allocate pins based of Amaranth member metadata"
-
-    if port_name is None:
-        port_name = name
-
-    pin_map = {}
-
-    logger.debug(f"allocate_pins: name={name}, pins={pins}")
-    logger.debug(f"member={pformat(member)}")
-
-    if member['type'] == 'interface' and 'annotations' in member \
-       and IO_ANNOTATION_SCHEMA in member['annotations']:
-        model:IOModel = member['annotations'][IO_ANNOTATION_SCHEMA]
-        logger.debug(f"matched IOSignature {model}")
-        name = name
-        width = model['width']
-        pin_map[name] = Port(pins=pins[0:width], type='io', port_name=port_name, iomodel=model)
-        logger.debug(f"added '{name}':{pin_map[name]} to pin_map")
-        return pin_map, pins[width:]
-    elif member['type'] == 'interface':
-        for k, v in member['members'].items():
-            port_name = '_'.join([name, k])
-            _map, pins = _allocate_pins(k, v, pins, port_name=port_name)
-            pin_map |= _map
-            logger.debug(f"{pin_map},{_map}")
-        return pin_map, pins
-    elif member['type'] == 'port':
-        logger.warning(f"Port '{name}' has no IOSignature, pin allocation likely to be wrong")
-        width = member['width']
-        model = IOModel(width=width, direction=io.Direction(member['dir']))
-        pin_map[name] = Port(pins=pins[0:width], type='io', port_name=port_name, iomodel=model)
-        logger.debug(f"added '{name}':{pin_map[name]} to pin_map")
-        return pin_map, pins[width:]
-    else:
-        logging.debug(f"Shouldnt get here. member = {member}")
-        assert False
-
-
-Interface = Dict[str, Port]
-Component = Dict[str, Interface]
-
-class PortMap(pydantic.BaseModel):
-    ports: Dict[str, Component] = {}
-
-    def _add_port(self, component: str, interface: str, port_name: str, port: Port):
-        "Internally used by a `PackageDef`"
-        if component not in self.ports:
-            self.ports[component] = {}
-        if interface not in self.ports[component]:
-            self.ports[component][interface] = {}
-        self.ports[component][interface][port_name] = port
-
-    def _add_ports(self, component: str, interface: str, ports: Interface):
-        "Internally used by a `PackageDef`"
-        if component not in self.ports:
-            self.ports[component] = {}
-        self.ports[component][interface] = ports
-
-    def get_ports(self, component: str, interface: str) -> Interface:
-
-        "List the ports allocated in this PortMap for the given `Component` and `Interface`"
-        if component not in self.ports:
-            raise KeyError(f"'{component}' not found in {self}")
-        return self.ports[component][interface]
-
-    def get_clocks(self) -> List[Port]:
-        ret = []
-        for n, c in self.ports.items():
-            for cn, i in c.items():
-                for ni, p in i.items():
-                    if p.type == "clock":
-                        ret.append(p)
-        return ret
-
-    def get_resets(self) -> List[Port]:
-        ret = []
-        for n, c in self.ports.items():
-            for cn, i in c.items():
-                for ni, p in i.items():
-                    if p.type == "reset":
-                        ret.append(p)
-        return ret
 
 
 class LockFile(pydantic.BaseModel):
@@ -541,35 +777,6 @@ class Package(pydantic.BaseModel):
     """
     type: PackageDef = pydantic.Field(discriminator="package_type")
 
-def _linear_allocate_components(interfaces: dict, lockfile: LockFile | None, allocate, unallocated) -> PortMap:
-    port_map = PortMap()
-    for component, iface in interfaces.items():
-        for k, v in iface['interface']['members'].items():
-            logger.debug(f"Interface {iface}.{k}:")
-            logger.debug(pformat(v))
-            width = _count_member_pins(k, v)
-            logger.debug(f"  {k}: total {width} pins")
-            old_ports = lockfile.port_map.get_ports(component, k) if lockfile else None
-
-            if old_ports:
-                logger.debug(f"  {iface}.{k} found in pins.lock, reusing")
-                logger.debug(pformat(old_ports))
-                old_width = sum([len(p.pins) for p in old_ports.values() if p.pins is not None])
-                if old_width != width:
-                    raise ChipFlowError(
-                        f"top level interface has changed size. "
-                        f"Old size = {old_width}, new size = {width}"
-                    )
-                port_map._add_ports(component, k, old_ports)
-            else:
-                pins = allocate(unallocated, width)
-                if len(pins) == 0:
-                    raise ChipFlowError("No pins were allocated")
-                logger.debug(f"allocated range: {pins}")
-                unallocated = unallocated - set(pins)
-                _map, _ = _allocate_pins(k, v, pins)
-                port_map._add_ports(component, k, _map)
-    return port_map
 
 
 class UnableToAllocate(ChipFlowError):
@@ -584,8 +791,6 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
 
     Attributes:
         name (str): The name of the package
-        lockfile: Optional exisiting LockFile for the mapping
-
     """
 
     name: str
@@ -614,36 +819,56 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
         cds = set(config.chipflow.clock_domains) if config.chipflow.clock_domains else set()
         cds.discard('sync')
 
-        d: Interface = { 'sync-clk': Port(type='clock',
+        d: Interface = { 'sync-clk': PortModel(type='clock',
                                           pins=[self.bringup_pins.core_clock],
                                           port_name='sync-clk',
-                                          iomodel=IOModel(width=1, direction=io.Direction.Input, clock_domain_o="sync")
+                                          iomodel=IOModel(width=1, direction=io.Direction.Input,
+                                                          clock_domain="sync")
                                       ),
-                          'sync-rst_n': Port(type='reset',
+                          'sync-rst_n': PortModel(type='reset',
                                            pins=[self.bringup_pins.core_reset],
                                            port_name='sync-rst_n',
-                                           iomodel=IOModel(width=1, direction=io.Direction.Input, clock_domain_o="sync",
+                                           iomodel=IOModel(width=1, direction=io.Direction.Input, clock_domain="sync",
                                                            invert=True)
                                       )
                        }
+        vdd_pins = []
+        vss_pins = []
+        for pp in self.bringup_pins.core_power:
+            vdd_pins.append(pp.ground)
+            vss_pins.append(pp.power)
+
+        d |= {'vdd' : PortModel(type='vdd',
+                           pins=vdd_pins,
+                           port_name="vdd-core",
+                           pad_power_domains="_core",
+                           iomodel=IOModel(width=len(vdd_pins), direction=io.Direction.Input)),
+              'vss' : PortModel(type='vss',
+                           pins=vss_pins,
+                           port_name="vss-core",
+                           pad_power_domains="_core",
+                           iomodel=IOModel(width=len(vss_pins), direction=io.Direction.Input))
+              }
+
+
         assert config.chipflow.silicon
         if config.chipflow.silicon.debug and \
            config.chipflow.silicon.debug['heartbeat']:
-            d['heartbeat'] = Port(type='heartbeat',
+            d['heartbeat'] = PortModel(type='heartbeat',
                                   pins=[self.bringup_pins.core_heartbeat],
                                   port_name='heartbeat',
-                                  iomodel=IOModel(width=1, direction=io.Direction.Output, clock_domain_i="sync")
+                                  iomodel=IOModel(width=1, direction=io.Direction.Output, clock_domain="sync")
                               )
         #TODO: JTAG
         return {'bringup_pins': d}
 
     @abc.abstractmethod
-    def allocate_pins(self, config: 'Config', process: 'Process', lockfile: LockFile|None) -> LockFile:
+    def _allocate_pins(self, config: 'Config', process: 'Process', lockfile: LockFile|None) -> LockFile:
         """
         Allocate package pins to the registered component.
         Pins should be allocated in the most usable way for *users* of the packaged IC.
 
-        Returns: `LockFile` data structure represnting the allocation of interfaces to pins
+        Returns: `_LockFile` data structure represnting the allocation of interfaces to pins
 
         Raises:
             UnableToAllocate: Raised if the port was unable to be allocated.
@@ -681,48 +906,45 @@ class BareDiePackageDef(BasePackageDef):
     height: int
 
     def model_post_init(self, __context):
-        pins = set(itertools.product((_Side.N, _Side.S), range(self.width)))
-        pins |= set(itertools.product((_Side.W, _Side.E), range(self.height)))
-        pins -= set(self.bringup_pins.to_set())
+        pins = set(itertools.product((Side.N, Side.S), range(self.width)))
+        pins |= set(itertools.product((Side.W, Side.E), range(self.height)))
+        pins -= set(self.bringup_pins._to_set())
 
         self._ordered_pins: List[Pin] = sorted(pins)
         return super().model_post_init(__context)
 
-    def allocate_pins(self, config: 'Config', process: 'Process', lockfile: LockFile|None) -> LockFile:
-        portmap =  _linear_allocate_components(self._interfaces, lockfile, self._allocate, set(self._ordered_pins))
-        bringup_pins = self._allocate_bringup(config)
-        portmap.ports['_core']=bringup_pins
+    def _allocate(self, available: PinSet, width: int) -> PinList:
+        avail_n = self._sortpins(available)
+        logger.debug(f"BareDiePackageDef.allocate {width} from {len(avail_n)} remaining")
+        ret = find_contiguous_sequence(self._ordered_pins, avail_n, width)
+        logger.debug(f"BareDiePackageDef.returned {ret}")
+        assert len(ret) == width
+        return ret
+
+    def _allocate_pins(self, config: 'Config',  process: 'Process', lockfile: LockFile|None) -> LockFile:
+        portmap = construct_portmap(config, self._interfaces, lockfile, self._allocate_bringup(config), self._allocate, set(self._ordered_pins))
         package = self._get_package()
         return LockFile(package=package, process=process, metadata=self._interfaces, port_map=portmap)
 
     @property
     def bringup_pins(self) -> BringupPins:
         core_power = PowerPins(
-            (_Side.N, 1),
-            (_Side.N, 2)
+            (Side.N, 1),
+            (Side.N, 2)
         )
         return BringupPins(
             core_power=[core_power],
-            core_clock=(_Side.N, 3),
-            core_reset=(_Side.N, 3),
-            core_heartbeat=(_Side.E, 1),
+            core_clock=(Side.N, 3),
+            core_reset=(Side.N, 3),
+            core_heartbeat=(Side.E, 1),
             core_jtag=JTAGPins(
-                (_Side.E, 2),
-                (_Side.E, 3),
-                (_Side.E, 4),
-                (_Side.E, 5),
-                (_Side.E, 6)
+                (Side.E, 2),
+                (Side.E, 3),
+                (Side.E, 4),
+                (Side.E, 5),
+                (Side.E, 6)
             )
         )
-
-
-    def _allocate(self, available: PinSet, width: int) -> PinList:
-        avail_n = self._sortpins(available)
-        logger.debug(f"BareDiePackageDef.allocate {width} from {len(avail_n)} remaining")
-        ret = _find_contiguous_sequence(self._ordered_pins, avail_n, width)
-        logger.debug(f"BareDiePackageDef.returned {ret}")
-        assert len(ret) == width
-        return ret
 
 
 
@@ -765,24 +987,22 @@ class QuadPackageDef(BasePackageDef):
 
     def model_post_init(self, __context):
         pins = set([i for i in range(1, self.width * 2 + self.height * 2)])
-        pins.difference_update(*[x.to_set() for x in self._power])
-        pins.difference_update(self._jtag.to_set())
+        pins.difference_update(*[x._to_set() for x in self._power])
+        pins.difference_update(self._jtag._to_set())
 
         self._ordered_pins: List[Pin] = sorted(pins)
         return super().model_post_init(__context)
 
-    def allocate_pins(self, config: 'Config', process: 'Process', lockfile: LockFile|None) -> LockFile:
-        portmap = _linear_allocate_components(self._interfaces, lockfile, self._allocate, set(self._ordered_pins))
-        bringup_pins = self._allocate_bringup(config)
-        portmap.ports['_core']=bringup_pins
+    def _allocate_pins(self, config: 'Config', process: 'Process', lockfile: LockFile|None) -> LockFile:
+        portmap = construct_portmap(config, self._interfaces, lockfile, self._allocate_bringup(config), self._allocate, set(self._ordered_pins))
         package = self._get_package()
         return LockFile(package=package, process=process, metadata=self._interfaces, port_map=portmap)
 
-    def _allocate(self, available: Set[int], width: int) -> List[Pin]:
+    def _allocate(self, available: PinSet, width: int) -> List[Pin]:
         avail_n: List[Pin] = sorted(available)
-        logger.debug(f"QuadPackageDef.allocate {width} from {len(avail_n)} remaining: {available}")
-        ret = _find_contiguous_sequence(self._ordered_pins, avail_n, width)
-        logger.debug(f"QuadPackageDef.returned {ret}")
+        # logger.debug(f"QuadPackageDef.allocate {width} from {len(avail_n)} remaining: {available}")
+        ret = find_contiguous_sequence(self._ordered_pins, avail_n, width)
+        # logger.debug(f"QuadPackageDef.returned {ret}")
         assert len(ret) == width
         return ret
 
@@ -834,7 +1054,7 @@ class QuadPackageDef(BasePackageDef):
         """
         # Default JTAG pin allocations
         # Use consecutive pins at the start of the package
-        start_pin = 2
+        start_pin = 1
         return JTAGPins(
             trst=start_pin,
             tck=start_pin + 1,
@@ -954,14 +1174,14 @@ class GAPackageDef(BasePackageDef):
         match self.layout_type:
             case GALayout.FULL:
                 pins = pins_for_range(1, self.height, 1, self.width)
-                pins -= self.bringup_pins.to_set()
+                pins -= self.bringup_pins._to_set()
                 self._ordered_pins = sort_by_quadrant(pins)
 
             case GALayout.PERIMETER:
                 assert self.channel_width is not None
                 pins = pins_for_range(1, self.height, 1, self.width) - \
                        pins_for_range(1 + self.channel_width, self.height-self.channel_width,  1 + self.channel_width, self.width - self.channel_width)
-                pins -= self.bringup_pins.to_set()
+                pins -= self.bringup_pins._to_set()
                 self._ordered_pins = sort_by_quadrant(pins)
 
             case GALayout.ISLAND:
@@ -969,7 +1189,7 @@ class GAPackageDef(BasePackageDef):
                 assert self.island_width is not None
                 outer_pins = pins_for_range(1, self.height, 1, self.width) - \
                              pins_for_range(1 + self.channel_width, self.height-self.channel_width,  1 + self.channel_width, self.width - self.channel_width)
-                outer_pins -= self.bringup_pins.to_set()
+                outer_pins -= self.bringup_pins._to_set()
                 inner_pins = pins_for_range(ceil(self.height/ 2 - self.island_width /2), floor(self.height/2 + self.island_width /2),
                                             ceil(self.width / 2 - self.island_width /2), floor(self.width /2 + self.island_width /2))
                 # TODO, allocate island as power
@@ -979,22 +1199,20 @@ class GAPackageDef(BasePackageDef):
                 assert self.channel_width is not None
                 pins = pins_for_range(1, self.channel_width + 1, 1, self.width) | \
                        pins_for_range(self.height - self.channel_width, self.height, 1, self.width)
-                pins -= self.bringup_pins.to_set()
+                pins -= self.bringup_pins._to_set()
                 self._ordered_pins = sort_by_quadrant(pins)
 
         return super().model_post_init(__context)
 
-    def allocate_pins(self, config: 'Config', process: 'Process', lockfile: LockFile|None) -> LockFile:
-        portmap = _linear_allocate_components(self._interfaces, lockfile, self._allocate, set(self._ordered_pins))
-        bringup_pins = self._allocate_bringup(config)
-        portmap.ports['_core']=bringup_pins
+    def _allocate_pins(self, config: 'Config', process: 'Process', lockfile: LockFile|None) -> LockFile:
+        portmap = construct_portmap(config, self._interfaces, lockfile, self._allocate_bringup(config), self._allocate, set(self._ordered_pins))
         package = self._get_package()
         return LockFile(package=package, process=process, metadata=self._interfaces, port_map=portmap)
 
     def _allocate(self, available: Set[Pin], width: int) -> List[Pin]:
         avail_n = sorted(available)
         logger.debug(f"GAPackageDef.allocate {width} from {len(avail_n)} remaining: {available}")
-        ret = _find_contiguous_sequence(self._ordered_pins, avail_n, width)
+        ret = find_contiguous_sequence(self._ordered_pins, avail_n, width)
         logger.debug(f"GAPackageDef.returned {ret}")
         assert len(ret) == width
         return ret
@@ -1032,7 +1250,7 @@ class GAPackageDef(BasePackageDef):
         )
 
     @property
-    def heartbeat(self) -> Dict[int, Pin]:
+    def _heartbeat(self) -> Dict[int, Pin]:
         """
         Numbered set of heartbeat pins for the package
         """

@@ -7,14 +7,14 @@ import tempfile
 from amaranth.lib import io
 
 from chipflow_lib import ChipFlowError
-from chipflow_lib.platforms.utils import (
+from chipflow_lib.platforms._utils import (
     IOModel,
     Port,
     PortMap,
     Package,
     PACKAGE_DEFINITIONS
 )
-from chipflow_lib.config_models import Config, ChipFlowConfig, SiliconConfig
+from chipflow_lib._config_models import Config, ChipFlowConfig, SiliconConfig
 
 # Define a MockPackageType for testing
 class MockPackageType:
@@ -28,13 +28,13 @@ class MockPackageType:
         self._components = {}
         # Create mocks for the methods
         self.register_component = mock.MagicMock(side_effect=self._register_component)
-        self.allocate_pins = mock.MagicMock()
-        self.allocate = mock.MagicMock(side_effect=self._allocate)
+        self._allocate_pins = mock.MagicMock()
+        self._allocate = mock.MagicMock(side_effect=self._allocate)
         self.bringup_pins = mock.PropertyMock()
 
         # Setup allocate_pins to return a mock LockFile
         mock_lockfile = mock.MagicMock()
-        self.allocate_pins.return_value = mock_lockfile
+        self._allocate_pins.return_value = mock_lockfile
 
     def _register_component(self, name, component):
         """Mock implementation of register_component"""
@@ -199,7 +199,7 @@ class TestPinLock(unittest.TestCase):
 
         # Verify the package definition was used
         mock_package_type.register_component.assert_called()
-        mock_package_type.allocate_pins.assert_called()
+        mock_package_type._allocate_pins.assert_called()
 
         # Verify write was called with the JSON data
         file_handle = mock_open.return_value.__enter__.return_value

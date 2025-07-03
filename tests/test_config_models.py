@@ -2,8 +2,6 @@
 import os
 import unittest
 
-from chipflow_lib.config_models import PadConfig
-
 
 class ConfigModelsTestCase(unittest.TestCase):
     def setUp(self):
@@ -35,16 +33,6 @@ class ConfigModelsTestCase(unittest.TestCase):
         # self.assertEqual(config.chipflow.silicon.package, "pga144")
         # self.assertEqual(config.chipflow.silicon.process, Process.SKY130)
         self.skipTest("Config validation temporarily disabled")
-
-    def test_pad_config(self):
-        """Test validation of pad configuration."""
-        pad = PadConfig(type="clock", loc="114")
-        self.assertEqual(pad.type, "clock")
-        self.assertEqual(pad.loc, "114")
-
-        # Test validation of loc format
-        with self.assertRaises(ValueError):
-            PadConfig(type="clock", loc="invalid-format")
 
     def test_nested_structure(self):
         """Test the nested structure of the Config model."""

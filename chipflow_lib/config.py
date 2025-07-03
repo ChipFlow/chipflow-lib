@@ -6,7 +6,7 @@ import tomli
 from pydantic import ValidationError
 
 from . import ChipFlowError
-from .config_models import Config
+from ._config_models import Config
 
 def get_dir_models():
     return os.path.dirname(__file__) + "/models"

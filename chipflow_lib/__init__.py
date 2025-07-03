@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .config_models import Config
+    from ._config_models import Config
 
 __version__ = importlib.metadata.version("chipflow_lib")
 

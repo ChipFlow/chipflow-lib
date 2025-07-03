@@ -7,7 +7,7 @@ from abc import ABC
 
 from amaranth import Module
 
-from ..platforms.utils import IOSignature
+from ..platforms._utils import IOSignature
 
 logger = logging.getLogger(__name__)
 
@@ -48,11 +48,14 @@ class StepBase(ABC):
         ...
 
 def _wire_up_ports(m: Module, top, platform):
+    assert platform._pinlock
+
     logger.debug("Wiring up ports")
     logger.debug("-> Adding top components:")
     for n, t in top.items():
         logger.debug(f"    > {n}, {t}")
         setattr(m.submodules, n, t)
+
     print("Wiring up ports:")
     for component, iface in platform._pinlock.port_map.ports.items():
         if component.startswith('_'):

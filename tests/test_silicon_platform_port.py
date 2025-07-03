@@ -7,7 +7,7 @@ from amaranth.lib import wiring, io
 from amaranth.lib.wiring import PureInterface
 
 from chipflow_lib.platforms.silicon import SiliconPlatformPort
-from chipflow_lib.platforms.utils import Port, IOModel
+from chipflow_lib.platforms._utils import Port, IOModel
 
 
 class TestSiliconPlatformPort(unittest.TestCase):

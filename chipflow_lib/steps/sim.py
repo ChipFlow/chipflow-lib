@@ -14,8 +14,8 @@ from amaranth import *
 
 from . import StepBase, _wire_up_ports
 from .. import ChipFlowError, _ensure_chipflow_root
-from ..platforms import SimPlatform, top_components
-from ..platforms.sim import VARIABLES, TASKS, DOIT_CONFIG
+from ..platforms._utils import top_components
+from ..platforms.sim import SimPlatform, VARIABLES, TASKS, DOIT_CONFIG
 
 
 EXE = ".exe" if os.name == "nt" else ""
@@ -89,8 +89,12 @@ class SimStep(StepBase):
         #    m.d.sync += heartbeat_ctr.eq(heartbeat_ctr + 1)
         #    m.d.comb += platform.request("heartbeat").o.eq(heartbeat_ctr[-1])
 
+        assert self._platform._pinlock
+
         top = top_components(self._config)
         logger.debug(f"SimStep top = {top}")
+        logger.debug(f"port map ports =\n{pformat(self._platform._pinlock.port_map.ports)}")
+
 
         _wire_up_ports(m, top, self._platform)
 

@@ -8,7 +8,7 @@ from amaranth import Const
 from amaranth.lib import io
 
 from chipflow_lib import ChipFlowError
-from chipflow_lib.platforms.utils import (
+from chipflow_lib.platforms._utils import (
     IOSignature,
     IOModel,
     Package,
@@ -124,7 +124,7 @@ class TestPortMap(unittest.TestCase):
 
         # Test _add_port with a new component and interface
         port1 = Port(type="input", pins=["1"], port_name="port1", iomodel=IOModel(width=1, direction=io.Direction.Input))
-        port_map._add_port("comp1", "iface1", "port1", port1)
+        port_map.add_port("comp1", "iface1", "port1", port1)
 
         self.assertIn("comp1", port_map.ports)
         self.assertIn("iface1", port_map.ports["comp1"])
@@ -136,7 +136,7 @@ class TestPortMap(unittest.TestCase):
             "port2": Port(type="output", pins=["2"], port_name="port2", iomodel=IOModel(width=1, direction=io.Direction.Output)),
             "port3": Port(type="output", pins=["3"], port_name="port3", iomodel=IOModel(width=1, direction=io.Direction.Output))
         }
-        port_map._add_ports("comp1", "iface2", ports)
+        port_map.add_ports("comp1", "iface2", ports)
 
         self.assertIn("iface2", port_map.ports["comp1"])
         self.assertEqual(len(port_map.ports["comp1"]["iface2"]), 2)
@@ -194,15 +194,15 @@ class TestPort(unittest.TestCase):
             _ = port_no_pins.width
 
 
-@mock.patch('chipflow_lib.platforms.utils.LockFile.model_validate_json')
-@mock.patch('chipflow_lib.platforms.utils._ensure_chipflow_root')
+@mock.patch('chipflow_lib.platforms._utils.LockFile.model_validate_json')
+@mock.patch('chipflow_lib.platforms._utils._ensure_chipflow_root')
 @mock.patch('pathlib.Path.exists')
 @mock.patch('pathlib.Path.read_text')
 class TestLoadPinlock(unittest.TestCase):
     def test_load_pinlock_exists(self, mock_read_text, mock_exists, mock_ensure_chipflow_root, mock_validate_json):
         """Test load_pinlock when pins.lock exists"""
         # Import here to avoid issues during test collection
-        from chipflow_lib.platforms.utils import load_pinlock
+        from chipflow_lib.platforms._utils import load_pinlock
 
         # Setup mocks
         mock_ensure_chipflow_root.return_value = "/mock/chipflow/root"
@@ -223,7 +223,7 @@ class TestLoadPinlock(unittest.TestCase):
     def test_load_pinlock_not_exists(self, mock_read_text, mock_exists, mock_ensure_chipflow_root, mock_validate_json):
         """Test load_pinlock when pins.lock doesn't exist"""
         # Import here to avoid issues during test collection
-        from chipflow_lib.platforms.utils import load_pinlock
+        from chipflow_lib.platforms._utils import load_pinlock
 
         # Setup mocks
         mock_ensure_chipflow_root.return_value = "/mock/chipflow/root"

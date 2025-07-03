@@ -20,7 +20,8 @@ from halo import Halo
 from . import StepBase, _wire_up_ports
 from .. import ChipFlowError
 from ..cli import log_level
-from ..platforms import SiliconPlatform, top_components, load_pinlock
+from ..platforms import SiliconPlatform
+from ..platforms._utils import top_components, load_pinlock
 
 
 logger = logging.getLogger(__name__)
@@ -57,7 +58,11 @@ class SiliconStep:
         self.config = config
 
         self.platform = SiliconPlatform(config)
+        self._chipflow_api_key = None
         self._log_file = None
+        self._last_log_steps = []
+        self._log_stream_url = None
+        self._build_status_url = None
 
     def build_cli_parser(self, parser):
         action_argument = parser.add_subparsers(dest="action")
@@ -112,7 +117,7 @@ class SiliconStep:
                 raise ChipFlowError(
                     "Environment variable `CHIPFLOW_API_KEY` is empty."
                 )
-        self._chipflow_api_origin = os.environ.get("CHIPFLOW_API_ORIGIN", "https://build.chipflow.org")
+        chipflow_api_origin = os.environ.get("CHIPFLOW_API_ORIGIN", "https://build.chipflow.org")
 
 
         with  Halo(text="Submitting...", spinner="dots") as sp:
@@ -164,13 +169,13 @@ class SiliconStep:
                     fh.close()
                 exit(1)
 
-            sp.info(f"> Submitting {submission_name} for project {self.config.chipflow.project_name} to ChipFlow Cloud {self._chipflow_api_origin}")
+            sp.info(f"> Submitting {submission_name} for project {self.config.chipflow.project_name} to ChipFlow Cloud {chipflow_api_origin}")
             sp.start("Sending design to ChipFlow Cloud")
 
-            build_submit_url = f"{self._chipflow_api_origin}/build/submit"
+            build_submit_url = f"{chipflow_api_origin}/build/submit"
 
             assert self._chipflow_api_key
-            assert self._chipflow_api_origin
+            assert chipflow_api_origin
             try:
                 resp = requests.post(
                     build_submit_url,
@@ -201,11 +206,11 @@ class SiliconStep:
             # Handle response based on status code
             if resp.status_code == 200:
                 logger.debug(f"Submitted design: {resp_data}")
-                self._build_url = f"{self._chipflow_api_origin}/build/{resp_data['build_id']}"
-                self._build_status_url = f"{self._chipflow_api_origin}/build/{resp_data['build_id']}/status"
-                self._log_stream_url = f"{self._chipflow_api_origin}/build/{resp_data['build_id']}/logs?follow=true"
+                build_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}"
+                self._build_status_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/status"
+                self._log_stream_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/logs?follow=true"
 
-                sp.succeed(f"✅ Design submitted successfully! Build URL: {self._build_url}")
+                sp.succeed(f"✅ Design submitted successfully! Build URL: {build_url}")
 
                 exit_code = 0
                 if args.wait:
@@ -238,6 +243,7 @@ class SiliconStep:
                 exit(2)
 
     def _long_poll_stream(self, sp, network_err):
+        assert self._log_stream_url
         steps = self._last_log_steps
         stream_event_counter = 0
         assert self._chipflow_api_key
@@ -300,7 +306,10 @@ class SiliconStep:
         build_status = "pending"
         stream_event_counter = 0
         self._last_log_steps = []
-        assert self._chipflow_api_key is not None
+
+        assert self._chipflow_api_key
+        assert self._build_status_url
+
         while fail_counter < 10 and stream_event_counter < 10:
             sp.text = f"Waiting for build to run... {build_status}"
             time.sleep(timeout)  # Wait before polling
