@@ -14,6 +14,6 @@ class BoardStep(StepBase):
     def run_cli(self, args):
         self.build()
 
-    def build(self):
+    def build(self, *args):
         "Build for the given platform"
-        self.platform.build()
+        self.platform.build(*args)
