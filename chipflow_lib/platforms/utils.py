@@ -625,6 +625,23 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
                                            iomodel=IOModel(width=1, direction=io.Direction.Input, clock_domain_o="sync")
                                       )
                        }
+        vdd_pins = []
+        vss_pins = []
+        for pp in self.bringup_pins.core_power:
+            vdd_pins.append(pp.ground)
+            vss_pins.append(pp.power)
+
+        d |= {'vdd' : Port(type='vdd',
+                            pins=vss_pins,
+                            port_name="vdd-core",
+                            iomodel=IOModel(width=1, direction=io.Direction.Input)),
+              'vss' : Port(type='vss',
+                           pins=vdd_pins,
+                           port_name="vss-core",
+                           iomodel=IOModel(width=1, direction=io.Direction.Input))
+              }
+
+
         assert config.chipflow.silicon
         if config.chipflow.silicon.debug and \
            config.chipflow.silicon.debug['heartbeat']:
