@@ -71,7 +71,7 @@ PowerDomainName = str
 class PowerConfig:
     domains: Optional[Dict[PowerDomainName, PowerDomain]] = None
     map: Optional[Dict[ComponentName,
-                     Dict[InterfaceName, dict]
+                     Dict[InterfaceName, dict | str]
                      ]
                  ] = None
 
@@ -138,7 +138,7 @@ class Port(pydantic.BaseModel):
     pins: List[Pin] | None  # None implies must be allocated at end
     port_name: str
     iomodel: IOModel
-    ic_power_domain: Optional[PowerDomainName] = None
+    port_power_domain: Optional[PowerDomainName] = None
 
     @property
     def width(self):
@@ -154,15 +154,15 @@ class Port(pydantic.BaseModel):
     @property
     def invert(self) -> Iterable[bool] | None:
         if 'invert' in self.iomodel:
-            assert self.iomodel['invert'] is tuple
+            assert isinstance(self.iomodel['invert'], tuple)
             return self.iomodel['invert']
         else:
             return None
 
     @property
-    def interface_power_domain(self) -> Iterable[bool] | None:
+    def interface_power_domain(self) -> str | None:
         if 'interface_power_domain' in self.iomodel:
-            assert self.iomodel['interface_power_domain'] is tuple
+            assert isinstance(self.iomodel['interface_power_domain'], str)
             return self.iomodel['interface_power_domain']
         else:
             return None
@@ -174,6 +174,7 @@ Component = Dict[str, Interface]
 
 class PortMap(pydantic.BaseModel):
     ports: Dict[str, Component] = {}
+    port_power_domains: Dict[str, PowerDomain] = {}
 
     def get_ports(self, component: str, interface: str) -> Interface:
         "List the ports allocated in this PortMap for the given `Component` and `Interface`"
@@ -217,41 +218,70 @@ class PortMap(pydantic.BaseModel):
         "Allocate power domains to top level ports"
         if not config.chipflow.power:
             return
-        power_config = config.chipflow.power
 
-        def set_iface_pd(c, i, ipd, pd):
-            for n, p in self.ports[c][i].items():
-                if p.interface_power_domain == ipd:
-                    p.ic_power_domain = pd
-
-        def match_iface_pd(c, i, x):
-            for n1, _map in x.items():
-                for ipd, pd in _map.items():
-                    for n2, p in self.ports[c][i].items():
-                        if n1 == n2 and ipd == p.interface_power_domain:
-                            p.ic_power_domain = pd
-
-        if not power_config or not power_config.map:
+        # TODO: allow for shell-defined power domains
+        if not config.chipflow.power.domains:
             return
-        for c, im in power_config.map.items():
-            # c is top-level component name
+
+        # instantiate port-side power domains
+        self.port_power_domains = config.chipflow.power.domains
+
+        if not config.chipflow.power.map:
+            logger.warning("[chipflow.power.domains] is defined, but no [chipflow.power.map] found")
+            return
+
+        # convert nested dict structure into a mapping ic_power_domain:[component, interface, {port,} {ip power domain}]
+        map_config = config.chipflow.power.map
+
+        def map_ports(c, i, *, port_power_domain, port_name=None, interface_power_domain=None):
+            # a bit verbose but easier to understand, I hope..
+            if port_power_domain not in self.port_power_domains:
+                raise ChipFlowError(f"'{port_power_domain}' is not a known power domain in {c}.{i}{'.'+port_name if port_name else ''}{'.'+interface_power_domain if interface_power_domain else ''} = '{port_power_domain}')")
+            if not port_name and interface_power_domain:
+                for p in self.ports[c][i].values():
+                    if p.interface_power_domain == interface_power_domain:
+                        p.port_power_domain = port_power_domain
+            elif not port_name:
+                for p in self.ports[c][i].values():
+                    p.port_power_domain = port_power_domain
+            elif port_power_domain and not interface_power_domain:
+                self.ports[c][i][port_name].port_power_domain = port_power_domain
+            else:
+                p = self.ports[c][i][port_name]
+                if p.interface_power_domain == interface_power_domain:
+                    p.port_power_domain = port_power_domain
+
+        # must be an easier way to do this...
+        for c, v in map_config.items():
             if c not in self.ports:
-                raise ChipFlowError(f"In [chipflow.silicon.power], '{c}' is not a top level component")
-            for i, pm in im.items():
-                # i is top-level interface name
-                if i not in self.ports[i]:
-                    raise ChipFlowError(f"In [chipflow.silicon.power], '{i}' is not a top level component of {c}")
-                for x, y in pm.items():
-                    # is x a power domain of i?
-                    if x is str and any(x == p.interface_power_domain for p in self.ports[c][i].values()):
-                        # set power domain on all items in the port that match
-                        set_iface_pd(c,i,x, y)
-                    # is x a port of i?
-                    if isinstance(x, str) and any(x == p for p in self.ports[c][i].keys()):
-                        self.ports[c][i][x].ic_power_domain = y
-                    # is x a map of portnames to interface power domains?
-                    if isinstance(x, dict) and any(p1 == p1 for p1 in x.keys() for p2 in self.ports[c][i].keys()):
-                        match_iface_pd(c, i, x)
+                raise ChipFlowError(f"In [chipflow.power.map], '{c}' is not a top level component")
+            if not isinstance(v, dict):
+                raise ChipFlowError(f"Malformed [chipflow.power.map] section: {c} = {v}")
+            for i, v in v.items():
+                if i not in self.ports[c]:
+                    raise ChipFlowError(f"In [chipflow.silicon.power], '{i}' is not an interface of {c}")
+                if isinstance(v, str):
+                    map_ports(c, i, port_power_domain=v)
+                if isinstance(v, dict):
+                    for x, v in v.items():
+                        # is x a port name?
+                        if x in self.ports[c][i]:
+                            if isinstance(v, str):
+                                map_ports(c, i, port_name=x, port_power_domain=v)
+                            elif isinstance(v, dict):
+                                for y, v in v.items():
+                                    map_ports(c, i, port_name=x, interface_power_domain=y, port_power_domain=v)
+                            else:
+                                raise ChipFlowError(f"Malformed [chipflow.power.map] section: {c}.{i}.{x} = {v} ('{x}' is a port)")
+                        # is x an interface-side power domain?
+                        elif any(x == p.interface_power_domain for p in self.ports[c][i].values()):
+                            if not isinstance(v, str):
+                                raise ChipFlowError(f"Malformed [chipflow.power.map] section: {c}.{i}.{x} = {v} ('{x}' is a power domaiwn)")
+                            else:
+                                # map interface-side power domain x to port-side power domain v
+                                map_ports(c, i, interface_power_domain=x, port_power_domain=v)
+                        else:
+                            raise ChipFlowError(f"Malformed [chipflow.power.map] section: {c}.{i}.{x} = {v} (unable to interpret '{x}')")
 
 
 def io_annotation_schema():
