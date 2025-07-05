@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 import unittest
 
-from chipflow_lib.platforms.utils import (
+from chipflow_lib.platforms._ import (
     BareDiePackageDef, QuadPackageDef, Package, GAPackageDef, GALayout, GAPin
 )
 
@@ -123,7 +123,7 @@ class TestGAPackage(unittest.TestCase):
     def test_gapackagedef_class_structure(self):
         """Test GAPackageDef class structure and type"""
         # Test that we can import and access the class
-        from chipflow_lib.platforms.utils import BasePackageDef
+        from chipflow_lib.platforms._ import BasePackageDef
 
         # Test that GAPackageDef inherits from BasePackageDef
         self.assertTrue(issubclass(GAPackageDef, BasePackageDef))
@@ -238,7 +238,7 @@ class TestGAPackage(unittest.TestCase):
 
     def test_inheritance_from_basepackagedef(self):
         """Test that GAPackageDef properly inherits from BasePackageDef"""
-        from chipflow_lib.platforms.utils import BasePackageDef
+        from chipflow_lib.platforms._ import BasePackageDef
 
         # Test inheritance
         self.assertTrue(issubclass(GAPackageDef, BasePackageDef))

@@ -11,7 +11,7 @@ from amaranth.back import rtlil  # type: ignore[reportAttributeAccessIssue]
 from amaranth.hdl._ir import PortDirection
 from amaranth.lib.cdc import FFSynchronizer
 
-from .utils import load_pinlock
+from ._utils import load_pinlock
 
 
 __all__ = ["SimPlatform"]
@@ -26,6 +26,7 @@ class SimPlatform:
         self.sim_boxes = dict()
         self._ports = {}
         self._config = config
+        self._pinlock = None
 
     def add_file(self, filename, content):
         if not isinstance(content, (str, bytes)):
@@ -81,8 +82,8 @@ class SimPlatform:
                    self._ports[port.port_name] = io.SimulationPort(port.direction, port.width, invert=invert, name=f"{component}-{name}")
 
         for clock in pinlock.port_map.get_clocks():
-            assert 'clock_domain_o' in clock.iomodel
-            domain = clock.iomodel['clock_domain_o']
+            assert 'clock_domain' in clock.iomodel
+            domain = clock.iomodel['clock_domain']
             logger.debug(f"Instantiating clock buffer for {clock.port_name}, domain {domain}")
             setattr(m.domains, domain, ClockDomain(name=domain))
             clk_buffer = io.Buffer(clock.direction, self._ports[clock.port_name])
@@ -90,8 +91,8 @@ class SimPlatform:
             m.d.comb += ClockSignal().eq(clk_buffer.i)  # type: ignore[reportAttributeAccessIssue]
 
         for reset in pinlock.port_map.get_resets():
-            assert 'clock_domain_o' in reset.iomodel
-            domain = reset.iomodel['clock_domain_o']
+            assert 'clock_domain' in reset.iomodel
+            domain = reset.iomodel['clock_domain']
             logger.debug(f"Instantiating reset synchronizer for {reset.port_name}, domain {domain}")
             rst_buffer = io.Buffer(reset.direction, self._ports[clock.port_name])
             setattr(m.submodules, reset.port_name, rst_buffer)

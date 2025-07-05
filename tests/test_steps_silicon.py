@@ -21,7 +21,7 @@ from chipflow_lib import (
 
 from chipflow_lib.cli import run as cli_run
 from chipflow_lib.steps.silicon import SiliconStep, SiliconTop
-from chipflow_lib.config_models import Config, ChipFlowConfig, SiliconConfig
+from chipflow_lib._config_models import Config, ChipFlowConfig, SiliconConfig
 
 DEFAULT_PINLOCK = {
     "process" : "ihp_sg13g2",

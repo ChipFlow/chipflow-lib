@@ -14,7 +14,7 @@ from chipflow_lib import (
     _parse_config
 )
 from chipflow_lib.config import _parse_config_file
-from chipflow_lib.config_models import Config, ChipFlowConfig
+from chipflow_lib._config_models import Config, ChipFlowConfig
 from chipflow_lib.platforms import Process
 
 

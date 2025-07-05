@@ -8,6 +8,7 @@ import re
 import subprocess
 
 from dataclasses import dataclass
+from typing import Optional
 
 from amaranth import Module, Signal, Cat, ClockDomain, ClockSignal, ResetSignal
 
@@ -20,7 +21,7 @@ from amaranth.hdl import Fragment
 from amaranth.hdl._ir import PortDirection
 
 from .. import ChipFlowError
-from .utils import load_pinlock, Port
+from ._utils import load_pinlock, Port
 
 __all__ = ["SiliconPlatformPort", "SiliconPlatform"]
 
@@ -78,9 +79,9 @@ class SiliconPlatformPort(io.PortLike):
         self._pins = port.pins if port.pins else []
 
         # Initialize signal attributes to None
-        self._i = None
-        self._o = None
-        self._oe = None
+        self._i: Optional[Signal] = None
+        self._o: Optional[Signal]  = None
+        self._oe: Optional[Signal] = None
 
         # Create signals based on direction
         if self._direction in (io.Direction.Input, io.Direction.Bidir):
@@ -199,6 +200,7 @@ class IOBuffer(io.Buffer):
     o: Signal
     i: Signal
     oe: Signal
+    port: SiliconPlatformPort
 
     def elaborate(self, platform):
         if not isinstance(self.port, SiliconPlatformPort):
@@ -233,6 +235,8 @@ class FFBuffer(io.FFBuffer):
     i: Signal
     o: Signal
     oe: Signal
+    port: SiliconPlatformPort
+
     def elaborate(self, platform):
         if not isinstance(self.port, SiliconPlatformPort):
             raise TypeError(f"Cannot elaborate SiliconPlatform buffer with port {self.port!r}")
@@ -279,14 +283,14 @@ class SiliconPlatform:
                     self._ports[port.port_name] = SiliconPlatformPort(component, name, port)
 
         for clock in pinlock.port_map.get_clocks():
-            domain = name=clock.iomodel['clock_domain_o']
+            domain = name=clock.iomodel['clock_domain']
             setattr(m.domains, domain, ClockDomain(name=domain))
             clk_buffer = io.Buffer("i", self._ports[clock.port_name])
             setattr(m.submodules, "clk_buffer_" + domain, clk_buffer)
             m.d.comb += ClockSignal().eq(clk_buffer.i)  #type: ignore[reportAttributeAccessIssue]
 
         for reset in pinlock.port_map.get_resets():
-            domain = name=clock.iomodel['clock_domain_o']
+            domain = name=clock.iomodel['clock_domain']
             rst_buffer = io.Buffer("i", self._ports[reset.port_name])
             setattr(m.submodules, reset.port_name, rst_buffer)
             setattr(m.submodules, reset.port_name + "_sync", FFSynchronizer(rst_buffer.i, ResetSignal()))  #type: ignore[reportAttributeAccessIssue]

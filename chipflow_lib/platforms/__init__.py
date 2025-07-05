@@ -8,13 +8,18 @@ This module defines the functionality you use in you code to target the ChipFlow
 
 from .silicon import *
 from .sim import *
-from .utils import *
+from ._utils import (
+        IO_ANNOTATION_SCHEMA, IOSignature, IOModel,
+        OutputIOSignature, InputIOSignature, BidirIOSignature,
+        PACKAGE_DEFINITIONS, Process,
+        GAPackageDef, QuadPackageDef, BareDiePackageDef,
+        BringupPins, JTAGPins, PowerPins
+)
 
 __all__ = ['IO_ANNOTATION_SCHEMA', 'IOSignature', 'IOModel',
            'OutputIOSignature', 'InputIOSignature', 'BidirIOSignature',
-           'load_pinlock', "PACKAGE_DEFINITIONS", 'top_components', 'LockFile',
-           'Package', 'PortMap', 'Port', 'Process',
-           'GAPackageDef', 'QuadPackageDef', 'BareDiePackageDef', 'BasePackageDef',
+           'PACKAGE_DEFINITIONS', 'Process',
+           'GAPackageDef', 'QuadPackageDef', 'BareDiePackageDef',
            'BringupPins', 'JTAGPins', 'PowerPins',
            'SiliconPlatformPort', 'SiliconPlatform',
            'SimPlatform']

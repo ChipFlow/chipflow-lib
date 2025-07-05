@@ -6,7 +6,7 @@ from pathlib import Path
 from pprint import pformat
 
 from . import _parse_config, _ensure_chipflow_root, ChipFlowError
-from .platforms import top_components, LockFile, PACKAGE_DEFINITIONS
+from .platforms._utils import top_components, LockFile, PACKAGE_DEFINITIONS
 
 # logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -41,7 +41,7 @@ def lock_pins() -> None:
     for name, component in top.items():
         package_def.register_component(name, component)
 
-    newlock = package_def.allocate_pins(config, process, oldlock)
+    newlock = package_def._allocate_pins(config, process, oldlock)
 
     with open(lockfile, 'w') as f:
         f.write(newlock.model_dump_json(indent=2, serialize_as_any=True))

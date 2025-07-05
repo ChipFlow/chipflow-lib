@@ -7,14 +7,14 @@ import tempfile
 from amaranth.lib import io
 
 from chipflow_lib import ChipFlowError
-from chipflow_lib.platforms.utils import (
+from chipflow_lib.platforms._ import (
     IOModel,
     Port,
     PortMap,
     Package,
     PACKAGE_DEFINITIONS
 )
-from chipflow_lib.config_models import Config, ChipFlowConfig, SiliconConfig
+from chipflow_lib._config_models import Config, ChipFlowConfig, SiliconConfig
 
 # Define a MockPackageType for testing
 class MockPackageType:

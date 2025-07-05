@@ -2,7 +2,7 @@
 import os
 import unittest
 
-from chipflow_lib.config_models import PadConfig
+from chipflow_lib._config_models import PadConfig
 
 
 class ConfigModelsTestCase(unittest.TestCase):

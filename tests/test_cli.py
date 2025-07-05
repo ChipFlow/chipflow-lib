@@ -6,7 +6,7 @@ from unittest import mock
 
 from chipflow_lib import ChipFlowError
 from chipflow_lib.cli import run
-from chipflow_lib.config_models import Config, ChipFlowConfig
+from chipflow_lib._config_models import Config, ChipFlowConfig
 
 class MockCommand:
     """Mock command for testing CLI"""
