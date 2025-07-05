@@ -54,7 +54,7 @@ Package Contents
 
 
    .. py:property:: options
-      :type: _IOModelOptions
+      :type: IOModelOptions
 
 
       Options set on the io port at construction

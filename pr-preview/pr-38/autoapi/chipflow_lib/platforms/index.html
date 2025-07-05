@@ -281,18 +281,6 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.IOModel" title="chipflow_lib.platforms.IOModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IOModel</span></code></a></p></td>
 <td><p>Options for IO Ports</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.platforms.LockFile" title="chipflow_lib.platforms.LockFile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LockFile</span></code></a></p></td>
-<td><p>Representation of a pin lock file.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.Package" title="chipflow_lib.platforms.Package"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Package</span></code></a></p></td>
-<td><p>Serialisable identifier for a defined packaging option</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.platforms.PortMap" title="chipflow_lib.platforms.PortMap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PortMap</span></code></a></p></td>
-<td><p>!!! abstract &quot;Usage Documentation&quot;</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.Port" title="chipflow_lib.platforms.Port"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Port</span></code></a></p></td>
-<td><p>!!! abstract &quot;Usage Documentation&quot;</p></td>
-</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.platforms.Process" title="chipflow_lib.platforms.Process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Process</span></code></a></p></td>
 <td><p>IC manufacturing process</p></td>
 </tr>
@@ -305,13 +293,10 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.BareDiePackageDef" title="chipflow_lib.platforms.BareDiePackageDef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BareDiePackageDef</span></code></a></p></td>
 <td><p>Definition of a package with pins on four sides, labelled north, south, east, west</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.platforms.BasePackageDef" title="chipflow_lib.platforms.BasePackageDef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BasePackageDef</span></code></a></p></td>
-<td><p>Abstract base class for the definition of a package</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.JTAGPins" title="chipflow_lib.platforms.JTAGPins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JTAGPins</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.platforms.JTAGPins" title="chipflow_lib.platforms.JTAGPins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JTAGPins</span></code></a></p></td>
 <td><p>Pins for a JTAG interface</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.platforms.PowerPins" title="chipflow_lib.platforms.PowerPins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PowerPins</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.PowerPins" title="chipflow_lib.platforms.PowerPins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PowerPins</span></code></a></p></td>
 <td><p>A matched pair of power pins, with optional notation of the voltage range</p></td>
 </tr>
 </tbody>
@@ -354,7 +339,7 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>component</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
 <li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
-<li><p><strong>port</strong> (<em>chipflow_lib.platforms.utils.Port</em>)</p></li>
+<li><p><strong>port</strong> (<em>chipflow_lib.platforms._utils.Port</em>)</p></li>
 <li><p><strong>invert</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>)</p></li>
 </ul>
 </dd>
@@ -420,11 +405,11 @@ Instead, you would typically utilize the more specific
 
 <dl class="py property">
 <dt class="sig sig-object py" id="chipflow_lib.platforms.IOSignature.options">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">options</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">_IOModelOptions</span></em><a class="headerlink" href="#chipflow_lib.platforms.IOSignature.options" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">options</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">IOModelOptions</span></em><a class="headerlink" href="#chipflow_lib.platforms.IOSignature.options" title="Link to this definition">¶</a></dt>
 <dd><p>Options set on the io port at construction</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>_IOModelOptions</p>
+<dd class="field-odd"><p>IOModelOptions</p>
 </dd>
 </dl>
 </dd></dl>
@@ -451,7 +436,7 @@ a corresponding interface object. The default implementation provides none.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="chipflow_lib.platforms.IOModel">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">IOModel</span></span><a class="headerlink" href="#chipflow_lib.platforms.IOModel" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">_IOModelOptions</span></code></p>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">IOModelOptions</span></code></p>
 <p>Options for IO Ports</p>
 <dl class="field-list simple">
 <dt class="field-odd">Attributes<span class="colon">:</span></dt>
@@ -464,10 +449,8 @@ single OE bit controls the entire port.</p></li>
 <li><p><strong>invert</strong> – Polarity inversion. If the value is a simple <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, it specifies inversion for
 the entire port. If the value is an iterable of <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, the iterable must have the
 same length as the width of <code class="code highlight py python docutils literal highlight-python"><span class="n">io</span></code>, and the inversion is specified for individual wires.</p></li>
-<li><p><strong>allocate_power</strong> – Whether a power line should be allocated with this interface.  NB there is only one of these, so IO with multiple IO power domains must be split up.</p></li>
-<li><p><strong>power_voltage</strong> – Voltage range of the allocated power</p></li>
-<li><p><strong>clock_domain_i</strong> – the name of the <cite>Amaranth.ClockDomain</cite> for input. NB there is only one of these, so IO with multiple input clocks must be split up.</p></li>
-<li><p><strong>clock_domain_o</strong> – the name of the <cite>Amaranth.ClockDomain</cite> for output. NB there is only one of these, so IO with multiple output clocks must be split up.</p></li>
+<li><p><strong>allocate_power</strong> – Whether a io power domain should be set on this interface.  NB there is only one of these, so IO with multiple IO power domains must be split up.</p></li>
+<li><p><strong>clock_domain</strong> – the name of the <cite>Amaranth.ClockDomain</cite> for this port. NB there is only one of these, so IO with multiple input clocks must be split up.</p></li>
 <li><p><strong>init</strong> – a <a class="reference external" href="https://docs.python.org/3/library/argparse.html#const" title="(in Python v3.13)"><span class="xref std std-ref">Const</span></a> value for the initial values of the port</p></li>
 </ul>
 </dd>
@@ -483,7 +466,7 @@ intended for connection to the physical pads of the integrated circuit package.<
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – specifies the number of individual output wires within this port, each of which will correspond to a separate physical pad on the integrated circuit package.</p></li>
-<li><p><strong>kwargs</strong> (<em>typing_extensions.Unpack</em><em>[</em><em>_IOModelOptions</em><em>]</em>)</p></li>
+<li><p><strong>kwargs</strong> (<em>typing_extensions.Unpack</em><em>[</em><em>IOModelOptions</em><em>]</em>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -498,7 +481,7 @@ intended for connection to the physical pads of the integrated circuit package.<
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – specifies the number of individual input wires within this port, each of which will correspond to a separate physical pad on the integrated circuit package.</p></li>
-<li><p><strong>kwargs</strong> (<em>typing_extensions.Unpack</em><em>[</em><em>_IOModelOptions</em><em>]</em>)</p></li>
+<li><p><strong>kwargs</strong> (<em>typing_extensions.Unpack</em><em>[</em><em>IOModelOptions</em><em>]</em>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -513,139 +496,8 @@ intended for connection to the physical pads of the integrated circuit package.<
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – specifies the number of individual input/output wires within this port. Each pair of input/output wires will correspond to a separate physical pad on the integrated circuit package.</p></li>
-<li><p><strong>kwargs</strong> (<em>typing_extensions.Unpack</em><em>[</em><em>_IOModelOptions</em><em>]</em>)</p></li>
+<li><p><strong>kwargs</strong> (<em>typing_extensions.Unpack</em><em>[</em><em>IOModelOptions</em><em>]</em>)</p></li>
 </ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.LockFile">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">LockFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.LockFile" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
-<p>Representation of a pin lock file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Attributes<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>package</strong> – Information about the physical package</p></li>
-<li><p><strong>port_map</strong> – Mapping of components to interfaces to port</p></li>
-<li><p><strong>metadata</strong> – Amaranth metadata, for reference</p></li>
-</ul>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>data</strong> (<em>Any</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.Package">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">Package</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.Package" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
-<p>Serialisable identifier for a defined packaging option
-:Attributes: <strong>type</strong> – Package type</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<em>Any</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.PortMap">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">PortMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.PortMap" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
-<dl class="simple">
-<dt>!!! abstract “Usage Documentation”</dt><dd><p>[Models](../concepts/models.md)</p>
-</dd>
-</dl>
-<p>A base class for creating Pydantic models.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Attributes<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>__class_vars__</strong> – The names of the class variables defined on the model.</p></li>
-<li><p><strong>__private_attributes__</strong> – Metadata about the private attributes of the model.</p></li>
-<li><p><strong>__signature__</strong> – The synthesized <cite>__init__</cite> [<cite>Signature</cite>][inspect.Signature] of the model.</p></li>
-<li><p><strong>__pydantic_complete__</strong> – Whether model building is completed, or if there are still undefined fields.</p></li>
-<li><p><strong>__pydantic_core_schema__</strong> – The core schema of the model.</p></li>
-<li><p><strong>__pydantic_custom_init__</strong> – Whether the model has a custom <cite>__init__</cite> function.</p></li>
-<li><p><strong>__pydantic_decorators__</strong> – Metadata containing the decorators defined on the model.
-This replaces <cite>Model.__validators__</cite> and <cite>Model.__root_validators__</cite> from Pydantic V1.</p></li>
-<li><p><strong>__pydantic_generic_metadata__</strong> – Metadata for generic models; contains data used for a similar purpose to
-__args__, __origin__, __parameters__ in typing-module generics. May eventually be replaced by these.</p></li>
-<li><p><strong>__pydantic_parent_namespace__</strong> – Parent namespace of the model, used for automatic rebuilding of models.</p></li>
-<li><p><strong>__pydantic_post_init__</strong> – The name of the post-init method for the model, if defined.</p></li>
-<li><p><strong>__pydantic_root_model__</strong> – Whether the model is a [<cite>RootModel</cite>][pydantic.root_model.RootModel].</p></li>
-<li><p><strong>__pydantic_serializer__</strong> – The <cite>pydantic-core</cite> <cite>SchemaSerializer</cite> used to dump instances of the model.</p></li>
-<li><p><strong>__pydantic_validator__</strong> – The <cite>pydantic-core</cite> <cite>SchemaValidator</cite> used to validate instances of the model.</p></li>
-<li><p><strong>__pydantic_fields__</strong> – A dictionary of field names and their corresponding [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo] objects.</p></li>
-<li><p><strong>__pydantic_computed_fields__</strong> – A dictionary of computed field names and their corresponding [<cite>ComputedFieldInfo</cite>][pydantic.fields.ComputedFieldInfo] objects.</p></li>
-<li><p><strong>__pydantic_extra__</strong> – A dictionary containing extra values, if [<cite>extra</cite>][pydantic.config.ConfigDict.extra]
-is set to <cite>‘allow’</cite>.</p></li>
-<li><p><strong>__pydantic_fields_set__</strong> – The names of fields explicitly set during instantiation.</p></li>
-<li><p><strong>__pydantic_private__</strong> – Values of private attributes set on the model instance.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>data</strong> (<em>Any</em>)</p>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.PortMap.get_ports">
-<span class="sig-name descname"><span class="pre">get_ports</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interface</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.PortMap.get_ports" title="Link to this definition">¶</a></dt>
-<dd><p>List the ports allocated in this PortMap for the given <cite>Component</cite> and <cite>Interface</cite></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>component</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
-<li><p><strong>interface</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Interface</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.Port">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">Port</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.Port" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
-<dl class="simple">
-<dt>!!! abstract “Usage Documentation”</dt><dd><p>[Models](../concepts/models.md)</p>
-</dd>
-</dl>
-<p>A base class for creating Pydantic models.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Attributes<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>__class_vars__</strong> – The names of the class variables defined on the model.</p></li>
-<li><p><strong>__private_attributes__</strong> – Metadata about the private attributes of the model.</p></li>
-<li><p><strong>__signature__</strong> – The synthesized <cite>__init__</cite> [<cite>Signature</cite>][inspect.Signature] of the model.</p></li>
-<li><p><strong>__pydantic_complete__</strong> – Whether model building is completed, or if there are still undefined fields.</p></li>
-<li><p><strong>__pydantic_core_schema__</strong> – The core schema of the model.</p></li>
-<li><p><strong>__pydantic_custom_init__</strong> – Whether the model has a custom <cite>__init__</cite> function.</p></li>
-<li><p><strong>__pydantic_decorators__</strong> – Metadata containing the decorators defined on the model.
-This replaces <cite>Model.__validators__</cite> and <cite>Model.__root_validators__</cite> from Pydantic V1.</p></li>
-<li><p><strong>__pydantic_generic_metadata__</strong> – Metadata for generic models; contains data used for a similar purpose to
-__args__, __origin__, __parameters__ in typing-module generics. May eventually be replaced by these.</p></li>
-<li><p><strong>__pydantic_parent_namespace__</strong> – Parent namespace of the model, used for automatic rebuilding of models.</p></li>
-<li><p><strong>__pydantic_post_init__</strong> – The name of the post-init method for the model, if defined.</p></li>
-<li><p><strong>__pydantic_root_model__</strong> – Whether the model is a [<cite>RootModel</cite>][pydantic.root_model.RootModel].</p></li>
-<li><p><strong>__pydantic_serializer__</strong> – The <cite>pydantic-core</cite> <cite>SchemaSerializer</cite> used to dump instances of the model.</p></li>
-<li><p><strong>__pydantic_validator__</strong> – The <cite>pydantic-core</cite> <cite>SchemaValidator</cite> used to validate instances of the model.</p></li>
-<li><p><strong>__pydantic_fields__</strong> – A dictionary of field names and their corresponding [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo] objects.</p></li>
-<li><p><strong>__pydantic_computed_fields__</strong> – A dictionary of computed field names and their corresponding [<cite>ComputedFieldInfo</cite>][pydantic.fields.ComputedFieldInfo] objects.</p></li>
-<li><p><strong>__pydantic_extra__</strong> – A dictionary containing extra values, if [<cite>extra</cite>][pydantic.config.ConfigDict.extra]
-is set to <cite>‘allow’</cite>.</p></li>
-<li><p><strong>__pydantic_fields_set__</strong> – The names of fields explicitly set during instantiation.</p></li>
-<li><p><strong>__pydantic_private__</strong> – Values of private attributes set on the model instance.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>data</strong> (<em>Any</em>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -660,7 +512,7 @@ is set to <cite>‘allow’</cite>.</p></li>
 <dl class="py class">
 <dt class="sig sig-object py" id="chipflow_lib.platforms.GAPackageDef">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">GAPackageDef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.GAPackageDef" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#chipflow_lib.platforms.BasePackageDef" title="chipflow_lib.platforms.BasePackageDef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BasePackageDef</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">BasePackageDef</span></code></p>
 <p>Definiton of a grid array package, with pins or pads in a regular array of ‘width’ by ‘height’ pins
 on the left and right</p>
 <p>The pins are identified by a 2-tuple of row and column, counting from the bottom left hand corner when looking at the underside of the package.
@@ -718,29 +570,6 @@ wWLB, Embedded wafer level ball grid array</p>
 This is useful if you want to do some validation that requires the entire model to be initialized.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.GAPackageDef.allocate_pins">
-<span class="sig-name descname"><span class="pre">allocate_pins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">process</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lockfile</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.GAPackageDef.allocate_pins" title="Link to this definition">¶</a></dt>
-<dd><p>Allocate package pins to the registered component.
-Pins should be allocated in the most usable way for <em>users</em> of the packaged IC.</p>
-<p>Returns: <cite>LockFile</cite> data structure represnting the allocation of interfaces to pins</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>UnableToAllocate</strong> – Raised if the port was unable to be allocated.</p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>config</strong> (<em>chipflow_lib.config_models.Config</em>)</p></li>
-<li><p><strong>process</strong> (<a class="reference internal" href="#chipflow_lib.platforms.Process" title="chipflow_lib.platforms.Process"><em>Process</em></a>)</p></li>
-<li><p><strong>lockfile</strong> (<a class="reference internal" href="#chipflow_lib.platforms.LockFile" title="chipflow_lib.platforms.LockFile"><em>LockFile</em></a><em> | </em><em>None</em>)</p></li>
-</ul>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#chipflow_lib.platforms.LockFile" title="chipflow_lib.platforms.LockFile">LockFile</a></p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="chipflow_lib.platforms.GAPackageDef.bringup_pins">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bringup_pins</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">BringupPins</span></em><a class="headerlink" href="#chipflow_lib.platforms.GAPackageDef.bringup_pins" title="Link to this definition">¶</a></dt>
@@ -754,23 +583,12 @@ Should include core power, clock and reset.</p>
 </dl>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.GAPackageDef.heartbeat">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">heartbeat</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Pin</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#chipflow_lib.platforms.GAPackageDef.heartbeat" title="Link to this definition">¶</a></dt>
-<dd><p>Numbered set of heartbeat pins for the package</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Dict[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>, Pin]</p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="chipflow_lib.platforms.QuadPackageDef">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">QuadPackageDef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.QuadPackageDef" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#chipflow_lib.platforms.BasePackageDef" title="chipflow_lib.platforms.BasePackageDef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BasePackageDef</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">BasePackageDef</span></code></p>
 <p>Definiton of a package a row of ‘width* pins on the top and bottom of the package and ‘height’ pins
 on the left and right</p>
 <p>The pins are numbered anti-clockwise from the top left hand pin.</p>
@@ -810,29 +628,6 @@ on the left and right</p>
 This is useful if you want to do some validation that requires the entire model to be initialized.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.QuadPackageDef.allocate_pins">
-<span class="sig-name descname"><span class="pre">allocate_pins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">process</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lockfile</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.QuadPackageDef.allocate_pins" title="Link to this definition">¶</a></dt>
-<dd><p>Allocate package pins to the registered component.
-Pins should be allocated in the most usable way for <em>users</em> of the packaged IC.</p>
-<p>Returns: <cite>LockFile</cite> data structure represnting the allocation of interfaces to pins</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>UnableToAllocate</strong> – Raised if the port was unable to be allocated.</p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>config</strong> (<em>chipflow_lib.config_models.Config</em>)</p></li>
-<li><p><strong>process</strong> (<a class="reference internal" href="#chipflow_lib.platforms.Process" title="chipflow_lib.platforms.Process"><em>Process</em></a>)</p></li>
-<li><p><strong>lockfile</strong> (<a class="reference internal" href="#chipflow_lib.platforms.LockFile" title="chipflow_lib.platforms.LockFile"><em>LockFile</em></a><em> | </em><em>None</em>)</p></li>
-</ul>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#chipflow_lib.platforms.LockFile" title="chipflow_lib.platforms.LockFile">LockFile</a></p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="chipflow_lib.platforms.QuadPackageDef.bringup_pins">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bringup_pins</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">BringupPins</span></em><a class="headerlink" href="#chipflow_lib.platforms.QuadPackageDef.bringup_pins" title="Link to this definition">¶</a></dt>
@@ -851,7 +646,7 @@ Should include core power, clock and reset.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="chipflow_lib.platforms.BareDiePackageDef">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">BareDiePackageDef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.BareDiePackageDef" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#chipflow_lib.platforms.BasePackageDef" title="chipflow_lib.platforms.BasePackageDef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BasePackageDef</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">BasePackageDef</span></code></p>
 <p>Definition of a package with pins on four sides, labelled north, south, east, west
 with an integer identifier within each side, indicating pads across or down from top-left corner</p>
 <dl class="field-list simple">
@@ -872,112 +667,9 @@ with an integer identifier within each side, indicating pads across or down from
 This is useful if you want to do some validation that requires the entire model to be initialized.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.BareDiePackageDef.allocate_pins">
-<span class="sig-name descname"><span class="pre">allocate_pins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">process</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lockfile</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.BareDiePackageDef.allocate_pins" title="Link to this definition">¶</a></dt>
-<dd><p>Allocate package pins to the registered component.
-Pins should be allocated in the most usable way for <em>users</em> of the packaged IC.</p>
-<p>Returns: <cite>LockFile</cite> data structure represnting the allocation of interfaces to pins</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>UnableToAllocate</strong> – Raised if the port was unable to be allocated.</p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>config</strong> (<em>chipflow_lib.config_models.Config</em>)</p></li>
-<li><p><strong>process</strong> (<a class="reference internal" href="#chipflow_lib.platforms.Process" title="chipflow_lib.platforms.Process"><em>Process</em></a>)</p></li>
-<li><p><strong>lockfile</strong> (<a class="reference internal" href="#chipflow_lib.platforms.LockFile" title="chipflow_lib.platforms.LockFile"><em>LockFile</em></a><em> | </em><em>None</em>)</p></li>
-</ul>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#chipflow_lib.platforms.LockFile" title="chipflow_lib.platforms.LockFile">LockFile</a></p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="chipflow_lib.platforms.BareDiePackageDef.bringup_pins">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bringup_pins</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">BringupPins</span></em><a class="headerlink" href="#chipflow_lib.platforms.BareDiePackageDef.bringup_pins" title="Link to this definition">¶</a></dt>
-<dd><p>To aid bringup, these are always in the same place for each package type.
-Should include core power, clock and reset.</p>
-<p>Power, clocks and resets needed for non-core are allocated with the port.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>BringupPins</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.BasePackageDef">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">BasePackageDef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.BasePackageDef" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
-<p>Abstract base class for the definition of a package
-Serialising this or any derived classes results in the
-description of the package</p>
-<dl class="field-list simple">
-<dt class="field-odd">Attributes<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em>) – The name of the package</p></li>
-<li><p><strong>lockfile</strong> – Optional exisiting LockFile for the mapping</p></li>
-</ul>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>data</strong> (<em>Any</em>)</p>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.BasePackageDef.model_post_init">
-<span class="sig-name descname"><span class="pre">model_post_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">__context</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.BasePackageDef.model_post_init" title="Link to this definition">¶</a></dt>
-<dd><p>Override this method to perform additional initialization after <cite>__init__</cite> and <cite>model_construct</cite>.
-This is useful if you want to do some validation that requires the entire model to be initialized.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.BasePackageDef.register_component">
-<span class="sig-name descname"><span class="pre">register_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.BasePackageDef.register_component" title="Link to this definition">¶</a></dt>
-<dd><p>Registers a port to be allocated to the pad ring and pins</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>component</strong> (<a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Component" title="(in Amaranth language &amp; toolchain v0.5.4)"><em>amaranth.lib.wiring.Component</em></a>) – Amaranth <cite>wiring.Component</cite> to allocate</p></li>
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.BasePackageDef.allocate_pins">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">allocate_pins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">process</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lockfile</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.BasePackageDef.allocate_pins" title="Link to this definition">¶</a></dt>
-<dd><p>Allocate package pins to the registered component.
-Pins should be allocated in the most usable way for <em>users</em> of the packaged IC.</p>
-<p>Returns: <cite>LockFile</cite> data structure represnting the allocation of interfaces to pins</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>UnableToAllocate</strong> – Raised if the port was unable to be allocated.</p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>config</strong> (<em>chipflow_lib.config_models.Config</em>)</p></li>
-<li><p><strong>process</strong> (<a class="reference internal" href="#chipflow_lib.platforms.Process" title="chipflow_lib.platforms.Process"><em>Process</em></a>)</p></li>
-<li><p><strong>lockfile</strong> (<a class="reference internal" href="#chipflow_lib.platforms.LockFile" title="chipflow_lib.platforms.LockFile"><em>LockFile</em></a><em> | </em><em>None</em>)</p></li>
-</ul>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#chipflow_lib.platforms.LockFile" title="chipflow_lib.platforms.LockFile">LockFile</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.BasePackageDef.bringup_pins">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bringup_pins</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">BringupPins</span></em><a class="headerlink" href="#chipflow_lib.platforms.BasePackageDef.bringup_pins" title="Link to this definition">¶</a></dt>
 <dd><p>To aid bringup, these are always in the same place for each package type.
 Should include core power, clock and reset.</p>
 <p>Power, clocks and resets needed for non-core are allocated with the port.</p>
@@ -1080,38 +772,20 @@ Should include core power, clock and reset.</p>
 <li><a class="reference internal" href="#chipflow_lib.platforms.OutputIOSignature"><code class="docutils literal notranslate"><span class="pre">OutputIOSignature()</span></code></a></li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.InputIOSignature"><code class="docutils literal notranslate"><span class="pre">InputIOSignature()</span></code></a></li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.BidirIOSignature"><code class="docutils literal notranslate"><span class="pre">BidirIOSignature()</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.platforms.LockFile"><code class="docutils literal notranslate"><span class="pre">LockFile</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.platforms.Package"><code class="docutils literal notranslate"><span class="pre">Package</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.platforms.PortMap"><code class="docutils literal notranslate"><span class="pre">PortMap</span></code></a><ul>
-<li><a class="reference internal" href="#chipflow_lib.platforms.PortMap.get_ports"><code class="docutils literal notranslate"><span class="pre">PortMap.get_ports()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#chipflow_lib.platforms.Port"><code class="docutils literal notranslate"><span class="pre">Port</span></code></a></li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.Process"><code class="docutils literal notranslate"><span class="pre">Process</span></code></a></li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.GAPackageDef"><code class="docutils literal notranslate"><span class="pre">GAPackageDef</span></code></a><ul>
 <li><a class="reference internal" href="#chipflow_lib.platforms.GAPackageDef.model_post_init"><code class="docutils literal notranslate"><span class="pre">GAPackageDef.model_post_init()</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.platforms.GAPackageDef.allocate_pins"><code class="docutils literal notranslate"><span class="pre">GAPackageDef.allocate_pins()</span></code></a></li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.GAPackageDef.bringup_pins"><code class="docutils literal notranslate"><span class="pre">GAPackageDef.bringup_pins</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.platforms.GAPackageDef.heartbeat"><code class="docutils literal notranslate"><span class="pre">GAPackageDef.heartbeat</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.QuadPackageDef"><code class="docutils literal notranslate"><span class="pre">QuadPackageDef</span></code></a><ul>
 <li><a class="reference internal" href="#chipflow_lib.platforms.QuadPackageDef.model_post_init"><code class="docutils literal notranslate"><span class="pre">QuadPackageDef.model_post_init()</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.platforms.QuadPackageDef.allocate_pins"><code class="docutils literal notranslate"><span class="pre">QuadPackageDef.allocate_pins()</span></code></a></li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.QuadPackageDef.bringup_pins"><code class="docutils literal notranslate"><span class="pre">QuadPackageDef.bringup_pins</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.BareDiePackageDef"><code class="docutils literal notranslate"><span class="pre">BareDiePackageDef</span></code></a><ul>
 <li><a class="reference internal" href="#chipflow_lib.platforms.BareDiePackageDef.model_post_init"><code class="docutils literal notranslate"><span class="pre">BareDiePackageDef.model_post_init()</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.platforms.BareDiePackageDef.allocate_pins"><code class="docutils literal notranslate"><span class="pre">BareDiePackageDef.allocate_pins()</span></code></a></li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.BareDiePackageDef.bringup_pins"><code class="docutils literal notranslate"><span class="pre">BareDiePackageDef.bringup_pins</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#chipflow_lib.platforms.BasePackageDef"><code class="docutils literal notranslate"><span class="pre">BasePackageDef</span></code></a><ul>
-<li><a class="reference internal" href="#chipflow_lib.platforms.BasePackageDef.model_post_init"><code class="docutils literal notranslate"><span class="pre">BasePackageDef.model_post_init()</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.platforms.BasePackageDef.register_component"><code class="docutils literal notranslate"><span class="pre">BasePackageDef.register_component()</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.platforms.BasePackageDef.allocate_pins"><code class="docutils literal notranslate"><span class="pre">BasePackageDef.allocate_pins()</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.platforms.BasePackageDef.bringup_pins"><code class="docutils literal notranslate"><span class="pre">BasePackageDef.bringup_pins</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.JTAGPins"><code class="docutils literal notranslate"><span class="pre">JTAGPins</span></code></a></li>
