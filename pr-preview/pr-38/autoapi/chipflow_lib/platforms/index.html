@@ -450,6 +450,7 @@ single OE bit controls the entire port.</p></li>
 the entire port. If the value is an iterable of <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, the iterable must have the
 same length as the width of <code class="code highlight py python docutils literal highlight-python"><span class="n">io</span></code>, and the inversion is specified for individual wires.</p></li>
 <li><p><strong>allocate_power</strong> – Whether a io power domain should be set on this interface.  NB there is only one of these, so IO with multiple IO power domains must be split up.</p></li>
+<li><p><strong>interface_power_domains</strong> – the name of the available power domains on the interface</p></li>
 <li><p><strong>clock_domain</strong> – the name of the <cite>Amaranth.ClockDomain</cite> for this port. NB there is only one of these, so IO with multiple input clocks must be split up.</p></li>
 <li><p><strong>init</strong> – a <a class="reference external" href="https://docs.python.org/3/library/argparse.html#const" title="(in Python v3.13)"><span class="xref std std-ref">Const</span></a> value for the initial values of the port</p></li>
 </ul>

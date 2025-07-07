@@ -132,6 +132,7 @@ Package Contents
                   the entire port. If the value is an iterable of :class:`bool`, the iterable must have the
                   same length as the width of :py:`io`, and the inversion is specified for individual wires.
                 * **allocate_power** -- Whether a io power domain should be set on this interface.  NB there is only one of these, so IO with multiple IO power domains must be split up.
+                * **interface_power_domains** -- the name of the available power domains on the interface
                 * **clock_domain** -- the name of the `Amaranth.ClockDomain` for this port. NB there is only one of these, so IO with multiple input clocks must be split up.
                 * **init** -- a :ref:`Const` value for the initial values of the port
 
