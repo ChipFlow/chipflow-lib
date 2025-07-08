@@ -82,10 +82,15 @@ jobs:
         run: |
           pdm test
 
-      - name: Submit build ${{ env.is_dry }}
+      - name: Run simulation check
         working-directory: ${{ env.test_repo_path }}/${{ matrix.repo.design }}
         run: |
           pdm run chipflow pin lock
+          pdm sim-check
+
+      - name: Submit build ${{ env.is_dry }}
+        working-directory: ${{ env.test_repo_path }}/${{ matrix.repo.design }}
+        run: |
           pdm run chipflow silicon submit --wait $DRY | cat
         env:
           CHIPFLOW_API_KEY: ${{ secrets.CHIPFLOW_API_KEY}}
