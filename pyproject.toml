@@ -28,6 +28,7 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "pydantic>=2.8",
     "halo>=0.0.31",
+    "yowasp-yosys!=0.54.*,!=0.55.*",
 ]
 
 [project.scripts]
