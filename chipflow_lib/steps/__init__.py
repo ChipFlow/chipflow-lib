@@ -60,7 +60,7 @@ def _wire_up_ports(m: Module, top, platform):
                 if hasattr(wire, 'i'):
                     m.d.comb += wire.i.eq(port.i ^ inv_mask)
                 if hasattr(wire, 'o'):
-                        m.d.comb += port.o.eq(wire.o)^ inv_mask
+                        m.d.comb += port.o.eq(wire.o ^ inv_mask)
                 if hasattr(wire, 'oe'):
-                        m.d.comb += port.oe.eq(wire.oe)^ inv_mask
+                        m.d.comb += port.oe.eq(wire.oe)
 
