@@ -1,13 +1,15 @@
 """
 Steps provide an extensible way to modify the `chipflow` command behavior for a given design
 """
-
+import logging
 import os
 from abc import ABC
 
 from amaranth import Module
 
 from ..platforms.utils import IOSignature
+
+logger = logging.getLogger(__name__)
 
 def setup_amaranth_tools():
     _amaranth_settings = {
@@ -43,12 +45,17 @@ class StepBase(ABC):
 
 
 def _wire_up_ports(m: Module, top, platform):
+    logger.debug("wiring up ports")
+    logger.debug("adding top:")
     for n, t in top.items():
+        logger.debug(f"    > {n}, {t}")
         setattr(m.submodules, n, t)
 
+    logger.debug("wiring up:")
     for component, iface in platform._pinlock.port_map.items():
         for iface_name, member, in iface.items():
             for name, port in member.items():
+                logger.debug(f"    > {component}, {iface_name}, {member}")
                 iface = getattr(top[component], iface_name)
                 wire = (iface if isinstance(iface.signature, IOSignature)
                         else getattr(iface, name))

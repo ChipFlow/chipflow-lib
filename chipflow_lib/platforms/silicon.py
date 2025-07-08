@@ -286,7 +286,7 @@ class SiliconPlatform:
 
         for reset, name in self._config["chipflow"]["resets"].items():
             port_data = pinlock.package.resets[name]
-            port = SiliconPlatformPort(component, name, port_data)
+            port = SiliconPlatformPort(component, name, port_data, invert=True)
             self._ports[name] = port
             rst_buffer = io.Buffer("i", port)
             setattr(m.submodules, reset, rst_buffer)
