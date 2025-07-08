@@ -93,7 +93,7 @@ class SimPlatform:
 
         for reset, name in self._config["chipflow"]["resets"].items():
             port_data = pinlock.package.resets[name]
-            port = io.SimulationPort(io.Direction.Input, port_data.width, name=f"reset-{name}", )
+            port = io.SimulationPort(io.Direction.Input, port_data.width, name=f"reset-{name}", invert=True)
             self._ports[name] = port
             rst_buffer = io.Buffer("i", port)
             setattr(m.submodules, reset, rst_buffer)
