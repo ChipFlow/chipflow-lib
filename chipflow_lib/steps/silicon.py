@@ -8,8 +8,10 @@ import os
 import re
 import requests
 import subprocess
+import sys
 import time
 import urllib3
+
 
 import dotenv
 
@@ -117,7 +119,11 @@ class SiliconStep:
                 raise ChipFlowError(
                     "Environment variable `CHIPFLOW_API_KEY` is empty."
                 )
-        with  Halo(text="Submitting...", spinner="dots") as sp:
+        if not sys.stdout.isatty():
+            interval = 5000  # lets not animate..
+        else:
+            interval = -1
+        with  Halo(text="Submitting...", spinner="dots", interval=interval) as sp:
             fh = None
             submission_name = self.determine_submission_name()
             data = {
