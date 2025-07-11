@@ -206,7 +206,7 @@ class SiliconStep:
                 self._build_status_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/status"
                 self._log_stream_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/logs?follow=true"
 
-                sp.succeed("✅ Design submitted successfully! Build URL: {self._build_url}")
+                sp.succeed(f"✅ Design submitted successfully! Build URL: {self._build_url}")
 
                 exit_code = 0
                 if args.wait:
