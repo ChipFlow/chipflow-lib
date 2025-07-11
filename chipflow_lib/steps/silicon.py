@@ -208,6 +208,7 @@ class SiliconStep:
 
                 sp.succeed("✅ Design submitted successfully! Build URL: {self._build_url}")
 
+                exit_code = 0
                 if args.wait:
                     exit_code = self._stream_logs(sp, network_err)
                 if fh:
