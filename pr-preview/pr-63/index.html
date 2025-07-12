@@ -1,768 +1,349 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Getting Started with ChipFlow" href="getting-started.html" />
 
-<!DOCTYPE html>
-
-
-<html lang="en" data-content_root="./" >
-
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <title>ChipFlow Library Documentation &#8212; ChipFlow Platform Documentation</title>
-  
-  
-  
-  <script data-cfasync="false">
-    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
-  </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
-  
-  <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
+        <title>ChipFlow Platform Documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
-  
-  <!-- So that users can add custom icons -->
-  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
-  <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
-
-    <script src="_static/documentation_options.js?v=125a713a"></script>
-    <script src="_static/doctools.js?v=9a2dae69"></script>
-    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Intro to chipflow.toml" href="chipflow-toml-guide.html" />
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.dev1+g8881a1d" />
-  </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
-  
-  
-  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
-  
-  <div id="pst-scroll-pixel-helper"></div>
-  
-  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
-  
-  <dialog id="pst-search-dialog">
-    
-<form class="bd-search d-flex align-items-center"
-      action="search.html"
-      method="get">
-  <i class="fa-solid fa-magnifying-glass"></i>
-  <input type="search"
-         class="form-control"
-         name="q"
-         placeholder="Search..."
-         aria-label="Search..."
-         autocomplete="off"
-         autocorrect="off"
-         autocapitalize="off"
-         spellcheck="false"/>
-  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
-
-  <div class="pst-async-banner-revealer d-none">
-  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
-</div>
-
-  
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
-    </header>
-  
-
-  <div class="bd-container">
-    <div class="bd-container__inner bd-page-width">
-      
-      
-      
-        
-      
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
-        
-
-  
-  <div class="sidebar-header-items sidebar-primary__section">
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
     
     
-    
-    
-  </div>
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --admonition-font-size: 0.9 rem;
   
-    <div class="sidebar-primary-items__start sidebar-primary__section">
-        <div class="sidebar-primary-item">
-  <div>
-    <h4>Next topic</h4>
-    <p class="topless"><a href="chipflow-toml-guide.html"
-                          title="next chapter">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></a></p>
-  </div></div>
-        <div class="sidebar-primary-item">
-<div id="searchbox"></div></div>
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --admonition-font-size: 0.9 rem;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --admonition-font-size: 0.9 rem;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
     </div>
+    <div class="header-center">
+      <a href="#"><div class="brand">ChipFlow Platform Documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
   
-  
-  <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/chipflow-logo.svg" alt="Logo"/>
   </div>
+  
+  <span class="sidebar-brand-text">ChipFlow Platform Documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started with ChipFlow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="chipflow-commands.html">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="autoapi/index.html">API Reference</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="autoapi/chipflow_lib/index.html">chipflow_lib</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of chipflow_lib</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html">chipflow_lib.platforms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/chipflow_lib/steps/index.html">chipflow_lib.steps</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 
+</div>
+</div>
 
       </div>
       
-      <main id="main-content" class="bd-main" role="main">
-        
-        
-
-<div class="sbt-scroll-pixel-helper"></div>
-
-          <div class="bd-content">
-            <div class="bd-article-container">
-              
-              <div class="bd-header-article d-print-none">
-<div class="header-article-items header-article__inner">
-  
-    <div class="header-article-items__start">
-      
-        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <span class="fa-solid fa-bars"></span>
-</button></div>
-      
     </div>
-  
-  
-    <div class="header-article-items__end">
-      
-        <div class="header-article-item">
-
-<div class="article-header-buttons">
-
-
-
-
-
-<div class="dropdown dropdown-source-buttons">
-  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
-    <i class="fab fa-github"></i>
-  </button>
-  <ul class="dropdown-menu">
-      
-      
-      
-      <li><a href="https://github.com/ChipFlow/chipflow-lib" target="_blank"
-   class="btn btn-sm btn-source-repository-button dropdown-item"
-   title="Source repository"
-   data-bs-placement="left" data-bs-toggle="tooltip"
->
-  
-
-<span class="btn__icon-container">
-  <i class="fab fa-github"></i>
-  </span>
-<span class="btn__text-container">Repository</span>
-</a>
-</li>
-      
-      
-      
-      
-      <li><a href="https://github.com/ChipFlow/chipflow-lib/edit/master/docs/index.rst" target="_blank"
-   class="btn btn-sm btn-source-edit-button dropdown-item"
-   title="Suggest edit"
-   data-bs-placement="left" data-bs-toggle="tooltip"
->
-  
-
-<span class="btn__icon-container">
-  <i class="fas fa-pencil-alt"></i>
-  </span>
-<span class="btn__text-container">Suggest edit</span>
-</a>
-</li>
-      
-      
-      
-      
-      <li><a href="https://github.com/ChipFlow/chipflow-lib/issues/new?title=Issue%20on%20page%20%2Findex.html&body=Your%20issue%20content%20here." target="_blank"
-   class="btn btn-sm btn-source-issues-button dropdown-item"
-   title="Open an issue"
-   data-bs-placement="left" data-bs-toggle="tooltip"
->
-  
-
-<span class="btn__icon-container">
-  <i class="fas fa-lightbulb"></i>
-  </span>
-<span class="btn__text-container">Open issue</span>
-</a>
-</li>
-      
-  </ul>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/index.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
 </div>
-
-
-
-
-
-
-<div class="dropdown dropdown-download-buttons">
-  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
-    <i class="fas fa-download"></i>
-  </button>
-  <ul class="dropdown-menu">
-      
-      
-      
-      <li><a href="_sources/index.rst" target="_blank"
-   class="btn btn-sm btn-download-source-button dropdown-item"
-   title="Download source file"
-   data-bs-placement="left" data-bs-toggle="tooltip"
->
-  
-
-<span class="btn__icon-container">
-  <i class="fas fa-file"></i>
-  </span>
-<span class="btn__text-container">.rst</span>
-</a>
-</li>
-      
-      
-      
-      
-      <li>
-<button onclick="window.print()"
-  class="btn btn-sm btn-download-pdf-button dropdown-item"
-  title="Print to PDF"
-  data-bs-placement="left" data-bs-toggle="tooltip"
->
-  
-
-<span class="btn__icon-container">
-  <i class="fas fa-file-pdf"></i>
-  </span>
-<span class="btn__text-container">.pdf</span>
-</button>
-</li>
-      
-  </ul>
-</div>
-
-
-
-
-<button onclick="toggleFullScreen()"
-  class="btn btn-sm btn-fullscreen-button"
-  title="Fullscreen mode"
-  data-bs-placement="bottom" data-bs-toggle="tooltip"
->
-  
-
-<span class="btn__icon-container">
-  <i class="fas fa-expand"></i>
-  </span>
-
-</button>
-
-
-
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button>
-
-
-<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-</button>
-
-</div></div>
-      
-    </div>
-  
-</div>
-</div>
-              
-              
-
-<div id="jb-print-docs-body" class="onlyprint">
-    <h1>ChipFlow Library Documentation</h1>
-    <!-- Table of contents -->
-    <div id="print-main-content">
-        <div id="jb-print-toc">
-            
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
         </div>
-    </div>
-</div>
-
-              
-                
-<div id="searchbox"></div>
-                <article class="bd-article">
-                  
-  <section id="chipflow-library-documentation">
-<h1>ChipFlow Library Documentation<a class="headerlink" href="#chipflow-library-documentation" title="Link to this heading">#</a></h1>
+        <article role="main" id="furo-main-content">
+          <section id="chipflow-library-documentation">
+<h1>ChipFlow Library Documentation<a class="headerlink" href="#chipflow-library-documentation" title="Link to this heading">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">chipflow_lib</span></code> is a Python library and tools for working with the <a class="reference external" href="https://doc.chipflow.io">ChipFlow Platform</a></p>
+<p>It is developed at <a class="reference external" href="https://github.com/chipFlow/chipflow-lib/">https://github.com/chipFlow/chipflow-lib/</a> and licensed <a class="reference external" href="https://github.com/chipFlow/chipflow-lib/?tab=BSD-2-Clause-1-ov-file">BSD 2-Clause</a></p>
 <div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started with ChipFlow</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#what-is-chipflow">What is ChipFlow?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#clone-chipflow-examples">Clone chipflow-examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#install-the-dependencies">Install the dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#set-up-the-environment">Set up the environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#running-a-chip-build">Running a chip build</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></a><ul>
 <li class="toctree-l2"><a class="reference internal" href="chipflow-toml-guide.html#chipflow"><code class="docutils literal notranslate"><span class="pre">[chipflow]</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="chipflow-toml-guide.html#chipflow-top"><code class="docutils literal notranslate"><span class="pre">[chipflow.top]</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="chipflow-toml-guide.html#chipflow-steps"><code class="docutils literal notranslate"><span class="pre">[chipflow.steps]</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="chipflow-toml-guide.html#chipflow-clocks"><code class="docutils literal notranslate"><span class="pre">[chipflow.clocks]</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="chipflow-toml-guide.html#chipflow-resets"><code class="docutils literal notranslate"><span class="pre">[chipflow.resets]</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="chipflow-toml-guide.html#chipflow-silicon"><code class="docutils literal notranslate"><span class="pre">[chipflow.silicon]</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="chipflow-toml-guide.html#available-processes">Available processes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="chipflow-toml-guide.html#available-pad-rings">Available pad rings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chipflow-toml-guide.html#silicon-pads"><code class="docutils literal notranslate"><span class="pre">[silicon.pads]</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="chipflow-toml-guide.html#silicon-power"><code class="docutils literal notranslate"><span class="pre">[silicon.power]</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#silicon-pads">silicon.pads</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="chipflow-toml-guide.html#type">type</a></li>
-<li class="toctree-l2"><a class="reference internal" href="chipflow-toml-guide.html#loc">loc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chipflow-commands.html">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="chipflow-commands.html#chipflow-pin-lock"><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">pin</span> <span class="pre">lock</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="chipflow-commands.html#chipflow-silicon"><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">silicon</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="chipflow-commands.html#chipflow-sim"><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">sim</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="chipflow-commands.html#chipflow-software"><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">software</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#silicon-power">silicon.power</a></li>
 <li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="autoapi/chipflow_lib/index.html">chipflow_lib</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="autoapi/chipflow_lib/index.html#submodules">Submodules</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="autoapi/chipflow_lib/cli/index.html">chipflow_lib.cli</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="autoapi/chipflow_lib/cli/index.html#exceptions">Exceptions</a></li>
-<li class="toctree-l5"><a class="reference internal" href="autoapi/chipflow_lib/cli/index.html#functions">Functions</a></li>
-<li class="toctree-l5"><a class="reference internal" href="autoapi/chipflow_lib/cli/index.html#module-contents">Module Contents</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/cli/index.html#chipflow_lib.cli.UnexpectedError"><code class="docutils literal notranslate"><span class="pre">UnexpectedError</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/cli/index.html#chipflow_lib.cli.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="autoapi/chipflow_lib/config/index.html">chipflow_lib.config</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="autoapi/chipflow_lib/config/index.html#functions">Functions</a></li>
-<li class="toctree-l5"><a class="reference internal" href="autoapi/chipflow_lib/config/index.html#module-contents">Module Contents</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/config/index.html#chipflow_lib.config.get_dir_models"><code class="docutils literal notranslate"><span class="pre">get_dir_models()</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/config/index.html#chipflow_lib.config.get_dir_software"><code class="docutils literal notranslate"><span class="pre">get_dir_software()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html">chipflow_lib.config_models</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#classes">Classes</a></li>
-<li class="toctree-l5"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#module-contents">Module Contents</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.PadConfig"><code class="docutils literal notranslate"><span class="pre">PadConfig</span></code></a><ul>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.PadConfig.type"><code class="docutils literal notranslate"><span class="pre">PadConfig.type</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.PadConfig.loc"><code class="docutils literal notranslate"><span class="pre">PadConfig.loc</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.PadConfig.validate_loc_format"><code class="docutils literal notranslate"><span class="pre">PadConfig.validate_loc_format()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.PadConfig.validate_pad_dict"><code class="docutils literal notranslate"><span class="pre">PadConfig.validate_pad_dict()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.SiliconConfig"><code class="docutils literal notranslate"><span class="pre">SiliconConfig</span></code></a><ul>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.SiliconConfig.process"><code class="docutils literal notranslate"><span class="pre">SiliconConfig.process</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.SiliconConfig.package"><code class="docutils literal notranslate"><span class="pre">SiliconConfig.package</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.SiliconConfig.pads"><code class="docutils literal notranslate"><span class="pre">SiliconConfig.pads</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.SiliconConfig.power"><code class="docutils literal notranslate"><span class="pre">SiliconConfig.power</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.SiliconConfig.debug"><code class="docutils literal notranslate"><span class="pre">SiliconConfig.debug</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.SiliconConfig.validate_pad_dicts"><code class="docutils literal notranslate"><span class="pre">SiliconConfig.validate_pad_dicts()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.StepsConfig"><code class="docutils literal notranslate"><span class="pre">StepsConfig</span></code></a><ul>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.StepsConfig.silicon"><code class="docutils literal notranslate"><span class="pre">StepsConfig.silicon</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.ChipFlowConfig"><code class="docutils literal notranslate"><span class="pre">ChipFlowConfig</span></code></a><ul>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.ChipFlowConfig.project_name"><code class="docutils literal notranslate"><span class="pre">ChipFlowConfig.project_name</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.ChipFlowConfig.top"><code class="docutils literal notranslate"><span class="pre">ChipFlowConfig.top</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.ChipFlowConfig.steps"><code class="docutils literal notranslate"><span class="pre">ChipFlowConfig.steps</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.ChipFlowConfig.silicon"><code class="docutils literal notranslate"><span class="pre">ChipFlowConfig.silicon</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.ChipFlowConfig.clocks"><code class="docutils literal notranslate"><span class="pre">ChipFlowConfig.clocks</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.ChipFlowConfig.resets"><code class="docutils literal notranslate"><span class="pre">ChipFlowConfig.resets</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.Config"><code class="docutils literal notranslate"><span class="pre">Config</span></code></a><ul>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/config_models/index.html#chipflow_lib.config_models.Config.chipflow"><code class="docutils literal notranslate"><span class="pre">Config.chipflow</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="autoapi/chipflow_lib/errors/index.html">chipflow_lib.errors</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="autoapi/chipflow_lib/errors/index.html#exceptions">Exceptions</a></li>
-<li class="toctree-l5"><a class="reference internal" href="autoapi/chipflow_lib/errors/index.html#module-contents">Module Contents</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/errors/index.html#chipflow_lib.errors.ChipFlowError"><code class="docutils literal notranslate"><span class="pre">ChipFlowError</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="autoapi/chipflow_lib/pin_lock/index.html">chipflow_lib.pin_lock</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="autoapi/chipflow_lib/pin_lock/index.html#attributes">Attributes</a></li>
-<li class="toctree-l5"><a class="reference internal" href="autoapi/chipflow_lib/pin_lock/index.html#classes">Classes</a></li>
-<li class="toctree-l5"><a class="reference internal" href="autoapi/chipflow_lib/pin_lock/index.html#functions">Functions</a></li>
-<li class="toctree-l5"><a class="reference internal" href="autoapi/chipflow_lib/pin_lock/index.html#module-contents">Module Contents</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/pin_lock/index.html#chipflow_lib.pin_lock.logger"><code class="docutils literal notranslate"><span class="pre">logger</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/pin_lock/index.html#chipflow_lib.pin_lock.count_member_pins"><code class="docutils literal notranslate"><span class="pre">count_member_pins()</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/pin_lock/index.html#chipflow_lib.pin_lock.allocate_pins"><code class="docutils literal notranslate"><span class="pre">allocate_pins()</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/pin_lock/index.html#chipflow_lib.pin_lock.lock_pins"><code class="docutils literal notranslate"><span class="pre">lock_pins()</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/pin_lock/index.html#chipflow_lib.pin_lock.PinCommand"><code class="docutils literal notranslate"><span class="pre">PinCommand</span></code></a><ul>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/pin_lock/index.html#chipflow_lib.pin_lock.PinCommand.config"><code class="docutils literal notranslate"><span class="pre">PinCommand.config</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/pin_lock/index.html#chipflow_lib.pin_lock.PinCommand.build_cli_parser"><code class="docutils literal notranslate"><span class="pre">PinCommand.build_cli_parser()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/pin_lock/index.html#chipflow_lib.pin_lock.PinCommand.run_cli"><code class="docutils literal notranslate"><span class="pre">PinCommand.run_cli()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/pin_lock/index.html#chipflow_lib.pin_lock.PinCommand.lock"><code class="docutils literal notranslate"><span class="pre">PinCommand.lock()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html">chipflow_lib.platforms</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#submodules">Submodules</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/platforms/silicon/index.html">chipflow_lib.platforms.silicon</a><ul>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/silicon/index.html#classes">Classes</a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/silicon/index.html#module-contents">Module Contents</a><ul>
-<li class="toctree-l8"><a class="reference internal" href="autoapi/chipflow_lib/platforms/silicon/index.html#chipflow_lib.platforms.silicon.SiliconPlatformPort"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort</span></code></a><ul>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/silicon/index.html#chipflow_lib.platforms.silicon.SiliconPlatformPort.wire"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.wire()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/silicon/index.html#chipflow_lib.platforms.silicon.SiliconPlatformPort.i"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.i</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/silicon/index.html#chipflow_lib.platforms.silicon.SiliconPlatformPort.o"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.o</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/silicon/index.html#chipflow_lib.platforms.silicon.SiliconPlatformPort.oe"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.oe</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/silicon/index.html#chipflow_lib.platforms.silicon.SiliconPlatformPort.direction"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.direction</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/silicon/index.html#chipflow_lib.platforms.silicon.SiliconPlatformPort.pins"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.pins</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/silicon/index.html#chipflow_lib.platforms.silicon.SiliconPlatformPort.invert"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.invert</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l8"><a class="reference internal" href="autoapi/chipflow_lib/platforms/silicon/index.html#chipflow_lib.platforms.silicon.SiliconPlatform"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform</span></code></a><ul>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/silicon/index.html#chipflow_lib.platforms.silicon.SiliconPlatform.ports"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.ports</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/silicon/index.html#chipflow_lib.platforms.silicon.SiliconPlatform.instantiate_ports"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.instantiate_ports()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/silicon/index.html#chipflow_lib.platforms.silicon.SiliconPlatform.request"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.request()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/silicon/index.html#chipflow_lib.platforms.silicon.SiliconPlatform.get_io_buffer"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.get_io_buffer()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/silicon/index.html#chipflow_lib.platforms.silicon.SiliconPlatform.add_file"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.add_file()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/silicon/index.html#chipflow_lib.platforms.silicon.SiliconPlatform.build"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.build()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/silicon/index.html#chipflow_lib.platforms.silicon.SiliconPlatform.default_clock"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.default_clock()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/platforms/sim/index.html">chipflow_lib.platforms.sim</a><ul>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/sim/index.html#classes">Classes</a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/sim/index.html#module-contents">Module Contents</a><ul>
-<li class="toctree-l8"><a class="reference internal" href="autoapi/chipflow_lib/platforms/sim/index.html#chipflow_lib.platforms.sim.SimPlatform"><code class="docutils literal notranslate"><span class="pre">SimPlatform</span></code></a><ul>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/sim/index.html#chipflow_lib.platforms.sim.SimPlatform.build_dir"><code class="docutils literal notranslate"><span class="pre">SimPlatform.build_dir</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/sim/index.html#chipflow_lib.platforms.sim.SimPlatform.extra_files"><code class="docutils literal notranslate"><span class="pre">SimPlatform.extra_files</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/sim/index.html#chipflow_lib.platforms.sim.SimPlatform.clk"><code class="docutils literal notranslate"><span class="pre">SimPlatform.clk</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/sim/index.html#chipflow_lib.platforms.sim.SimPlatform.rst"><code class="docutils literal notranslate"><span class="pre">SimPlatform.rst</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/sim/index.html#chipflow_lib.platforms.sim.SimPlatform.buttons"><code class="docutils literal notranslate"><span class="pre">SimPlatform.buttons</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/sim/index.html#chipflow_lib.platforms.sim.SimPlatform.sim_boxes"><code class="docutils literal notranslate"><span class="pre">SimPlatform.sim_boxes</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/sim/index.html#chipflow_lib.platforms.sim.SimPlatform.add_file"><code class="docutils literal notranslate"><span class="pre">SimPlatform.add_file()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/sim/index.html#chipflow_lib.platforms.sim.SimPlatform.add_model"><code class="docutils literal notranslate"><span class="pre">SimPlatform.add_model()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/sim/index.html#chipflow_lib.platforms.sim.SimPlatform.add_monitor"><code class="docutils literal notranslate"><span class="pre">SimPlatform.add_monitor()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/sim/index.html#chipflow_lib.platforms.sim.SimPlatform.build"><code class="docutils literal notranslate"><span class="pre">SimPlatform.build()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/platforms/utils/index.html">chipflow_lib.platforms.utils</a><ul>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/utils/index.html#attributes">Attributes</a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/utils/index.html#classes">Classes</a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/utils/index.html#functions">Functions</a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/utils/index.html#module-contents">Module Contents</a><ul>
-<li class="toctree-l8"><a class="reference internal" href="autoapi/chipflow_lib/platforms/utils/index.html#chipflow_lib.platforms.utils.PIN_ANNOTATION_SCHEMA"><code class="docutils literal notranslate"><span class="pre">PIN_ANNOTATION_SCHEMA</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="autoapi/chipflow_lib/platforms/utils/index.html#chipflow_lib.platforms.utils.PinSignature"><code class="docutils literal notranslate"><span class="pre">PinSignature</span></code></a><ul>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/utils/index.html#chipflow_lib.platforms.utils.PinSignature.direction"><code class="docutils literal notranslate"><span class="pre">PinSignature.direction</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/utils/index.html#chipflow_lib.platforms.utils.PinSignature.width"><code class="docutils literal notranslate"><span class="pre">PinSignature.width()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/utils/index.html#chipflow_lib.platforms.utils.PinSignature.options"><code class="docutils literal notranslate"><span class="pre">PinSignature.options()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/platforms/utils/index.html#chipflow_lib.platforms.utils.PinSignature.annotations"><code class="docutils literal notranslate"><span class="pre">PinSignature.annotations()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l8"><a class="reference internal" href="autoapi/chipflow_lib/platforms/utils/index.html#chipflow_lib.platforms.utils.OutputPinSignature"><code class="docutils literal notranslate"><span class="pre">OutputPinSignature()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="autoapi/chipflow_lib/platforms/utils/index.html#chipflow_lib.platforms.utils.InputPinSignature"><code class="docutils literal notranslate"><span class="pre">InputPinSignature()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="autoapi/chipflow_lib/platforms/utils/index.html#chipflow_lib.platforms.utils.BidirPinSignature"><code class="docutils literal notranslate"><span class="pre">BidirPinSignature()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="autoapi/chipflow_lib/platforms/utils/index.html#chipflow_lib.platforms.utils.PACKAGE_DEFINITIONS"><code class="docutils literal notranslate"><span class="pre">PACKAGE_DEFINITIONS</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="autoapi/chipflow_lib/platforms/utils/index.html#chipflow_lib.platforms.utils.load_pinlock"><code class="docutils literal notranslate"><span class="pre">load_pinlock()</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="autoapi/chipflow_lib/platforms/utils/index.html#chipflow_lib.platforms.utils.top_interfaces"><code class="docutils literal notranslate"><span class="pre">top_interfaces()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l5"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#attributes">Attributes</a></li>
-<li class="toctree-l5"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#classes">Classes</a></li>
-<li class="toctree-l5"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#functions">Functions</a></li>
-<li class="toctree-l5"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#package-contents">Package Contents</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SiliconPlatformPort"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort</span></code></a><ul>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SiliconPlatformPort.wire"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.wire()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SiliconPlatformPort.i"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.i</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SiliconPlatformPort.o"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.o</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SiliconPlatformPort.oe"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.oe</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SiliconPlatformPort.direction"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.direction</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SiliconPlatformPort.pins"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.pins</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SiliconPlatformPort.invert"><code class="docutils literal notranslate"><span class="pre">SiliconPlatformPort.invert</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SiliconPlatform"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform</span></code></a><ul>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SiliconPlatform.ports"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.ports</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SiliconPlatform.instantiate_ports"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.instantiate_ports()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SiliconPlatform.request"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.request()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SiliconPlatform.get_io_buffer"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.get_io_buffer()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SiliconPlatform.add_file"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.add_file()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SiliconPlatform.build"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.build()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SiliconPlatform.default_clock"><code class="docutils literal notranslate"><span class="pre">SiliconPlatform.default_clock()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SimPlatform"><code class="docutils literal notranslate"><span class="pre">SimPlatform</span></code></a><ul>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SimPlatform.build_dir"><code class="docutils literal notranslate"><span class="pre">SimPlatform.build_dir</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SimPlatform.extra_files"><code class="docutils literal notranslate"><span class="pre">SimPlatform.extra_files</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SimPlatform.clk"><code class="docutils literal notranslate"><span class="pre">SimPlatform.clk</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SimPlatform.rst"><code class="docutils literal notranslate"><span class="pre">SimPlatform.rst</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SimPlatform.buttons"><code class="docutils literal notranslate"><span class="pre">SimPlatform.buttons</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SimPlatform.sim_boxes"><code class="docutils literal notranslate"><span class="pre">SimPlatform.sim_boxes</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SimPlatform.add_file"><code class="docutils literal notranslate"><span class="pre">SimPlatform.add_file()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SimPlatform.add_model"><code class="docutils literal notranslate"><span class="pre">SimPlatform.add_model()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SimPlatform.add_monitor"><code class="docutils literal notranslate"><span class="pre">SimPlatform.add_monitor()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SimPlatform.build"><code class="docutils literal notranslate"><span class="pre">SimPlatform.build()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.PIN_ANNOTATION_SCHEMA"><code class="docutils literal notranslate"><span class="pre">PIN_ANNOTATION_SCHEMA</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.PinSignature"><code class="docutils literal notranslate"><span class="pre">PinSignature</span></code></a><ul>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.PinSignature.direction"><code class="docutils literal notranslate"><span class="pre">PinSignature.direction</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.PinSignature.width"><code class="docutils literal notranslate"><span class="pre">PinSignature.width()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.PinSignature.options"><code class="docutils literal notranslate"><span class="pre">PinSignature.options()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.PinSignature.annotations"><code class="docutils literal notranslate"><span class="pre">PinSignature.annotations()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.OutputPinSignature"><code class="docutils literal notranslate"><span class="pre">OutputPinSignature()</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.InputPinSignature"><code class="docutils literal notranslate"><span class="pre">InputPinSignature()</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.BidirPinSignature"><code class="docutils literal notranslate"><span class="pre">BidirPinSignature()</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.load_pinlock"><code class="docutils literal notranslate"><span class="pre">load_pinlock()</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.PACKAGE_DEFINITIONS"><code class="docutils literal notranslate"><span class="pre">PACKAGE_DEFINITIONS</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.top_interfaces"><code class="docutils literal notranslate"><span class="pre">top_interfaces()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="autoapi/chipflow_lib/software/index.html">chipflow_lib.software</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="autoapi/chipflow_lib/software/index.html#submodules">Submodules</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/software/soft_gen/index.html">chipflow_lib.software.soft_gen</a><ul>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/software/soft_gen/index.html#classes">Classes</a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/software/soft_gen/index.html#module-contents">Module Contents</a><ul>
-<li class="toctree-l8"><a class="reference internal" href="autoapi/chipflow_lib/software/soft_gen/index.html#chipflow_lib.software.soft_gen.SoftwareGenerator"><code class="docutils literal notranslate"><span class="pre">SoftwareGenerator</span></code></a><ul>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/software/soft_gen/index.html#chipflow_lib.software.soft_gen.SoftwareGenerator.rom_start"><code class="docutils literal notranslate"><span class="pre">SoftwareGenerator.rom_start</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/software/soft_gen/index.html#chipflow_lib.software.soft_gen.SoftwareGenerator.rom_size"><code class="docutils literal notranslate"><span class="pre">SoftwareGenerator.rom_size</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/software/soft_gen/index.html#chipflow_lib.software.soft_gen.SoftwareGenerator.ram_start"><code class="docutils literal notranslate"><span class="pre">SoftwareGenerator.ram_start</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/software/soft_gen/index.html#chipflow_lib.software.soft_gen.SoftwareGenerator.ram_size"><code class="docutils literal notranslate"><span class="pre">SoftwareGenerator.ram_size</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/software/soft_gen/index.html#chipflow_lib.software.soft_gen.SoftwareGenerator.defines"><code class="docutils literal notranslate"><span class="pre">SoftwareGenerator.defines</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/software/soft_gen/index.html#chipflow_lib.software.soft_gen.SoftwareGenerator.periphs"><code class="docutils literal notranslate"><span class="pre">SoftwareGenerator.periphs</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/software/soft_gen/index.html#chipflow_lib.software.soft_gen.SoftwareGenerator.extra_init"><code class="docutils literal notranslate"><span class="pre">SoftwareGenerator.extra_init</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/software/soft_gen/index.html#chipflow_lib.software.soft_gen.SoftwareGenerator.generate"><code class="docutils literal notranslate"><span class="pre">SoftwareGenerator.generate()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/software/soft_gen/index.html#chipflow_lib.software.soft_gen.SoftwareGenerator.add_periph"><code class="docutils literal notranslate"><span class="pre">SoftwareGenerator.add_periph()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/software/soft_gen/index.html#chipflow_lib.software.soft_gen.SoftwareGenerator.add_extra_init"><code class="docutils literal notranslate"><span class="pre">SoftwareGenerator.add_extra_init()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/software/soft_gen/index.html#chipflow_lib.software.soft_gen.SoftwareGenerator.soc_h"><code class="docutils literal notranslate"><span class="pre">SoftwareGenerator.soc_h</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/software/soft_gen/index.html#chipflow_lib.software.soft_gen.SoftwareGenerator.start"><code class="docutils literal notranslate"><span class="pre">SoftwareGenerator.start</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/software/soft_gen/index.html#chipflow_lib.software.soft_gen.SoftwareGenerator.lds"><code class="docutils literal notranslate"><span class="pre">SoftwareGenerator.lds</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="autoapi/chipflow_lib/steps/index.html">chipflow_lib.steps</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="autoapi/chipflow_lib/steps/index.html#submodules">Submodules</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/steps/board/index.html">chipflow_lib.steps.board</a><ul>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/steps/board/index.html#classes">Classes</a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/steps/board/index.html#module-contents">Module Contents</a><ul>
-<li class="toctree-l8"><a class="reference internal" href="autoapi/chipflow_lib/steps/board/index.html#chipflow_lib.steps.board.BoardStep"><code class="docutils literal notranslate"><span class="pre">BoardStep</span></code></a><ul>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/board/index.html#chipflow_lib.steps.board.BoardStep.platform"><code class="docutils literal notranslate"><span class="pre">BoardStep.platform</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/board/index.html#chipflow_lib.steps.board.BoardStep.build_cli_parser"><code class="docutils literal notranslate"><span class="pre">BoardStep.build_cli_parser()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/board/index.html#chipflow_lib.steps.board.BoardStep.run_cli"><code class="docutils literal notranslate"><span class="pre">BoardStep.run_cli()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/board/index.html#chipflow_lib.steps.board.BoardStep.build"><code class="docutils literal notranslate"><span class="pre">BoardStep.build()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/steps/silicon/index.html">chipflow_lib.steps.silicon</a><ul>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/steps/silicon/index.html#attributes">Attributes</a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/steps/silicon/index.html#classes">Classes</a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/steps/silicon/index.html#module-contents">Module Contents</a><ul>
-<li class="toctree-l8"><a class="reference internal" href="autoapi/chipflow_lib/steps/silicon/index.html#chipflow_lib.steps.silicon.logger"><code class="docutils literal notranslate"><span class="pre">logger</span></code></a></li>
-<li class="toctree-l8"><a class="reference internal" href="autoapi/chipflow_lib/steps/silicon/index.html#chipflow_lib.steps.silicon.SiliconTop"><code class="docutils literal notranslate"><span class="pre">SiliconTop</span></code></a><ul>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/silicon/index.html#chipflow_lib.steps.silicon.SiliconTop.elaborate"><code class="docutils literal notranslate"><span class="pre">SiliconTop.elaborate()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l8"><a class="reference internal" href="autoapi/chipflow_lib/steps/silicon/index.html#chipflow_lib.steps.silicon.SiliconStep"><code class="docutils literal notranslate"><span class="pre">SiliconStep</span></code></a><ul>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/silicon/index.html#chipflow_lib.steps.silicon.SiliconStep.config"><code class="docutils literal notranslate"><span class="pre">SiliconStep.config</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/silicon/index.html#chipflow_lib.steps.silicon.SiliconStep.config_model"><code class="docutils literal notranslate"><span class="pre">SiliconStep.config_model</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/silicon/index.html#chipflow_lib.steps.silicon.SiliconStep.project_name"><code class="docutils literal notranslate"><span class="pre">SiliconStep.project_name</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/silicon/index.html#chipflow_lib.steps.silicon.SiliconStep.silicon_config"><code class="docutils literal notranslate"><span class="pre">SiliconStep.silicon_config</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/silicon/index.html#chipflow_lib.steps.silicon.SiliconStep.platform"><code class="docutils literal notranslate"><span class="pre">SiliconStep.platform</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/silicon/index.html#chipflow_lib.steps.silicon.SiliconStep.build_cli_parser"><code class="docutils literal notranslate"><span class="pre">SiliconStep.build_cli_parser()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/silicon/index.html#chipflow_lib.steps.silicon.SiliconStep.run_cli"><code class="docutils literal notranslate"><span class="pre">SiliconStep.run_cli()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/silicon/index.html#chipflow_lib.steps.silicon.SiliconStep.prepare"><code class="docutils literal notranslate"><span class="pre">SiliconStep.prepare()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/silicon/index.html#chipflow_lib.steps.silicon.SiliconStep.submit"><code class="docutils literal notranslate"><span class="pre">SiliconStep.submit()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/steps/sim/index.html">chipflow_lib.steps.sim</a><ul>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/steps/sim/index.html#classes">Classes</a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/steps/sim/index.html#module-contents">Module Contents</a><ul>
-<li class="toctree-l8"><a class="reference internal" href="autoapi/chipflow_lib/steps/sim/index.html#chipflow_lib.steps.sim.SimStep"><code class="docutils literal notranslate"><span class="pre">SimStep</span></code></a><ul>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/sim/index.html#chipflow_lib.steps.sim.SimStep.doit_build_module"><code class="docutils literal notranslate"><span class="pre">SimStep.doit_build_module</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/sim/index.html#chipflow_lib.steps.sim.SimStep.platform"><code class="docutils literal notranslate"><span class="pre">SimStep.platform</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/sim/index.html#chipflow_lib.steps.sim.SimStep.build_cli_parser"><code class="docutils literal notranslate"><span class="pre">SimStep.build_cli_parser()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/sim/index.html#chipflow_lib.steps.sim.SimStep.run_cli"><code class="docutils literal notranslate"><span class="pre">SimStep.run_cli()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/sim/index.html#chipflow_lib.steps.sim.SimStep.doit_build"><code class="docutils literal notranslate"><span class="pre">SimStep.doit_build()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/sim/index.html#chipflow_lib.steps.sim.SimStep.build"><code class="docutils literal notranslate"><span class="pre">SimStep.build()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l6"><a class="reference internal" href="autoapi/chipflow_lib/steps/software/index.html">chipflow_lib.steps.software</a><ul>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/steps/software/index.html#classes">Classes</a></li>
-<li class="toctree-l7"><a class="reference internal" href="autoapi/chipflow_lib/steps/software/index.html#module-contents">Module Contents</a><ul>
-<li class="toctree-l8"><a class="reference internal" href="autoapi/chipflow_lib/steps/software/index.html#chipflow_lib.steps.software.SoftwareStep"><code class="docutils literal notranslate"><span class="pre">SoftwareStep</span></code></a><ul>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/software/index.html#chipflow_lib.steps.software.SoftwareStep.doit_build_module"><code class="docutils literal notranslate"><span class="pre">SoftwareStep.doit_build_module</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/software/index.html#chipflow_lib.steps.software.SoftwareStep.build_cli_parser"><code class="docutils literal notranslate"><span class="pre">SoftwareStep.build_cli_parser()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/software/index.html#chipflow_lib.steps.software.SoftwareStep.run_cli"><code class="docutils literal notranslate"><span class="pre">SoftwareStep.run_cli()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/software/index.html#chipflow_lib.steps.software.SoftwareStep.doit_build"><code class="docutils literal notranslate"><span class="pre">SoftwareStep.doit_build()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="autoapi/chipflow_lib/steps/software/index.html#chipflow_lib.steps.software.SoftwareStep.build"><code class="docutils literal notranslate"><span class="pre">SoftwareStep.build()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="autoapi/chipflow_lib/index.html#attributes">Attributes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="autoapi/chipflow_lib/index.html#exceptions">Exceptions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="autoapi/chipflow_lib/index.html#package-contents">Package Contents</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="autoapi/chipflow_lib/index.html#chipflow_lib.ChipFlowError"><code class="docutils literal notranslate"><span class="pre">ChipFlowError</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="autoapi/chipflow_lib/index.html#chipflow_lib.config_schema"><code class="docutils literal notranslate"><span class="pre">config_schema</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/chipflow_lib/index.html">chipflow_lib</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </section>
 
-
-                </article>
-              
-
-              
-              
-              
-              
-                <footer class="prev-next-footer d-print-none">
-                  
-<div class="prev-next-area">
-    <a class="right-next"
-       href="chipflow-toml-guide.html"
-       title="next page">
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></p>
+        </article>
       </div>
-      <i class="fa-solid fa-angle-right"></i>
-    </a>
-</div>
-                </footer>
-              
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="getting-started.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Getting Started with ChipFlow</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; ChipFlow Limited, 2021-2025
             </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
-            
-              
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
             
           </div>
-          <footer class="bd-footer-content">
+          <div class="right-details">
             
-<div class="bd-footer-content__inner container">
-  
-  <div class="footer-item">
-    
-<p class="component-author">
-By ChipFlow Platform Team
-</p>
-
-  </div>
-  
-  <div class="footer-item">
-    
-
-  <p class="copyright">
-    
-      © Copyright ChipFlow Limited, 2021-2025.
-      <br/>
-    
-  </p>
-
-  </div>
-  
-  <div class="footer-item">
-    
-  </div>
-  
-  <div class="footer-item">
-    
-  </div>
-  
-</div>
-          </footer>
+          </div>
+        </div>
         
-
-      </main>
+      </footer>
     </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
   </div>
-  
-  <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
-
-  <footer class="bd-footer">
-  </footer>
-  </body>
+</div><script src="_static/documentation_options.js?v=1f169f65"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=5fa4622c"></script>
+    </body>
 </html>
