@@ -86,14 +86,12 @@ class SiliconPlatformPort(io.PortLike):
             self._i = Signal(port.width, name=f"{component}_{name}__i")
         if self._direction in (io.Direction.Output, io.Direction.Bidir):
             self._o = Signal(port.width, name=f"{component}_{name}__o")
+        # Only bidir ports have output-enable. Either each line has its own OE, or there's one OE for all the wires
         if self._direction is io.Direction.Bidir:
             if "all_have_oe" in self._options and self._options["all_have_oe"]:
                 self._oe = Signal(port.width, name=f"{component}_{name}__oe", init=-1)
             else:
                 self._oe = Signal(1, name=f"{component}_{name}__oe", init=-1)
-        elif self._direction is io.Direction.Output:
-            # Always create an _oe for output ports
-            self._oe = Signal(1, name=f"{component}_{name}__oe", init=-1)
 
         logger.debug(f"Created SiliconPlatformPort {name}, width={len(port.pins)},dir{self._direction}")
 
@@ -101,30 +99,30 @@ class SiliconPlatformPort(io.PortLike):
         assert self._direction == interface.signature.direction
         if hasattr(interface, 'i'):
             m.d.comb += interface.i.eq(self.i)
-        for d in ['o', 'oe']:
-            if hasattr(interface, d):
-                m.d.comb += getattr(self, d).eq(getattr(interface, d))
+        if hasattr(interface, 'o'):
+            m.d.comb += self.o.eq(interface.o)
+        if hasattr(interface, 'oe') and self._oe is not None:
+            m.d.comb += self.oe.eq(interface.oe)
 
     @property
-
     def i(self):
         if self._i is None:
             raise AttributeError("SiliconPlatformPort with output direction does not have an "
-                               "input signal")
+                                 "input signal")
         return self._i
 
     @property
     def o(self):
         if self._o is None:
             raise AttributeError("SiliconPlatformPort with input direction does not have an "
-                               "output signal")
+                                 "output signal")
         return self._o
 
     @property
     def oe(self):
         if self._oe is None:
-            raise AttributeError("SiliconPlatformPort with input direction does not have an "
-                               "output enable signal")
+            raise AttributeError("SiliconPlatformPort with output or input direction does not have an "
+                                 "output enable signal")
         return self._oe
 
     @property
@@ -219,6 +217,9 @@ class IOBuffer(io.Buffer):
             m.d.comb += i_inv.eq(self.port.i)
         if self.direction in (io.Direction.Output, io.Direction.Bidir):
             m.d.comb += self.port.o.eq(o_inv)
+
+        # Only set oe for bidirectional ports
+        if self.direction is io.Direction.Bidir:
             m.d.comb += self.port.oe.eq(self.oe)
 
         return m
