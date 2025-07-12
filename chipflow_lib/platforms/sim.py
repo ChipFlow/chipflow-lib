@@ -1,19 +1,21 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
+import logging
 import os
 import sys
 from pathlib import Path
 
 from amaranth import *
 from amaranth.lib import io
-from amaranth.back import rtlil
+from amaranth.back import rtlil  # type: ignore[reportAttributeAccessIssue]
 from amaranth.hdl._ir import PortDirection
 from amaranth.lib.cdc import FFSynchronizer
 
-from .. import ChipFlowError
-from .utils import load_pinlock
+from ._utils import load_pinlock
+
 
 __all__ = ["SimPlatform"]
+logger = logging.getLogger(__name__)
 
 
 class SimPlatform:
@@ -24,6 +26,7 @@ class SimPlatform:
         self.sim_boxes = dict()
         self._ports = {}
         self._config = config
+        self._pinlock = None
 
     def add_file(self, filename, content):
         if not isinstance(content, (str, bytes)):
@@ -42,6 +45,7 @@ class SimPlatform:
             if port.direction is io.Direction.Bidir:
                 ports.append((f"io${port_name}$oe", port.oe, PortDirection.Output))
 
+        print("elaborating design")
         output = rtlil.convert(e, name="sim_top", ports=ports, platform=self)
 
         top_rtlil = Path(self.build_dir) / "sim_soc.il"
@@ -66,42 +70,36 @@ class SimPlatform:
             print("write_cxxrtl -header sim_soc.cc", file=yosys_file)
 
     def instantiate_ports(self, m: Module):
-        if hasattr(self, "_pinlock"):
+        if self._pinlock:  # already instantiated
             return
 
         pinlock = load_pinlock()
-        for component, iface in pinlock.port_map.items():
+        for component, iface in pinlock.port_map.ports.items():
             for k, v in iface.items():
                 for name, port in v.items():
+                   logger.debug(f"Instantiating port {port.port_name}: {port}")
                    invert = port.invert if port.invert else False
                    self._ports[port.port_name] = io.SimulationPort(port.direction, port.width, invert=invert, name=f"{component}-{name}")
 
-        for clock, name in self._config["chipflow"]["clocks"].items():
-            if name not in pinlock.package.clocks:
-                raise ChipFlowError(f"Unable to find clock {name} in pinlock")
+        for clock in pinlock.port_map.get_clocks():
+            assert 'clock_domain' in clock.iomodel
+            domain = clock.iomodel['clock_domain']
+            logger.debug(f"Instantiating clock buffer for {clock.port_name}, domain {domain}")
+            setattr(m.domains, domain, ClockDomain(name=domain))
+            clk_buffer = io.Buffer(clock.direction, self._ports[clock.port_name])
+            setattr(m.submodules, "clk_buffer_" + clock.port_name, clk_buffer)
+            m.d.comb += ClockSignal().eq(clk_buffer.i)  # type: ignore[reportAttributeAccessIssue]
 
-            port_data = pinlock.package.clocks[name]
-            port = io.SimulationPort(io.Direction.Input, port_data.width, name=f"clock-{name}")
-            self._ports[name] = port
-
-            if clock == 'default':
-                clock = 'sync'
-            setattr(m.domains, clock, ClockDomain(name=clock))
-            clk_buffer = io.Buffer("i", port)
-            setattr(m.submodules, "clk_buffer_" + clock, clk_buffer)
-            m.d.comb += ClockSignal().eq(clk_buffer.i)
-
-        for reset, name in self._config["chipflow"]["resets"].items():
-            port_data = pinlock.package.resets[name]
-            port = io.SimulationPort(io.Direction.Input, port_data.width, name=f"reset-{name}", invert=True)
-            self._ports[name] = port
-            rst_buffer = io.Buffer("i", port)
-            setattr(m.submodules, reset, rst_buffer)
-            setattr(m.submodules, reset + "_sync", FFSynchronizer(rst_buffer.i, ResetSignal()))
+        for reset in pinlock.port_map.get_resets():
+            assert 'clock_domain' in reset.iomodel
+            domain = reset.iomodel['clock_domain']
+            logger.debug(f"Instantiating reset synchronizer for {reset.port_name}, domain {domain}")
+            rst_buffer = io.Buffer(reset.direction, self._ports[reset.port_name])
+            setattr(m.submodules, reset.port_name, rst_buffer)
+            ffsync = FFSynchronizer(rst_buffer.i, ResetSignal())  # type: ignore[reportAttributeAccessIssue]
+            setattr(m.submodules, reset.port_name + "_sync", ffsync)
 
         self._pinlock = pinlock
-
-
 
 
 VARIABLES = {

@@ -11,9 +11,11 @@ class SoftwareGenerator:
         self.defines = []
         self.periphs = []
         self.extra_init = []
+        print("initialed SoftwareGenerator")
 
     def generate(self, out_dir):
         Path(out_dir).mkdir(parents=True, exist_ok=True)
+        print(f"generating in {out_dir}")
         with open(Path(out_dir) / "start.S", "w") as f:
             f.write(self.start)
         with open(Path(out_dir) / "sections.lds", "w") as f:

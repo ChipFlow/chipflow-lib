@@ -7,7 +7,7 @@ from abc import ABC
 
 from amaranth import Module
 
-from ..platforms.utils import IOSignature
+from ..platforms._utils import IOSignature
 
 logger = logging.getLogger(__name__)
 
@@ -43,26 +43,32 @@ class StepBase(ABC):
         "Called when this step's is used from `chipflow` command"
         self.build()
 
+    def build(self, *args):
+        "builds the design"
+        ...
 
 def _wire_up_ports(m: Module, top, platform):
-    logger.debug("wiring up ports")
-    logger.debug("adding top:")
+    assert platform._pinlock
+
+    logger.debug("Wiring up ports")
+    logger.debug("-> Adding top components:")
     for n, t in top.items():
         logger.debug(f"    > {n}, {t}")
         setattr(m.submodules, n, t)
 
-    logger.debug("wiring up:")
-    for component, iface in platform._pinlock.port_map.items():
+    print("Wiring up ports:")
+    for component, iface in platform._pinlock.port_map.ports.items():
+        if component.startswith('_'):
+            logger.debug(f"Ignoring special component {component}")
+            continue
+
         for iface_name, member, in iface.items():
             for name, port in member.items():
-                logger.debug(f"    > {component}, {iface_name}, {member}")
+                logger.debug(f"    > {component}, {iface_name}, {name}: {port}")
                 iface = getattr(top[component], iface_name)
                 wire = (iface if isinstance(iface.signature, IOSignature)
                         else getattr(iface, name))
-                if port.invert:
-                    inv_mask = sum(inv << bit for bit, inv in enumerate(port.invert))
-                else:
-                    inv_mask = 0
+                inv_mask = sum(inv << bit for bit, inv in enumerate(port.invert))
                 port = platform._ports[port.port_name]
                 if hasattr(wire, 'i'):
                     m.d.comb += wire.i.eq(port.i ^ inv_mask)
@@ -70,4 +76,3 @@ def _wire_up_ports(m: Module, top, platform):
                         m.d.comb += port.o.eq(wire.o ^ inv_mask)
                 if hasattr(wire, 'oe'):
                         m.d.comb += port.oe.eq(wire.oe)
-
