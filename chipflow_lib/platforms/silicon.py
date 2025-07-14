@@ -88,7 +88,7 @@ class SiliconPlatformPort(io.PortLike):
         if self._direction in (io.Direction.Output, io.Direction.Bidir):
             self._o = Signal(port.width, name=f"{component}_{name}__o")
         if self._direction is io.Direction.Bidir:
-            if "all_have_oe" in self._iomodel and self._iomodel["all_have_oe"]:
+            if "individual_oe" in self._iomodel and self._iomodel["individual_oe"]:
                 self._oe = Signal(port.width, name=f"{component}_{name}__oe", init=-1)
             else:
                 self._oe = Signal(1, name=f"{component}_{name}__oe", init=-1)
@@ -148,7 +148,7 @@ class SiliconPlatformPort(io.PortLike):
             return len(self.o)
         if self._direction is io.Direction.Bidir:
             assert len(self.i) == len(self.o)
-            if 'all_have_oe' in self._iomodel and self._iomodel["all_have_oe"]:
+            if 'individual_oe' in self._iomodel and self._iomodel["individual_oe"]:
                 assert len(self.o) == len(self.oe)
             else:
                 assert len(self.oe) == 1
@@ -279,14 +279,14 @@ class SiliconPlatform:
                     self._ports[port.port_name] = SiliconPlatformPort(component, name, port)
 
         for clock in pinlock.port_map.get_clocks():
-            domain = name=clock.iomodel['clock_domain_o']
+            domain = name=clock.iomodel['clock_domain']
             setattr(m.domains, domain, ClockDomain(name=domain))
             clk_buffer = io.Buffer("i", self._ports[clock.port_name])
             setattr(m.submodules, "clk_buffer_" + domain, clk_buffer)
             m.d.comb += ClockSignal().eq(clk_buffer.i)  #type: ignore[reportAttributeAccessIssue]
 
         for reset in pinlock.port_map.get_resets():
-            domain = name=clock.iomodel['clock_domain_o']
+            domain = name=clock.iomodel['clock_domain']
             rst_buffer = io.Buffer("i", self._ports[reset.port_name])
             setattr(m.submodules, reset.port_name, rst_buffer)
             setattr(m.submodules, reset.port_name + "_sync", FFSynchronizer(rst_buffer.i, ResetSignal()))  #type: ignore[reportAttributeAccessIssue]
