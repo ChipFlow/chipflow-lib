@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
+import logging
 import os
 import sys
 from pathlib import Path
@@ -14,6 +15,7 @@ from .utils import load_pinlock
 
 
 __all__ = ["SimPlatform"]
+logger = logging.getLogger(__name__)
 
 
 class SimPlatform:
@@ -42,6 +44,7 @@ class SimPlatform:
             if port.direction is io.Direction.Bidir:
                 ports.append((f"io${port_name}$oe", port.oe, PortDirection.Output))
 
+        print("elaborating design")
         output = rtlil.convert(e, name="sim_top", ports=ports, platform=self)
 
         top_rtlil = Path(self.build_dir) / "sim_soc.il"
@@ -73,19 +76,26 @@ class SimPlatform:
         for component, iface in pinlock.port_map.ports.items():
             for k, v in iface.items():
                 for name, port in v.items():
+                   logger.debug(f"Instantiating port {port.port_name}: {port}")
                    invert = port.invert if port.invert else False
                    self._ports[port.port_name] = io.SimulationPort(port.direction, port.width, invert=invert, name=f"{component}-{name}")
 
         for clock in pinlock.port_map.get_clocks():
-            setattr(m.domains, clock.port_name, ClockDomain(name=clock.port_name))
+            assert 'clock_domain' in clock.iomodel
+            domain = clock.iomodel['clock_domain']
+            logger.debug(f"Instantiating clock buffer for {clock.port_name}, domain {domain}")
+            setattr(m.domains, domain, ClockDomain(name=domain))
             clk_buffer = io.Buffer(clock.direction, self._ports[clock.port_name])
             setattr(m.submodules, "clk_buffer_" + clock.port_name, clk_buffer)
             m.d.comb += ClockSignal().eq(clk_buffer.i)  # type: ignore[reportAttributeAccessIssue]
 
         for reset in pinlock.port_map.get_resets():
+            assert 'clock_domain' in reset.iomodel
+            domain = reset.iomodel['clock_domain']
+            logger.debug(f"Instantiating reset synchronizer for {reset.port_name}, domain {domain}")
             rst_buffer = io.Buffer(reset.direction, self._ports[clock.port_name])
             setattr(m.submodules, reset.port_name, rst_buffer)
-            ffsync = FFSynchronizer(rst_buffer.i, ResetSignal(name=reset.port_name))  # type: ignore[reportAttributeAccessIssue]
+            ffsync = FFSynchronizer(rst_buffer.i, ResetSignal())  # type: ignore[reportAttributeAccessIssue]
             setattr(m.submodules, reset.port_name + "_sync", ffsync)
 
         self._pinlock = pinlock

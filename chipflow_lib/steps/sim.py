@@ -14,7 +14,7 @@ from amaranth import *
 
 from . import StepBase, _wire_up_ports
 from .. import ChipFlowError, _ensure_chipflow_root
-from ..platforms import SimPlatform, top_components
+from ..platforms._internal import SimPlatform, top_components
 from ..platforms.sim import VARIABLES, TASKS, DOIT_CONFIG
 
 
@@ -77,7 +77,8 @@ class SimStep(StepBase):
         self._platform = SimPlatform(config)
         self._config = config
 
-    def build(self):
+    def build(self, *args):
+        print("building sim")
         m = Module()
         self._platform.instantiate_ports(m)
 
