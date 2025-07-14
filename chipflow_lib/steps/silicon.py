@@ -22,7 +22,7 @@ from halo import Halo
 from . import StepBase, _wire_up_ports
 from .. import ChipFlowError
 from ..cli import log_level
-from ..platforms import SiliconPlatform, top_components, load_pinlock
+from ..platforms._internal import SiliconPlatform, top_components, load_pinlock
 
 
 logger = logging.getLogger(__name__)
@@ -167,13 +167,13 @@ class SiliconStep:
                     fh.close()
                 exit(1)
 
-            sp.info(f"> Submitting {submission_name} for project {self.config.chipflow.project_name} to ChipFlow Cloud {self._chipflow_api_origin}")
+            chipflow_api_origin = os.environ.get("CHIPFLOW_API_ORIGIN", "https://build.chipflow.org")
+            build_submit_url = f"{chipflow_api_origin}/build/submit"
+
+            sp.info(f"> Submitting {submission_name} for project {self.config.chipflow.project_name} to ChipFlow Cloud {chipflow_api_origin}")
             sp.start("Sending design to ChipFlow Cloud")
 
-            build_submit_url = f"{self._chipflow_api_origin}/build/submit"
-
             assert self._chipflow_api_key
-            assert self._chipflow_api_origin
             try:
                 resp = requests.post(
                     build_submit_url,
@@ -204,9 +204,9 @@ class SiliconStep:
             # Handle response based on status code
             if resp.status_code == 200:
                 logger.debug(f"Submitted design: {resp_data}")
-                self._build_url = f"{self._chipflow_api_origin}/build/{resp_data['build_id']}"
-                self._build_status_url = f"{self._chipflow_api_origin}/build/{resp_data['build_id']}/status"
-                self._log_stream_url = f"{self._chipflow_api_origin}/build/{resp_data['build_id']}/logs?follow=true"
+                self._build_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}"
+                self._build_status_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/status"
+                self._log_stream_url = f"{chipflow_api_origin}/build/{resp_data['build_id']}/logs?follow=true"
 
                 sp.succeed(f"✅ Design submitted successfully! Build URL: {self._build_url}")
 

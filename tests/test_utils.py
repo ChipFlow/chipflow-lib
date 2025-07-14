@@ -86,6 +86,6 @@ def test_signature_factory_functions():
     assert input_sig.width == 16
 
     # Test BidirIOSignature factory
-    bidir_sig = BidirIOSignature(width=8, all_have_oe=True)
+    bidir_sig = BidirIOSignature(width=8, individual_oe=True)
     assert bidir_sig.direction == io.Direction.Bidir
     assert bidir_sig.width == 8

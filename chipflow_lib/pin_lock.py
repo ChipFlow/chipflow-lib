@@ -6,7 +6,7 @@ from pathlib import Path
 from pprint import pformat
 
 from . import _parse_config, _ensure_chipflow_root, ChipFlowError
-from .platforms import top_components, LockFile, PACKAGE_DEFINITIONS
+from .platforms._internal import top_components, LockFile, PACKAGE_DEFINITIONS
 
 # logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 logger = logging.getLogger(__name__)
