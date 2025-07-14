@@ -18,7 +18,6 @@ dependencies = [
     "amaranth[builtin-yosys]>=0.5,<0.7",
     "amaranth-soc @ git+https://github.com/amaranth-lang/amaranth-soc",
     "amaranth-boards @ git+https://github.com/amaranth-lang/amaranth-boards",
-    "yowasp-yosys>=0.41.0.0",
     "yowasp-nextpnr-ecp5>=0.7",
     "yowasp-runtime",
     "tomli>=2.0.1",
@@ -28,7 +27,7 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "pydantic>=2.8",
     "halo>=0.0.31",
-    "yowasp-yosys!=0.54.*,!=0.55.*",
+    "yowasp-yosys>=0.55.0.3.post946.dev0",
 ]
 
 [project.scripts]
