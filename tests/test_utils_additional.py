@@ -22,19 +22,19 @@ class TestIOSignature(unittest.TestCase):
     def test_pin_signature_properties(self):
         """Test IOSignature properties"""
         # Create signature with options
-        sig = IOSignature(direction=io.Direction.Bidir, width=4, all_have_oe=True, init=Const.cast(0))
+        sig = IOSignature(direction=io.Direction.Bidir, width=4, individual_oe=True, init=Const.cast(0))
 
         # Test properties
         self.assertEqual(sig.direction, io.Direction.Bidir)
         self.assertEqual(sig.width, 4)
-        assert 'all_have_oe' in sig.options
-        self.assertEqual(sig.options['all_have_oe'], True)
+        assert 'individual_oe' in sig.options
+        self.assertEqual(sig.options['individual_oe'], True)
 
         # Test __repr__ - actual representation depends on Direction enum's representation
         repr_string = repr(sig)
         self.assertIn("IOSignature", repr_string)
         self.assertIn("4", repr_string)
-        self.assertIn("all_have_oe=True", repr_string)
+        self.assertIn("individual_oe=True", repr_string)
         self.assertIn("init=(const 1'd0)", repr_string)
 
     def test_pin_signature_annotations(self):

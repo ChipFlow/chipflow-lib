@@ -15,7 +15,7 @@ from amaranth.lib import wiring, io
 from amaranth.lib.cdc import FFSynchronizer
 from amaranth.lib.wiring import Component, In, PureInterface
 
-from amaranth.back import rtlil
+from amaranth.back import rtlil  #type: ignore[reportAttributeAccessIssue]
 from amaranth.hdl import Fragment
 from amaranth.hdl._ir import PortDirection
 
@@ -59,7 +59,7 @@ class Heartbeat(Component):
         heartbeat_ctr = Signal(self.counter_size)
         getattr(m.d, self.clock_domain).__iadd__(heartbeat_ctr.eq(heartbeat_ctr + 1))
 
-        heartbeat_buffer = io.Buffer("o", self.ports.heartbeat)
+        heartbeat_buffer = io.Buffer(io.Direction.Output, self.ports.heartbeat)
         m.submodules.heartbeat_buffer = heartbeat_buffer
         m.d.comb += heartbeat_buffer.o.eq(heartbeat_ctr[-1])  # type: ignore
         return m
@@ -88,7 +88,7 @@ class SiliconPlatformPort(io.PortLike):
         if self._direction in (io.Direction.Output, io.Direction.Bidir):
             self._o = Signal(port.width, name=f"{component}_{name}__o")
         if self._direction is io.Direction.Bidir:
-            if "all_have_oe" in self._iomodel and self._iomodel["all_have_oe"]:
+            if "individual_oe" in self._iomodel and self._iomodel["individual_oe"]:
                 self._oe = Signal(port.width, name=f"{component}_{name}__oe", init=-1)
             else:
                 self._oe = Signal(1, name=f"{component}_{name}__oe", init=-1)
@@ -148,7 +148,7 @@ class SiliconPlatformPort(io.PortLike):
             return len(self.o)
         if self._direction is io.Direction.Bidir:
             assert len(self.i) == len(self.o)
-            if 'all_have_oe' in self._iomodel and self._iomodel["all_have_oe"]:
+            if 'individual_oe' in self._iomodel and self._iomodel["individual_oe"]:
                 assert len(self.o) == len(self.oe)
             else:
                 assert len(self.oe) == 1
@@ -178,15 +178,130 @@ class SiliconPlatformPort(io.PortLike):
         return result
 
     def __add__(self, other):
-        direction = self._direction & other._direction
-        result = object.__new__(type(self))
-        result._i = None if direction is io.Direction.Output else Cat(self._i, other._i)
-        result._o = None if direction is io.Direction.Input else Cat(self._o, other._o)
-        result._oe = None if direction is io.Direction.Input else Cat(self._oe, other._oe)
-        result._invert = self._invert
-        result._direction = direction
-        result._iomodel = self._iomodel
-        result._pins = self._pins + other._pins
+        return NotImplemented
+
+    def __repr__(self):
+        return (f"SiliconPlatformPort(name={self._name}, invert={self._invert}, iomode={self.iomodel})")
+
+
+class Sky130Port(SiliconPlatformPort):
+    """
+    Specialisation of `SiliconPlatformPort` for the `Skywater sky130_fd_io__gpiov2 IO cell <https://skywater-pdk.readthedocs.io/en/main/contents/libraries/sky130_fd_io/docs/user_guide.html>`_
+
+    Includes wires and configuration for `Drive Modes <IODriveMode>`, `Input buffer trip point <IOTripPoint>`and buffer control~
+    """
+
+    _DriveMode_map = {
+        # Strong pull-up, weak pull-down
+        IODriveMode.STRONG_UP_WEAK_DOWN: 0b011,
+        # Weak pull-up, Strong pull-down
+        IODriveMode.WEAK_UP_STRONG_DOWN: 0b010,
+        # Open drain with strong pull-down
+        IODriveMode.OPEN_DRAIN_STRONG_DOWN: 0b100,
+        # Open drain-with strong pull-up
+        IODriveMode.OPEN_DRAIN_STRONG_UP: 0b101,
+        # Strong pull-up, weak pull-down
+        IODriveMode.STRONG_UP_STRONG_DOWN: 0b110,
+        # Weak pull-up, weak pull-down
+        IODriveMode.WEAK_UP_WEAK_DOWN: 0b111
+    }
+
+    _VTrip_map = {
+        # CMOS level switching (30%/70%) referenced to IO power domain
+        IOTripPoint.CMOS: (0, 0),
+        # TTL level switching (low < 0.8v, high > 2.0v) referenced to IO power domain
+        IOTripPoint.TTL: (0, 1),
+        # CMOS level switching referenced to core power domain (e.g. low power mode)
+        IOTripPoint.VCORE: (1,0),
+        # CMOS level switching referenced to external reference voltage (e.g. low power mode)
+        # Only available on sky130_fd_io__gpio_ovtv2
+        # VREF
+    }
+
+
+    # TODO: slew rate, hold points
+    def __init__(self,
+                 name: str,
+                 port_desc: PortDesc,
+                 *,
+                 invert: bool = False):
+        super().__init__(name, port_desc, invert=invert)
+
+        # keep a list of signals we create
+        self._signals = []
+
+        # Now create the signals for ``gpio_oeb`` (``oe_n``), ``gpio_inp_dis`` (``ie``)
+        self._oe_n = None
+        self._ie = None
+
+        if self._oe is not None:
+            self._oe_n = Signal(self._oe.shape().width, name=f"{self._name}$oeb")
+            self._signals.append((self._oe_n, PortDirection.Output))
+        if self._i is not None:
+            self._ie = Signal(self._i.shape().width, name=f"{self._name}$inp_dis")
+            self._signals.append((self._ie, PortDirection.Input))
+
+        # Port Configuration
+        # Input voltage trip level
+        if self.direction in (io.Direction.Input, io.Direction.Bidir):
+            if 'trip_point' in port_desc.iomodel:
+                trip_point = port_desc.iomodel['trip_point']
+                if trip_point not in __class__._VTrip_map:
+                    raise ChipFlowError(f"Trip point `{trip_point}` not available for {__class__.__name__}")
+                ib_mode_init, vtrip_init = __class__._VTrip_map[trip_point]
+            else:
+                ib_mode_init = vtrip_init = 0
+
+            self._gpio_ib_mode_sel =  Signal(1, name=f"{self._name}$ib_mode_sel", init=ib_mode_init)
+            self._signals.append((self._gpio_ib_mode_sel, PortDirection.Output))
+            self._gpio_vtrip_sel = Signal(1, name=f"{self._name}$vtrip_sel", init=vtrip_init)
+            self._signals.append((self._gpio_vtrip_sel, PortDirection.Output))
+
+        # Drive mode
+        if self.direction in (io.Direction.Output, io.Direction.Bidir):
+            if 'drive_mode' in port_desc.iomodel:
+                dm = port_desc.iomodel['drive_mode']
+            else:
+                dm = IODriveMode.STRONG_UP_STRONG_DOWN
+            dm_init = __class__._DriveMode_map[dm]
+            self._gpio_dm = Signal(3, name=f"{self._name}$dm", init=dm_init)
+            self._signals.append((self._gpio_dm, PortDirection.Output))
+
+        # Not enabled yet:
+        self._gpio_slow_sel = None  # Select slew rate
+        self._gpio_holdover = None  # Hold mode
+        # Analog config, not enabled yet
+        # see https://skywater-pdk.readthedocs.io/en/main/contents/libraries/sky130_fd_io/docs/user_guide.html#analog-functionality
+        self._gpio_analog_en = None # analog enable
+        self._gpio_analog_sel = None # analog mux select
+        self._gpio_analog_pol = None # analog mux select
+
+    def wire(self, m: Module, interface: PureInterface):
+        super().wire(m, interface)
+        # don't wire up oe_n
+        if hasattr(interface, 'ie'):
+            m.d.comb += interface.ie.eq(self._ie)  # type: ignore
+        # wire up oe_n = ~oe
+        if self._oe is not None:
+            assert self._oe_n is not None
+            m.d.comb += self._oe_n.eq(~self._oe)
+
+    def instantiate_toplevel(self):
+        ports = super().instantiate_toplevel()
+        for s, d in self._signals:
+            logger.debug(f"Instantiating io${s.name} top level port")
+            ports.append((f"io${s.name}", s, d))
+        return ports
+
+    @property
+    def ie(self):
+        if self._ie is None:
+            raise AttributeError("SiliconPlatformPort with input direction does not have an "
+                                 "input enable signal")
+        return self._ie
+
+    def __invert__(self):
+        result = Sky130Port(self._name, self._port_desc, invert=not self.invert)
         return result
 
     def __repr__(self):
@@ -272,15 +387,16 @@ class SiliconPlatform:
                     self._ports[port.port_name] = SiliconPlatformPort(component, name, port)
 
         for clock in pinlock.port_map.get_clocks():
-            domain = name=clock.iomodel['clock_domain_o']
+            domain = name=clock.iomodel['clock_domain']
             setattr(m.domains, domain, ClockDomain(name=domain))
-            clk_buffer = io.Buffer("i", self._ports[clock.port_name])
+            clk_buffer = io.Buffer(io.Direction.Input, self._ports[clock.port_name])
             setattr(m.submodules, "clk_buffer_" + domain, clk_buffer)
             m.d.comb += ClockSignal().eq(clk_buffer.i)  #type: ignore[reportAttributeAccessIssue]
 
         for reset in pinlock.port_map.get_resets():
-            domain = name=clock.iomodel['clock_domain_o']
-            rst_buffer = io.Buffer("i", self._ports[reset.port_name])
+            assert 'clock_domain' in reset.iomodel
+            domain = reset.iomodel['clock_domain']
+            rst_buffer = io.Buffer(io.Direction.Input, self._ports[reset.port_name])
             setattr(m.submodules, reset.port_name, rst_buffer)
             setattr(m.submodules, reset.port_name + "_sync", FFSynchronizer(rst_buffer.i, ResetSignal()))  #type: ignore[reportAttributeAccessIssue]
 

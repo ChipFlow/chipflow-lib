@@ -1,63 +1,23 @@
 # SPDX-License-Identifier: BSD-2-Clause
-import re
-from typing import Dict, Optional, Literal, Any, List
+from typing import Dict, Optional, Any, List
 
-from pydantic import BaseModel, model_validator, ValidationInfo, field_validator
+from pydantic import BaseModel
 
-from .platforms.utils import Process
-
-class PadConfig(BaseModel):
-    """Configuration for a pad in chipflow.toml."""
-    type: Literal["io", "i", "o", "oe", "clock", "reset", "power", "ground"]
-    loc: str
-
-    @model_validator(mode="after")
-    def validate_loc_format(self):
-        """Validate that the location is in the correct format."""
-        if not re.match(r"^[NSWE]?[0-9]+$", self.loc):
-            raise ValueError(f"Invalid location format: {self.loc}, expected format: [NSWE]?[0-9]+")
-        return self
-
-    @classmethod
-    def validate_pad_dict(cls, v: dict, info: ValidationInfo):
-        """Custom validation for pad dicts from TOML that may not have all fields."""
-        if isinstance(v, dict):
-            # Handle legacy format - if 'type' is missing but should be inferred from context
-            if 'loc' in v and 'type' not in v:
-                if info.field_name == 'power':
-                    v['type'] = 'power'
-
-            # Map legacy 'clk' type to 'clock' to match our enum
-            if 'type' in v and v['type'] == 'clk':
-                v['type'] = 'clock'
-
-            return v
-        return v
+from .platforms._internal import PACKAGE_DEFINITIONS, Process, Voltage
 
 
-Voltage = float
+def known_package(package: str):
+    if package not in PACKAGE_DEFINITIONS.keys():
+        raise ValueError(f"{package} is not a valid package type. Valid package types are {PACKAGE_DEFINITIONS.keys()}")
+
 
 class SiliconConfig(BaseModel):
     """Configuration for silicon in chipflow.toml."""
     process: 'Process'
-    package: Literal["caravel", "cf20", "pga144"]
+    package: str
     power: Dict[str, Voltage] = {}
     debug: Optional[Dict[str, bool]] = None
     # This is still kept around to allow forcing pad locations.
-    pads: Optional[Dict[str, PadConfig]] = {}
-
-    @field_validator('pads', 'power', mode='before')
-    @classmethod
-    def validate_pad_dicts(cls, v, info: ValidationInfo):
-        """Pre-process pad dictionaries to handle legacy format."""
-        if isinstance(v, dict):
-            result = {}
-            for key, pad_dict in v.items():
-                # Apply the pad validator with context about which field we're in
-                validated_pad = PadConfig.validate_pad_dict(pad_dict, info)
-                result[key] = validated_pad
-            return result
-        return v
 
 
 class ChipFlowConfig(BaseModel):
