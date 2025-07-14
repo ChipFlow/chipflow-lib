@@ -10,7 +10,7 @@ from pprint import pformat
 from typing import Set, List, Dict, Optional, Union, Literal, Tuple
 
 from dataclasses import dataclass, asdict
-from enum import Enum, IntEnum, StrEnum
+from enum import Enum, IntEnum, StrEnum, auto
 from math import ceil, floor
 from typing import (
     Any, Annotated, NamedTuple, Self,
@@ -21,26 +21,20 @@ from typing_extensions import (
 )
 
 
-from amaranth import Const
 from amaranth.lib import wiring, io, meta
 from amaranth.lib.wiring import In, Out
 from pydantic import (
         ConfigDict, TypeAdapter, PlainSerializer,
-        WithJsonSchema
+        WrapValidator
         )
 
 
 from .. import ChipFlowError, _ensure_chipflow_root, _get_cls_by_reference
+from .._appresponse import AppResponseModel, OmitIfNone
 
 if TYPE_CHECKING:
     from ..config_models import Config
-
-__all__ = ['IO_ANNOTATION_SCHEMA', 'IOSignature', 'IOModel',
-           'OutputIOSignature', 'InputIOSignature', 'BidirIOSignature',
-           'load_pinlock', "PACKAGE_DEFINITIONS", 'top_components', 'LockFile',
-           'Package', 'PortMap', 'Port', 'Process',
-           'GAPackageDef', 'QuadPackageDef', 'BareDiePackageDef', 'BasePackageDef',
-           'BringupPins', 'JTAGPins', 'PowerPins']
+    from ._openframe import OpenframePackageDef
 
 
 logger = logging.getLogger(__name__)
@@ -49,61 +43,103 @@ logger = logging.getLogger(__name__)
 def _chipflow_schema_uri(name: str, version: int) -> str:
     return f"https://api.chipflow.com/schemas/{version}/{name}"
 
+Voltage = Annotated[
+              float,
+              PlainSerializer(lambda x: f'{x:.1e}V', return_type=str),
+              WrapValidator(lambda v, h: h(v.strip('Vv ') if isinstance(v, str) else h(v)))
+          ]
 
-@dataclass
-class VoltageRange:
-    min: Optional[float] = None
-    max: Optional[float] = None
+
+class VoltageRange(AppResponseModel):
+    """
+    Models a voltage range for a power domain or IO
+    """
+    min: Annotated[Optional[Voltage], OmitIfNone()] = None
+    max: Annotated[Optional[Voltage], OmitIfNone()] = None
+    typical: Annotated[Optional[Voltage], OmitIfNone()] = None
+
+class TripPoint(StrEnum):
+    """
+    Models various options for trip points for IO.
+    Depending on process and cell library, these may be statically or dynamically configurable.
+
+    You will get an error if the option is not available with the chosen process and cell library
+    """
+
+    # CMOS level switching (30%/70%) referenced to IO power domain
+    CMOS = auto()
+    # TTL level switching (low < 0.8v, high > 2.0v) referenced to IO power domain
+    TTL = auto()
+    # CMOS level switching referenced to core power domain (e.g. low power mode)
+    VCORE = auto()
+    # CMOS level switching referenced to external reference voltage (e.g. low power mode)
+    VREF = auto()
+
+
+class IODriveMode(StrEnum):
+    """
+    Models the potential drive modes of an IO pad.
+    Depending on process and cell library, these may be statically or dynamically configurable.
+
+    You will get an error if the option is not available with the chosen process and cell library
+    """
+    # Strong pull-up, weak pull-down
+    STRONG_UP_WEAK_DOWN = auto()
+    # Weak pull-up, Strong pull-down
+    WEAK_UP_STRONG_DOWN = auto()
+    # Open drain with strong pull-down
+    OPEN_DRAIN_STRONG_DOWN = auto()
+    # Open drain-with strong pull-up
+    OPEN_DRAIN_STRONG_UP= auto()
+    # Strong pull-up, weak pull-down
+    STRONG_UP_STRONG_DOWN = auto()
+    # Hi-Z / tristate output buffer
+    HI_Z = auto()
 
 
 IO_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("pin-annotation", 0))
 
-ConstSerializer = PlainSerializer(
-        lambda x: {"width": x._shape._width, "signed": x._shape._signed, "value": x._value},
-        #TypedDict('ConstSerialize', {"width": int, "signed": bool, "value": int})
-        )
-ConstSchema = WithJsonSchema({
-    "title": "Const",
-    "type": "object",
-    "properties": {
-        "width": {"title": "Width", "type": "integer", "minimum":0},
-        "signed": {"title": "Signed", "type": "boolean"},
-        "value": {"title": "Value", "type": "integer"}
-    },
-    "required": ["width", "signed", "value"]
-})
-
 
 @pydantic.with_config(ConfigDict(arbitrary_types_allowed=True))  # type: ignore[reportCallIssue]
-class _IOModelOptions(TypedDict):
-    invert: NotRequired[bool|Tuple[bool, ...]]
-    all_have_oe: NotRequired[bool]
-    allocate_power: NotRequired[bool]
-    power_voltage: NotRequired[VoltageRange]
-    clock_domain_i: NotRequired[str]
-    clock_domain_o: NotRequired[str]
-    init: NotRequired[Annotated[Const, ConstSerializer, ConstSchema]]
-
-
-@pydantic.with_config(ConfigDict(arbitrary_types_allowed=True))  # type: ignore[reportCallIssue]
-class IOModel(_IOModelOptions):
+class IOModelOptions(TypedDict):
     """
-    Options for IO Ports
+    Options for an IO pad/pin.
+
+    Attributes:
+        invert: Polarity inversion. If the value is a simple :class:`bool`, it specifies inversion for
+            the entire port. If the value is an iterable of :class:`bool`, the iterable must have the
+            same length as the width of :py:`io`, and the inversion is specified for individual wires.
+        individual_oe: controls whether each output wire is associated with an individual Output Enable bit
+            or if a single OE bit will be used for entire port. The default value is False (indicating that a
+            single OE bit controls the entire port).
+        power_domain: The name of the I/O power domain. NB there is only one of these, so IO with multiple power domains must be split up.
+
+        clock_domain: the name of the I/O's clock domain (see `Amaranth.ClockDomain`). NB there is only one of these, so IO with multiple clocks must be split up.
+        buffer_in: Should the IO pad have an input buffer?
+        buffer_out: Should the IO pad have an output buffer?
+        drive_mode: Drive mode for output
+        init: The value for the initial values of the port
+        init_oe: The value for the initial values of the output enable(s) of the port
+    """
+
+    invert: NotRequired[bool|Tuple[bool, ...]]
+    individual_oe: NotRequired[bool]
+    clock_domain: NotRequired[str]
+    buffer_in: NotRequired[bool]
+    buffer_out: NotRequired[bool]
+    drive_mode: NotRequired[IODriveMode]
+    init: NotRequired[int | bool]
+    init_oe: NotRequired[int | bool]
+
+
+@pydantic.with_config(ConfigDict(arbitrary_types_allowed=True))  # type: ignore[reportCallIssue]
+class IOModel(IOModelOptions):
+    """
+    Setting for IO Ports (see also base class `IOModelOptions`)
 
     Attributes:
         direction: `io.Direction.Input`, `io.Direction.Output` or `io.Direction.Bidir`
         width: width of port, default is 1
-        all_have_oe: controls whether each output wire is associated with an individual Output Enable bit
-            or a single OE bit will be used for entire port, the default value is False, indicating that a
-            single OE bit controls the entire port.
-        invert: Polarity inversion. If the value is a simple :class:`bool`, it specifies inversion for
-            the entire port. If the value is an iterable of :class:`bool`, the iterable must have the
-            same length as the width of :py:`io`, and the inversion is specified for individual wires.
-        allocate_power: Whether a power line should be allocated with this interface.  NB there is only one of these, so IO with multiple IO power domains must be split up.
-        power_voltage: Voltage range of the allocated power
-        clock_domain_i: the name of the `Amaranth.ClockDomain` for input. NB there is only one of these, so IO with multiple input clocks must be split up.
-        clock_domain_o: the name of the `Amaranth.ClockDomain` for output. NB there is only one of these, so IO with multiple output clocks must be split up.
-        init: a :ref:`Const` value for the initial values of the port
     """
 
     width: int
@@ -137,22 +173,22 @@ class _IOAnnotation(meta.Annotation):
 
 class IOSignature(wiring.Signature):
     """An :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` used to decorate wires that would usually be brought out onto a port on the package.
-    This class is generally not directly used.
-    Instead, you would typically utilize the more specific
+    This class is generally not directly used.  Instead, you would typically utilize the more specific
     :py:obj:`InputIOSignature`, :py:obj:`OutputIOSignature`, or :py:obj:`BidirIOSignature` for defining pin interfaces.
     """
 
     def __init__(self, **kwargs: Unpack[IOModel]):
+        # Special Handling for io.Direction, invert and clock_domain
         model = IOModel(**kwargs)
         assert 'width' in model
         assert 'direction' in model
         width = model['width']
-        all_have_oe = model['all_have_oe'] if 'all_have_oe' in model else False
+        individual_oe = model['individual_oe'] if 'individual_oe' in model else False
         match model['direction']:
             case io.Direction.Bidir:
                 sig = {
                     "o": Out(width),
-                    "oe": Out(width if all_have_oe else 1),
+                    "oe": Out(width if individual_oe else 1),
                     "i": In(width)
                 }
             case io.Direction.Input:
@@ -175,10 +211,8 @@ class IOSignature(wiring.Signature):
         else:
             model['invert'] = (False,) * width
 
-        if 'clock_domain_i' not in model:
-            model['clock_domain_i'] = 'sync'
-        if 'clock_domain_o' not in model:
-            model['clock_domain_o'] = 'sync'
+        if 'clock_domain' not in model:
+            model['clock_domain'] = 'sync'
 
         self._model = model
         super().__init__(sig)
@@ -200,7 +234,7 @@ class IOSignature(wiring.Signature):
         return self._model['invert']
 
     @property
-    def options(self) -> _IOModelOptions:
+    def options(self) -> IOModelOptions:
         """
         Options set on the io port at construction
         """
@@ -217,7 +251,7 @@ class IOSignature(wiring.Signature):
         return f"IOSignature({','.join('{0}={1!r}'.format(k,v) for k,v in self._model.items())})"
 
 
-def OutputIOSignature(width: int, **kwargs: Unpack[_IOModelOptions]):
+def OutputIOSignature(width: int, **kwargs: Unpack[IOModelOptions]):
     """This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package output signals
     intended for connection to the physical pads of the integrated circuit package.
 
@@ -227,7 +261,7 @@ def OutputIOSignature(width: int, **kwargs: Unpack[_IOModelOptions]):
     return IOSignature(**model)
 
 
-def InputIOSignature(width: int, **kwargs: Unpack[_IOModelOptions]):  # type: ignore[reportGeneralTypeIssues]
+def InputIOSignature(width: int, **kwargs: Unpack[IOModelOptions]):
     """This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package input signals
     intended for connection to the physical pads of the integrated circuit package.
 
@@ -238,7 +272,7 @@ def InputIOSignature(width: int, **kwargs: Unpack[_IOModelOptions]):  # type: ig
     return IOSignature(**model)
 
 
-def BidirIOSignature(width: int, **kwargs: Unpack[_IOModelOptions]):  # type: ignore[reportGeneralTypeIssues]
+def BidirIOSignature(width: int, **kwargs: Unpack[IOModelOptions]):
     """This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package bi-directional signals
     intended for connection to the physical pads of the integrated circuit package.
 
@@ -255,15 +289,15 @@ PinList = List[Pin]
 Pins = Union[PinSet, PinList]
 
 class PowerType(StrEnum):
-    POWER = "power"
-    GROUND = "ground"
+    POWER = auto()
+    GROUND = auto()
 
 class JTAGWire(StrEnum):
-    TRST = "trst"
-    TCK = "tck"
-    TMS = "tms"
-    TDI = "tdi"
-    TDO = "tdo"
+    TRST = auto()
+    TCK = auto()
+    TMS = auto()
+    TDI = auto()
+    TDO = auto()
 
 JTAGSignature = wiring.Signature({
     JTAGWire.TRST: Out(InputIOSignature(1)),
@@ -278,7 +312,8 @@ class PowerPins:
     "A matched pair of power pins, with optional notation of the voltage range"
     power: Pin
     ground: Pin
-    voltage: Optional[VoltageRange] = None
+    voltage: Optional[VoltageRange | Voltage] = None
+    name: Optional[str] = None
     def to_set(self) -> Set[Pin]:
         return set(asdict(self).values())
 
@@ -300,12 +335,13 @@ class BringupPins:
     core_clock: Pin
     core_reset: Pin
     core_heartbeat: Pin
-    core_jtag: JTAGPins
+    core_jtag: Optional[JTAGPins] = None
 
     def to_set(self) -> Set[Pin]:
+        jtag = self.core_jtag.to_set() if self.core_jtag else set()
         return {p for pp in self.core_power for p in asdict(pp).values()} | \
                set([self.core_clock, self.core_reset, self.core_heartbeat]) | \
-               self.core_jtag.to_set()
+               jtag
 
 
 class _Side(IntEnum):
@@ -316,6 +352,12 @@ class _Side(IntEnum):
 
     def __str__(self):
         return f'{self.name}'
+
+
+class PortType(StrEnum):
+    IO = auto()
+    CLOCK = auto()
+    RESET = auto()
 
 
 class Port(pydantic.BaseModel):
@@ -332,17 +374,18 @@ class Port(pydantic.BaseModel):
 
     @property
     def direction(self):
-        assert self.pins and 'direction' in self.iomodel
-        assert len(self.pins) == self.iomodel['direction']
+        assert 'direction' in self.iomodel
         return self.iomodel['direction']
 
     @property
-    def invert(self) -> Iterable[bool]:
-        assert self.pins and 'invert' in self.iomodel
-        print(type(self.iomodel['invert']))
-        assert type(self.iomodel['invert']) is tuple
-        assert len(self.pins) == len(self.iomodel['invert'])
-        return self.iomodel['invert']
+    def invert(self) -> Iterable[bool] | None:
+        if 'invert' in self.iomodel:
+            if type(self.iomodel['invert']) is bool:
+                return (self.iomodel['invert'],)
+            else:
+                return self.iomodel['invert']
+        else:
+            return None
 
 
 def _group_consecutive_items(ordering: PinList, lst: PinList) -> OrderedDict[int, List[PinList]]:
@@ -532,7 +575,7 @@ class LockFile(pydantic.BaseModel):
     metadata: dict
 
 
-PackageDef = Union['GAPackageDef', 'QuadPackageDef', 'BareDiePackageDef']
+PackageDef = Union['GAPackageDef', 'QuadPackageDef', 'BareDiePackageDef', 'OpenframePackageDef']
 
 class Package(pydantic.BaseModel):
     """
@@ -582,6 +625,7 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
     Abstract base class for the definition of a package
     Serialising this or any derived classes results in the
     description of the package
+    Not serialisable!
 
     Attributes:
         name (str): The name of the package
@@ -618,12 +662,12 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
         d: Interface = { 'sync-clk': Port(type='clock',
                                           pins=[self.bringup_pins.core_clock],
                                           port_name='sync-clk',
-                                          iomodel=IOModel(width=1, direction=io.Direction.Input, clock_domain_o="sync")
+                                          iomodel=IOModel(width=1, direction=io.Direction.Input, clock_domain="sync")
                                       ),
                           'sync-rst_n': Port(type='reset',
                                            pins=[self.bringup_pins.core_reset],
                                            port_name='sync-rst_n',
-                                           iomodel=IOModel(width=1, direction=io.Direction.Input, clock_domain_o="sync", 
+                                           iomodel=IOModel(width=1, direction=io.Direction.Input, clock_domain="sync",
                                                            invert=True)
                                       )
                        }
@@ -633,7 +677,7 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
             d['heartbeat'] = Port(type='heartbeat',
                                   pins=[self.bringup_pins.core_heartbeat],
                                   port_name='heartbeat',
-                                  iomodel=IOModel(width=1, direction=io.Direction.Output, clock_domain_i="sync")
+                                  iomodel=IOModel(width=1, direction=io.Direction.Output, clock_domain="sync")
                               )
         #TODO: JTAG
         return {'bringup_pins': d}
@@ -665,7 +709,35 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
         return sorted(list(pins))
 
 
-class BareDiePackageDef(BasePackageDef):
+class LinearAllocPackageDef(BasePackageDef):
+    """
+    Base class for any package types where allocation is from a linear list of pins/pads
+    Not serialisable
+
+    To use, populate self._ordered_pins in model_post_init before calling super().model_post_init(__context).
+    You will also likely need to override bringup_pins
+    """
+    def __init__(self, **kwargs):
+        self._ordered_pins = None
+        super().__init__(**kwargs)
+
+    def allocate_pins(self, config: 'Config', process: 'Process', lockfile: LockFile|None) -> LockFile:
+        assert self._ordered_pins
+        portmap = _linear_allocate_components(self._interfaces, lockfile, self._allocate, set(self._ordered_pins))
+        bringup_pins = self._allocate_bringup(config)
+        portmap.ports['_core']=bringup_pins
+        package = self._get_package()
+        return LockFile(package=package, process=process, metadata=self._interfaces, port_map=portmap)
+
+    def _allocate(self, available: Set[int], width: int) -> List[Pin]:
+        assert self._ordered_pins
+        avail_n: List[Pin] = sorted(available)
+        ret = _find_contiguous_sequence(self._ordered_pins, avail_n, width)
+        assert len(ret) == width
+        return ret
+
+
+class BareDiePackageDef(LinearAllocPackageDef):
     """
     Definition of a package with pins on four sides, labelled north, south, east, west
     with an integer identifier within each side, indicating pads across or down from top-left corner
@@ -689,13 +761,6 @@ class BareDiePackageDef(BasePackageDef):
         self._ordered_pins: List[Pin] = sorted(pins)
         return super().model_post_init(__context)
 
-    def allocate_pins(self, config: 'Config', process: 'Process', lockfile: LockFile|None) -> LockFile:
-        portmap =  _linear_allocate_components(self._interfaces, lockfile, self._allocate, set(self._ordered_pins))
-        bringup_pins = self._allocate_bringup(config)
-        portmap.ports['_core']=bringup_pins
-        package = self._get_package()
-        return LockFile(package=package, process=process, metadata=self._interfaces, port_map=portmap)
-
     @property
     def bringup_pins(self) -> BringupPins:
         core_power = PowerPins(
@@ -717,17 +782,7 @@ class BareDiePackageDef(BasePackageDef):
         )
 
 
-    def _allocate(self, available: PinSet, width: int) -> PinList:
-        avail_n = self._sortpins(available)
-        logger.debug(f"BareDiePackageDef.allocate {width} from {len(avail_n)} remaining")
-        ret = _find_contiguous_sequence(self._ordered_pins, avail_n, width)
-        logger.debug(f"BareDiePackageDef.returned {ret}")
-        assert len(ret) == width
-        return ret
-
-
-
-class QuadPackageDef(BasePackageDef):
+class QuadPackageDef(LinearAllocPackageDef):
     """
     Definiton of a package a row of 'width* pins on the top and bottom of the package and 'height' pins
     on the left and right
@@ -771,21 +826,6 @@ class QuadPackageDef(BasePackageDef):
 
         self._ordered_pins: List[Pin] = sorted(pins)
         return super().model_post_init(__context)
-
-    def allocate_pins(self, config: 'Config', process: 'Process', lockfile: LockFile|None) -> LockFile:
-        portmap = _linear_allocate_components(self._interfaces, lockfile, self._allocate, set(self._ordered_pins))
-        bringup_pins = self._allocate_bringup(config)
-        portmap.ports['_core']=bringup_pins
-        package = self._get_package()
-        return LockFile(package=package, process=process, metadata=self._interfaces, port_map=portmap)
-
-    def _allocate(self, available: Set[int], width: int) -> List[Pin]:
-        avail_n: List[Pin] = sorted(available)
-        logger.debug(f"QuadPackageDef.allocate {width} from {len(avail_n)} remaining: {available}")
-        ret = _find_contiguous_sequence(self._ordered_pins, avail_n, width)
-        logger.debug(f"QuadPackageDef.returned {ret}")
-        assert len(ret) == width
-        return ret
 
     @property
     def bringup_pins(self) -> BringupPins:
@@ -844,6 +884,7 @@ class QuadPackageDef(BasePackageDef):
             tdo=start_pin + 4
         )
 
+
 class GAPin(NamedTuple):
     h: str
     w: int
@@ -852,11 +893,13 @@ class GAPin(NamedTuple):
             return self.w < other.w
         return self.h < other.h
 
+
 class GALayout(StrEnum):
-    FULL = "full"
-    PERIMETER = "perimeter"
-    CHANNEL = "channel"
-    ISLAND = "island"
+    FULL = auto()
+    PERIMETER = auto()
+    CHANNEL = auto()
+    ISLAND = auto()
+
 
 class GAPackageDef(BasePackageDef):
     """Definiton of a grid array package, with pins or pads in a regular array of 'width' by 'height' pins
@@ -1041,12 +1084,6 @@ class GAPackageDef(BasePackageDef):
         # Use the last pin in the package
         return {0: str(self.width * 2 + self.height * 2 - 1)}
 
-
-# Add any new package types to both PACKAGE_DEFINITIONS and the PackageDef union
-PACKAGE_DEFINITIONS = {
-    "pga144": QuadPackageDef(name="pga144", width=36, height=36),
-    "cf20": BareDiePackageDef(name="cf20", width=7, height=3)
-}
 
 class Process(Enum):
     """
