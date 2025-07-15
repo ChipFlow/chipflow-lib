@@ -58,9 +58,9 @@ class VoltageRange(AppResponseModel):
     max: Annotated[Optional[Voltage], OmitIfNone()] = None
     typical: Annotated[Optional[Voltage], OmitIfNone()] = None
 
-class TripPoint(StrEnum):
+class IOTripPoint(StrEnum):
     """
-    Models various options for trip points for IO.
+    Models various options for trip points for inputs.
     Depending on process and cell library, these may be statically or dynamically configurable.
 
     You will get an error if the option is not available with the chosen process and cell library
@@ -93,8 +93,8 @@ class IODriveMode(StrEnum):
     OPEN_DRAIN_STRONG_UP= auto()
     # Strong pull-up, weak pull-down
     STRONG_UP_STRONG_DOWN = auto()
-    # Hi-Z / tristate output buffer
-    HI_Z = auto()
+    # Weak pull-up, weak pull-down
+    WEAK_UP_WEAK_DOWN = auto()
 
 
 IO_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("pin-annotation", 0))
@@ -118,6 +118,7 @@ class IOModelOptions(TypedDict):
         buffer_in: Should the IO pad have an input buffer?
         buffer_out: Should the IO pad have an output buffer?
         drive_mode: Drive mode for output
+        trip_point: Trip Point configutation for input buffer
         init: The value for the initial values of the port
         init_oe: The value for the initial values of the output enable(s) of the port
     """
@@ -128,6 +129,7 @@ class IOModelOptions(TypedDict):
     buffer_in: NotRequired[bool]
     buffer_out: NotRequired[bool]
     drive_mode: NotRequired[IODriveMode]
+    trip_point: NotRequired[IOTripPoint]
     init: NotRequired[int | bool]
     init_oe: NotRequired[int | bool]
 
@@ -360,7 +362,7 @@ class PortType(StrEnum):
     RESET = auto()
 
 
-class Port(pydantic.BaseModel):
+class PortDesc(pydantic.BaseModel):
     type: str
     pins: List[Pin] | None  # None implies must be allocated at end
     port_name: str
@@ -475,7 +477,7 @@ def _count_member_pins(name: str, member: Dict[str, Any]) -> int:
     return 0
 
 
-def _allocate_pins(name: str, member: Dict[str, Any], pins: List[Pin], port_name: Optional[str] = None) -> Tuple[Dict[str, Port], List[Pin]]:
+def _allocate_pins(name: str, member: Dict[str, Any], pins: List[Pin], port_name: Optional[str] = None) -> Tuple[Dict[str, PortDesc], List[Pin]]:
     "Allocate pins based of Amaranth member metadata"
 
     if port_name is None:
@@ -492,7 +494,7 @@ def _allocate_pins(name: str, member: Dict[str, Any], pins: List[Pin], port_name
         logger.debug(f"matched IOSignature {model}")
         name = name
         width = model['width']
-        pin_map[name] = Port(pins=pins[0:width], type='io', port_name=port_name, iomodel=model)
+        pin_map[name] = PortDesc(pins=pins[0:width], type='io', port_name=port_name, iomodel=model)
         logger.debug(f"added '{name}':{pin_map[name]} to pin_map")
         return pin_map, pins[width:]
     elif member['type'] == 'interface':
@@ -503,10 +505,10 @@ def _allocate_pins(name: str, member: Dict[str, Any], pins: List[Pin], port_name
             logger.debug(f"{pin_map},{_map}")
         return pin_map, pins
     elif member['type'] == 'port':
-        logger.warning(f"Port '{name}' has no IOSignature, pin allocation likely to be wrong")
+        logger.warning(f"PortDesc '{name}' has no IOSignature, pin allocation likely to be wrong")
         width = member['width']
         model = IOModel(width=width, direction=io.Direction(member['dir']))
-        pin_map[name] = Port(pins=pins[0:width], type='io', port_name=port_name, iomodel=model)
+        pin_map[name] = PortDesc(pins=pins[0:width], type='io', port_name=port_name, iomodel=model)
         logger.debug(f"added '{name}':{pin_map[name]} to pin_map")
         return pin_map, pins[width:]
     else:
@@ -514,13 +516,13 @@ def _allocate_pins(name: str, member: Dict[str, Any], pins: List[Pin], port_name
         assert False
 
 
-Interface = Dict[str, Port]
+Interface = Dict[str, PortDesc]
 Component = Dict[str, Interface]
 
 class PortMap(pydantic.BaseModel):
     ports: Dict[str, Component] = {}
 
-    def _add_port(self, component: str, interface: str, port_name: str, port: Port):
+    def _add_port(self, component: str, interface: str, port_name: str, port: PortDesc):
         "Internally used by a `PackageDef`"
         if component not in self.ports:
             self.ports[component] = {}
@@ -534,14 +536,14 @@ class PortMap(pydantic.BaseModel):
             self.ports[component] = {}
         self.ports[component][interface] = ports
 
-    def get_ports(self, component: str, interface: str) -> Interface:
+    def get_ports(self, component: str, interface: str) -> Interface | None:
 
         "List the ports allocated in this PortMap for the given `Component` and `Interface`"
-        if component not in self.ports:
-            raise KeyError(f"'{component}' not found in {self}")
+        if component not in self.ports or interface not in self.ports[component]:
+            return None
         return self.ports[component][interface]
 
-    def get_clocks(self) -> List[Port]:
+    def get_clocks(self) -> List[PortDesc]:
         ret = []
         for n, c in self.ports.items():
             for cn, i in c.items():
@@ -550,7 +552,7 @@ class PortMap(pydantic.BaseModel):
                         ret.append(p)
         return ret
 
-    def get_resets(self) -> List[Port]:
+    def get_resets(self) -> List[PortDesc]:
         ret = []
         for n, c in self.ports.items():
             for cn, i in c.items():
@@ -585,18 +587,19 @@ class Package(pydantic.BaseModel):
     """
     type: PackageDef = pydantic.Field(discriminator="package_type")
 
+# TODO: minimise names into more traditional form
 def _linear_allocate_components(interfaces: dict, lockfile: LockFile | None, allocate, unallocated) -> PortMap:
     port_map = PortMap()
-    for component, iface in interfaces.items():
-        for k, v in iface['interface']['members'].items():
-            logger.debug(f"Interface {iface}.{k}:")
+    for component, v in interfaces.items():
+        for interface, v in v['interface']['members'].items():
+            logger.debug(f"Interface {component}.{interface}:")
             logger.debug(pformat(v))
-            width = _count_member_pins(k, v)
-            logger.debug(f"  {k}: total {width} pins")
-            old_ports = lockfile.port_map.get_ports(component, k) if lockfile else None
+            width = _count_member_pins(interface, v)
+            logger.debug(f"  {interface}: total {width} pins")
+            old_ports = lockfile.port_map.get_ports(component, interface) if lockfile else None
 
             if old_ports:
-                logger.debug(f"  {iface}.{k} found in pins.lock, reusing")
+                logger.debug(f"  {component}.{interface} found in pins.lock, reusing")
                 logger.debug(pformat(old_ports))
                 old_width = sum([len(p.pins) for p in old_ports.values() if p.pins is not None])
                 if old_width != width:
@@ -604,15 +607,15 @@ def _linear_allocate_components(interfaces: dict, lockfile: LockFile | None, all
                         f"top level interface has changed size. "
                         f"Old size = {old_width}, new size = {width}"
                     )
-                port_map._add_ports(component, k, old_ports)
+                port_map._add_ports(component, interface, old_ports)
             else:
                 pins = allocate(unallocated, width)
                 if len(pins) == 0:
                     raise ChipFlowError("No pins were allocated")
                 logger.debug(f"allocated range: {pins}")
                 unallocated = unallocated - set(pins)
-                _map, _ = _allocate_pins(k, v, pins)
-                port_map._add_ports(component, k, _map)
+                _map, _ = _allocate_pins(f"{component}_{interface}", v, pins)
+                port_map._add_ports(component, interface, _map)
     return port_map
 
 
@@ -659,14 +662,14 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
         cds = set(config.chipflow.clock_domains) if config.chipflow.clock_domains else set()
         cds.discard('sync')
 
-        d: Interface = { 'sync-clk': Port(type='clock',
+        d: Interface = { 'clk': PortDesc(type='clock',
                                           pins=[self.bringup_pins.core_clock],
-                                          port_name='sync-clk',
+                                          port_name='clk',
                                           iomodel=IOModel(width=1, direction=io.Direction.Input, clock_domain="sync")
                                       ),
-                          'sync-rst_n': Port(type='reset',
+                          'rst_n': PortDesc(type='reset',
                                            pins=[self.bringup_pins.core_reset],
-                                           port_name='sync-rst_n',
+                                           port_name='rst_n',
                                            iomodel=IOModel(width=1, direction=io.Direction.Input, clock_domain="sync",
                                                            invert=True)
                                       )
@@ -674,7 +677,7 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
         assert config.chipflow.silicon
         if config.chipflow.silicon.debug and \
            config.chipflow.silicon.debug['heartbeat']:
-            d['heartbeat'] = Port(type='heartbeat',
+            d['heartbeat'] = PortDesc(type='heartbeat',
                                   pins=[self.bringup_pins.core_heartbeat],
                                   port_name='heartbeat',
                                   iomodel=IOModel(width=1, direction=io.Direction.Output, clock_domain="sync")
