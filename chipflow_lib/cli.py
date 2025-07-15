@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
+
 import argparse
 import inspect
 import sys

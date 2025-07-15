@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-2-Clause
+
 from dataclasses import dataclass
 
 from pydantic import BaseModel, PlainSerializer, model_serializer
@@ -32,7 +34,7 @@ class AppResponseModel(BaseModel):
             # Run Annotated PlainSerializer
             for metadata in self.model_fields[name].metadata:
                 if isinstance(metadata, PlainSerializer):
-                    value = metadata.func(value)
+                    value = metadata.func(value)  # type: ignore
 
             serialized[serialize_key] = value
 

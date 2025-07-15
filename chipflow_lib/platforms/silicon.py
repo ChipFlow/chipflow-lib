@@ -16,7 +16,7 @@ from amaranth.lib import wiring, io
 from amaranth.lib.cdc import FFSynchronizer
 from amaranth.lib.wiring import Component, In, PureInterface
 
-from amaranth.back import rtlil
+from amaranth.back import rtlil  #type: ignore[reportAttributeAccessIssue]
 from amaranth.hdl import Fragment
 from amaranth.hdl._ir import PortDirection
 
@@ -63,7 +63,7 @@ class Heartbeat(Component):
         heartbeat_ctr = Signal(self.counter_size)
         getattr(m.d, self.clock_domain).__iadd__(heartbeat_ctr.eq(heartbeat_ctr + 1))
 
-        heartbeat_buffer = io.Buffer("o", self.ports.heartbeat)
+        heartbeat_buffer = io.Buffer(io.Direction.Output, self.ports.heartbeat)
         m.submodules.heartbeat_buffer = heartbeat_buffer
         m.d.comb += heartbeat_buffer.o.eq(heartbeat_ctr[-1])  # type: ignore
         return m
@@ -240,10 +240,10 @@ class Sky130Port(SiliconPlatformPort):
         self._ie = None
 
         if self._oe is not None:
-            self._oe_n = Signal(self._oe.width, name=f"{self._name}$oeb")
+            self._oe_n = Signal(self._oe.shape().width, name=f"{self._name}$oeb")
             self._signals.append((self._oe_n, PortDirection.Output))
         if self._i is not None:
-            self._ie = Signal(self._i.width, name=f"{self._name}$inp_dis")
+            self._ie = Signal(self._i.shape().width, name=f"{self._name}$inp_dis")
             self._signals.append((self._ie, PortDirection.Input))
 
         # Port Configuration
@@ -412,14 +412,14 @@ class SiliconPlatform:
             assert 'clock_domain' in clock.iomodel
             domain = clock.iomodel['clock_domain']
             setattr(m.domains, domain, ClockDomain(name=domain))
-            clk_buffer = io.Buffer("i", self._ports[clock.port_name])
+            clk_buffer = io.Buffer(io.Direction.Input, self._ports[clock.port_name])
             setattr(m.submodules, "clk_buffer_" + domain, clk_buffer)
             m.d.comb += ClockSignal().eq(clk_buffer.i)  #type: ignore[reportAttributeAccessIssue]
 
         for reset in pinlock.port_map.get_resets():
             assert 'clock_domain' in reset.iomodel
             domain = reset.iomodel['clock_domain']
-            rst_buffer = io.Buffer("i", self._ports[reset.port_name])
+            rst_buffer = io.Buffer(io.Direction.Input, self._ports[reset.port_name])
             setattr(m.submodules, reset.port_name, rst_buffer)
             setattr(m.submodules, reset.port_name + "_sync", FFSynchronizer(rst_buffer.i, ResetSignal()))  #type: ignore[reportAttributeAccessIssue]
 
