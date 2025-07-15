@@ -7,6 +7,7 @@ import logging
 import os
 import re
 import requests
+import shutil
 import subprocess
 import sys
 import time
@@ -156,6 +157,11 @@ class SiliconStep:
                 sp.succeed(f"✅ Design `{data['projectId']}:{data['name']}` ready for submission to ChipFlow cloud!")
                 logger.debug(f"data=\n{json.dumps(data, indent=2)}")
                 logger.debug(f"files['config']=\n{config}")
+                shutil.copyfile(rtlil_path, 'rtlil')
+                with open("data", 'w') as f:
+                    json.dump(data, f)
+                with open("config", 'w') as f:
+                    f.write(config)
                 return
 
             def network_err(e):
