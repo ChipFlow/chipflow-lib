@@ -75,10 +75,10 @@ class SimPlatform:
         pinlock = load_pinlock()
         for component, iface in pinlock.port_map.ports.items():
             for k, v in iface.items():
-                for name, port in v.items():
-                   logger.debug(f"Instantiating port {port.port_name}: {port}")
-                   invert = port.invert if port.invert else False
-                   self._ports[port.port_name] = io.SimulationPort(port.direction, port.width, invert=invert, name=f"{component}-{name}")
+                for name, port_desc in v.items():
+                   logger.debug(f"Instantiating port {port_desc.port_name}: {port_desc}")
+                   invert = port_desc.invert if port_desc.invert else False
+                   self._ports[port_desc.port_name] = io.SimulationPort(port_desc.direction, port_desc.width, invert=invert, name=port_desc.port_name)
 
         for clock in pinlock.port_map.get_clocks():
             assert 'clock_domain' in clock.iomodel
@@ -93,7 +93,7 @@ class SimPlatform:
             assert 'clock_domain' in reset.iomodel
             domain = reset.iomodel['clock_domain']
             logger.debug(f"Instantiating reset synchronizer for {reset.port_name}, domain {domain}")
-            rst_buffer = io.Buffer(reset.direction, self._ports[clock.port_name])
+            rst_buffer = io.Buffer(reset.direction, self._ports[reset.port_name])
             setattr(m.submodules, reset.port_name, rst_buffer)
             ffsync = FFSynchronizer(rst_buffer.i, ResetSignal())  # type: ignore[reportAttributeAccessIssue]
             setattr(m.submodules, reset.port_name + "_sync", ffsync)
