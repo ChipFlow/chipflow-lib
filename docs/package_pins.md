@@ -1,4 +1,4 @@
-# Package Pin Interface in ChipFlow
+# Package Pin Interface in chipflow-lib
 
 This document describes the package pin interface in ChipFlow, introduced to provide a more structured and consistent way to specify pin configurations for chip packages.
 
