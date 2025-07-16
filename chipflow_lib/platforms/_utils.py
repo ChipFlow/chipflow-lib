@@ -31,6 +31,7 @@ from pydantic import (
 
 from .. import ChipFlowError, _ensure_chipflow_root, _get_cls_by_reference
 from .._appresponse import AppResponseModel, OmitIfNone
+from ._sky130 import Sky130DriveMode
 
 if TYPE_CHECKING:
     from ..config_models import Config
@@ -58,6 +59,7 @@ class VoltageRange(AppResponseModel):
     max: Annotated[Optional[Voltage], OmitIfNone()] = None
     typical: Annotated[Optional[Voltage], OmitIfNone()] = None
 
+
 class IOTripPoint(StrEnum):
     """
     Models various options for trip points for inputs.
@@ -74,27 +76,8 @@ class IOTripPoint(StrEnum):
     VCORE = auto()
     # CMOS level switching referenced to external reference voltage (e.g. low power mode)
     VREF = auto()
-
-
-class IODriveMode(StrEnum):
-    """
-    Models the potential drive modes of an IO pad.
-    Depending on process and cell library, these may be statically or dynamically configurable.
-
-    You will get an error if the option is not available with the chosen process and cell library
-    """
-    # Strong pull-up, weak pull-down
-    STRONG_UP_WEAK_DOWN = auto()
-    # Weak pull-up, Strong pull-down
-    WEAK_UP_STRONG_DOWN = auto()
-    # Open drain with strong pull-down
-    OPEN_DRAIN_STRONG_DOWN = auto()
-    # Open drain-with strong pull-up
-    OPEN_DRAIN_STRONG_UP= auto()
-    # Strong pull-up, weak pull-down
-    STRONG_UP_STRONG_DOWN = auto()
-    # Weak pull-up, weak pull-down
-    WEAK_UP_WEAK_DOWN = auto()
+    # Schmitt trigger
+    SCHMITT_TRIGGER = auto()
 
 
 IO_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("pin-annotation", 0))
@@ -117,7 +100,7 @@ class IOModelOptions(TypedDict):
         clock_domain: the name of the I/O's clock domain (see `Amaranth.ClockDomain`). NB there is only one of these, so IO with multiple clocks must be split up.
         buffer_in: Should the IO pad have an input buffer?
         buffer_out: Should the IO pad have an output buffer?
-        drive_mode: Drive mode for output
+        sky130_drive_mode: Drive mode for output buffer on sky130
         trip_point: Trip Point configutation for input buffer
         init: The value for the initial values of the port
         init_oe: The value for the initial values of the output enable(s) of the port
@@ -128,7 +111,7 @@ class IOModelOptions(TypedDict):
     clock_domain: NotRequired[str]
     buffer_in: NotRequired[bool]
     buffer_out: NotRequired[bool]
-    drive_mode: NotRequired[IODriveMode]
+    sky130_drive_mode: NotRequired[Sky130DriveMode]
     trip_point: NotRequired[IOTripPoint]
     init: NotRequired[int | bool]
     init_oe: NotRequired[int | bool]

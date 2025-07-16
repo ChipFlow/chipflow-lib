@@ -21,7 +21,8 @@ from amaranth.hdl import Fragment
 from amaranth.hdl._ir import PortDirection
 
 from .. import ChipFlowError
-from ._utils import load_pinlock, PortDesc, Pin, IOModel, IODriveMode, IOTripPoint, Process
+from ._utils import load_pinlock, PortDesc, Pin, IOModel, IOTripPoint, Process
+from ._sky130 import Sky130DriveMode
 
 if TYPE_CHECKING:
     from ..config_models import Config
@@ -198,17 +199,17 @@ class Sky130Port(SiliconPlatformPort):
 
     _DriveMode_map = {
         # Strong pull-up, weak pull-down
-        IODriveMode.STRONG_UP_WEAK_DOWN: 0b011,
+        Sky130DriveMode.STRONG_UP_WEAK_DOWN: 0b011,
         # Weak pull-up, Strong pull-down
-        IODriveMode.WEAK_UP_STRONG_DOWN: 0b010,
+        Sky130DriveMode.WEAK_UP_STRONG_DOWN: 0b010,
         # Open drain with strong pull-down
-        IODriveMode.OPEN_DRAIN_STRONG_DOWN: 0b100,
+        Sky130DriveMode.OPEN_DRAIN_STRONG_DOWN: 0b100,
         # Open drain-with strong pull-up
-        IODriveMode.OPEN_DRAIN_STRONG_UP: 0b101,
+        Sky130DriveMode.OPEN_DRAIN_STRONG_UP: 0b101,
         # Strong pull-up, weak pull-down
-        IODriveMode.STRONG_UP_STRONG_DOWN: 0b110,
+        Sky130DriveMode.STRONG_UP_STRONG_DOWN: 0b110,
         # Weak pull-up, weak pull-down
-        IODriveMode.WEAK_UP_WEAK_DOWN: 0b111
+        Sky130DriveMode.WEAK_UP_WEAK_DOWN: 0b111
     }
 
     _VTrip_map = {
@@ -265,9 +266,9 @@ class Sky130Port(SiliconPlatformPort):
         # Drive mode
         if self.direction in (io.Direction.Output, io.Direction.Bidir):
             if 'drive_mode' in port_desc.iomodel:
-                dm = port_desc.iomodel['drive_mode']
+                dm = Sky130DriveMode(port_desc.iomodel['drive_mode'])
             else:
-                dm = IODriveMode.STRONG_UP_STRONG_DOWN
+                dm = Sky130DriveMode.STRONG_UP_STRONG_DOWN
             dm_init = __class__._DriveMode_map[dm]
             self._gpio_dm = Signal(3, name=f"{self._name}$dm", init=dm_init)
             self._signals.append((self._gpio_dm, PortDirection.Output))
