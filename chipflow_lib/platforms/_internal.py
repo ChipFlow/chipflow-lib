@@ -1,6 +1,6 @@
 from .silicon import *
 from .sim import *
-from .utils import *
+from ._utils import *
 from ._packages import *
 __all__ = ['IO_ANNOTATION_SCHEMA', 'IOSignature', 'IOModel',
            'OutputIOSignature', 'InputIOSignature', 'BidirIOSignature',
