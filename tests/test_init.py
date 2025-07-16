@@ -94,8 +94,6 @@ class TestCoreUtilities(unittest.TestCase):
 [chipflow]
 project_name = "test_project"
 steps = { silicon = "chipflow_lib.steps.silicon:SiliconStep" }
-clocks = { default = "sys_clk" }
-resets = { default = "sys_rst_n" }
 
 [chipflow.silicon]
 process = "sky130"
