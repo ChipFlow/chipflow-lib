@@ -281,14 +281,14 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.IOModel" title="chipflow_lib.platforms.IOModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IOModel</span></code></a></p></td>
 <td><p>Setting for IO Ports (see also base class <cite>IOModelOptions</cite>)</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.platforms.IODriveMode" title="chipflow_lib.platforms.IODriveMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IODriveMode</span></code></a></p></td>
-<td><p>Models the potential drive modes of an IO pad.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.IOTripPoint" title="chipflow_lib.platforms.IOTripPoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IOTripPoint</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.platforms.IOTripPoint" title="chipflow_lib.platforms.IOTripPoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IOTripPoint</span></code></a></p></td>
 <td><p>Models various options for trip points for inputs.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.platforms.IOModelOptions" title="chipflow_lib.platforms.IOModelOptions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IOModelOptions</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.IOModelOptions" title="chipflow_lib.platforms.IOModelOptions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IOModelOptions</span></code></a></p></td>
 <td><p>Options for an IO pad/pin.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.platforms.Sky130DriveMode" title="chipflow_lib.platforms.Sky130DriveMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sky130DriveMode</span></code></a></p></td>
+<td><p>Models the potential drive modes of an IO pad.</p></td>
 </tr>
 </tbody>
 </table>
@@ -438,15 +438,6 @@ a corresponding interface object. The default implementation provides none.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.IODriveMode">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">IODriveMode</span></span><a class="headerlink" href="#chipflow_lib.platforms.IODriveMode" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></a></p>
-<p>Models the potential drive modes of an IO pad.
-Depending on process and cell library, these may be statically or dynamically configurable.</p>
-<p>You will get an error if the option is not available with the chosen process and cell library</p>
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="chipflow_lib.platforms.IOTripPoint">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">IOTripPoint</span></span><a class="headerlink" href="#chipflow_lib.platforms.IOTripPoint" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></a></p>
@@ -527,6 +518,15 @@ intended for connection to the physical pads of the integrated circuit package.<
 </dl>
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="chipflow_lib.platforms.Sky130DriveMode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">Sky130DriveMode</span></span><a class="headerlink" href="#chipflow_lib.platforms.Sky130DriveMode" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></a></p>
+<p>Models the potential drive modes of an IO pad.
+Depending on process and cell library, these may be statically or dynamically configurable.</p>
+<p>You will get an error if the option is not available with the chosen process and cell library</p>
+</dd></dl>
+
 </section>
 </section>
 
@@ -602,12 +602,12 @@ intended for connection to the physical pads of the integrated circuit package.<
 </ul>
 </li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.IOModel"><code class="docutils literal notranslate"><span class="pre">IOModel</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.platforms.IODriveMode"><code class="docutils literal notranslate"><span class="pre">IODriveMode</span></code></a></li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.IOTripPoint"><code class="docutils literal notranslate"><span class="pre">IOTripPoint</span></code></a></li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.IOModelOptions"><code class="docutils literal notranslate"><span class="pre">IOModelOptions</span></code></a></li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.OutputIOSignature"><code class="docutils literal notranslate"><span class="pre">OutputIOSignature()</span></code></a></li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.InputIOSignature"><code class="docutils literal notranslate"><span class="pre">InputIOSignature()</span></code></a></li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.BidirIOSignature"><code class="docutils literal notranslate"><span class="pre">BidirIOSignature()</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.platforms.Sky130DriveMode"><code class="docutils literal notranslate"><span class="pre">Sky130DriveMode</span></code></a></li>
 </ul>
 </li>
 </ul>

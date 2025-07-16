@@ -20,9 +20,9 @@ Classes
    chipflow_lib.platforms.SiliconPlatformPort
    chipflow_lib.platforms.IOSignature
    chipflow_lib.platforms.IOModel
-   chipflow_lib.platforms.IODriveMode
    chipflow_lib.platforms.IOTripPoint
    chipflow_lib.platforms.IOModelOptions
+   chipflow_lib.platforms.Sky130DriveMode
 
 
 Functions
@@ -123,17 +123,6 @@ Package Contents
                 * **width** -- width of port, default is 1
 
 
-.. py:class:: IODriveMode
-
-   Bases: :py:obj:`enum.StrEnum`
-
-
-   Models the potential drive modes of an IO pad.
-   Depending on process and cell library, these may be statically or dynamically configurable.
-
-   You will get an error if the option is not available with the chosen process and cell library
-
-
 .. py:class:: IOTripPoint
 
    Bases: :py:obj:`enum.StrEnum`
@@ -190,5 +179,16 @@ Package Contents
    intended for connection to the physical pads of the integrated circuit package.
 
    :param width: specifies the number of individual input/output wires within this port. Each pair of input/output wires will correspond to a separate physical pad on the integrated circuit package.
+
+
+.. py:class:: Sky130DriveMode
+
+   Bases: :py:obj:`enum.StrEnum`
+
+
+   Models the potential drive modes of an IO pad.
+   Depending on process and cell library, these may be statically or dynamically configurable.
+
+   You will get an error if the option is not available with the chosen process and cell library
 
 
