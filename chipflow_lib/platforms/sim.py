@@ -11,7 +11,7 @@ from amaranth.back import rtlil  # type: ignore[reportAttributeAccessIssue]
 from amaranth.hdl._ir import PortDirection
 from amaranth.lib.cdc import FFSynchronizer
 
-from .utils import load_pinlock
+from ._utils import load_pinlock
 
 
 __all__ = ["SimPlatform"]

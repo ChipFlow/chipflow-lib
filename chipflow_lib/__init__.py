@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
 __version__ = importlib.metadata.version("chipflow_lib")
 
+
 logger = logging.getLogger(__name__)
 
 class ChipFlowError(Exception):

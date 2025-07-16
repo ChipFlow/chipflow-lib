@@ -1,6 +1,6 @@
 from typing import List, NamedTuple, Optional, Literal
 
-from .utils import Voltage, PowerPins, LinearAllocPackageDef, BringupPins
+from ._utils import Voltage, PowerPins, LinearAllocPackageDef, BringupPins
 
 class OFPin(NamedTuple):
     pin: int
