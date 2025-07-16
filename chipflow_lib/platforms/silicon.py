@@ -7,19 +7,25 @@ import re
 import subprocess
 
 from dataclasses import dataclass
+from pprint import pformat
+from typing import TYPE_CHECKING, List
 
-from amaranth import Module, Signal, Cat, ClockDomain, ClockSignal, ResetSignal
+from amaranth import Module, Signal, ClockDomain, ClockSignal, ResetSignal
 
 from amaranth.lib import wiring, io
 from amaranth.lib.cdc import FFSynchronizer
 from amaranth.lib.wiring import Component, In, PureInterface
 
-from amaranth.back import rtlil
+from amaranth.back import rtlil  #type: ignore[reportAttributeAccessIssue]
 from amaranth.hdl import Fragment
 from amaranth.hdl._ir import PortDirection
 
 from .. import ChipFlowError
-from .utils import load_pinlock, Port
+from ._utils import load_pinlock, PortDesc, Pin, IOModel, IOTripPoint, Process
+from ._sky130 import Sky130DriveMode
+
+if TYPE_CHECKING:
+    from ..config_models import Config
 
 __all__ = ["SiliconPlatformPort", "SiliconPlatform"]
 
@@ -58,23 +64,21 @@ class Heartbeat(Component):
         heartbeat_ctr = Signal(self.counter_size)
         getattr(m.d, self.clock_domain).__iadd__(heartbeat_ctr.eq(heartbeat_ctr + 1))
 
-        heartbeat_buffer = io.Buffer("o", self.ports.heartbeat)
+        heartbeat_buffer = io.Buffer(io.Direction.Output, self.ports.heartbeat)
         m.submodules.heartbeat_buffer = heartbeat_buffer
-        m.d.comb += heartbeat_buffer.o.eq(heartbeat_ctr[-1])
+        m.d.comb += heartbeat_buffer.o.eq(heartbeat_ctr[-1])  # type: ignore
         return m
 
 
 class SiliconPlatformPort(io.PortLike):
     def __init__(self,
-                 component: str,
                  name: str,
-                 port: Port,
+                 port_desc: PortDesc,
                  *,
                  invert: bool = False):
-        self._direction = io.Direction(port.direction)
+        self._port_desc = port_desc
         self._invert = invert
-        self._options = port.options
-        self._pins = port.pins
+        self._name = name
 
         # Initialize signal attributes to None
         self._i = None
@@ -82,31 +86,53 @@ class SiliconPlatformPort(io.PortLike):
         self._oe = None
 
         # Create signals based on direction
-        if self._direction in (io.Direction.Input, io.Direction.Bidir):
-            self._i = Signal(port.width, name=f"{component}_{name}__i")
-        if self._direction in (io.Direction.Output, io.Direction.Bidir):
-            self._o = Signal(port.width, name=f"{component}_{name}__o")
-        if self._direction is io.Direction.Bidir:
-            if "all_have_oe" in self._options and self._options["all_have_oe"]:
-                self._oe = Signal(port.width, name=f"{component}_{name}__oe", init=-1)
+        if self.direction in (io.Direction.Input, io.Direction.Bidir):
+            self._i = Signal(self._port_desc.width, name=f"{self._name}__i")
+        if self.direction in (io.Direction.Output, io.Direction.Bidir):
+            self._o = Signal(self._port_desc.width, name=f"{self._name}__o")
+        if self.direction is io.Direction.Bidir:
+            if "individual_oe" in self.iomodel and self.iomodel["individual_oe"]:
+                self._oe = Signal(self._port_desc.width, name=f"{self._name}__oe", init=-1)
             else:
-                self._oe = Signal(1, name=f"{component}_{name}__oe", init=-1)
-        elif self._direction is io.Direction.Output:
+                self._oe = Signal(1, name=f"{self._name}__oe", init=-1)
+        elif self.direction is io.Direction.Output:
             # Always create an _oe for output ports
-            self._oe = Signal(1, name=f"{component}_{name}__oe", init=-1)
+            self._oe = Signal(1, name=f"{self._name}__oe", init=-1)
 
-        logger.debug(f"Created SiliconPlatformPort {name}, width={len(port.pins)},dir{self._direction}")
+        logger.debug(f"Created SiliconPlatformPort {self._name}, invert={invert} with port description:\n{pformat(self._port_desc)}")
 
     def wire(self, m: Module, interface: PureInterface):
-        assert self._direction == interface.signature.direction
+        assert self.direction == interface.signature.direction  #type: ignore
         if hasattr(interface, 'i'):
-            m.d.comb += interface.i.eq(self.i)
+            m.d.comb += interface.i.eq(self.i)  # type: ignore
         for d in ['o', 'oe']:
             if hasattr(interface, d):
                 m.d.comb += getattr(self, d).eq(getattr(interface, d))
 
-    @property
+    def instantiate_toplevel(self):
+        ports = []
+        if self.direction in (io.Direction.Input, io.Direction.Bidir):
+            ports.append((f"io${self._name}$i", self.i, PortDirection.Input))
+        if self.direction in (io.Direction.Output, io.Direction.Bidir):
+            ports.append((f"io${self._name}$o", self.o, PortDirection.Output))
+        if self.direction is io.Direction.Bidir:
+            ports.append((f"io${self._name}$oe", self.oe, PortDirection.Output))
+        return ports
 
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def pins(self) -> List[Pin]:
+        return self._port_desc.pins if self._port_desc.pins else []
+
+    @property
+    def iomodel(self) -> IOModel:
+        return self._port_desc.iomodel
+
+
+    @property
     def i(self):
         if self._i is None:
             raise AttributeError("SiliconPlatformPort with output direction does not have an "
@@ -129,11 +155,7 @@ class SiliconPlatformPort(io.PortLike):
 
     @property
     def direction(self):
-        return self._direction
-
-    @property
-    def pins(self):
-        return self._pins
+        return self._port_desc.iomodel['direction']
 
     @property
     def invert(self):
@@ -141,60 +163,171 @@ class SiliconPlatformPort(io.PortLike):
 
 
     def __len__(self):
-        if self._direction is io.Direction.Input:
-            return len(self._i)
-        if self._direction is io.Direction.Output:
-            return len(self._o)
-        if self._direction is io.Direction.Bidir:
-            assert len(self._i) == len(self._o)
-            if self._options["all_have_oe"]:
-                assert len(self.o) == len(self._oe)
+        if self.direction is io.Direction.Input:
+            return len(self.i)
+        if self.direction is io.Direction.Output:
+            return len(self.o)
+        if self.direction is io.Direction.Bidir:
+            assert len(self.i) == len(self.o)
+            if 'individual_oe' in self.iomodel and self.iomodel["individual_oe"]:
+                assert len(self.o) == len(self.oe)
             else:
-                assert len(self._oe) == 1
-            return len(self._i)
+                assert len(self.oe) == 1
+            return len(self.i)
         assert False  # :nocov:
 
     def __getitem__(self, key):
-        result = object.__new__(type(self))
-        result._i = None if self._i is None else self._i[key]
-        result._o = None if self._o is None else self._o[key]
-        result._oe = None if self._oe is None else self._oe[key]
-        result._invert = self._invert
-        result._direction = self._direction
-        result._options = self._options
-        result._pins = self._pins
-        return result
+        return NotImplemented
 
     def __invert__(self):
-        result = object.__new__(type(self))
-        result._i = self._i
-        result._o = self._o
-        result._oe = self._oe
-        result._invert = not self._invert
-        result._direction = self._direction
-        result._options = self._options
-        result._pins = self._pins
+        result = SiliconPlatformPort(self._name, self._port_desc, invert=not self.invert)
         return result
 
     def __add__(self, other):
-        direction = self._direction & other._direction
-        result = object.__new__(type(self))
-        result._i = None if direction is io.Direction.Output else Cat(self._i, other._i)
-        result._o = None if direction is io.Direction.Input else Cat(self._o, other._o)
-        result._oe = None if direction is io.Direction.Input else Cat(self._oe, other._oe)
-        result._invert = self._invert
-        result._direction = direction
-        result._options = self._options
-        result._pins = self._pins + other._pins
+        return NotImplemented
+
+    def __repr__(self):
+        return (f"SiliconPlatformPort(name={self._name}, invert={self._invert}, iomode={self.iomodel})")
+
+
+class Sky130Port(SiliconPlatformPort):
+    """
+    Specialisation of `SiliconPlatformPort` for the `Skywater sky130_fd_io__gpiov2 IO cell <https://skywater-pdk.readthedocs.io/en/main/contents/libraries/sky130_fd_io/docs/user_guide.html>`_
+
+    Includes wires and configuration for `Drive Modes <IODriveMode>`, `Input buffer trip point <IOTripPoint>`and buffer control~
+    """
+
+    _DriveMode_map = {
+        # Strong pull-up, weak pull-down
+        Sky130DriveMode.STRONG_UP_WEAK_DOWN: 0b011,
+        # Weak pull-up, Strong pull-down
+        Sky130DriveMode.WEAK_UP_STRONG_DOWN: 0b010,
+        # Open drain with strong pull-down
+        Sky130DriveMode.OPEN_DRAIN_STRONG_DOWN: 0b100,
+        # Open drain-with strong pull-up
+        Sky130DriveMode.OPEN_DRAIN_STRONG_UP: 0b101,
+        # Strong pull-up, weak pull-down
+        Sky130DriveMode.STRONG_UP_STRONG_DOWN: 0b110,
+        # Weak pull-up, weak pull-down
+        Sky130DriveMode.WEAK_UP_WEAK_DOWN: 0b111
+    }
+
+    _VTrip_map = {
+        # CMOS level switching (30%/70%) referenced to IO power domain
+        IOTripPoint.CMOS: (0, 0),
+        # TTL level switching (low < 0.8v, high > 2.0v) referenced to IO power domain
+        IOTripPoint.TTL: (0, 1),
+        # CMOS level switching referenced to core power domain (e.g. low power mode)
+        IOTripPoint.VCORE: (1,0),
+        # CMOS level switching referenced to external reference voltage (e.g. low power mode)
+        # Only available on sky130_fd_io__gpio_ovtv2
+        # VREF
+    }
+
+
+    # TODO: slew rate, hold points
+    def __init__(self,
+                 name: str,
+                 port_desc: PortDesc,
+                 *,
+                 invert: bool = False):
+        super().__init__(name, port_desc, invert=invert)
+
+        # keep a list of signals we create
+        self._signals = []
+
+        # Now create the signals for ``gpio_oeb`` (``oe_n``), ``gpio_inp_dis`` (``ie``)
+        self._oe_n = None
+        self._ie = None
+
+        if self._oe is not None:
+            self._oe_n = Signal(self._oe.shape().width, name=f"{self._name}$oeb")
+            self._signals.append((self._oe_n, PortDirection.Output))
+        if self._i is not None:
+            self._ie = Signal(self._i.shape().width, name=f"{self._name}$inp_dis")
+            self._signals.append((self._ie, PortDirection.Input))
+
+        # Port Configuration
+        # Input voltage trip level
+        if self.direction in (io.Direction.Input, io.Direction.Bidir):
+            if 'trip_point' in port_desc.iomodel:
+                trip_point = port_desc.iomodel['trip_point']
+                if trip_point not in __class__._VTrip_map:
+                    raise ChipFlowError(f"Trip point `{trip_point}` not available for {__class__.__name__}")
+                ib_mode_init, vtrip_init = __class__._VTrip_map[trip_point]
+            else:
+                ib_mode_init = vtrip_init = 0
+
+            self._gpio_ib_mode_sel =  Signal(1, name=f"{self._name}$ib_mode_sel", init=ib_mode_init)
+            self._signals.append((self._gpio_ib_mode_sel, PortDirection.Output))
+            self._gpio_vtrip_sel = Signal(1, name=f"{self._name}$vtrip_sel", init=vtrip_init)
+            self._signals.append((self._gpio_vtrip_sel, PortDirection.Output))
+
+        # Drive mode
+        if self.direction in (io.Direction.Output, io.Direction.Bidir):
+            if 'drive_mode' in port_desc.iomodel:
+                dm = Sky130DriveMode(port_desc.iomodel['drive_mode'])
+            else:
+                dm = Sky130DriveMode.STRONG_UP_STRONG_DOWN
+            dm_init = __class__._DriveMode_map[dm]
+            self._gpio_dm = Signal(3, name=f"{self._name}$dm", init=dm_init)
+            self._signals.append((self._gpio_dm, PortDirection.Output))
+
+        # Not enabled yet:
+        self._gpio_slow_sel = None  # Select slew rate
+        self._gpio_holdover = None  # Hold mode
+        # Analog config, not enabled yet
+        # see https://skywater-pdk.readthedocs.io/en/main/contents/libraries/sky130_fd_io/docs/user_guide.html#analog-functionality
+        self._gpio_analog_en = None # analog enable
+        self._gpio_analog_sel = None # analog mux select
+        self._gpio_analog_pol = None # analog mux select
+
+    def wire(self, m: Module, interface: PureInterface):
+        super().wire(m, interface)
+        # don't wire up oe_n
+        if hasattr(interface, 'ie'):
+            m.d.comb += interface.ie.eq(self._ie)  # type: ignore
+        # wire up oe_n = ~oe
+        if self._oe is not None:
+            assert self._oe_n is not None
+            m.d.comb += self._oe_n.eq(~self._oe)
+
+    def instantiate_toplevel(self):
+        ports = super().instantiate_toplevel()
+        for s, d in self._signals:
+            logger.debug(f"Instantiating io${s.name} top level port")
+            ports.append((f"io${s.name}", s, d))
+        return ports
+
+    @property
+    def ie(self):
+        if self._ie is None:
+            raise AttributeError("SiliconPlatformPort with input direction does not have an "
+                                 "input enable signal")
+        return self._ie
+
+    def __invert__(self):
+        result = Sky130Port(self._name, self._port_desc, invert=not self.invert)
         return result
 
     def __repr__(self):
-        return (f"SiliconPlatformPort(direction={repr(self._direction)}, width={len(self)}, "
-                f"i={repr(self._i)}, o={repr(self._o)}, oe={repr(self._oe)}, "
-                f"invert={repr(self._invert)})")
+        return (f"Sky130Port(name={self._name}, invert={self._invert}, iomode={self.iomodel})")
+
+
+
+def port_for_process(p: Process):
+    match p:
+        case Process.SKY130:
+            return Sky130Port
+        case Process.GF180 | Process.HELVELLYN2 | Process.GF130BCD | Process.IHP_SG13G2:
+            return SiliconPlatformPort
 
 
 class IOBuffer(io.Buffer):
+    o: Signal
+    i: Signal
+    oe: Signal
+
     def elaborate(self, platform):
         if not isinstance(self.port, SiliconPlatformPort):
             raise TypeError(f"Cannot elaborate SiliconPlatform buffer with port {self.port!r}")
@@ -225,6 +358,9 @@ class IOBuffer(io.Buffer):
 
 
 class FFBuffer(io.FFBuffer):
+    i: Signal
+    o: Signal
+    oe: Signal
     def elaborate(self, platform):
         if not isinstance(self.port, SiliconPlatformPort):
             raise TypeError(f"Cannot elaborate SiliconPlatform buffer with port {self.port!r}")
@@ -250,51 +386,47 @@ class FFBuffer(io.FFBuffer):
 
 
 class SiliconPlatform:
-    def __init__(self, config):
+    def __init__(self, config: 'Config'):
+        if not config.chipflow.silicon:
+            raise ChipFlowError("I can't build for silicon without a [chipflow.silicon] section to guide me!")
         self._config = config
         self._ports = {}
         self._files = {}
+        self._pinlock = None
 
     @property
     def ports(self):
         return self._ports
 
     def instantiate_ports(self, m: Module):
+        assert self._config.chipflow.silicon
         if hasattr(self, "pinlock"):
             return
 
         pinlock = load_pinlock()
-        for component, iface in pinlock.port_map.items():
-            for k, v in iface.items():
+        for component, iface in pinlock.port_map.ports.items():
+            for interface, v in iface.items():
                 for name, port in v.items():
-                    self._ports[port.port_name] = SiliconPlatformPort(component, name, port)
+                    self._ports[port.port_name] = port_for_process(self._config.chipflow.silicon.process)(port.port_name, port)
 
-        for clock, name in self._config["chipflow"]["clocks"].items():
-            if name not in pinlock.package.clocks:
-                raise ChipFlowError(f"Unable to find clock {name} in pinlock")
+        for clock in pinlock.port_map.get_clocks():
+            assert 'clock_domain' in clock.iomodel
+            domain = clock.iomodel['clock_domain']
+            setattr(m.domains, domain, ClockDomain(name=domain))
+            clk_buffer = io.Buffer(io.Direction.Input, self._ports[clock.port_name])
+            setattr(m.submodules, "clk_buffer_" + domain, clk_buffer)
+            m.d.comb += ClockSignal().eq(clk_buffer.i)  #type: ignore[reportAttributeAccessIssue]
 
-            port_data = pinlock.package.clocks[name]
-            port = SiliconPlatformPort(component, name, port_data, invert=True)
-            self._ports[name] = port
-
-            if clock == 'default':
-                clock = 'sync'
-            setattr(m.domains, clock, ClockDomain(name=clock))
-            clk_buffer = io.Buffer("i", port)
-            setattr(m.submodules, "clk_buffer_" + clock, clk_buffer)
-            m.d.comb += ClockSignal().eq(clk_buffer.i)
-
-        for reset, name in self._config["chipflow"]["resets"].items():
-            port_data = pinlock.package.resets[name]
-            port = SiliconPlatformPort(component, name, port_data, invert=True)
-            self._ports[name] = port
-            rst_buffer = io.Buffer("i", port)
-            setattr(m.submodules, reset, rst_buffer)
-            setattr(m.submodules, reset + "_sync", FFSynchronizer(rst_buffer.i, ResetSignal()))
+        for reset in pinlock.port_map.get_resets():
+            assert 'clock_domain' in reset.iomodel
+            domain = reset.iomodel['clock_domain']
+            rst_buffer = io.Buffer(io.Direction.Input, self._ports[reset.port_name])
+            setattr(m.submodules, reset.port_name, rst_buffer)
+            setattr(m.submodules, reset.port_name + "_sync", FFSynchronizer(rst_buffer.i, ResetSignal()))  #type: ignore[reportAttributeAccessIssue]
 
         self._pinlock = pinlock
 
-    def request(self, name=None, **kwargs):
+    def request(self, name, **kwargs):
         if "$" in name:
             raise NameError(f"Reserved character `$` used in pad name `{name}`")
         if name not in self._ports:
@@ -311,10 +443,10 @@ class SiliconPlatform:
             raise TypeError(f"Unsupported buffer type {buffer!r}")
 
         if buffer.direction is not io.Direction.Output:
-            result.i = buffer.i
+            result.i = buffer.i  #type: ignore[reportAttributeAccessIssue]
         if buffer.direction is not io.Direction.Input:
-            result.o = buffer.o
-            result.oe = buffer.oe
+            result.o = buffer.o  #type: ignore[reportAttributeAccessIssue]
+            result.oe = buffer.oe  #type: ignore[reportAttributeAccessIssue]
 
         return result
 
@@ -330,7 +462,7 @@ class SiliconPlatform:
         for clock_domain in fragment.domains.values():
             if clock_domain.name != "sync" or (sync_domain is not None and
                                              clock_domain is not sync_domain):
-                raise ChipFlowError("Only a single clock domain, called 'sync', may be used")
+                raise ChipFlowError(f"Only a single clock domain, called 'sync', may be used: {clock_domain.name}")
             sync_domain = clock_domain
 
         for subfragment, subfragment_name, src_loc in fragment.subfragments:
@@ -344,13 +476,8 @@ class SiliconPlatform:
 
         # Prepare toplevel ports according to pinlock
         ports = []
-        for port_name, port in self._ports.items():
-            if port.direction in (io.Direction.Input, io.Direction.Bidir):
-                ports.append((f"io${port_name}$i", port.i, PortDirection.Input))
-            if port.direction in (io.Direction.Output, io.Direction.Bidir):
-                ports.append((f"io${port_name}$o", port.o, PortDirection.Output))
-            if port.direction is io.Direction.Bidir:
-                ports.append((f"io${port_name}$oe", port.oe, PortDirection.Output))
+        for port in self._ports.values():
+            ports.extend(port.instantiate_toplevel())
 
         # Prepare design for RTLIL conversion.
         return fragment.prepare(ports)
@@ -391,13 +518,3 @@ class SiliconPlatform:
             "-o", output_rtlil.replace("\\", "/")
         ])
         return output_rtlil
-
-    def default_clock(m, platform, clock, reset):
-        # Clock generation
-        m.domains.sync = ClockDomain()
-
-        clk = platform.request(clock)
-        m.d.comb += ClockSignal().eq(clk.i)
-        m.submodules.rst_sync = FFSynchronizer(
-            ~platform.request(reset).i,
-            ResetSignal())
