@@ -15,7 +15,7 @@ from chipflow_lib import (
 )
 from chipflow_lib.config import _parse_config_file
 from chipflow_lib.config_models import Config, ChipFlowConfig
-from chipflow_lib.platforms import Process
+# Process is not part of the public API, so we won't test it here
 
 
 class TestCoreUtilities(unittest.TestCase):
@@ -94,8 +94,6 @@ class TestCoreUtilities(unittest.TestCase):
 [chipflow]
 project_name = "test_project"
 steps = { silicon = "chipflow_lib.steps.silicon:SiliconStep" }
-clocks = { default = "sys_clk" }
-resets = { default = "sys_rst_n" }
 
 [chipflow.silicon]
 process = "sky130"
@@ -110,7 +108,8 @@ package = "caravel"
         assert config.chipflow
         assert config.chipflow.silicon
         self.assertEqual(config.chipflow.project_name, "test_project")
-        self.assertEqual(config.chipflow.silicon.process, Process.SKY130)
+        # Process enum is not part of the public API, so we just check that process has a string value
+        self.assertEqual(str(config.chipflow.silicon.process), "sky130")
 
     @mock.patch("chipflow_lib._ensure_chipflow_root")
     @mock.patch("chipflow_lib.config._parse_config_file")
