@@ -7,19 +7,3 @@ silicon = "chipflow_lib.steps.silicon:SiliconStep"
 [chipflow.silicon]
 process = "ihp_sg13g2"
 package = "pga144"
-
-[chipflow.clocks]
-default = 'sys_clk'
-
-[chipflow.resets]
-default = 'sys_rst_n'
-
-[chipflow.silicon.pads]
-sys_clk     = { type = "clk", loc = "N3" }
-sys_rst_n    = { type = "i",   loc = "N4" }
-
-[chipflow.silicon.power]
-vss         = { loc = "N1" }
-vssio       = { loc = "N5" }
-vddio       = { loc = "N6" }
-vdd         = { loc = "N7" }
