@@ -89,6 +89,7 @@ jobs:
       - name: Submit build ${{ env.is_dry }}
         working-directory: ${{ env.test_repo_path }}/${{ matrix.repo.design }}
         run: |
+          set -o pipefail
           pdm run chipflow silicon submit --wait $DRY | cat
         env:
           CHIPFLOW_API_KEY: ${{ secrets.CHIPFLOW_API_KEY}}
