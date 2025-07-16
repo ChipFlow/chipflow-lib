@@ -1,3 +1,5 @@
+# amaranth: UnusedElaboratable=no
+
 # SPDX-License-Identifier: BSD-2-Clause
 
 import argparse
