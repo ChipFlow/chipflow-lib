@@ -7,7 +7,7 @@ from abc import ABC
 
 from amaranth import Module
 
-from ..platforms.utils import IOSignature
+from ..platforms import IOSignature
 
 logger = logging.getLogger(__name__)
 
