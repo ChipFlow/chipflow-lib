@@ -1,4 +1,4 @@
-# Package Pin Interface in ChipFlow
+# Package Pin Interface in chipflow-lib
 
 This document describes the package pin interface in ChipFlow, introduced to provide a more structured and consistent way to specify pin configurations for chip packages.
 
@@ -16,61 +16,77 @@ Each package type (PGA, bare die, etc.) defines its own implementation of these 
 
 # Using the Package Pin Interface in Code
 
-### Getting Default Pins
+### Available Package Definitions
 
 ```python
-from chipflow_lib.platforms.utils import PACKAGE_DEFINITIONS, PowerType, JTAGWireName
+from chipflow_lib.platforms import PACKAGE_DEFINITIONS
+
+# Available package types
+print(list(PACKAGE_DEFINITIONS.keys()))  # ['pga144', 'cf20', 'openframe']
 
 # Get a package definition
 package_def = PACKAGE_DEFINITIONS["pga144"]
-
-# Get power pins
-power_pins = package_def.power
-vdd_pin = power_pins[PowerType.POWER]  # Get the default power pin
-gnd_pin = power_pins[PowerType.GROUND]  # Get the default ground pin
-
-# Get clock pins
-clock_pins = package_def.clocks
-default_clock = clock_pins[0]  # Get the first clock pin
-
-# Get JTAG pins
-jtag_pins = package_def.jtag
-tck_pin = jtag_pins[JTAGWireName.TCK]  # Get the TCK pin
-tms_pin = jtag_pins[JTAGWireName.TMS]  # Get the TMS pin
+print(package_def.name)          # "pga144"
+print(package_def.package_type)  # "QuadPackageDef"
 ```
 
-### Creating a Package with Default Pins
+### Core Package Methods
 
 ```python
-from chipflow_lib.platforms.utils import PACKAGE_DEFINITIONS
+from chipflow_lib.platforms import PACKAGE_DEFINITIONS
 
-# Create a package with a specific package definition
-package = Package(package_type=PACKAGE_DEFINITIONS["pga144"])
+package_def = PACKAGE_DEFINITIONS["pga144"]
 
-# Initialize default pins from the package definition
-package.initialize_from_package_type()
+# Allocate pins for components
+# This method handles pin allocation logic for the package
+pins = package_def.allocate_pins(component_requirements)
+
+# Get bringup pins for testing/debugging
+bringup_pins = package_def.bringup_pins()
+
+# Register a component with the package
+package_def.register_component(component)
 ```
+
+### Working with Different Package Types
+
+```python
+from chipflow_lib.platforms import PACKAGE_DEFINITIONS
+
+# Work with different package types
+pga_package = PACKAGE_DEFINITIONS["pga144"]     # QuadPackageDef
+cf_package = PACKAGE_DEFINITIONS["cf20"]        # BareDiePackageDef
+openframe_package = PACKAGE_DEFINITIONS["openframe"]  # OpenframePackageDef
+
+# Each package type has the same core interface
+for name, package in PACKAGE_DEFINITIONS.items():
+    print(f"{name}: {package.package_type}")
+```
+
+## Package Types
+
+Currently available package types:
+
+- **QuadPackageDef**: Used by `pga144` package
+- **BareDiePackageDef**: Used by `cf20` package
+- **OpenframePackageDef**: Used by `openframe` package
+
+All package definitions implement the same core interface:
+- `allocate_pins()`: Handle pin allocation logic
+- `bringup_pins()`: Get pins for testing/debugging
+- `register_component()`: Register components with the package
 
 ## Extending for New Package Types
 
 To create a new package type, you need to:
 
-1. Subclass `_BasePackageDef` and implement all the required properties and methods
-2. Add your new package type to the `PackageDef` union and `PACKAGE_DEFINITIONS` dictionary
+1. Implement a new package definition class that provides the core methods
+2. Add your new package type to the `PACKAGE_DEFINITIONS` dictionary
 
-Example:
-
-```python
-class MyNewPackageDef(_BasePackageDef):
-    type: Literal["MyNewPackageDef"] = "MyNewPackageDef"
-    # ... implement all required methods ...
-
-# Add to the union
-PackageDef = Union[_QuadPackageDef, _BareDiePackageDef, MyNewPackageDef, _BasePackageDef]
-
-# Add to the dictionary of available packages
-PACKAGE_DEFINITIONS["my_new_package"] = MyNewPackageDef(name="my_new_package", ...)
-```
+The new package definition should implement:
+- `allocate_pins()` method for pin allocation
+- `bringup_pins()` method for test pins
+- `register_component()` method for component registration
 
 ## Running Tests
 
@@ -79,3 +95,11 @@ Tests for the package pin interface can be run using:
 ```bash
 pdm run pytest tests/test_package_pins.py
 ```
+
+## Available Packages
+
+The current public API provides access to these packages through `PACKAGE_DEFINITIONS`:
+
+- `pga144`: PGA-144 package (QuadPackageDef)
+- `cf20`: CF-20 package (BareDiePackageDef)
+- `openframe`: OpenFrame package (OpenframePackageDef)
