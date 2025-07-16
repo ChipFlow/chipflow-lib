@@ -566,9 +566,9 @@ class Package(pydantic.BaseModel):
     """
     Serialisable identifier for a defined packaging option
     Attributes:
-        type: Package type
+        package_type: Package type
     """
-    type: PackageDef = pydantic.Field(discriminator="package_type")
+    package_type: PackageDef = pydantic.Field(discriminator="package_type")
 
 # TODO: minimise names into more traditional form
 def _linear_allocate_components(interfaces: dict, lockfile: LockFile | None, allocate, unallocated) -> PortMap:
@@ -639,7 +639,7 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
 
     def _get_package(self) -> Package:
         assert self is not Self
-        return Package(type=self)  # type: ignore
+        return Package(package_type=self)  # type: ignore
 
     def _allocate_bringup(self, config: 'Config') -> Component:
         cds = set(config.chipflow.clock_domains) if config.chipflow.clock_domains else set()
