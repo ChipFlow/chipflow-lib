@@ -21,7 +21,7 @@ from amaranth.hdl import Fragment
 from amaranth.hdl._ir import PortDirection
 
 from .. import ChipFlowError
-from .utils import load_pinlock, PortDesc, Pin, IOModel, IODriveMode, IOTripPoint, Process
+from ._utils import load_pinlock, PortDesc, Pin, IOModel, IODriveMode, IOTripPoint, Process
 
 if TYPE_CHECKING:
     from ..config_models import Config
