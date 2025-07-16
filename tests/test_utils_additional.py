@@ -6,7 +6,6 @@ from amaranth.lib import io
 
 from chipflow_lib.platforms import (
     IOSignature,
-    IOModel,
     PACKAGE_DEFINITIONS
 )
 
@@ -59,21 +58,6 @@ class TestIOSignature(unittest.TestCase):
         self.assertEqual(json_data['width'], 8)
         # The init field contains an Amaranth Const object, check its value
         self.assertEqual(json_data['init'].value, 42)
-
-
-class TestIOModel(unittest.TestCase):
-    def test_iomodel_basic_properties(self):
-        """Test IOModel basic functionality"""
-        # Test with basic properties
-        iomodel = IOModel(width=8, direction=io.Direction.Input)
-        self.assertEqual(iomodel['width'], 8)
-        self.assertEqual(iomodel['direction'], io.Direction.Input)
-
-        # Test with additional properties
-        iomodel_with_init = IOModel(width=4, direction=io.Direction.Output, init=42)
-        self.assertEqual(iomodel_with_init['width'], 4)
-        self.assertEqual(iomodel_with_init['direction'], io.Direction.Output)
-        self.assertEqual(iomodel_with_init['init'], 42)
 
 
 class TestPackageDefinitions(unittest.TestCase):

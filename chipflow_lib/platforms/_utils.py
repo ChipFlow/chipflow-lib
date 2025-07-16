@@ -179,9 +179,10 @@ class IOSignature(wiring.Signature):
     :py:obj:`InputIOSignature`, :py:obj:`OutputIOSignature`, or :py:obj:`BidirIOSignature` for defining pin interfaces.
     """
 
-    def __init__(self, **kwargs: Unpack[IOModel]):
+    def __init__(self, width, direction, **kwargs: Unpack[IOModelOptions]):
         # Special Handling for io.Direction, invert and clock_domain
-        model = IOModel(**kwargs)
+        model = IOModel(width=width, direction=direction, **kwargs)
+        logger.debug(f"Creating IOSignature with parameters:\n{pformat(model)}")
         assert 'width' in model
         assert 'direction' in model
         width = model['width']
@@ -259,8 +260,7 @@ def OutputIOSignature(width: int, **kwargs: Unpack[IOModelOptions]):
 
     :param width: specifies the number of individual output wires within this port, each of which will correspond to a separate physical pad on the integrated circuit package.
     """
-    model: IOModel = kwargs | {'width': width, 'direction': io.Direction.Output}   # type: ignore[reportGeneralTypeIssues]
-    return IOSignature(**model)
+    return IOSignature(width=width, direction=io.Direction.Output, **kwargs)
 
 
 def InputIOSignature(width: int, **kwargs: Unpack[IOModelOptions]):
@@ -270,8 +270,7 @@ def InputIOSignature(width: int, **kwargs: Unpack[IOModelOptions]):
     :param width: specifies the number of individual input wires within this port, each of which will correspond to a separate physical pad on the integrated circuit package.
     """
 
-    model: IOModel = kwargs | {'width': width, 'direction': io.Direction.Input}   # type: ignore[reportGeneralTypeIssues]
-    return IOSignature(**model)
+    return IOSignature(width=width, direction=io.Direction.Input, **kwargs)
 
 
 def BidirIOSignature(width: int, **kwargs: Unpack[IOModelOptions]):
@@ -281,8 +280,7 @@ def BidirIOSignature(width: int, **kwargs: Unpack[IOModelOptions]):
     :param width: specifies the number of individual input/output wires within this port. Each pair of input/output wires will correspond to a separate physical pad on the integrated circuit package.
     """
 
-    model: IOModel = kwargs | {'width': width, 'direction': io.Direction.Bidir}   # type: ignore[reportGeneralTypeIssues]
-    return IOSignature(**model)
+    return IOSignature(width=width, direction=io.Direction.Bidir, **kwargs)
 
 
 Pin = Union[Tuple[Any,...], str, int]
@@ -403,12 +401,12 @@ def _group_consecutive_items(ordering: PinList, lst: PinList) -> OrderedDict[int
     for item in lst[1:]:
         idx = ordering.index(last)
         next = ordering[idx + 1] if idx < len(ordering) - 1 else None
-        logger.debug(f"inspecting {item}, index {idx}, next {next}")
+        # logger.debug(f"inspecting {item}, index {idx}, next {next}")
         if item == next:
             current_group.append(item)
-            logger.debug("found consecutive, adding to current group")
+            # logger.debug("found consecutive, adding to current group")
         else:
-            logger.debug("found nonconsecutive, creating new group")
+            # logger.debug("found nonconsecutive, creating new group")
             grouped.append(current_group)
             current_group = [item]
         last = item
