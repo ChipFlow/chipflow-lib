@@ -3,34 +3,37 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="#" /><link rel="search" title="Search" href="search.html" />
+        <link rel="prefetch" href="_static/chipflow-logo.svg" as="image" />
 
-    <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 --><title>Index - ChipFlow Platform Documentation</title>
-<link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
+    <!-- Generated with Sphinx 7.4.7 and Furo 2025.07.19 --><title>Index - ChipFlow Platform Documentation</title>
+<link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=25af2a20" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
+    <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
 
 
 <style>
   body {
-    --color-code-background: #f8f8f8;
-  --color-code-foreground: black;
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
   --admonition-font-size: 0.9 rem;
   
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #202020;
-  --color-code-foreground: #d0d0d0;
+      --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
   --admonition-font-size: 0.9 rem;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #202020;
-  --color-code-foreground: #d0d0d0;
+        --color-code-background: #2b2b2b;
+  --color-code-foreground: #f8f8f2;
   --admonition-font-size: 0.9 rem;
   
       }
@@ -190,7 +193,6 @@
     <div class="sidebar-container">
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
-  
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="_static/chipflow-logo.svg" alt="Logo"/>
   </div>
@@ -207,6 +209,10 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started with ChipFlow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#project-name">project_name</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#clock-domains">clock_domains</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#process">process</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#package">package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-commands.html">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="autoapi/index.html">API Reference</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="autoapi/chipflow_lib/index.html">chipflow_lib</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of chipflow_lib</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -277,6 +283,8 @@
 </li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="autoapi/chipflow_lib/steps/index.html#chipflow_lib.steps.StepBase.build">build() (chipflow_lib.steps.StepBase method)</a>
+</li>
         <li><a href="autoapi/chipflow_lib/steps/index.html#chipflow_lib.steps.StepBase.build_cli_parser">build_cli_parser() (chipflow_lib.steps.StepBase method)</a>
 </li>
     </ul></td>
@@ -325,6 +333,8 @@
         <li><a href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.IOSignature.direction">direction (chipflow_lib.platforms.IOSignature property)</a>
 
         <ul>
+          <li><a href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SiliconPlatformPort.direction">(chipflow_lib.platforms.SiliconPlatformPort property)</a>
+</li>
           <li><a href="autoapi/chipflow_lib/steps/index.html#chipflow_lib.steps.IOSignature.direction">(chipflow_lib.steps.IOSignature property)</a>
 </li>
         </ul></li>
@@ -338,20 +348,26 @@
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.InputIOSignature">InputIOSignature() (in module chipflow_lib.platforms)</a>
 </li>
-        <li><a href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.IOSignature.invert">invert() (chipflow_lib.platforms.IOSignature method)</a>
+        <li><a href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.IOSignature.invert">invert (chipflow_lib.platforms.IOSignature property)</a>
 
         <ul>
-          <li><a href="autoapi/chipflow_lib/steps/index.html#chipflow_lib.steps.IOSignature.invert">(chipflow_lib.steps.IOSignature method)</a>
+          <li><a href="autoapi/chipflow_lib/steps/index.html#chipflow_lib.steps.IOSignature.invert">(chipflow_lib.steps.IOSignature property)</a>
 </li>
         </ul></li>
+        <li><a href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.IOModel">IOModel (class in chipflow_lib.platforms)</a>
+</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.IOModelOptions">IOModelOptions (class in chipflow_lib.platforms)</a>
+</li>
         <li><a href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.IOSignature">IOSignature (class in chipflow_lib.platforms)</a>
 
         <ul>
           <li><a href="autoapi/chipflow_lib/steps/index.html#chipflow_lib.steps.IOSignature">(class in chipflow_lib.steps)</a>
 </li>
         </ul></li>
+        <li><a href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.IOTripPoint">IOTripPoint (class in chipflow_lib.platforms)</a>
+</li>
     </ul></td>
   </tr></table>
 </section>
@@ -393,10 +409,10 @@
   <h2>O</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.IOSignature.options">options() (chipflow_lib.platforms.IOSignature method)</a>
+        <li><a href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.IOSignature.options">options (chipflow_lib.platforms.IOSignature property)</a>
 
         <ul>
-          <li><a href="autoapi/chipflow_lib/steps/index.html#chipflow_lib.steps.IOSignature.options">(chipflow_lib.steps.IOSignature method)</a>
+          <li><a href="autoapi/chipflow_lib/steps/index.html#chipflow_lib.steps.IOSignature.options">(chipflow_lib.steps.IOSignature property)</a>
 </li>
         </ul></li>
     </ul></td>
@@ -425,6 +441,12 @@
   <h2>S</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.SiliconPlatformPort">SiliconPlatformPort (class in chipflow_lib.platforms)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.Sky130DriveMode">Sky130DriveMode (class in chipflow_lib.platforms)</a>
+</li>
         <li><a href="autoapi/chipflow_lib/steps/index.html#chipflow_lib.steps.StepBase">StepBase (class in chipflow_lib.steps)</a>
 </li>
     </ul></td>
@@ -445,10 +467,10 @@
   <h2>W</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.IOSignature.width">width() (chipflow_lib.platforms.IOSignature method)</a>
+        <li><a href="autoapi/chipflow_lib/platforms/index.html#chipflow_lib.platforms.IOSignature.width">width (chipflow_lib.platforms.IOSignature property)</a>
 
         <ul>
-          <li><a href="autoapi/chipflow_lib/steps/index.html#chipflow_lib.steps.IOSignature.width">(chipflow_lib.steps.IOSignature method)</a>
+          <li><a href="autoapi/chipflow_lib/steps/index.html#chipflow_lib.steps.IOSignature.width">(chipflow_lib.steps.IOSignature property)</a>
 </li>
         </ul></li>
     </ul></td>
@@ -490,6 +512,7 @@
 </div><script src="_static/documentation_options.js?v=1f169f65"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="_static/scripts/furo.js?v=5fa4622c"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
     </body>
 </html>
