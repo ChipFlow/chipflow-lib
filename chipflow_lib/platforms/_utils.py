@@ -416,7 +416,7 @@ def _find_contiguous_sequence(ordering: PinList, lst: PinList, total: int) -> Pi
         if unable to find a consecutive list, allocate as contigously as possible
     """
     if not lst or len(lst) < total:
-        raise ChipFlowError("Invalid request to find_contiguous_argument")
+        raise ValueError(f"Invalid request to _find_contiguous_sequence: lst={lst}")
 
     grouped = _group_consecutive_items(ordering, lst)
 
@@ -472,26 +472,37 @@ def _allocate_pins(name: str, member: Dict[str, Any], pins: List[Pin], port_name
     logger.debug(f"member={pformat(member)}")
 
     if member['type'] == 'interface' and 'annotations' in member \
-       and IO_ANNOTATION_SCHEMA in member['annotations']:
+    and IO_ANNOTATION_SCHEMA in member['annotations']:
         model:IOModel = member['annotations'][IO_ANNOTATION_SCHEMA]
         logger.debug(f"matched IOSignature {model}")
         name = name
         width = model['width']
         pin_map[name] = PortDesc(pins=pins[0:width], type='io', port_name=port_name, iomodel=model)
         logger.debug(f"added '{name}':{pin_map[name]} to pin_map")
+        if len(pins) - width < 0:
+            raise ChipFlowError(f"Ran out of available pins when allocating '{port_name}`")
         return pin_map, pins[width:]
     elif member['type'] == 'interface':
-        for k, v in member['members'].items():
-            port_name = '_'.join([name, k])
-            _map, pins = _allocate_pins(k, v, pins, port_name=port_name)
-            pin_map |= _map
-            logger.debug(f"{pin_map},{_map}")
-        return pin_map, pins
+        try:
+            for k, v in member['members'].items():
+                port_name = '_'.join([name, k])
+                _map, pins = _allocate_pins(k, v, pins, port_name=port_name)
+                pin_map |= _map
+                logger.debug(f"{pin_map},{_map}")
+            return pin_map, pins
+        except ChipFlowError as e:
+            e.add_note("While allocating {name}")
+            raise e
+        except ValueError as e:
+            raise ChipFlowError(f"Ran out of available pins when allocating '{port_name}`")
+
     elif member['type'] == 'port':
         logger.warning(f"PortDesc '{name}' has no IOSignature, pin allocation likely to be wrong")
         width = member['width']
         model = IOModel(width=width, direction=io.Direction(member['dir']))
         pin_map[name] = PortDesc(pins=pins[0:width], type='io', port_name=port_name, iomodel=model)
+        if len(pins) - width < 0:
+            raise ChipFlowError(f"Ran out of available pins when allocating '{port_name}`")
         logger.debug(f"added '{name}':{pin_map[name]} to pin_map")
         return pin_map, pins[width:]
     else:
@@ -519,12 +530,27 @@ class PortMap(pydantic.BaseModel):
             self.ports[component] = {}
         self.ports[component][interface] = ports
 
-    def get_ports(self, component: str, interface: str) -> Interface | None:
-
+    def get_ports(self, component: Optional[str] = None, interface: Optional[str] = None) -> Interface | None:
         "List the ports allocated in this PortMap for the given `Component` and `Interface`"
-        if component not in self.ports or interface not in self.ports[component]:
-            return None
-        return self.ports[component][interface]
+        out: Interface = {}
+        if not component:
+            for c, v in self.ports.items():
+                for i, v in self.ports[c].items():
+                    vn = { f"{c}.{i}.{pn}": p for pn, p in v.items() }
+                    out |= vn
+            return out
+        elif not interface:
+            if component not in self.ports:
+                return None
+            for i, v in self.ports[component].items():
+                vn = { f"{i}.{pn}": p for pn, p in v.items() }
+                out |= vn
+            return out
+        else:
+            if component not in self.ports or interface not in self.ports[component]:
+                return None
+            return self.ports[component][interface]
+
 
     def get_clocks(self) -> List[PortDesc]:
         ret = []
@@ -572,6 +598,7 @@ class Package(pydantic.BaseModel):
 
 # TODO: minimise names into more traditional form
 def _linear_allocate_components(interfaces: dict, lockfile: LockFile | None, allocate, unallocated) -> PortMap:
+    assert len(unallocated)
     port_map = PortMap()
     for component, v in interfaces.items():
         for interface, v in v['interface']['members'].items():
@@ -592,9 +619,20 @@ def _linear_allocate_components(interfaces: dict, lockfile: LockFile | None, all
                     )
                 port_map._add_ports(component, interface, old_ports)
             else:
+                if len(unallocated) == 0:
+                    ports = port_map.get_ports()
+                    errstr = ''
+                    total = 0
+                    assert ports
+                    for pn,pd in ports.items():
+                        errstr += f"\n  {pn}: "
+                        assert pd.pins
+                        errstr += f"{len(pd.pins)} pins"
+                        total += len(pd.pins)
+                    errstr += '\n'
+                    raise ChipFlowError(f"Ran out of available pins when allocating '{component}.{interface}`\n"
+                                        f"Ports already allocated were:\n{errstr}\nTotal pins: {total}")
                 pins = allocate(unallocated, width)
-                if len(pins) == 0:
-                    raise ChipFlowError("No pins were allocated")
                 logger.debug(f"allocated range: {pins}")
                 unallocated = unallocated - set(pins)
                 _map, _ = _allocate_pins(f"{component}_{interface}", v, pins)
