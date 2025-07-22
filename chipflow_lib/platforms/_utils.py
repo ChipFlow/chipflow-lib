@@ -13,7 +13,7 @@ from dataclasses import dataclass, asdict
 from enum import Enum, IntEnum, StrEnum, auto
 from math import ceil, floor
 from typing import (
-    Any, Annotated, NamedTuple, Generic, Self,
+    Any, Annotated, NamedTuple, Iterator, Generic, Self,
     TYPE_CHECKING
 )
 from typing_extensions import (
@@ -130,32 +130,47 @@ class IOModel(IOModelOptions):
     width: int
     direction: Annotated[io.Direction, PlainSerializer(lambda x: x.value)]
 
-def io_annotation_schema():
-    class Model(pydantic.BaseModel):
-        data_td: IOModel
+def amaranth_annotate(model: Type[TypedDict], schema_id: str):
+    def annotation_schema():
+        class Model(pydantic.BaseModel):
+            data_td: model
 
-    PydanticModel = TypeAdapter(IOModel)
-    schema = PydanticModel.json_schema()
-    schema['$schema'] = "https://json-schema.org/draft/2020-12/schema"
-    schema['$id'] = IO_ANNOTATION_SCHEMA
-    return schema
+        PydanticModel = TypeAdapter(model)
+        schema = PydanticModel.json_schema()
+        schema['$schema'] = "https://json-schema.org/draft/2020-12/schema"
+        schema['$id'] = schema_id
+        return schema
+
+    class Annotation(meta.Annotation):
+        "Generated annotation class"
+        schema = annotation_schema()
+
+        def __init__(self, model:IOModel):
+            self._model = model
+
+        @property
+        def origin(self):  # type: ignore
+            return self._model
+
+        def as_json(self):  # type: ignore
+            return TypeAdapter(IOModel).dump_python(self._model)
+
+    def annotations(self, *args):  # type: ignore
+        annotations = wiring.Signature.annotations(self, *args)  # type: ignore
+
+        io_annotation = Annotation(self._model)
+        return annotations + (io_annotation,)  # type: ignore
 
 
-class _IOAnnotation(meta.Annotation):
-    "Infrastructure for `Amaranth annotations <amaranth.lib.meta.Annotation>`"
-    schema = io_annotation_schema()
-
-    def __init__(self, model:IOModel):
-        self._model = model
-
-    @property
-    def origin(self):  # type: ignore
-        return self._model
-
-    def as_json(self):  # type: ignore
-        return TypeAdapter(IOModel).dump_python(self._model)
 
 
+    def decorator(klass):
+        klass.annotations = annotations
+        klass.__repr__
+        return klass
+    return decorator
+
+@amaranth_annotate(IOModel, IO_ANNOTATION_SCHEMA)
 class IOSignature(wiring.Signature):
     """An :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` used to decorate wires that would usually be brought out onto a port on the package.
     This class is generally not directly used.  Instead, you would typically utilize the more specific
@@ -225,16 +240,8 @@ class IOSignature(wiring.Signature):
         """
         return self._model
 
-    def annotations(self, *args):  # type: ignore
-        annotations = wiring.Signature.annotations(self, *args)  # type: ignore
-
-        io_annotation = _IOAnnotation(self._model)
-        return annotations + (io_annotation,)  # type: ignore
-
-
     def __repr__(self):
         return f"IOSignature({','.join('{0}={1!r}'.format(k,v) for k,v in self._model.items())})"
-
 
 def OutputIOSignature(width: int, **kwargs: Unpack[IOModelOptions]):
     """This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package output signals
