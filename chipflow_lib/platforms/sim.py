@@ -26,6 +26,7 @@ class SimPlatform:
         self.sim_boxes = dict()
         self._ports = {}
         self._config = config
+        self._top_sim = {}
 
     def add_file(self, filename, content):
         if not isinstance(content, (str, bytes)):
@@ -67,6 +68,10 @@ class SimPlatform:
             print("read_rtlil sim_soc.il", file=yosys_file)
             print("hierarchy -top sim_top", file=yosys_file)
             print("write_cxxrtl -header sim_soc.cc", file=yosys_file)
+        main = Path(self.build_dir) / "main.cc"
+        with open(main, "w") as main_file:
+            for p in self._ports:
+                print(p, file=main_file)
 
     def instantiate_ports(self, m: Module):
         if hasattr(self, "_pinlock"):
@@ -76,10 +81,9 @@ class SimPlatform:
         for component, iface in pinlock.port_map.ports.items():
             for k, v in iface.items():
                 for name, port_desc in v.items():
-                   logger.debug(f"Instantiating port {port_desc.port_name}: {port_desc}")
-                   invert = port_desc.invert if port_desc.invert else False
-                   self._ports[port_desc.port_name] = io.SimulationPort(port_desc.direction, port_desc.width, invert=invert, name=port_desc.port_name)
-
+                    logger.debug(f"Instantiating port {port_desc.port_name}: {port_desc}")
+                    invert = port_desc.invert if port_desc.invert else False
+                    self._ports[port_desc.port_name] = io.SimulationPort(port_desc.direction, port_desc.width, invert=invert, name=port_desc.port_name)
         for clock in pinlock.port_map.get_clocks():
             assert 'clock_domain' in clock.iomodel
             domain = clock.iomodel['clock_domain']

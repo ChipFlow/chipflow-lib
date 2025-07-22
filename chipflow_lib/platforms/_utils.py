@@ -13,7 +13,7 @@ from dataclasses import dataclass, asdict
 from enum import Enum, IntEnum, StrEnum, auto
 from math import ceil, floor
 from typing import (
-    Any, Annotated, NamedTuple, Self, Iterator, Type,
+    Any, Annotated, NamedTuple, Self, Type,
     TYPE_CHECKING
 )
 from typing_extensions import (
