@@ -13,7 +13,7 @@ from dataclasses import dataclass, asdict
 from enum import Enum, IntEnum, StrEnum, auto
 from math import ceil, floor
 from typing import (
-    Any, Annotated, NamedTuple, Self, Iterator, Type,
+    Any, Annotated, NamedTuple, Self, Type,
     TYPE_CHECKING
 )
 from typing_extensions import (
@@ -157,18 +157,16 @@ def amaranth_annotate(model: Type[TypedDict], schema_id: str):
 
     def annotations(self, *args):  # type: ignore
         annotations = wiring.Signature.annotations(self, *args)  # type: ignore
-
-        io_annotation = Annotation(self._model)
-        return annotations + (io_annotation,)  # type: ignore
-
-
-
+        print(f"annotating {self} with {self._model}")
+        annotation = Annotation(self._model)
+        print(f"returning {annotations + (annotation,)}")
+        return annotations + (annotation,)  # type: ignore
 
     def decorator(klass):
         klass.annotations = annotations
-        klass.__repr__
         return klass
     return decorator
+
 
 @amaranth_annotate(IOModel, IO_ANNOTATION_SCHEMA)
 class IOSignature(wiring.Signature):
