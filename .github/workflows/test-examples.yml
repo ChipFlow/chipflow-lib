@@ -5,10 +5,22 @@ on:
     secrets:
       CHIPFLOW_API_KEY:
         required: true
+    inputs:
+      CHIPFLOW_API_ORIGIN:
+        required: true
+        type: string
+      CHIPFLOW_BACKEND_VERSION:
+        required: true
+        type: string
+      ENVIRONMENT:
+        required: true
+        type: string
+
 
 jobs:
   test-submit:
     runs-on: ubuntu-latest
+    environment: ${{ vars.ENVIRONMENT }}
     strategy:
       matrix:
         dry: [true, false]
@@ -18,7 +30,7 @@ jobs:
     env:
       DRY: ${{ matrix.dry && '--dry-run' || '' }}
       is_dry: ${{ matrix.dry && '(dry run)' || '' }}
-      our_path: "${{ github.workspace}}/${{ github.repo }}"
+      our_path: ${{ github.workspace}}
       test_repo_path: "${{ github.workspace }}/${{ matrix.repo.name }}"
 
     name:  ${{ matrix.dry && 'Test Submit - Dry run' || 'Test submit' }}
@@ -39,20 +51,23 @@ jobs:
         id: check-head-ref
         working-directory: ${{ env.test_repo_path }}
         if: github.event_name == 'pull_request'
+        env:
+            HEAD_REF: ${{ github.head_ref }}
+            BASE_REF: ${{ github.base_ref }}
         run: |
           git remote update
-          if git checkout ${{ github.head_ref }}; then
-             echo "Using branch ${{github.head_ref}}"
+          if git checkout $HEAD_REF; then
+             echo "Using branch $HEAD_REF"
              echo "found-branch=1\n" >> $GITHUB_OUTPUT
           else
-             echo "${{github.head_ref}} not found, checking base ${{github.base_ref}}"
+             echo "$HEAD_REF not found, checking base $BASE_REF"
              echo "found-branch=0\n" >> $GITHUB_OUTPUT
           fi
 
       - name: Check for branch ${{ github.base_ref }}
         id: check-base-ref
         working-directory: ${{ env.test_repo_path }}x
-        if: github.event_name == 'pull_request' && steps.check-head-ref == 0
+        if: github.event_name == 'pull_request' && steps.check-head-ref.outputs.found-branch == '0'
         run: |
           git remote update
           if git checkout ${{ github.base_ref }}; then
@@ -92,3 +107,5 @@ jobs:
           pdm run chipflow silicon submit --wait $DRY | cat
         env:
           CHIPFLOW_API_KEY: ${{ secrets.CHIPFLOW_API_KEY}}
+          CHIPFLOW_API_ORIGIN: ${{ inputs.CHIPFLOW_API_ORIGIN }}
+          CHIPFLOW_BACKEND_VERSION: ${{ inputs.CHIPFLOW_BACKEND_VERSION }}

@@ -1,3 +1,4 @@
+
 on:
   push:
     branches:
@@ -6,11 +7,18 @@ on:
   merge_group:
   schedule:
     - cron: '0 0 * * *'  # Every day at midnight UTC
-
+  # allow manual triggering with a given environment
+  workflow_dispatch:
+    inputs:
+      ENVIRONMENT:
+        required: true
+        type: environment
 name: CI
 jobs:
 
   test:
+    environment:
+      name: ${{ vars.ENVIRONMENT }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out source code
@@ -34,6 +42,8 @@ jobs:
         run: pdm run test-docs
 
   license:
+    environment:
+      name: ${{ vars.ENVIRONMENT}}
     runs-on: ubuntu-latest
     steps:
       - name: Check out source code
@@ -45,5 +55,10 @@ jobs:
 
   test-submit:
     uses: ./.github/workflows/test-examples.yml
+    with:
+      CHIPFLOW_API_ORIGIN: ${{ vars.CHIPFLOW_API_ORIGIN }}
+      CHIPFLOW_BACKEND_VERSION: ${{ vars.CHIPFLOW_BACKEND_VERSION }}
+      ENVIRONMENT: ${{ vars.ENVIRONMENT }}
     secrets:
       CHIPFLOW_API_KEY: ${{ secrets.CHIPFLOW_API_KEY}}
+
