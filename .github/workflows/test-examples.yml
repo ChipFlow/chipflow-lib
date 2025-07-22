@@ -5,6 +5,12 @@ on:
     secrets:
       CHIPFLOW_API_KEY:
         required: true
+    inputs:
+      CHIPFLOW_API_ORIGIN:
+        required: true
+      CHIPFLOW_BACKEND_VERSION:
+        required: true
+
 
 jobs:
   test-submit:
@@ -92,3 +98,5 @@ jobs:
           pdm run chipflow silicon submit --wait $DRY | cat
         env:
           CHIPFLOW_API_KEY: ${{ secrets.CHIPFLOW_API_KEY}}
+          CHIPFLOW_API_ORIGIN: ${{ inputs.CHIPFLOW_API_ORIGIN }}
+          CHIPFLOW_BACKEND_VERSION: ${{ inputs.CHIPFLOW_BACKEND_VERSION }}
