@@ -83,17 +83,21 @@ private:
 };
 
 struct gpio_model {
-    static constexpr unsigned width = 8;
     std::string name;
-    gpio_model(const std::string &name, const value<width> &o, const value<width> &oe, value<width> &i) : name(name), o(o), oe(oe), i(i) {};
+    struct parameters {
+        unsigned pin_count;
+    };
+    parameters parameters;
+
+    gpio_model(const std::string &name, parameters, const value<paramters.pin_count> &o, const value<parameters.pin_count> &oe, value<parameters.pin_count> &i) : name(name), parameters(parameters), o(o), oe(oe), i(i) {};
 
     void step(unsigned timestamp);
 
 private:
     uint32_t input_data = 0;
-    const value<width> &o;
-    const value<width> &oe;
-    value<width> &i;
+    const value<pin_count> &o;
+    const value<pin_count> &oe;
+    value<pin_count> &i;
     struct {
         uint32_t o_last = 0;
         uint32_t oe_last = 0;
@@ -103,7 +107,7 @@ private:
 
 struct spi_model {
     std::string name;
-    spi_model(const std::string &name, const value<1> &clk, const value<1> &csn, const value<1> &copi, value<1> &cipo) : 
+    spi_model(const std::string &name, const value<1> &clk, const value<1> &copi, value<1> &cipo, const value<1> &csn) : 
         name(name), clk(clk), csn(csn), copi(copi), cipo(cipo) {
     };
 
@@ -127,7 +131,7 @@ private:
 
 struct i2c_model {
     std::string name;
-    i2c_model(const std::string &name, const value<1> &sda_oe, value<1> &sda_i, const value<1> &scl_oe, value<1> &scl_i) : name(name), sda_oe(sda_oe), sda_i(sda_i), scl_oe(scl_oe), scl_i(scl_i) {};
+    i2c_model(const std::string &name, const value<1> &scl_o, const value<1> &scl_oe, value<1> &scl_i, const value<1> &sda_o, const value<1> &sda_oe, value<1> &sda_i)  : name(name), sda_oe(sda_oe), sda_i(sda_i), scl_oe(scl_oe), scl_i(scl_i) {};
 
     void step(unsigned timestamp);
 private:
