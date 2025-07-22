@@ -672,6 +672,7 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
                                   port_name='heartbeat',
                                   iomodel=IOModel(width=1, direction=io.Direction.Output, clock_domain="sync")
                               )
+        fir 
         #TODO: JTAG
         return {'bringup_pins': d}
 

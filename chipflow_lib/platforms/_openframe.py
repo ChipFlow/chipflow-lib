@@ -1,6 +1,12 @@
+import logging
+
 from typing import List, NamedTuple, Optional, Literal
 
 from ._utils import Voltage, PowerPins, LinearAllocPackageDef, BringupPins
+
+
+logger = logging.getLogger(__name__)
+
 
 class OFPin(NamedTuple):
     pin: int
@@ -108,8 +114,9 @@ class OpenframePackageDef(LinearAllocPackageDef):
     @property
     def _core_power(self) -> List[PowerPins]:
         pps = []
-
+        logger.debug("Getting core power pins")
         for power, ground in OF_CORE_POWER:
+            logger.debug(f"  adding {power}, {ground}")
             pp = PowerPins(power=power, ground=ground, voltage=power.voltage)
             pps.append(pp)
 
