@@ -13,7 +13,7 @@ from dataclasses import dataclass, asdict
 from enum import Enum, IntEnum, StrEnum, auto
 from math import ceil, floor
 from typing import (
-    Any, Annotated, NamedTuple, Iterator, Generic, Self,
+    Any, Annotated, NamedTuple, Generic, Self,
     TYPE_CHECKING
 )
 from typing_extensions import (
@@ -31,6 +31,7 @@ from pydantic import (
 
 from .. import ChipFlowError, _ensure_chipflow_root, _get_cls_by_reference
 from .._appresponse import AppResponseModel, OmitIfNone
+from ._annotate import amaranth_annotate
 from ._sky130 import Sky130DriveMode
 
 if TYPE_CHECKING:
@@ -83,7 +84,6 @@ class IOTripPoint(StrEnum):
 IO_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("pin-annotation", 0))
 
 
-@pydantic.with_config(ConfigDict(arbitrary_types_allowed=True))  # type: ignore[reportCallIssue]
 class IOModelOptions(TypedDict):
     """
     Options for an IO pad/pin.
@@ -130,47 +130,8 @@ class IOModel(IOModelOptions):
     width: int
     direction: Annotated[io.Direction, PlainSerializer(lambda x: x.value)]
 
-def amaranth_annotate(model: Type[TypedDict], schema_id: str):
-    def annotation_schema():
-        class Model(pydantic.BaseModel):
-            data_td: model
 
-        PydanticModel = TypeAdapter(model)
-        schema = PydanticModel.json_schema()
-        schema['$schema'] = "https://json-schema.org/draft/2020-12/schema"
-        schema['$id'] = schema_id
-        return schema
-
-    class Annotation(meta.Annotation):
-        "Generated annotation class"
-        schema = annotation_schema()
-
-        def __init__(self, model:IOModel):
-            self._model = model
-
-        @property
-        def origin(self):  # type: ignore
-            return self._model
-
-        def as_json(self):  # type: ignore
-            return TypeAdapter(IOModel).dump_python(self._model)
-
-    def annotations(self, *args):  # type: ignore
-        annotations = wiring.Signature.annotations(self, *args)  # type: ignore
-
-        io_annotation = Annotation(self._model)
-        return annotations + (io_annotation,)  # type: ignore
-
-
-
-
-    def decorator(klass):
-        klass.annotations = annotations
-        klass.__repr__
-        return klass
-    return decorator
-
-@amaranth_annotate(IOModel, IO_ANNOTATION_SCHEMA)
+@amaranth_annotate(IOModel, IO_ANNOTATION_SCHEMA, '_model')
 class IOSignature(wiring.Signature):
     """An :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` used to decorate wires that would usually be brought out onto a port on the package.
     This class is generally not directly used.  Instead, you would typically utilize the more specific
@@ -242,6 +203,7 @@ class IOSignature(wiring.Signature):
 
     def __repr__(self):
         return f"IOSignature({','.join('{0}={1!r}'.format(k,v) for k,v in self._model.items())})"
+
 
 def OutputIOSignature(width: int, **kwargs: Unpack[IOModelOptions]):
     """This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package output signals
@@ -379,17 +341,17 @@ def _group_consecutive_items(ordering: PinList, lst: PinList) -> OrderedDict[int
     last = lst[0]
     current_group = [last]
 
-    logger.debug(f"_group_consecutive_items starting with {current_group}")
+    #logger.debug(f"_group_consecutive_items starting with {current_group}")
 
     for item in lst[1:]:
         idx = ordering.index(last)
         next = ordering[idx + 1] if idx < len(ordering) - 1 else None
-        logger.debug(f"inspecting {item}, index {idx}, next {next}")
+        #logger.debug(f"inspecting {item}, index {idx}, next {next}")
         if item == next:
             current_group.append(item)
-            logger.debug("found consecutive, adding to current group")
+            #logger.debug("found consecutive, adding to current group")
         else:
-            logger.debug("found nonconsecutive, creating new group")
+            #logger.debug("found nonconsecutive, creating new group")
             grouped.append(current_group)
             current_group = [item]
         last = item
@@ -631,6 +593,7 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
             component: Amaranth `wiring.Component` to allocate
 
         """
+        print(f"registering {component}")
         self._components[name] = component
         self._interfaces[name] = component.metadata.as_json()
 
