@@ -1,0 +1,77 @@
+#undef NDEBUG
+
+#include <cxxrtl/cxxrtl.h>
+#include <cxxrtl/cxxrtl_server.h>
+#include "sim_soc.h"
+{% for include in includes %}
+#include "{{include}}"
+{% endfor %}
+
+#include <fstream>
+#include <filesystem>
+
+using namespace cxxrtl::time_literals;
+using namespace cxxrtl_design;
+
+int main(int argc, char **argv) {
+    p_sim__top top;
+
+    {% for initialiser in initialisers %}
+    {{initialiser}};
+    {% endfor %}
+
+    cxxrtl::agent agent(cxxrtl::spool("spool.bin"), top);
+    if (getenv("DEBUG")) // can also be done when a condition is violated, etc
+        std::cerr << "Waiting for debugger on " << agent.start_debugging() << std::endl;
+
+    open_event_log(BUILD_DIR "/sim/events.json");
+    open_input_commands(PROJECT_ROOT "/design/tests/input.json");
+
+    unsigned timestamp = 0;
+    auto tick = [&]() {
+        {% for interface in interfaces %}
+        {{interface}}.step(timestamp);
+        {% endfor %}
+
+        // FIXME: Currently we tick all clocks together, this need fixing..
+        {% for clock in clocks %}
+        top.{{clock}}.set(false);
+        {% endfor %}
+        agent.step();
+        agent.advance(1_us);
+        ++timestamp;
+
+        {% for clock in clocks %}
+        top.{{clock}}.set(true);
+        {% endfor %}
+        agent.step();
+        agent.advance(1_us);
+        ++timestamp;
+
+        // if (timestamp == 10)
+        //     agent.breakpoint(CXXRTL_LOCATION);
+    };
+
+    {% for data in data_load %}
+    {{data.model_name}}.load_data("{{data.file_name}}", {{data.args | join(', ')}});
+    {% endfor %}
+
+    agent.step();
+    agent.advance(1_us);
+
+    {% for reset in resets %}
+    top.{{reset}}.set(false);
+    {% endfor %}
+
+    tick();
+
+    {% for reset in resets %}
+    top.{{reset}}.set(true);
+    {% endfor %}
+
+    for (int i = 0; i < 3000000; i++)
+        tick();
+
+    close_event_log();
+    return 0;
+}
