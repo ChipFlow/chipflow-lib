@@ -3,9 +3,11 @@
 import logging
 import os
 import sys
+
+from enum import StrEnum
 from pathlib import Path
 from pprint import pformat
-from typing import List, Optional
+from typing import List, Optional, TypedDict, NotRequired, Unpack, Union
 
 from amaranth import *
 from amaranth.lib import io, meta, wiring
@@ -16,11 +18,11 @@ from amaranth.lib.cdc import FFSynchronizer
 from pydantic import BaseModel, ConfigDict
 
 from .. import ChipFlowError
-from ._utils import load_pinlock, _chipflow_schema_uri
+from ._utils import load_pinlock, _chipflow_schema_uri, amaranth_annotate
 
 
 logger = logging.getLogger(__name__)
-__all__ = ["SimPlatform", "SimModelSignature", "BuildObject", "CxxBuildObject"]
+__all__ = ["SimPlatform", "SimModelSignature", "BuildObject", "BasicCxxBuild"]
 
 
 class BuildObject(BaseModel):
@@ -30,99 +32,80 @@ class BuildObject(BaseModel):
     Attributes:
         capabilities: arbitary list of capability identifiers
     """
-    capabilities: List[str]
+    kind: str = "base"
 
-class CxxBuildObject(BuildObject):
+    @classmethod
+    def get_subclasses(cls):
+        return tuple(cls.__subclasses__())
+
+class BasicCxxBuild(BuildObject):
     """
-    Represents an object built from C++
+    Represents an object built from C++, where the compilation is simply done with a collection of
+    cpp and hpp files, simply compiled and linked together with no dependencies
 
     Attributes:
         cpp_files: C++ files used to define the model
         hpp_files: C++ header files to define the model interfaces
     """
+    kind = "basic-c++"
     cpp_files: Optional[List[Path]] = None
     hpp_files: Optional[List[Path]] = None
+    hpp_dirs: Optional[List[Path]] = None
 
 
-class _SimModelAnnotationModel(BaseModel):
-    model_config = ConfigDict(use_enum_values=True)
-    direction: io.Direction
-    width: int
-    options: dict = {}
-
-    @classmethod
-    def _annotation_schema(cls):
-        schema = _SimModelAnnotationModel.model_json_schema()
-        schema['$schema'] = "https://json-schema.org/draft/2020-12/schema"
-        schema['$id'] = _chipflow_schema_uri("sim-model-annotation", 0)
-        return schema
-
-    def __init__(self, **kwargs):
-        kwargs['url'] = _chipflow_schema_uri("sim-model-annotation", 0)
-        super().__init__(**kwargs)
+SIM_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("sim-model-annotation", 0))
 
 
-class _SimModelAnnotation(meta.Annotation):
-    schema = _SimModelAnnotationModel._annotation_schema()
-
-    def __init__(self, **kwargs):
-        self.model = _SimModelAnnotationModel(**kwargs)
-
-    @property
-    def origin(self):  # type: ignore
-        return self.model
-
-    def as_json(self):  # type: ignore
-        return self.model.model_dump()
+class SimModelCap(StrEnum):
+    LOAD_DATA = "load-data"
 
 
-PIN_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("sim-model-annotation", 0))
+class SimModel(TypedDict):
+    """
+    Used to attach simulation models to components
 
+    Attributes:
+        cpp_class: C++ class name for the model implmentation
+        capabilities: List of capabilities of the model.
+        build: A `BuildObject` which contains the described class and implementation
+    """
+    cpp_class: str
+    build: Union[*BuildObject.get_subclasses()]
+    capabilities: NotRequired[List[SimModelCap]]
 
+@amaranth_annotate(SimModel, SIM_ANNOTATION_SCHEMA)
 class SimModelSignature(wiring.Signature):
-    """An :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` used to attach simulation models to wires
-
-    For C++ based models, the model implmentation must at minimum implement the following interface:
-
-    .. code-block:: cpp
-
-        class {
-        public:
-            std::string name
-            void step(unsigned timestamp);
-        }
-
-    Models that need to be loaded with a dataset at startup should also implement:
-
-    .. code-block:: cpp
-        {
-            load_data(const std::string &filename, unsigned offset)
-        }
-    and annotate with the "load-data" capability.
-
-    :param cpp_class: C++ class name for the model implmentation
-    :param capabilities: List of capabilities of the model. Currently only supported is:
-        - 'load-data'
-    :param: build: A `BuildObject` which contains the described class and implementation
+    """
+    An :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` to be used as the base signature in components that
+    have a simulation model.
     """
 
-    def __init__(self, cpp_class: str,
-                 build: BuildObject,
-                 capabilities: Optional[List[str]] = None
-                 ):
-        self._cpp_class = cpp_class
-        self._build = build
-        self._capabilities = capabilities
-        super().__init__()
+    def __init__(self, members, **kwargs: Unpack[SimModel]):
+        super().__init__(members)
 
-    def annotations(self, *args):
-        annotations = wiring.Signature.annotations(self, *args)
-        sim_model_annotation = _SimModelAnnotation(cpp_class=self._cpp_class, build=self._build,
-                                                   capabilities=self._capabilities)
-        return annotations + (sim_model_annotation,)
+_COMMON_MODELS = BasicCxxBuild(
+    cpp_files = [ Path('common','sim','models.cc') ],
+    hpp_files = [ Path('common','sim','models.h') ],
+    )
 
-    def __repr__(self):
-        return f"SimModelSignature({self._cpp_class}, {self._cpp_files}, {self._hpp_files}, {self._capabilities})"
+class SPIFlashModel(wiring.Component):
+    def __init__(self)
+        super().__init__(SimModelSignature(cpp_class='spiflash_model', build=_COMMON_MODELS, capabilities=[SimModelCap.LOAD_DATA],
+                        members={
+                            "clk": Out(OutputIOSignature(1)),
+                            "csn": Out(OutputIOSignature(1)),
+                            "d": Out(BidirIOSignature(4, all_have_oe=True)),
+                        })
+#    spiflash_model(const std::string &name, const value<1> &clk, const value<1> &csn, const value<4> &d_o, const value<4> &d_oe, value  <4> &d_i)
+UARTModel = SimModelSignature('uart_model', _COMMON_MODELS)
+#     uart_model(const std::string &name, const value<1> &tx, value<1> &rx, unsigned baud_div = 25000000/115200)
+GPIOModel = SimModelSignature('gpio_model', _COMMON_MODELS)
+#    gpio_model(const std::string &name, const value<width> &o, const value<width> &oe, value<width> &i) : name(name), o(o), oe(oe), i(  i)
+SPIModel = SimModelSignature('spi_model', _COMMON_MODELS)
+#     spi_model(const std::string &name, const value<1> &clk, const value<1> &csn, const value<1> &copi, value<1> &cipo)
+I2CModel = SimModelSignature('i2c_model', _COMMON_MODELS)
+# i2c_model(const std::string &name, const value<1> &sda_oe, value<1> &sda_i, const value<1> &scl_oe, value<1> &scl_i)
+>>>>>>> e5e779df (wip)
 
 
 def print_fragment(fragment, ports=(), name="top", *, emit_src=True, **kwargs):
@@ -264,8 +247,6 @@ BUILD_SIM = {
             "{OUTPUT_DIR}/sim_soc.cc",
             "{OUTPUT_DIR}/sim_soc.h",
             "{SOURCE_DIR}/main.cc",
-            "{COMMON_DIR}/models.cc",
-            "{COMMON_DIR}/models.h",
             "{COMMON_DIR}/vendor/nlohmann/json.hpp",
             "{COMMON_DIR}/vendor/cxxrtl/cxxrtl_server.h",
         ],
