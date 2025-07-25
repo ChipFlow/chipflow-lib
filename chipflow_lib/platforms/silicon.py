@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from pprint import pformat
 from typing import TYPE_CHECKING, List
 
-from amaranth import Module, Signal, ClockDomain, ClockSignal, ResetSignal, unsigned
+from amaranth import Module, Signal, ClockDomain, ClockSignal, ResetSignal, Value, unsigned
 from amaranth.lib import wiring, io, data
 from amaranth.lib.cdc import FFSynchronizer
 from amaranth.lib.wiring import Component, In, PureInterface
@@ -282,10 +282,16 @@ class Sky130Port(SiliconPlatformPort):
                 dm = Sky130DriveMode(port_desc.iomodel['drive_mode'])
             else:
                 dm = Sky130DriveMode.STRONG_UP_STRONG_DOWN
-            dm_init = __class__._DriveMode_map[dm]
+            dm_init = Value.cast(__class__._DriveMode_map[dm])
             dms_shape = data.ArrayLayout(unsigned(3), self._o.shape().width)
-            self._dms = Signal(dms_shape, name=f"{self._name}$dm", init=[dm_init]*self._o.shape().width)
-            self._signals.append((self._dms.as_value(), PortDirection.Output))  #type: ignore
+            self._dms = Signal(dms_shape, name=f"{self._name}$dms", init=[dm_init]*self._o.shape().width)
+
+            self._dm0 = Signal(self._o.shape(), name=f"{self._name}$dm0", init=dm_init[0])
+            self._dm1 = Signal(self._o.shape(), name=f"{self._name}$dm1", init=dm_init[1])
+            self._dm2 = Signal(self._o.shape(), name=f"{self._name}$dm2", init=dm_init[2])
+            self._signals.append((self._dm0, PortDirection.Output))  #type: ignore
+            self._signals.append((self._dm1, PortDirection.Output))  #type: ignore
+            self._signals.append((self._dm2, PortDirection.Output))  #type: ignore
         # Not enabled yet:
         self._gpio_slow_sel = None  # Select slew rate
         self._gpio_holdover = None  # Hold mode
@@ -304,6 +310,12 @@ class Sky130Port(SiliconPlatformPort):
         if self._oe is not None:
             assert self._oe_n is not None
             m.d.comb += self._oe_n.eq(~self._oe)
+        # wire up drive mode bits
+        bit = 0
+        for i in self._dms:
+            m.d.comb += self._dm0[bit].eq(i[0]) # type: ignore
+            m.d.comb += self._dm1[bit].eq(i[1]) # type: ignore
+            m.d.comb += self._dm2[bit].eq(i[2]) # type: ignore
 
     def instantiate_toplevel(self):
         ports = super().instantiate_toplevel()
