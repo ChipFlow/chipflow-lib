@@ -4,13 +4,15 @@ import logging
 import os
 import sys
 
-from enum import StrEnum
+from dataclasses import dataclass
+from enum import StrEnum, auto
 from pathlib import Path
 from pprint import pformat
-from typing import List, Optional, TypedDict, NotRequired, Unpack, Union
+from typing import List, Optional, TypedDict, Optional, Unpack, Union, Type
 
 from amaranth import *
 from amaranth.lib import io, meta, wiring
+from amaranth.lib.wiring import In, Out
 from amaranth.back import rtlil  # type: ignore[reportAttributeAccessIssue]
 from amaranth.hdl import _ir, _ast
 from amaranth.hdl._ir import PortDirection
@@ -18,11 +20,30 @@ from amaranth.lib.cdc import FFSynchronizer
 from pydantic import BaseModel, ConfigDict
 
 from .. import ChipFlowError
-from ._utils import load_pinlock, _chipflow_schema_uri, amaranth_annotate
+from .._signatures import I2CSignature, GPIOSignature, UARTSignature, SPISignature
+from ._utils import load_pinlock, _chipflow_schema_uri, amaranth_annotate, InputIOSignature, OutputIOSignature, BidirIOSignature
 
 
 logger = logging.getLogger(__name__)
-__all__ = ["SimPlatform", "SimModelSignature", "BuildObject", "BasicCxxBuild"]
+__all__ = ["SimPlatform", "BuildObject", "BasicCxxBuild"]
+
+
+class SimModelCapability(StrEnum):
+    LOAD_DATA = "load-data"
+
+
+@dataclass
+class SimModel:
+    """
+    Description of a model available from a BuildObject
+    Attributes:
+        name: the model name
+        capabilities: List of capabilities of the model.
+        signature: the wiring connection of the model. This is also used to match with interfaces.
+    """
+    name: str
+    signature: Type[wiring.Signature]
+    capabilities: Optional[List[SimModelCapability]] = None
 
 
 class BuildObject(BaseModel):
@@ -33,112 +54,57 @@ class BuildObject(BaseModel):
         capabilities: arbitary list of capability identifiers
     """
     kind: str = "base"
+    models: List[SimModel]
 
     @classmethod
     def get_subclasses(cls):
         return tuple(cls.__subclasses__())
+
+    def model_for_signature(self, signature: wiring.Signature) -> SimModel | None:
+        """
+        Checks if this build object has a model for the given signature (matching by type equality)
+
+        Returns:
+            A tuple of the model and a dict of parameters from the signature
+            None on failure to find a matching model
+        """
+        for m in self.models:
+            if isinstance(signature, m.signature):
+                return m
+
+
 
 class BasicCxxBuild(BuildObject):
     """
     Represents an object built from C++, where the compilation is simply done with a collection of
     cpp and hpp files, simply compiled and linked together with no dependencies
 
+    Assumes model name corresponds to the c++ class name and that the class constructors take
+    a name followed by the wires of the interface.
+
     Attributes:
         cpp_files: C++ files used to define the model
         hpp_files: C++ header files to define the model interfaces
     """
-    kind = "basic-c++"
-    cpp_files: Optional[List[Path]] = None
+    kind: str = "basic-c++"
+    cpp_files: List[Path]
     hpp_files: Optional[List[Path]] = None
     hpp_dirs: Optional[List[Path]] = None
 
 
-SIM_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("sim-model-annotation", 0))
-
-
-class SimModelCap(StrEnum):
-    LOAD_DATA = "load-data"
-
-
-class SimModel(TypedDict):
-    """
-    Used to attach simulation models to components
-
-    Attributes:
-        cpp_class: C++ class name for the model implmentation
-        capabilities: List of capabilities of the model.
-        build: A `BuildObject` which contains the described class and implementation
-    """
-    cpp_class: str
-    build: Union[*BuildObject.get_subclasses()]
-    capabilities: NotRequired[List[SimModelCap]]
-
-@amaranth_annotate(SimModel, SIM_ANNOTATION_SCHEMA)
-class SimModelSignature(wiring.Signature):
-    """
-    An :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` to be used as the base signature in components that
-    have a simulation model.
-    """
-
-    def __init__(self, members, **kwargs: Unpack[SimModel]):
-        super().__init__(members)
-
 _COMMON_MODELS = BasicCxxBuild(
-    cpp_files = [ Path('common','sim','models.cc') ],
-    hpp_files = [ Path('common','sim','models.h') ],
+    models=[
+        SimModel('spiflash_model', SPISignature, [SimModelCapability.LOAD_DATA]),
+        SimModel('uart_model', UARTSignature),
+        SimModel('i2c_model', I2CSignature),
+        SimModel('gpio_model', GPIOSignature),
+        ],
+    cpp_files=[ Path('common','sim','models.cc') ],
+    hpp_files=[ Path('common','sim','models.h') ],
     )
 
-class SPIFlashModel(wiring.Component):
-    def __init__(self)
-        super().__init__(SimModelSignature(cpp_class='spiflash_model', build=_COMMON_MODELS, capabilities=[SimModelCap.LOAD_DATA],
-                        members={
-                            "clk": Out(OutputIOSignature(1)),
-                            "csn": Out(OutputIOSignature(1)),
-                            "d": Out(BidirIOSignature(4, all_have_oe=True)),
-                        })
-#    spiflash_model(const std::string &name, const value<1> &clk, const value<1> &csn, const value<4> &d_o, const value<4> &d_oe, value  <4> &d_i)
-UARTModel = SimModelSignature('uart_model', _COMMON_MODELS)
-#     uart_model(const std::string &name, const value<1> &tx, value<1> &rx, unsigned baud_div = 25000000/115200)
-GPIOModel = SimModelSignature('gpio_model', _COMMON_MODELS)
-#    gpio_model(const std::string &name, const value<width> &o, const value<width> &oe, value<width> &i) : name(name), o(o), oe(oe), i(  i)
-SPIModel = SimModelSignature('spi_model', _COMMON_MODELS)
-#     spi_model(const std::string &name, const value<1> &clk, const value<1> &csn, const value<1> &copi, value<1> &cipo)
-I2CModel = SimModelSignature('i2c_model', _COMMON_MODELS)
-# i2c_model(const std::string &name, const value<1> &sda_oe, value<1> &sda_i, const value<1> &scl_oe, value<1> &scl_i)
->>>>>>> e5e779df (wip)
-
-
-def print_fragment(fragment, ports=(), name="top", *, emit_src=True, **kwargs):
-    assert isinstance(fragment, (_ir.Fragment, _ir.Design))
-    name_map = _ast.SignalDict()
-    netlist = _ir.build_netlist(fragment, ports=ports, name=name, **kwargs)
-    top = netlist.modules[0]
-    print(f"netlist =\n{pformat(netlist)}")
-    #print(f"src_loc={netlist.src_loc}")
-    print(f"io_ports=\n{pformat(netlist.io_ports)}\n\nsignals={netlist.signals}\n\nsignal_fields={netlist.signal_fields}\n\nname_map={name_map}")
-
-
-def dump(elaboratable, name="top", platform=None, *, ports=None, emit_src=True, **kwargs):
-    if (ports is None and
-            hasattr(elaboratable, "signature") and
-            isinstance(elaboratable.signature, wiring.Signature)):
-        ports = {}
-        for path, member, value in elaboratable.signature.flatten(elaboratable):
-            if isinstance(value, _ast.ValueCastable):
-                value = value.as_value()
-            if isinstance(value, _ast.Value):
-                if member.flow == wiring.In:
-                    dir = _ir.PortDirection.Input
-                else:
-                    dir = _ir.PortDirection.Output
-                ports["__".join(map(str, path))] = (value, dir)
-    elif ports is None:
-        raise TypeError("The `convert()` function requires a `ports=` argument")
-    fragment = _ir.Fragment.get(elaboratable, platform)
-    print_fragment(fragment, ports, name, emit_src=emit_src, **kwargs)
 
 class SimPlatform:
-
     def __init__(self, config):
         self.build_dir = os.path.join(os.environ['CHIPFLOW_ROOT'], 'build', 'sim')
         self.extra_files = dict()
@@ -166,7 +132,6 @@ class SimPlatform:
 
         print("elaborating design")
         output = rtlil.convert(e, name="sim_top", ports=ports, platform=self)
-        dump(e, name="sim_top", ports=ports, platform=self)
 
         top_rtlil = Path(self.build_dir) / "sim_soc.il"
         with open(top_rtlil, "w") as rtlil_file:
@@ -204,6 +169,8 @@ class SimPlatform:
                     logger.debug(f"Instantiating port {port_desc.port_name}: {port_desc}")
                     invert = port_desc.invert if port_desc.invert else False
                     self._ports[port_desc.port_name] = io.SimulationPort(port_desc.direction, port_desc.width, invert=invert, name=port_desc.port_name)
+                    # TODO, allow user to add models
+                    #self._port_model = model_for_signature(port_desc.
         for clock in pinlock.port_map.get_clocks():
             assert 'clock_domain' in clock.iomodel
             domain = clock.iomodel['clock_domain']

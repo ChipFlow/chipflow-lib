@@ -157,18 +157,16 @@ def amaranth_annotate(model: Type[TypedDict], schema_id: str):
 
     def annotations(self, *args):  # type: ignore
         annotations = wiring.Signature.annotations(self, *args)  # type: ignore
-
-        io_annotation = Annotation(self._model)
-        return annotations + (io_annotation,)  # type: ignore
-
-
-
+        print(f"annotating {self} with {self._model}")
+        annotation = Annotation(self._model)
+        print(f"returning {annotations + (annotation,)}")
+        return annotations + (annotation,)  # type: ignore
 
     def decorator(klass):
         klass.annotations = annotations
-        klass.__repr__
         return klass
     return decorator
+
 
 @amaranth_annotate(IOModel, IO_ANNOTATION_SCHEMA)
 class IOSignature(wiring.Signature):
@@ -672,7 +670,6 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
                                   port_name='heartbeat',
                                   iomodel=IOModel(width=1, direction=io.Direction.Output, clock_domain="sync")
                               )
-        fir 
         #TODO: JTAG
         return {'bringup_pins': d}
 
