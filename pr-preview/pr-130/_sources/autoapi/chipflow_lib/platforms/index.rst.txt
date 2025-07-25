@@ -38,7 +38,7 @@ Functions
 Package Contents
 ----------------
 
-.. py:class:: SiliconPlatformPort(name, port_desc, *, invert = False)
+.. py:class:: SiliconPlatformPort(name, port_desc)
 
    Bases: :py:obj:`amaranth.lib.io.PortLike`
 
