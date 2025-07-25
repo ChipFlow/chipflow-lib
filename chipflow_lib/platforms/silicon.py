@@ -10,12 +10,10 @@ from dataclasses import dataclass
 from pprint import pformat
 from typing import TYPE_CHECKING, List
 
-from amaranth import Module, Signal, ClockDomain, ClockSignal, ResetSignal
-
-from amaranth.lib import wiring, io
+from amaranth import Module, Signal, ClockDomain, ClockSignal, ResetSignal, unsigned
+from amaranth.lib import wiring, io, data
 from amaranth.lib.cdc import FFSynchronizer
 from amaranth.lib.wiring import Component, In, PureInterface
-
 from amaranth.back import rtlil  #type: ignore[reportAttributeAccessIssue]
 from amaranth.hdl import Fragment
 from amaranth.hdl._ir import PortDirection
@@ -91,10 +89,17 @@ class SiliconPlatformPort(io.PortLike):
         if self.direction in (io.Direction.Output, io.Direction.Bidir):
             self._o = Signal(self._port_desc.width, name=f"{self._name}__o")
         if self.direction is io.Direction.Bidir:
-            if "individual_oe" in self.iomodel and self.iomodel["individual_oe"]:
-                self._oe = Signal(self._port_desc.width, name=f"{self._name}__oe", init=-1)
-            else:
+            # the signals that get wired out to iocells. Always one per io.
+            init_oe = -1
+            if 'init_oe' in port_desc.iomodel and port_desc.iomodel['init_oe']:
+                init_oe = port_desc.iomodel['init_oe']
+            self._oes = Signal(self._port_desc.width, name=f"{self._name}__oe", init=init_oe)
+            # the oe on the user side.
+            if "individual_oe" not in self.iomodel or not self.iomodel["individual_oe"]:
                 self._oe = Signal(1, name=f"{self._name}__oe", init=-1)
+            else:
+                self._oe = self._oes
+
         elif self.direction is io.Direction.Output:
             # Always create an _oe for output ports
             self._oe = Signal(1, name=f"{self._name}__oe", init=-1)
@@ -103,11 +108,15 @@ class SiliconPlatformPort(io.PortLike):
 
     def wire(self, m: Module, interface: PureInterface):
         assert self.direction == interface.signature.direction  #type: ignore
-        if hasattr(interface, 'i'):
+        if hasattr(interface, '_i'):
             m.d.comb += interface.i.eq(self.i)  # type: ignore
-        for d in ['o', 'oe']:
+        for d in ['_o', '_oe']:
             if hasattr(interface, d):
                 m.d.comb += getattr(self, d).eq(getattr(interface, d))
+        if self._oe is not None \
+        and "individual_oe" in self.iomodel \
+        and self.iomodel["individual_oe"]:
+            m.d.comb += self._oe.eq(self._oes)
 
     def instantiate_toplevel(self):
         ports = []
@@ -250,6 +259,8 @@ class Sky130Port(SiliconPlatformPort):
         # Port Configuration
         # Input voltage trip level
         if self.direction in (io.Direction.Input, io.Direction.Bidir):
+            assert self._i is not None
+
             if 'trip_point' in port_desc.iomodel:
                 trip_point = port_desc.iomodel['trip_point']
                 if trip_point not in __class__._VTrip_map:
@@ -258,21 +269,23 @@ class Sky130Port(SiliconPlatformPort):
             else:
                 ib_mode_init = vtrip_init = 0
 
-            self._gpio_ib_mode_sel =  Signal(1, name=f"{self._name}$ib_mode_sel", init=ib_mode_init)
-            self._signals.append((self._gpio_ib_mode_sel, PortDirection.Output))
-            self._gpio_vtrip_sel = Signal(1, name=f"{self._name}$vtrip_sel", init=vtrip_init)
-            self._signals.append((self._gpio_vtrip_sel, PortDirection.Output))
+            self._ib_mode_sel =  Signal(self._i.shape().width, name=f"{self._name}$ib_mode_sel", init=ib_mode_init)
+            self._signals.append((self._ib_mode_sel, PortDirection.Output))
+            self._vtrip_sel = Signal(self._i.shape().width, name=f"{self._name}$vtrip_sel", init=vtrip_init)
+            self._signals.append((self._vtrip_sel, PortDirection.Output))
 
         # Drive mode
         if self.direction in (io.Direction.Output, io.Direction.Bidir):
+            if self._o is None:
+                raise ChipFlowError(f"Cannot set drive modes on a port with no outputs for {name}")
             if 'drive_mode' in port_desc.iomodel:
                 dm = Sky130DriveMode(port_desc.iomodel['drive_mode'])
             else:
                 dm = Sky130DriveMode.STRONG_UP_STRONG_DOWN
             dm_init = __class__._DriveMode_map[dm]
-            self._gpio_dm = Signal(3, name=f"{self._name}$dm", init=dm_init)
-            self._signals.append((self._gpio_dm, PortDirection.Output))
-
+            dms_shape = data.ArrayLayout(unsigned(3), self._o.shape().width)
+            self._dms = Signal(dms_shape, name=f"{self._name}$dm", init=[dm_init]*self._o.shape().width)
+            self._signals.append((self._dms.as_value(), PortDirection.Output))  #type: ignore
         # Not enabled yet:
         self._gpio_slow_sel = None  # Select slew rate
         self._gpio_holdover = None  # Hold mode
@@ -295,6 +308,7 @@ class Sky130Port(SiliconPlatformPort):
     def instantiate_toplevel(self):
         ports = super().instantiate_toplevel()
         for s, d in self._signals:
+            logger.debug(f"Instantiating port for signal {repr(s)}")
             logger.debug(f"Instantiating io${s.name} top level port")
             ports.append((f"io${s.name}", s, d))
         return ports
@@ -305,6 +319,15 @@ class Sky130Port(SiliconPlatformPort):
             raise AttributeError("SiliconPlatformPort with input direction does not have an "
                                  "input enable signal")
         return self._ie
+
+    @property
+    def drive_mode(self):
+        if self._dms is None:
+            raise AttributeError("SiliconPlatformPort with input direction does not have an "
+                                 "input enable signal")
+        return self._dms
+
+    #TODO: trip selection
 
     def __invert__(self):
         result = Sky130Port(self._name, self._port_desc, invert=not self.invert)
