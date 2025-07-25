@@ -254,7 +254,7 @@ class Sky130Port(SiliconPlatformPort):
             self._signals.append((self._oe_n, PortDirection.Output))
         if self._i is not None:
             self._ie = Signal(self._i.shape().width, name=f"{self._name}$inp_dis")
-            self._signals.append((self._ie, PortDirection.Input))
+            self._signals.append((self._ie, PortDirection.Output))
 
         # Port Configuration
         # Input voltage trip level
