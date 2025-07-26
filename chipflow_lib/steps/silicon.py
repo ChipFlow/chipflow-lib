@@ -19,7 +19,7 @@ from pprint import pformat
 
 import dotenv
 
-from amaranth import *
+from amaranth import Module, Signal, Elaboratable
 from halo import Halo
 
 from . import StepBase, _wire_up_ports
@@ -182,6 +182,7 @@ class SiliconStep:
             sp.start("Sending design to ChipFlow Cloud")
 
             assert self._chipflow_api_key
+            resp = None
             try:
                 resp = requests.post(
                     build_submit_url,
@@ -203,6 +204,7 @@ class SiliconStep:
             except requests.exceptions.ReadTimeout as e:
                 network_err(e)
 
+            assert resp
             # Parse response body
             try:
                 resp_data = resp.json()

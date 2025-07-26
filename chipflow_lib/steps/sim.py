@@ -10,7 +10,7 @@ from doit.cmd_base import TaskLoader2, loader
 from doit.doit_cmd import DoitMain
 from doit.task import dict_to_task
 
-from amaranth import *
+from amaranth import Module
 
 from . import StepBase, _wire_up_ports
 from .. import ChipFlowError, _ensure_chipflow_root

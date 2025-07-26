@@ -44,10 +44,6 @@ build-backend = "pdm.backend"
 [tool.pyright]
 diagnosticMode=true
 typeCheckingMode = "standard"
-reportInvalidTypeForm = false
-reportMissingImports = false
-reportUnboundVariable = false
-reportWildcardImportFromLibrary = false
 
 [tool.ruff]
 include = [
