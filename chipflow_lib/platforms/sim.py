@@ -5,7 +5,7 @@ import os
 import sys
 from pathlib import Path
 
-from amaranth import *
+from amaranth import Module, ClockDomain, ClockSignal, ResetSignal
 from amaranth.lib import io
 from amaranth.back import rtlil  # type: ignore[reportAttributeAccessIssue]
 from amaranth.hdl._ir import PortDirection
