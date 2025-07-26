@@ -78,17 +78,16 @@ class SiliconPlatformPort(io.PortLike):
 
         if 'invert' in port_desc.iomodel:
             if isinstance(port_desc.iomodel['invert'], bool):
-                self._invert = [port_desc.iomodel['invert']]*width
+                self._invert = [port_desc.iomodel['invert']] * width
             else:
                 self._invert = port_desc.iomodel['invert']
         else:
-            self._invert = [False]*width
+            self._invert = [False] * width
 
         self._name = name
 
         # Initialize signal attributes to None
         self._i = None
-        self._ie = None
         self._o = None
         self._oe = None
         self._ie = None
@@ -96,13 +95,19 @@ class SiliconPlatformPort(io.PortLike):
         # Create signals based on direction
         if self.direction in (io.Direction.Input, io.Direction.Bidir):
             self._i = Signal(width, name=f"{self._name}$i")
-            self._ie = Signal(width, name=f"{self._name}$inp_dis", init=-1)
+            self._ie = Signal(width, name=f"{self._name}$ie", init=-1)
         if self.direction in (io.Direction.Output, io.Direction.Bidir):
-            self._o = Signal(width, name=f"{self._name}$o")
+            init = 0
+            if 'init' in port_desc.iomodel and port_desc.iomodel['init']:
+                init = port_desc.iomodel['init']
+                logger.debug(f"'init' found for self._name. Initialising outputs with {init}")
+
+            self._o = Signal(width, name=f"{self._name}$o", init=init)
 
             init_oe = -1
             if 'init_oe' in port_desc.iomodel and port_desc.iomodel['init_oe']:
                 init_oe = port_desc.iomodel['init_oe']
+                logger.debug(f"'init_oe' found for self._name. Initialising oe with {init_oe}")
 
             # user side either gets single oe or multiple, depending on 'individual_oe'
             # cells side always gets <width> oes. Wired together in the wire method below
@@ -112,19 +117,7 @@ class SiliconPlatformPort(io.PortLike):
             else:
                 self._oes = Signal(width, name=f"{self._name}$oe", init=init_oe)
                 self._oe = self._oes
-
         logger.debug(f"Created SiliconPlatformPort {self._name}, with port description:\n{pformat(self._port_desc)}")
-
-    def wire(self, m: Module, interface: PureInterface):
-        assert self.direction == interface.signature.direction  #type: ignore
-        if hasattr(interface, '_i'):
-            m.d.comb += interface.i.eq(self.i)  # type: ignore
-        for d in ['_o', '_oe', '_ie']:
-            if hasattr(interface, d):
-                m.d.comb += getattr(self, d).eq(getattr(interface, d))
-        # wire user side _oe to _oes if necessary
-        if self._oe is not None and self._oe.shape().width == 1 and self._oes.shape().width > 1:
-            m.d.comb += self._oe.eq(self._oes)
 
     def instantiate_toplevel(self):
         ports = []
@@ -133,25 +126,38 @@ class SiliconPlatformPort(io.PortLike):
             ports.append((f"io${self._name}$ie", self._ie, PortDirection.Output))
         if self.direction in (io.Direction.Output, io.Direction.Bidir):
             ports.append((f"io${self._name}$o", self._o, PortDirection.Output))
-            if self._oe is not None and self._oe.shape().width == 1 and self._oes.shape().width > 1:
+            if self._oe is not None and len(self._oe) == 1 and len(self._oes) > 1:
                 ports.append((f"io${self._name}$oe", self._oes, PortDirection.Output))
             else:
                 ports.append((f"io${self._name}$oe", self._oe, PortDirection.Output))
         return ports
 
     def wire_up(self, m, wire):
+        assert self.direction == wire.signature.direction  #type: ignore
+        # wire user side _oe to _oes if necessary
+        if self._oe is not None and len(self._oe) == 1 and len(self._oes) > 1:
+            self._oes.eq(self._oe.replicate(len(self._oes)))
+
         inv_mask = sum(inv << bit for bit, inv in enumerate(self.invert))
-        if hasattr(wire, 'i'):
-            m.d.comb += wire.i.eq(self.i ^ inv_mask)
-        if hasattr(wire, 'o'):
-            m.d.comb += self.o.eq(wire.o ^ inv_mask)
-        if hasattr(wire, 'oe'):
-            m.d.comb += self.oe.eq(wire.oe)
+        if hasattr(wire, 'i') and wire.i is not None:
+            assert self._i is not None
+            m.d.comb += wire.i.eq(self._i ^ inv_mask)
+        if hasattr(wire, 'o') and wire.o is not None:
+            assert self._o is not None
+            m.d.comb += self._o.eq(wire.o ^ inv_mask)
+        if hasattr(wire, 'oe') and wire.oe is not None:
+            assert self._oe is not None
+            m.d.comb += self._oe.eq(wire.oe)
+        elif self.direction in (io.Direction.Output, io.Direction.Bidir):
+            m.d.comb += self._oes.eq(-1)  # set output enabled if the user hasn't connected
 
         if hasattr(wire, 'ie'):
-            m.d.comb += self.ie.eq(wire.ie)
-        elif hasattr(wire, 'oe'):
-            m.d.comb += self.ie.eq(wire.oe)
+            assert self._ie is not None
+            m.d.comb += self._ie.eq(wire.ie)
+        elif self.direction is io.Direction.Bidir:
+            assert self._oes is not None
+            assert self._ie is not None
+            m.d.comb += self._ie.eq(~self._oes)
 
 
     @property
@@ -238,7 +244,7 @@ class Sky130Port(SiliconPlatformPort):
     """
     Specialisation of `SiliconPlatformPort` for the `Skywater sky130_fd_io__gpiov2 IO cell <https://skywater-pdk.readthedocs.io/en/main/contents/libraries/sky130_fd_io/docs/user_guide.html>`_
 
-    Includes wires and configuration for `Drive Modes <IODriveMode>`, `Input buffer trip point <IOTripPoint>`and buffer control~
+    Includes wires and configuration for `Drive Modes <IODriveMode>`, `Input buffer trip point <IOTripPoint>`and buffer control
     """
 
     _DriveMode_map = {
@@ -280,17 +286,6 @@ class Sky130Port(SiliconPlatformPort):
         # keep a list of signals we create
         self._signals = []
 
-        # Now create the signals for ``gpio_oeb`` (``oe_n``), ``gpio_inp_dis`` (``ie_n``)
-        self._oe_n = None
-
-        if self._oe is not None:
-            self._oe_n = Signal(self._oe.shape().width, name=f"{self._name}$oeb")
-            self._signals.append((self._oe_n, PortDirection.Output))
-
-        if self._ie is not None:
-            self._ie_n = Signal(self._ie.shape().width, name=f"{self._name}$inp_dis")
-            self._signals.append((self._ie_n, PortDirection.Output))
-
         # Port Configuration
         # Input voltage trip level
         if self.direction in (io.Direction.Input, io.Direction.Bidir):
@@ -304,9 +299,9 @@ class Sky130Port(SiliconPlatformPort):
             else:
                 ib_mode_init = vtrip_init = 0
 
-            self._ib_mode_sel =  Signal(self._i.shape().width, name=f"{self._name}$ib_mode_sel", init=ib_mode_init)
+            self._ib_mode_sel =  Signal(width, name=f"{self._name}$ib_mode_sel", init=ib_mode_init)
             self._signals.append((self._ib_mode_sel, PortDirection.Output))
-            self._vtrip_sel = Signal(self._i.shape().width, name=f"{self._name}$vtrip_sel", init=vtrip_init)
+            self._vtrip_sel = Signal(width, name=f"{self._name}$vtrip_sel", init=vtrip_init)
             self._signals.append((self._vtrip_sel, PortDirection.Output))
 
         # Drive mode
@@ -320,11 +315,11 @@ class Sky130Port(SiliconPlatformPort):
             dm_init = __class__._DriveMode_map[dm]
             dm_init_bits = [ int(b) for b in f"{dm_init:b}"]
             dms_shape = data.ArrayLayout(unsigned(3), width)
-            self._dms = Signal(dms_shape, name=f"{self._name}$dms", init=[dm_init]*width)
+            self._dms = Signal(dms_shape, name=f"{self._name}$dms", init=[dm_init] * width)
             all_ones = (2<<(width-1))-1
-            self._dm0 = Signal(width, name=f"{self._name}$dm0", init=dm_init_bits[0]*all_ones)
-            self._dm1 = Signal(width, name=f"{self._name}$dm1", init=dm_init_bits[1]*all_ones)
-            self._dm2 = Signal(width, name=f"{self._name}$dm2", init=dm_init_bits[2]*all_ones)
+            self._dm0 = Signal(width, name=f"{self._name}$dm0", init=dm_init_bits[0] * all_ones)
+            self._dm1 = Signal(width, name=f"{self._name}$dm1", init=dm_init_bits[1] * all_ones)
+            self._dm2 = Signal(width, name=f"{self._name}$dm2", init=dm_init_bits[2] * all_ones)
             self._signals.append((self._dm0, PortDirection.Output))  #type: ignore
             self._signals.append((self._dm1, PortDirection.Output))  #type: ignore
             self._signals.append((self._dm2, PortDirection.Output))  #type: ignore
@@ -347,14 +342,6 @@ class Sky130Port(SiliconPlatformPort):
 
     def wire_up(self, m, wire):
         super().wire_up(m, wire)
-        # wire up oe_n = ~oe
-        if self._oe is not None:
-            assert self._oe_n is not None
-            m.d.comb += self._oe_n.eq(~self._oe)
-
-        if self._ie is not None:
-            assert self._ie_n is not None
-            m.d.comb += self._ie_n.eq(~self._ie)
 
         if hasattr(wire, 'drive_mode'):
             m.d.comb += self.drive_mode.eq(wire.drive_mode)
