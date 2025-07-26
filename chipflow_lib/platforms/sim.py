@@ -5,23 +5,20 @@ import os
 import sys
 
 from dataclasses import dataclass
-from enum import StrEnum, auto
+from enum import StrEnum
 from pathlib import Path
-from pprint import pformat
-from typing import List, Optional, TypedDict, Optional, Unpack, Union, Type
+from typing import List, Optional, Type
 
 from amaranth import Module, ClockDomain, ClockSignal, ResetSignal
 from amaranth.lib import io, meta, wiring
 from amaranth.lib.wiring import In, Out
 from amaranth.back import rtlil  # type: ignore[reportAttributeAccessIssue]
-from amaranth.hdl import _ir, _ast
 from amaranth.hdl._ir import PortDirection
 from amaranth.lib.cdc import FFSynchronizer
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
-from .. import ChipFlowError
 from .._signatures import I2CSignature, GPIOSignature, UARTSignature, SPISignature
-from ._utils import load_pinlock, _chipflow_schema_uri, amaranth_annotate, InputIOSignature, OutputIOSignature, BidirIOSignature
+from ._utils import load_pinlock
 
 
 logger = logging.getLogger(__name__)
