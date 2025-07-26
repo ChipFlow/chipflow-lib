@@ -392,18 +392,15 @@ class IOBuffer(io.Buffer):
                 m.d.comb += o_inv.eq(self.o ^ invert)
             else:
                 o_inv = self.o
+            m.d.comb += self.port.o.eq(o_inv)
+            m.d.comb += self.port.oe.eq(self.oe)
         if self.direction is not io.Direction.Output:
             if invert:
                 i_inv = Signal.like(self.i)
                 m.d.comb += self.i.eq(i_inv ^ invert)
             else:
                 i_inv = self.i
-
-        if self.direction in (io.Direction.Input, io.Direction.Bidir):
             m.d.comb += i_inv.eq(self.port.i)
-        if self.direction in (io.Direction.Output, io.Direction.Bidir):
-            m.d.comb += self.port.o.eq(o_inv)
-            m.d.comb += self.port.oe.eq(self.oe)
 
         return m
 

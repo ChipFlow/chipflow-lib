@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:7529ba023302c995441bcbe1151581d23df93718d9420858ddd183cf8dcbb704"
+content_hash = "sha256:7d2e091a6e3f13d24dc0a95c2c476b978ae2ccb83829641c503b044080cf14de"
 
 [[metadata.targets]]
 requires_python = ">=3.11"
@@ -66,14 +66,14 @@ dependencies = [
 
 [[package]]
 name = "amaranth-soc"
-version = "0.1.dev136"
+version = "0.1a1.dev24"
 requires_python = "~=3.9"
-git = "https://github.com/ChipFlow/amaranth-soc"
-revision = "3a091491effde720ed39748f63b708b6ab27d0f9"
+git = "https://github.com/amaranth-lang/amaranth-soc"
+revision = "5c43cf58f15d9cd9c69ff83c97997708d386b2dc"
 summary = "System on Chip toolkit for Amaranth HDL"
 groups = ["default"]
 dependencies = [
-    "amaranth<0.7,>=0.5",
+    "amaranth<0.6,>=0.5",
 ]
 
 [[package]]
@@ -81,7 +81,7 @@ name = "amaranth-stubs"
 version = "0.1.1"
 requires_python = ">=3.11"
 summary = ""
-groups = ["default", "dev"]
+groups = ["dev"]
 dependencies = [
     "amaranth==0.5.4",
 ]
