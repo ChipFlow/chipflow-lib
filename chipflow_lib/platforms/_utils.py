@@ -130,12 +130,13 @@ class IOModel(IOModelOptions):
     width: int
     direction: Annotated[io.Direction, PlainSerializer(lambda x: x.value)]
 
-def amaranth_annotate(model: Type[TypedDict], schema_id: str):
+def amaranth_annotate(modeltype: Type[TypedDict], schema_id: str):
+    PydanticModel = TypeAdapter(modeltype)
+
     def annotation_schema():
         class Model(pydantic.BaseModel):
-            data_td: model
+            data_td: modeltype
 
-        PydanticModel = TypeAdapter(model)
         schema = PydanticModel.json_schema()
         schema['$schema'] = "https://json-schema.org/draft/2020-12/schema"
         schema['$id'] = schema_id
@@ -145,7 +146,7 @@ def amaranth_annotate(model: Type[TypedDict], schema_id: str):
         "Generated annotation class"
         schema = annotation_schema()
 
-        def __init__(self, model:IOModel):
+        def __init__(self, model: modeltype):
             self._model = model
 
         @property
@@ -153,13 +154,11 @@ def amaranth_annotate(model: Type[TypedDict], schema_id: str):
             return self._model
 
         def as_json(self):  # type: ignore
-            return TypeAdapter(IOModel).dump_python(self._model)
+            return PydanticModel.dump_python(self._model)
 
     def annotations(self, *args):  # type: ignore
         annotations = wiring.Signature.annotations(self, *args)  # type: ignore
-        print(f"annotating {self} with {self._model}")
         annotation = Annotation(self._model)
-        print(f"returning {annotations + (annotation,)}")
         return annotations + (annotation,)  # type: ignore
 
     def decorator(klass):
@@ -386,17 +385,17 @@ def _group_consecutive_items(ordering: PinList, lst: PinList) -> OrderedDict[int
     last = lst[0]
     current_group = [last]
 
-    logger.debug(f"_group_consecutive_items starting with {current_group}")
+    #logger.debug(f"_group_consecutive_items starting with {current_group}")
 
     for item in lst[1:]:
         idx = ordering.index(last)
         next = ordering[idx + 1] if idx < len(ordering) - 1 else None
-        logger.debug(f"inspecting {item}, index {idx}, next {next}")
+        #logger.debug(f"inspecting {item}, index {idx}, next {next}")
         if item == next:
             current_group.append(item)
-            logger.debug("found consecutive, adding to current group")
+            #logger.debug("found consecutive, adding to current group")
         else:
-            logger.debug("found nonconsecutive, creating new group")
+            #logger.debug("found nonconsecutive, creating new group")
             grouped.append(current_group)
             current_group = [item]
         last = item

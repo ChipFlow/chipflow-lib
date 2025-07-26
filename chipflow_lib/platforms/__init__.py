@@ -14,11 +14,13 @@ from ._utils import (
         )
 from ._packages import PACKAGE_DEFINITIONS
 from ._sky130 import Sky130DriveMode
+from ._signatures import JTAGSignature, SPISignature, I2CSignature, UARTSignature, GPIOSignature, QSPIFlashSignature
 
 __all__ = ['IO_ANNOTATION_SCHEMA', 'IOSignature',
            'IOModel', 'IOModelOptions', 'IOTripPoint',
            'OutputIOSignature', 'InputIOSignature', 'BidirIOSignature',
            'SiliconPlatformPort', 'SiliconPlatform',
            'SimPlatform',
+           'JTAGSignature', 'SPISignature', 'I2CSignature', 'UARTSignature', 'GPIOSignature',
            'Sky130DriveMode',
            'PACKAGE_DEFINITIONS']
