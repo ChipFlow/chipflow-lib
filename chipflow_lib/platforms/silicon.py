@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from pprint import pformat
 from typing import TYPE_CHECKING, List
 
-from amaranth import Module, Signal, ClockDomain, ClockSignal, ResetSignal, Value, unsigned
+from amaranth import Module, Signal, ClockDomain, ClockSignal, ResetSignal, unsigned
 from amaranth.lib import wiring, io, data
 from amaranth.lib.cdc import FFSynchronizer
 from amaranth.lib.wiring import Component, In, PureInterface
