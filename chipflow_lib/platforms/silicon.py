@@ -146,7 +146,7 @@ class SiliconPlatformPort(io.PortLike):
         if hasattr(wire, 'ie'):
             m.d.comb += self.ie.eq(wire.ie)
         elif hasattr(wire, 'oe'):
-            m.d.comb += self.ie.eq(wire.oe)
+            m.d.comb += self.ie.eq(~wire.oe)
 
 
     @property
