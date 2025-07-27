@@ -147,18 +147,18 @@ def amaranth_annotate(modeltype: Type[TypedDict], schema_id: str):
         schema = annotation_schema()
 
         def __init__(self, model: modeltype):
-            self._model = model
+            self.__chipflow_annotation__ = model
 
         @property
         def origin(self):  # type: ignore
-            return self._model
+            return self.__chipflow_annotation__
 
         def as_json(self):  # type: ignore
-            return PydanticModel.dump_python(self._model)
+            return PydanticModel.dump_python(self.__chipflow_annotation__)
 
     def annotations(self, *args):  # type: ignore
         annotations = wiring.Signature.annotations(self, *args)  # type: ignore
-        annotation = Annotation(self._model)
+        annotation = Annotation(self.__chipflow_annotation__)
         return annotations + (annotation,)  # type: ignore
 
     def decorator(klass):
@@ -211,34 +211,35 @@ class IOSignature(wiring.Signature):
         if 'clock_domain' not in model:
             model['clock_domain'] = 'sync'
 
-        self._model = model
+        self.__chipflow_annotation__ = model
         super().__init__(sig)
 
     @property
     def direction(self) -> io.Direction:
         "The direction of the IO port"
-        return self._model['direction']
+        return self.__chipflow_annotation__['direction']
 
     @property
     def width(self) -> int:
         "The width of the IO port, in wires"
-        return self._model['width']
+        return self.__chipflow_annotation__['width']
 
     @property
     def invert(self) -> Iterable[bool]:
         "A tuple as wide as the IO port, with a bool for the polarity inversion for each wire"
-        assert type(self._model['invert']) is tuple
-        return self._model['invert']
+        assert type(self.__chipflow_annotation__['invert']) is tuple
+        return self.__chipflow_annotation__['invert']
 
     @property
     def options(self) -> IOModelOptions:
         """
         Options set on the io port at construction
         """
-        return self._model
+        return self.__chipflow_annotation__
 
     def __repr__(self):
-        return f"IOSignature({','.join('{0}={1!r}'.format(k,v) for k,v in self._model.items())})"
+        return f"IOSignature({','.join('{0}={1!r}'.format(k,v) for k,v in self.__chipflow_annotation__.items())})"
+
 
 def OutputIOSignature(width: int, **kwargs: Unpack[IOModelOptions]):
     """This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package output signals

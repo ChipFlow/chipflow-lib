@@ -20,10 +20,10 @@ from amaranth.lib.cdc import FFSynchronizer
 from jinja2 import Environment, PackageLoader, select_autoescape
 from pydantic import BaseModel
 
-from .. import ChipFlowError
+from .. import ChipFlowError, _ensure_chipflow_root
 from ._signatures import (
         I2CSignature, GPIOSignature, UARTSignature, SPISignature, QSPIFlashSignature,
-        SimulatableSignature, SIM_ANNOTATION_SCHEMA, SimInterface
+        SIM_ANNOTATION_SCHEMA, SimInterface
         )
 from ._utils import load_pinlock, Interface
 
@@ -46,12 +46,15 @@ class SimModel:
         capabilities: List of capabilities of the model.
     """
     name: str
-    signature: Type[SimulatableSignature]
+    signature: Type[wiring.Signature]
     capabilities: Optional[List[SimModelCapability]] = None
 
+    def __post_init__(self):
+        if not hasattr(self.signature, '__chipflow_uid__'):
+            raise ChipFlowError(f"Signature {self.signature} must be decorated with `sim_annotate()` to use as a simulation model identifier")
 
 
-def cxxmangle(name, ispublic=True):
+def cxxrtlmangle(name, ispublic=True):
     # RTLIL allows any characters in names other than whitespace. This presents an issue for generating C++ code
     # because C++ identifiers may be only alphanumeric, cannot clash with C++ keywords, and cannot clash with cxxrtl
     # identifiers. This issue can be solved with a name mangling scheme. We choose a name mangling scheme that results
@@ -92,47 +95,58 @@ class BasicCxxBuilder(BaseModel):
         cpp_files: C++ files used to define the model
         hpp_files: C++ header files to define the model interfaces
     """
-    models: Dict[str, SimModel]
+    models: List[SimModel]
     cpp_files: List[Path]
     hpp_files: Optional[List[Path]] = None
     hpp_dirs: Optional[List[Path]] = None
 
-    def instantiate_model(self, interface_name: str, sim_interface: SimInterface, interface_desc: Interface, ports: Dict[str, io.SimulationPort]) -> str:
-        name = sim_interface['name']
+    def model_post_init(self, *args, **kwargs):
+        self._table = { getattr(m.signature,'__chipflow_uid__'): m for m in self.models }
+
+    def uid_to_c(self, uid: str) -> str:
+        return uid.replace('.','__')
+
+    def instantiate_model(self, interface: str, sim_interface: SimInterface, interface_desc: Interface, ports: Dict[str, io.SimulationPort]) -> str:
+        #TODO cache if this gets slow
+
+        uid = sim_interface['uid']
         parameters = sim_interface['parameters']
-        if name not in self.models:
+        if uid not in self._table:
             logger.warn(f"Unable to find simulation model for '{sim_interface}'")
 
-        model = self.models[name]
+        model = self._table[uid]
+        print(getattr(model.signature, '__chipflow_uid__'))
         sig = model.signature(**parameters)
         members = list(sig.flatten(sig.create()))
 
         sig_names = [ path for path, _, _ in members ]
         port_names = { n: interface_desc[n].port_name for n in interface_desc.keys()}
 
+        identifier_uid = self.uid_to_c(uid)
         names = [f"\\io${port_names[str(n)]}${d}" for n,d in sig_names]
-        params = [f"top.{cxxmangle(n)}" for n in names]
+        params = [f"top.{cxxrtlmangle(n)}" for n in names]
 
-        out = f"{model.name} {interface_name}(\"{interface_name}\", "
+        out = f"{model.name} {interface}(\"{interface}\", "
         out += ', '.join(list(params))
         out += ')\n'
         return out
 
 def find_builder(builders: List[BasicCxxBuilder], sim_interface: SimInterface):
-    name = sim_interface['name']
+    uid = sim_interface['uid']
     for b in builders:
-        if name in b.models:
+        if uid in b._table:
             return b
-    logger.warn(f"Unable to find builder for '{name}'")
+    logger.warn(f"Unable to find builder for '{uid}'")
     return None
+
 _COMMON_BUILDER = BasicCxxBuilder(
-    models={
-        SPISignature.__name__: SimModel('spi_model', SPISignature),
-        QSPIFlashSignature.__name__: SimModel('spiflash_model', QSPIFlashSignature,  [SimModelCapability.LOAD_DATA]),
-        UARTSignature.__name__: SimModel('uart_model', UARTSignature),
-        I2CSignature.__name__: SimModel('i2c_model', I2CSignature),
-        GPIOSignature.__name__: SimModel('gpio_model', GPIOSignature),
-        },
+    models=[
+        SimModel('spi_model', SPISignature),
+        SimModel('spiflash_model', QSPIFlashSignature,  [SimModelCapability.LOAD_DATA]),
+        SimModel('uart_model', UARTSignature),
+        SimModel('i2c_model', I2CSignature),
+        SimModel('gpio_model', GPIOSignature),
+        ],
     cpp_files=[ Path('{COMMON_DIR}', 'models.cc') ],
     hpp_files=[ Path('models.h') ],
     hpp_dirs=[Path("{COMMON_DIR}")],
@@ -203,8 +217,10 @@ class SimPlatform:
                     includes = [hpp for b in self._builders if b.hpp_files for hpp in b.hpp_files ],
                     initialisers = [exp for exp in self._top_sim.values()],
                     interfaces = [exp for exp in self._top_sim.keys()],
-                    clocks = [cxxmangle(f"io${clk}$i") for clk in self._clocks.keys()],
-                    resets = [cxxmangle(f"io${rst}$i") for rst in self._resets.keys()]),
+                    clocks = [cxxrtlmangle(f"io${clk}$i") for clk in self._clocks.keys()],
+                    resets = [cxxrtlmangle(f"io${rst}$i") for rst in self._resets.keys()],
+                    data_load = [{'model_name': 'flash', 'file_name':_ensure_chipflow_root() / 'build'/ 'software'/'software.bin', 'args':[ '0x00100000U' ]}]
+                ),
                 file=main_file)
 
 

@@ -103,7 +103,7 @@ private:
 
 struct spi_model {
     std::string name;
-    spi_model(const std::string &name, const value<1> &clk, const value<1> &csn, const value<1> &copi, value<1> &cipo) : 
+    spi_model(const std::string &name, const value<1> &clk, const value<1> &copi, value<1> &cipo, const value<1> &csn) : 
         name(name), clk(clk), csn(csn), copi(copi), cipo(cipo) {
     };
 
@@ -127,7 +127,7 @@ private:
 
 struct i2c_model {
     std::string name;
-    i2c_model(const std::string &name, const value<1> &sda_o, const value<1> &sda_oe, value<1> &sda_i, const value<1> &scl_o, const value<1> &scl_oe, value<1> &scl_i) : name(name), sda_oe(sda_oe), sda_i(sda_i), scl_oe(scl_oe), scl_i(scl_i) {};
+    i2c_model(const std::string &name, const value<1> &scl_o, const value<1> &scl_oe, value<1> &scl_i, const value<1> &sda_o, const value<1> &sda_oe, value<1> &sda_i)  : name(name), sda_oe(sda_oe), sda_i(sda_i), scl_oe(scl_oe), scl_i(scl_i) {};
 
     void step(unsigned timestamp);
 private:

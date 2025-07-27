@@ -52,7 +52,10 @@ int main(int argc, char **argv) {
         //     agent.breakpoint(CXXRTL_LOCATION);
     };
 
-    flash.load_data(BUILD_DIR "/software/software.bin", 0x00100000U);
+    {% for data in data_load %}
+    {{data.model_name}}.load_data("{{data.file_name}}", {{data.args | join(', ')}});
+    {% endfor %}
+
     agent.step();
     agent.advance(1_us);
 
