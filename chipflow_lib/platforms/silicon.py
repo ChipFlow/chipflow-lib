@@ -98,16 +98,17 @@ class SiliconPlatformPort(io.PortLike):
         if self.direction in (io.Direction.Output, io.Direction.Bidir):
             self._o = Signal(width, name=f"{self._name}$o")
 
-            # the oe signals that get wired out to iocells. Always one per io.
             init_oe = -1
             if 'init_oe' in port_desc.iomodel and port_desc.iomodel['init_oe']:
                 init_oe = port_desc.iomodel['init_oe']
-            self._oes = Signal(width, name=f"{self._name}$oe", init=init_oe)
 
-            # the oe on the user side.
+            # user side either gets single oe or multiple, depending on 'individual_oe'
+            # cells side always gets <width> oes. Wired together in the wire method below
             if "individual_oe" not in self.iomodel or not self.iomodel["individual_oe"]:
-                self._oe = Signal(1, name=f"{self._name}$oe", init=-1)
+                self._oe = Signal(1, name=f"{self._name}$oe", init=init_oe)
+                self._oes = Signal(width, name=f"{self._name}$oe") 
             else:
+                self._oes = Signal(width, name=f"{self._name}$oe", init=init_oe)
                 self._oe = self._oes
 
         logger.debug(f"Created SiliconPlatformPort {self._name}, with port description:\n{pformat(self._port_desc)}")
@@ -119,19 +120,21 @@ class SiliconPlatformPort(io.PortLike):
         for d in ['_o', '_oe', '_ie']:
             if hasattr(interface, d):
                 m.d.comb += getattr(self, d).eq(getattr(interface, d))
-        if self._oe is not None \
-        and "individual_oe" in self.iomodel \
-        and self.iomodel["individual_oe"]:
+        # wire user side _oe to _oes if necessary
+        if self._oe is not None and self._oe.shape().width == 1 and self._oes.shape().width > 1:
             m.d.comb += self._oe.eq(self._oes)
 
     def instantiate_toplevel(self):
         ports = []
         if self.direction in (io.Direction.Input, io.Direction.Bidir):
-            ports.append((f"io${self._name}$i", self.i, PortDirection.Input))
-            ports.append((f"io${self._name}$ie", self.ie, PortDirection.Output))
+            ports.append((f"io${self._name}$i", self._i, PortDirection.Input))
+            ports.append((f"io${self._name}$ie", self._ie, PortDirection.Output))
         if self.direction in (io.Direction.Output, io.Direction.Bidir):
-            ports.append((f"io${self._name}$o", self.o, PortDirection.Output))
-            ports.append((f"io${self._name}$oe", self.oe, PortDirection.Output))
+            ports.append((f"io${self._name}$o", self._o, PortDirection.Output))
+            if self._oe is not None and self._oe.shape().width == 1 and self._oes.shape().width > 1:
+                ports.append((f"io${self._name}$oe", self._oes, PortDirection.Output))
+            else:
+                ports.append((f"io${self._name}$oe", self._oe, PortDirection.Output))
         return ports
 
     def wire_up(self, m, wire):
@@ -307,10 +310,10 @@ class Sky130Port(SiliconPlatformPort):
             dm_init_bits = [ int(b) for b in f"{dm_init:b}"]
             dms_shape = data.ArrayLayout(unsigned(3), self.width)
             self._dms = Signal(dms_shape, name=f"{self._name}$dms", init=[dm_init]*self.width)
-
-            self._dm0 = Signal(self._o.shape(), name=f"{self._name}$dm0", init=dm_init_bits[0])
-            self._dm1 = Signal(self._o.shape(), name=f"{self._name}$dm1", init=dm_init_bits[1])
-            self._dm2 = Signal(self._o.shape(), name=f"{self._name}$dm2", init=dm_init_bits[2])
+            all_ones = (2<<(self.width-1))-1
+            self._dm0 = Signal(self.width, name=f"{self._name}$dm0", init=dm_init_bits[0]*all_ones)
+            self._dm1 = Signal(self.width, name=f"{self._name}$dm1", init=dm_init_bits[1]*all_ones)
+            self._dm2 = Signal(self.width, name=f"{self._name}$dm2", init=dm_init_bits[2]*all_ones)
             self._signals.append((self._dm0, PortDirection.Output))  #type: ignore
             self._signals.append((self._dm1, PortDirection.Output))  #type: ignore
             self._signals.append((self._dm2, PortDirection.Output))  #type: ignore
