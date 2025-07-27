@@ -94,7 +94,7 @@ class SiliconPlatformPort(io.PortLike):
         # Create signals based on direction
         if self.direction in (io.Direction.Input, io.Direction.Bidir):
             self._i = Signal(width, name=f"{self._name}$i")
-            self._ie = Signal(width, name=f"{self._name}$ie")
+            self._ie = Signal(width, name=f"{self._name}$ie", init=-1)
         if self.direction in (io.Direction.Output, io.Direction.Bidir):
             self._o = Signal(width, name=f"{self._name}$o")
 
