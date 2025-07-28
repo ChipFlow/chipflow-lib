@@ -23,17 +23,19 @@ def sim_annotate(base="com.chipflow.chipflow_lib"):
         dec = amaranth_annotate(SimInterface, SIM_ANNOTATION_SCHEMA)
         klass = dec(klass)
 
-        original_init = klass.__init__
         def new_init(self,*args, **kwargs):
+            print("called new_init")
             original_init(self, *args, **kwargs)
             self.__chipflow_annotation__ = {
                 "uid": klass.__chipflow_uid__,
                 "parameters": self.__chipflow_parameters__(),
                 }
 
+        original_init = klass.__init__
         klass.__init__ = new_init
         klass.__chipflow_uid__ = f"{base}.{klass.__name__}"
-        klass.__chipflow_parameters__ = lambda self: {}
+        if not hasattr(klass, '__chipflow_parameters__'):
+            klass.__chipflow_parameters__ = lambda self: {}
         return klass
     return decorate
 
@@ -98,6 +100,7 @@ class GPIOSignature(wiring.Signature):
             })
 
     def __chipflow_parameters__(self):
+        print("called GPIOSignature.__chipflow_parameters__")
         return {'pin_count': self._pin_count}
 
     def __repr__(self) -> str:

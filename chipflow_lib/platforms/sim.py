@@ -107,8 +107,6 @@ class BasicCxxBuilder(BaseModel):
         return uid.replace('.','__')
 
     def instantiate_model(self, interface: str, sim_interface: SimInterface, interface_desc: Interface, ports: Dict[str, io.SimulationPort]) -> str:
-        #TODO cache if this gets slow
-
         uid = sim_interface['uid']
         parameters = sim_interface['parameters']
         if uid not in self._table:
@@ -127,6 +125,11 @@ class BasicCxxBuilder(BaseModel):
         params = [f"top.{cxxrtlmangle(n)}" for n in names]
 
         out = f"{model.name} {interface}(\"{interface}\", "
+        if len(parameters):
+            cpp_params = []
+            for p,v in parameters.items():
+                cpp_params.append(f"{p} = {v}")
+            out += '{' + ', '.join(cpp_params) + '}, '
         out += ', '.join(list(params))
         out += ')\n'
         return out

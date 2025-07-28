@@ -83,17 +83,21 @@ private:
 };
 
 struct gpio_model {
-    static constexpr unsigned width = 8;
     std::string name;
-    gpio_model(const std::string &name, const value<width> &o, const value<width> &oe, value<width> &i) : name(name), o(o), oe(oe), i(i) {};
+    struct parameters {
+        unsigned pin_count;
+    };
+    parameters parameters;
+
+    gpio_model(const std::string &name, parameters, const value<paramters.pin_count> &o, const value<parameters.pin_count> &oe, value<parameters.pin_count> &i) : name(name), parameters(parameters), o(o), oe(oe), i(i) {};
 
     void step(unsigned timestamp);
 
 private:
     uint32_t input_data = 0;
-    const value<width> &o;
-    const value<width> &oe;
-    value<width> &i;
+    const value<pin_count> &o;
+    const value<pin_count> &oe;
+    value<pin_count> &i;
     struct {
         uint32_t o_last = 0;
         uint32_t oe_last = 0;

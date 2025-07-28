@@ -284,8 +284,8 @@ void gpio_model::step(unsigned timestamp) {
         if (action.event == "set") {
             auto bin = std::string(action.payload);
             input_data = 0;
-            for (unsigned i = 0; i < width; i++) {
-                if (bin.at((width - 1) - i) == '1')
+            for (unsigned i = 0; i < pin_count; i++) {
+                if (bin.at((pin_count - 1) - i) == '1')
                     input_data |= (1U << i);
             }
         }
@@ -293,7 +293,7 @@ void gpio_model::step(unsigned timestamp) {
 
     if (o_value != s.o_last || oe_value != s.oe_last) {
         std::string formatted_value;
-        for (int i = width - 1; i >= 0; i--) {
+        for (int i = pin_count - 1; i >= 0; i--) {
             if (oe_value & (1U << unsigned(i)))
                 formatted_value += (o_value & (1U << unsigned(i))) ? '1' : '0';
             else
