@@ -17,6 +17,12 @@ class SimInterface(TypedDict):
 
 _VALID_UID = re.compile('[a-zA-Z_.]').search
 
+"""
+Attributes:
+    __chipflow_parameters__: list of tuples (name, value).
+        It is expected that a model that takes parameters is implmemted as a template, with the parameters in the order
+        given.
+"""
 def sim_annotate(base="com.chipflow.chipflow_lib"):
     def decorate(klass):
         assert _VALID_UID(base)
@@ -35,7 +41,7 @@ def sim_annotate(base="com.chipflow.chipflow_lib"):
         klass.__init__ = new_init
         klass.__chipflow_uid__ = f"{base}.{klass.__name__}"
         if not hasattr(klass, '__chipflow_parameters__'):
-            klass.__chipflow_parameters__ = lambda self: {}
+            klass.__chipflow_parameters__ = lambda self: []
         return klass
     return decorate
 
@@ -101,7 +107,7 @@ class GPIOSignature(wiring.Signature):
 
     def __chipflow_parameters__(self):
         print("called GPIOSignature.__chipflow_parameters__")
-        return {'pin_count': self._pin_count}
+        return [('pin_count',self._pin_count)]
 
     def __repr__(self) -> str:
         return f"GPIOSignature(pin_count={self._pin_count}, {dict(self.members.items())})"

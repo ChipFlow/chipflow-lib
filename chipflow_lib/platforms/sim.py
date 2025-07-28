@@ -114,7 +114,7 @@ class BasicCxxBuilder(BaseModel):
 
         model = self._table[uid]
         print(getattr(model.signature, '__chipflow_uid__'))
-        sig = model.signature(**parameters)
+        sig = model.signature(**dict(parameters))
         members = list(sig.flatten(sig.create()))
 
         sig_names = [ path for path, _, _ in members ]
@@ -124,12 +124,13 @@ class BasicCxxBuilder(BaseModel):
         names = [f"\\io${port_names[str(n)]}${d}" for n,d in sig_names]
         params = [f"top.{cxxrtlmangle(n)}" for n in names]
 
-        out = f"{model.name} {interface}(\"{interface}\", "
+        cpp_class = model.name
         if len(parameters):
-            cpp_params = []
-            for p,v in parameters.items():
-                cpp_params.append(f"{p} = {v}")
-            out += '{' + ', '.join(cpp_params) + '}, '
+            template_params = []
+            for p,v in parameters:
+                template_params.append(f"{v}")
+            cpp_class = cpp_class + '<' + ', '.join(template_params) + '>'
+        out = f"{cpp_class} {interface}(\"{interface}\", "
         out += ', '.join(list(params))
         out += ')\n'
         return out
