@@ -23,7 +23,7 @@ from pydantic import BaseModel
 from .. import ChipFlowError, _ensure_chipflow_root
 from ._signatures import (
         I2CSignature, GPIOSignature, UARTSignature, SPISignature, QSPIFlashSignature,
-        SIM_ANNOTATION_SCHEMA, SimInterface
+        SIM_ANNOTATION_SCHEMA, SIM_DATA_SCHEMA, SimInterface
         )
 from ._utils import load_pinlock, Interface
 
@@ -143,6 +143,7 @@ def find_builder(builders: List[BasicCxxBuilder], sim_interface: SimInterface):
     logger.warn(f"Unable to find builder for '{uid}'")
     return None
 
+
 _COMMON_BUILDER = BasicCxxBuilder(
     models=[
         SimModel('spi_model', SPISignature),
@@ -164,10 +165,11 @@ class SimPlatform:
         self.sim_boxes = dict()
         self._ports: Dict[str, io.SimulationPort] = {}
         self._config = config
-        self._builders: List[BasicCxxBuilder] = [ _COMMON_BUILDER ]
-        self._top_sim = {}
         self._clocks = {}
         self._resets = {}
+        self._builders: List[BasicCxxBuilder] = [ _COMMON_BUILDER ]
+        self._sim_data = {}
+        self._top_sim = {}
 
     def add_file(self, filename, content):
         if not isinstance(content, (str, bytes)):
@@ -186,7 +188,7 @@ class SimPlatform:
             if port.direction is io.Direction.Bidir:
                 ports.append((f"io${port_name}$oe", port.oe, PortDirection.Output))
 
-        print("elaborating design")
+        print("Generating RTLIL from design")
         output = rtlil.convert(e, name="sim_top", ports=ports, platform=self)
 
         top_rtlil = Path(self.build_dir) / "sim_soc.il"
@@ -216,6 +218,13 @@ class SimPlatform:
             autoescape=select_autoescape()
         )
         template = env.get_template("main.cc.jinja")
+        data_load = []
+        for i,d in self._sim_data.items():
+            args = [f"0x{d['offset']:X}U"]
+            p = Path(d['file_name'])
+            if not p.is_absolute():
+                p = _ensure_chipflow_root() / p
+            data_load.append({'model_name': i, 'file_name': p, 'args': args})
         with main.open("w") as main_file:
             print(template.render(
                     includes = [hpp for b in self._builders if b.hpp_files for hpp in b.hpp_files ],
@@ -223,7 +232,7 @@ class SimPlatform:
                     interfaces = [exp for exp in self._top_sim.keys()],
                     clocks = [cxxrtlmangle(f"io${clk}$i") for clk in self._clocks.keys()],
                     resets = [cxxrtlmangle(f"io${rst}$i") for rst in self._resets.keys()],
-                    data_load = [{'model_name': 'flash', 'file_name':_ensure_chipflow_root() / 'build'/ 'software'/'software.bin', 'args':[ '0x00100000U' ]}]
+                    data_load = data_load
                 ),
                 file=main_file)
 
@@ -239,12 +248,18 @@ class SimPlatform:
                     logger.debug(f"Instantiating port {port_desc.port_name}: {port_desc}")
                     invert = port_desc.invert if port_desc.invert else False
                     self._ports[port_desc.port_name] = io.SimulationPort(port_desc.direction, port_desc.width, invert=invert, name=port_desc.port_name)
-                if not component.startswith('_') \
-                and pinlock.metadata[component]['interface']['members'][interface]['annotations']:
-                    sim_interface = pinlock.metadata[component]['interface']['members'][interface]['annotations'][SIM_ANNOTATION_SCHEMA]
+                if component.startswith('_'):
+                    continue
+                annotations = pinlock.metadata[component]['interface']['members'][interface]['annotations']
+
+                if SIM_ANNOTATION_SCHEMA in annotations:
+                    sim_interface = annotations[SIM_ANNOTATION_SCHEMA]
                     builder = find_builder(self._builders, sim_interface)
                     if builder:
                         self._top_sim[interface] = builder.instantiate_model(interface, sim_interface, interface_desc, self._ports)
+
+                if SIM_DATA_SCHEMA in annotations:
+                    self._sim_data[interface] = annotations[SIM_DATA_SCHEMA]
 
         print(f"ports = {pformat(self._ports)}")
         for clock in pinlock.port_map.get_clocks():

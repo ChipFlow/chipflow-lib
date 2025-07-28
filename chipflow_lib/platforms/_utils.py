@@ -31,6 +31,7 @@ from pydantic import (
 
 from .. import ChipFlowError, _ensure_chipflow_root, _get_cls_by_reference
 from .._appresponse import AppResponseModel, OmitIfNone
+from ._annotate import amaranth_annotate
 from ._sky130 import Sky130DriveMode
 
 if TYPE_CHECKING:
@@ -83,7 +84,6 @@ class IOTripPoint(StrEnum):
 IO_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("pin-annotation", 0))
 
 
-@pydantic.with_config(ConfigDict(arbitrary_types_allowed=True))  # type: ignore[reportCallIssue]
 class IOModelOptions(TypedDict):
     """
     Options for an IO pad/pin.
@@ -130,45 +130,8 @@ class IOModel(IOModelOptions):
     width: int
     direction: Annotated[io.Direction, PlainSerializer(lambda x: x.value)]
 
-def amaranth_annotate(modeltype: Type[TypedDict], schema_id: str):
-    PydanticModel = TypeAdapter(modeltype)
 
-    def annotation_schema():
-        class Model(pydantic.BaseModel):
-            data_td: modeltype
-
-        schema = PydanticModel.json_schema()
-        schema['$schema'] = "https://json-schema.org/draft/2020-12/schema"
-        schema['$id'] = schema_id
-        return schema
-
-    class Annotation(meta.Annotation):
-        "Generated annotation class"
-        schema = annotation_schema()
-
-        def __init__(self, model: modeltype):
-            self.__chipflow_annotation__ = model
-
-        @property
-        def origin(self):  # type: ignore
-            return self.__chipflow_annotation__
-
-        def as_json(self):  # type: ignore
-            return PydanticModel.dump_python(self.__chipflow_annotation__)
-
-    def decorator(klass):
-        def annotations(self, *args):  # type: ignore
-            annotations = super(klass, self).annotations(*args)  # type: ignore
-            annotation = Annotation(self.__chipflow_annotation__)
-            return annotations + (annotation,)  # type: ignore
-
-
-        klass.annotations = annotations
-        return klass
-    return decorator
-
-
-@amaranth_annotate(IOModel, IO_ANNOTATION_SCHEMA)
+@amaranth_annotate(IOModel, IO_ANNOTATION_SCHEMA, '_model')
 class IOSignature(wiring.Signature):
     """An :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` used to decorate wires that would usually be brought out onto a port on the package.
     This class is generally not directly used.  Instead, you would typically utilize the more specific
@@ -212,34 +175,34 @@ class IOSignature(wiring.Signature):
         if 'clock_domain' not in model:
             model['clock_domain'] = 'sync'
 
-        self.__chipflow_annotation__ = model
+        self._model = model
         super().__init__(sig)
 
     @property
     def direction(self) -> io.Direction:
         "The direction of the IO port"
-        return self.__chipflow_annotation__['direction']
+        return self._model['direction']
 
     @property
     def width(self) -> int:
         "The width of the IO port, in wires"
-        return self.__chipflow_annotation__['width']
+        return self._model['width']
 
     @property
     def invert(self) -> Iterable[bool]:
         "A tuple as wide as the IO port, with a bool for the polarity inversion for each wire"
-        assert type(self.__chipflow_annotation__['invert']) is tuple
-        return self.__chipflow_annotation__['invert']
+        assert type(self._model['invert']) is tuple
+        return self._model['invert']
 
     @property
     def options(self) -> IOModelOptions:
         """
         Options set on the io port at construction
         """
-        return self.__chipflow_annotation__
+        return self._model
 
     def __repr__(self):
-        return f"IOSignature({','.join('{0}={1!r}'.format(k,v) for k,v in self.__chipflow_annotation__.items())})"
+        return f"IOSignature({','.join('{0}={1!r}'.format(k,v) for k,v in self._model.items())})"
 
 
 def OutputIOSignature(width: int, **kwargs: Unpack[IOModelOptions]):
@@ -640,6 +603,7 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
             component: Amaranth `wiring.Component` to allocate
 
         """
+        print(f"registering {component}")
         self._components[name] = component
         self._interfaces[name] = component.metadata.as_json()
 

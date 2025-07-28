@@ -108,4 +108,5 @@ class SimStep(StepBase):
             for k,v in VARIABLES.items():
                 context[k] = v.format(**context)
             print(f"substituting:\n{pformat(context)}")
-            DoitMain(ContextTaskLoader(DOIT_CONFIG, TASKS, context)).run(["build_sim"])
+            if DoitMain(ContextTaskLoader(DOIT_CONFIG, TASKS, context)).run(["build_sim"]) !=0:
+                raise ChipFlowError("Failed building simulator")

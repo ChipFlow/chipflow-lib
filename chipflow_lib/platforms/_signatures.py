@@ -7,15 +7,25 @@ from amaranth.lib import wiring
 from amaranth.lib.wiring import Out
 
 from .. import ChipFlowError
-from ._utils import InputIOSignature, OutputIOSignature, BidirIOSignature, IOModelOptions, _chipflow_schema_uri, amaranth_annotate
+from ._utils import InputIOSignature, OutputIOSignature, BidirIOSignature, IOModelOptions, _chipflow_schema_uri
+from ._annotate import amaranth_annotate
 
-SIM_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("sim-interface", 0))
+SIM_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("simulatable-interface", 0))
+SIM_DATA_SCHEMA = str(_chipflow_schema_uri("simulatable-data", 0))
 
 class SimInterface(TypedDict):
     uid: str
     parameters: dict
 
+class SimData(TypedDict):
+    file_name: str
+    offset: int
+
 _VALID_UID = re.compile('[a-zA-Z_.]').search
+
+def _unpack_dict(d: dict) -> str:
+    params = [ f"{k}={repr(v)}" for k,v in d.items()]
+    return ', '.join(params)
 
 """
 Attributes:
@@ -23,30 +33,34 @@ Attributes:
         It is expected that a model that takes parameters is implmemted as a template, with the parameters in the order
         given.
 """
-def sim_annotate(base="com.chipflow.chipflow_lib"):
+def simulatable_interface(base="com.chipflow.chipflow_lib"):
     def decorate(klass):
         assert _VALID_UID(base)
         dec = amaranth_annotate(SimInterface, SIM_ANNOTATION_SCHEMA)
         klass = dec(klass)
 
         def new_init(self,*args, **kwargs):
-            print("called new_init")
             original_init(self, *args, **kwargs)
             self.__chipflow_annotation__ = {
                 "uid": klass.__chipflow_uid__,
                 "parameters": self.__chipflow_parameters__(),
                 }
 
+        def repr(self) -> str:
+            return f"{klass.__name__}({_unpack_dict(self.__chipflow_parameters__())}, {_unpack_dict(self._options)})"
+
         original_init = klass.__init__
         klass.__init__ = new_init
         klass.__chipflow_uid__ = f"{base}.{klass.__name__}"
         if not hasattr(klass, '__chipflow_parameters__'):
             klass.__chipflow_parameters__ = lambda self: []
+        if not klass.__repr__:
+            klass.__repr__ = repr
         return klass
     return decorate
 
 
-@sim_annotate()
+@simulatable_interface()
 class JTAGSignature(wiring.Signature):
     def __init__(self, **kwargs: Unpack[IOModelOptions]):
         super().__init__({
@@ -58,7 +72,7 @@ class JTAGSignature(wiring.Signature):
     })
 
 
-@sim_annotate()
+@simulatable_interface()
 class SPISignature(wiring.Signature):
     def __init__(self, **kwargs: Unpack[IOModelOptions]):
         super().__init__({
@@ -68,7 +82,7 @@ class SPISignature(wiring.Signature):
             "csn": Out(OutputIOSignature(1)),
         })
 
-@sim_annotate()
+@simulatable_interface()
 class QSPIFlashSignature(wiring.Signature):
     def __init__(self, **kwargs: Unpack[IOModelOptions]):
         super().__init__({
@@ -77,7 +91,7 @@ class QSPIFlashSignature(wiring.Signature):
             "d": Out(BidirIOSignature(4, individual_oe=True)),
         })
 
-@sim_annotate()
+@simulatable_interface()
 class UARTSignature(wiring.Signature):
     def __init__(self, **kwargs: Unpack[IOModelOptions]):
         super().__init__({
@@ -85,43 +99,32 @@ class UARTSignature(wiring.Signature):
             "rx": Out(InputIOSignature(1)),
         })
 
-@sim_annotate()
+@simulatable_interface()
 class I2CSignature(wiring.Signature):
     def __init__(self, **kwargs: Unpack[IOModelOptions]):
         super().__init__({
-        "scl": Out(BidirIOSignature(1)),
-        "sda": Out(BidirIOSignature(1))
-    })
+            "scl": Out(BidirIOSignature(1)),
+            "sda": Out(BidirIOSignature(1))
+        })
+        self._options = kwargs
 
-@sim_annotate()
+
+@simulatable_interface()
 class GPIOSignature(wiring.Signature):
 
     def __init__(self, pin_count=1, **kwargs: Unpack[IOModelOptions]):
-        if pin_count > 32:
-            raise ValueError(f"Pin pin_count must be lesser than or equal to 32, not {pin_count}")
         self._pin_count = pin_count
+        self._options = kwargs
         kwargs['individual_oe'] = True
         super().__init__({
             "gpio": Out(BidirIOSignature(pin_count, **kwargs))
             })
 
     def __chipflow_parameters__(self):
-        print("called GPIOSignature.__chipflow_parameters__")
         return [('pin_count',self._pin_count)]
 
-    def __repr__(self) -> str:
-        return f"GPIOSignature(pin_count={self._pin_count}, {dict(self.members.items())})"
 
+def attach_simulation_data(c: wiring.Component, **kwargs: Unpack[SimData]):
+    setattr(c.signature, '__chipflow_simulation_data__', kwargs)
+    amaranth_annotate(SimData, SIM_DATA_SCHEMA, '__chipflow_simulation_data__', decorate_object=True)(c.signature)
 
-class SimulationCanLoadData:
-    """
-    Inherit from this in your object's Signature if you want a simulation model
-    to be able to load data from your object
-    """
-    @classmethod
-    def __init_submodule__(cls, /, *args, **kwargs):
-        if wiring.Signature not in cls.mro():
-            raise ChipFlowError("SimulationCanLoadData can only be used with ``wiring.Signature`` classes")
-        original_annotations = getattr(cls, 'annotations')
-        #def annotations(self, obj, /):
-        #cls.annotate
