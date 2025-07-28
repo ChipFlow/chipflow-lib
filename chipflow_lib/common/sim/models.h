@@ -82,14 +82,11 @@ private:
     } s;
 };
 
+template<int pin_count>
 struct gpio_model {
     std::string name;
-    struct parameters {
-        unsigned pin_count;
-    };
-    parameters parameters;
 
-    gpio_model(const std::string &name, parameters, const value<paramters.pin_count> &o, const value<parameters.pin_count> &oe, value<parameters.pin_count> &i) : name(name), parameters(parameters), o(o), oe(oe), i(i) {};
+    gpio_model(const std::string &name, const value<pin_count> &o, const value<pin_count> &oe, value<pin_count> &i) : name(name), o(o), oe(oe), i(i) {};
 
     void step(unsigned timestamp);
 
@@ -104,6 +101,39 @@ private:
     } s;
 };
 
+
+// GPIO
+template<int pin_count>
+void gpio_model<pin_count>::step(unsigned timestamp) {
+    uint32_t o_value = o.template get<uint32_t>();
+    uint32_t oe_value = oe.template get<uint32_t>();
+
+    for (auto action : get_pending_actions(name)) {
+        if (action.event == "set") {
+            auto bin = std::string(action.payload);
+            input_data = 0;
+            for (unsigned i = 0; i < pin_count; i++) {
+                if (bin.at((pin_count - 1) - i) == '1')
+                    input_data |= (1U << i);
+            }
+        }
+    }
+
+    if (o_value != s.o_last || oe_value != s.oe_last) {
+        std::string formatted_value;
+        for (int i = pin_count - 1; i >= 0; i--) {
+            if (oe_value & (1U << unsigned(i)))
+                formatted_value += (o_value & (1U << unsigned(i))) ? '1' : '0';
+            else
+                formatted_value += 'Z';
+        }
+        log_event(timestamp, name, "change", json(formatted_value));
+    }
+
+    i.set((input_data & ~oe_value) | (o_value & oe_value));
+    s.o_last = o_value;
+    s.oe_last = oe_value;
+}
 
 struct spi_model {
     std::string name;
