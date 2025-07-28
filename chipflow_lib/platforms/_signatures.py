@@ -6,6 +6,7 @@ from typing_extensions import Unpack, TypedDict
 from amaranth.lib import wiring
 from amaranth.lib.wiring import Out
 
+from .. import ChipFlowError
 from ._utils import InputIOSignature, OutputIOSignature, BidirIOSignature, IOModelOptions, _chipflow_schema_uri, amaranth_annotate
 
 SIM_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("sim-interface", 0))
@@ -101,3 +102,17 @@ class GPIOSignature(wiring.Signature):
 
     def __repr__(self) -> str:
         return f"GPIOSignature(pin_count={self._pin_count}, {dict(self.members.items())})"
+
+
+class SimulationCanLoadData:
+    """
+    Inherit from this in your object's Signature if you want a simulation model
+    to be able to load data from your object
+    """
+    @classmethod
+    def __init_submodule__(cls, /, *args, **kwargs):
+        if wiring.Signature not in cls.mro():
+            raise ChipFlowError("SimulationCanLoadData can only be used with ``wiring.Signature`` classes")
+        original_annotations = getattr(cls, 'annotations')
+        #def annotations(self, obj, /):
+        #cls.annotate

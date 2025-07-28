@@ -156,12 +156,13 @@ def amaranth_annotate(modeltype: Type[TypedDict], schema_id: str):
         def as_json(self):  # type: ignore
             return PydanticModel.dump_python(self.__chipflow_annotation__)
 
-    def annotations(self, *args):  # type: ignore
-        annotations = wiring.Signature.annotations(self, *args)  # type: ignore
-        annotation = Annotation(self.__chipflow_annotation__)
-        return annotations + (annotation,)  # type: ignore
-
     def decorator(klass):
+        def annotations(self, *args):  # type: ignore
+            annotations = super(klass, self).annotations(*args)  # type: ignore
+            annotation = Annotation(self.__chipflow_annotation__)
+            return annotations + (annotation,)  # type: ignore
+
+
         klass.annotations = annotations
         return klass
     return decorator
