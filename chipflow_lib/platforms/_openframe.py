@@ -48,9 +48,9 @@ OF_GPIO = [
     OFPin(14, "gpio", 35),  # gpio[35]
     OFPin(15, "gpio", 36),  # gpio[36]
     OFPin(16, "gpio", 37),  # gpio[37]
-    # OFPin(22, "gpio", 38) is assigned as clock
-    # OFPin(24, "gpio", 39) is assigned as heartbeat
-    OFPin(25, "gpio", 40),  # gpio[40]
+    # OFPin(22, "gpio", 38)   # gpio[38] is assigned as clock
+    # OFPin(24, "gpio", 39)   # gpio[39] is assigned as heartbeat
+    # OFPin(25, "gpio", 40),  # gpio[40] is assign as reset
     OFPin(26, "gpio", 41),  # gpio[41]
     OFPin(27, "gpio", 42),  # gpio[42]
     OFPin(28, "gpio", 43),  # gpio[43]
@@ -58,7 +58,7 @@ OF_GPIO = [
 
 OF_CLOCK_PIN = OFPin(22, "gpio", 38)
 OF_HEARTBEAT_PIN = OFPin(24, "gpio", 39)
-OF_RESET_PIN = OFPin(21, "resetbi")
+OF_RESET_PIN = OFPin(25, "gpio", 40)
 
 OF_CORE_POWER = [
     (OFPin(18,"vcc", voltage=1.8, name="d"),     # Power, Digital power supply
