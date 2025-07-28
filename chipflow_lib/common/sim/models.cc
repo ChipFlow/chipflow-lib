@@ -274,39 +274,6 @@ void uart_model::step(unsigned timestamp) {
     }
 }
 
-// GPIO
-
-void gpio_model::step(unsigned timestamp) {
-    uint32_t o_value = o.get<uint32_t>();
-    uint32_t oe_value = oe.get<uint32_t>();
-
-    for (auto action : get_pending_actions(name)) {
-        if (action.event == "set") {
-            auto bin = std::string(action.payload);
-            input_data = 0;
-            for (unsigned i = 0; i < pin_count; i++) {
-                if (bin.at((pin_count - 1) - i) == '1')
-                    input_data |= (1U << i);
-            }
-        }
-    }
-
-    if (o_value != s.o_last || oe_value != s.oe_last) {
-        std::string formatted_value;
-        for (int i = pin_count - 1; i >= 0; i--) {
-            if (oe_value & (1U << unsigned(i)))
-                formatted_value += (o_value & (1U << unsigned(i))) ? '1' : '0';
-            else
-                formatted_value += 'Z';
-        }
-        log_event(timestamp, name, "change", json(formatted_value));
-    }
-
-    i.set((input_data & ~oe_value) | (o_value & oe_value));
-    s.o_last = o_value;
-    s.oe_last = oe_value;
-}
-
 // Generic SPI model
 void spi_model::step(unsigned timestamp) {
     for (auto action : get_pending_actions(name)) {
