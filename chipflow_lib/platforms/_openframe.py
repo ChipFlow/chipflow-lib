@@ -97,7 +97,7 @@ OF_OTHER = [
 
 class OpenframePackageDef(LinearAllocPackageDef):
 
-    name: str = "Openframe"
+    name: str = "openframe"
     package_type: Literal["OpenframePackageDef"] = "OpenframePackageDef"
     def model_post_init(self, __context):
         self._ordered_pins = OF_GPIO
