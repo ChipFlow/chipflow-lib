@@ -168,15 +168,15 @@ class SimPlatform:
         self._clocks = {}
         self._resets = {}
         self._builders: List[BasicCxxBuilder] = [ _COMMON_BUILDER ]
-        self._sim_data = {}
         self._top_sim = {}
+        self._sim_data = {}
 
     def add_file(self, filename, content):
         if not isinstance(content, (str, bytes)):
             content = content.read()
         self.extra_files[filename] = content
 
-    def build(self, e):
+    def build(self, e, top):
         Path(self.build_dir).mkdir(parents=True, exist_ok=True)
 
         ports = []
@@ -213,11 +213,16 @@ class SimPlatform:
             print("write_cxxrtl -header sim_soc.cc", file=yosys_file)
         main = Path(self.build_dir) / "main.cc"
 
-        env = Environment(
-            loader=PackageLoader("chipflow_lib", "common/sim"),
-            autoescape=select_autoescape()
-        )
-        template = env.get_template("main.cc.jinja")
+        metadata = {}
+        for key in top.keys():
+            metadata[key] = getattr(e.submodules, key).metadata.as_json()
+        for component, iface in metadata.items():
+            for interface, interface_desc in iface['interface']['members'].items():
+                annotations = interface_desc['annotations']
+
+                if SIM_DATA_SCHEMA in annotations:
+                    self._sim_data[interface] = annotations[SIM_DATA_SCHEMA]
+
         data_load = []
         for i,d in self._sim_data.items():
             args = [f"0x{d['offset']:X}U"]
@@ -225,6 +230,14 @@ class SimPlatform:
             if not p.is_absolute():
                 p = _ensure_chipflow_root() / p
             data_load.append({'model_name': i, 'file_name': p, 'args': args})
+
+
+        env = Environment(
+            loader=PackageLoader("chipflow_lib", "common/sim"),
+            autoescape=select_autoescape()
+        )
+        template = env.get_template("main.cc.jinja")
+
         with main.open("w") as main_file:
             print(template.render(
                     includes = [hpp for b in self._builders if b.hpp_files for hpp in b.hpp_files ],
@@ -257,9 +270,6 @@ class SimPlatform:
                     builder = find_builder(self._builders, sim_interface)
                     if builder:
                         self._top_sim[interface] = builder.instantiate_model(interface, sim_interface, interface_desc, self._ports)
-
-                if SIM_DATA_SCHEMA in annotations:
-                    self._sim_data[interface] = annotations[SIM_DATA_SCHEMA]
 
         print(f"ports = {pformat(self._ports)}")
         for clock in pinlock.port_map.get_clocks():

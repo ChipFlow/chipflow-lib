@@ -95,7 +95,7 @@ class SimStep(StepBase):
         _wire_up_ports(m, top, self._platform)
 
         #FIXME: common source for build dir
-        self._platform.build(m)
+        self._platform.build(m, top)
         with common() as common_dir, source() as source_dir, runtime() as runtime_dir:
             context = {
                 "COMMON_DIR": common_dir,
