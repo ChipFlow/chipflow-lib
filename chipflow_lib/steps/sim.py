@@ -13,8 +13,8 @@ from amaranth import Module
 
 from . import StepBase, _wire_up_ports
 from .. import ChipFlowError, _ensure_chipflow_root
-from ..platforms._internal import SimPlatform, top_components
-from ..platforms.sim import VARIABLES, TASKS, DOIT_CONFIG
+from ..platforms._utils import top_components
+from ..platforms.sim import VARIABLES, TASKS, DOIT_CONFIG, SimPlatform
 
 
 EXE = ".exe" if os.name == "nt" else ""

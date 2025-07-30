@@ -25,6 +25,7 @@ log_level = logging.WARNING
 DEFAULT_STEPS = {
     "silicon": "chipflow_lib.steps.silicon:SiliconStep",
     "sim": "chipflow_lib.steps.sim:SimStep",
+    "software": "chipflow_lib.steps.software:SoftwareStep"
 }
 
 
