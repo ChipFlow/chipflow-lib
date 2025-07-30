@@ -1,8 +1,7 @@
 from types import MethodType
 import pydantic
-from amaranth.lib import meta
-from typing import Any, Annotated, NamedTuple, Self, TypeVar
-from typing_extensions import TypedDict, is_typeddict
+from typing import TypeVar
+from typing_extensions import is_typeddict
 _T_TypedDict = TypeVar('_T_TypedDict')
 
 def amaranth_annotate(modeltype: type['_T_TypedDict'], schema_id: str, member='__chipflow_annotation__', decorate_object = False):

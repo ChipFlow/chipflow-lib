@@ -7,7 +7,6 @@ from typing_extensions import Unpack, TypedDict
 from amaranth.lib import wiring
 from amaranth.lib.wiring import Out
 
-from .. import ChipFlowError
 from ._utils import InputIOSignature, OutputIOSignature, BidirIOSignature, IOModelOptions, _chipflow_schema_uri
 from ._annotate import amaranth_annotate
 

@@ -4,16 +4,14 @@ import logging
 import os
 import sys
 
-from collections import defaultdict
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 from pprint import pformat
 from typing import Dict, List, Optional, Type
 
-from amaranth import Value, ValueCastable, Module, Signal, ClockSignal, ResetSignal, ClockDomain
-from amaranth.lib import io, meta, wiring
-from amaranth.lib.wiring import In, Out
+from amaranth import Module, ClockSignal, ResetSignal, ClockDomain
+from amaranth.lib import io, wiring
 from amaranth.back import rtlil  # type: ignore[reportAttributeAccessIssue]
 from amaranth.hdl._ir import PortDirection
 from amaranth.lib.cdc import FFSynchronizer
@@ -46,6 +44,7 @@ class SimModel:
         capabilities: List of capabilities of the model.
     """
     name: str
+    namespace: str
     signature: Type[wiring.Signature]
     capabilities: Optional[List[SimModelCapability]] = None
 
@@ -103,9 +102,6 @@ class BasicCxxBuilder(BaseModel):
     def model_post_init(self, *args, **kwargs):
         self._table = { getattr(m.signature,'__chipflow_uid__'): m for m in self.models }
 
-    def uid_to_c(self, uid: str) -> str:
-        return uid.replace('.','__')
-
     def instantiate_model(self, interface: str, sim_interface: SimInterface, interface_desc: Interface, ports: Dict[str, io.SimulationPort]) -> str:
         uid = sim_interface['uid']
         parameters = sim_interface['parameters']
@@ -120,11 +116,10 @@ class BasicCxxBuilder(BaseModel):
         sig_names = [ path for path, _, _ in members ]
         port_names = { n: interface_desc[n].port_name for n in interface_desc.keys()}
 
-        identifier_uid = self.uid_to_c(uid)
         names = [f"\\io${port_names[str(n)]}${d}" for n,d in sig_names]
         params = [f"top.{cxxrtlmangle(n)}" for n in names]
 
-        cpp_class = model.name
+        cpp_class = f"{model.namespace}::{model.name}"
         if len(parameters):
             template_params = []
             for p,v in parameters:
@@ -146,11 +141,11 @@ def find_builder(builders: List[BasicCxxBuilder], sim_interface: SimInterface):
 
 _COMMON_BUILDER = BasicCxxBuilder(
     models=[
-        SimModel('spi_model', SPISignature),
-        SimModel('spiflash_model', QSPIFlashSignature,  [SimModelCapability.LOAD_DATA]),
-        SimModel('uart_model', UARTSignature),
-        SimModel('i2c_model', I2CSignature),
-        SimModel('gpio_model', GPIOSignature),
+        SimModel('spi', 'chipflow::models', SPISignature),
+        SimModel('spiflash', 'chipflow::models', QSPIFlashSignature,  [SimModelCapability.LOAD_DATA]),
+        SimModel('uart', 'chipflow::models', UARTSignature),
+        SimModel('i2c', 'chipflow::models', I2CSignature),
+        SimModel('gpio', 'chipflow::models', GPIOSignature),
         ],
     cpp_files=[ Path('{COMMON_DIR}', 'models.cc') ],
     hpp_files=[ Path('models.h') ],

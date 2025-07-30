@@ -13,18 +13,17 @@ from dataclasses import dataclass, asdict
 from enum import Enum, IntEnum, StrEnum, auto
 from math import ceil, floor
 from typing import (
-    Any, Annotated, NamedTuple, Self, Type,
-    TYPE_CHECKING
+    Any, Annotated, NamedTuple, Self, TYPE_CHECKING
 )
 from typing_extensions import (
     TypedDict, Unpack, NotRequired
 )
 
 
-from amaranth.lib import wiring, io, meta
+from amaranth.lib import wiring, io
 from amaranth.lib.wiring import In, Out
 from pydantic import (
-        ConfigDict, TypeAdapter, PlainSerializer,
+        ConfigDict, PlainSerializer,
         WrapValidator
         )
 
