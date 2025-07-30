@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 import re
+from typing import List, Tuple, Any
 from typing_extensions import Unpack, TypedDict
 
 from amaranth.lib import wiring
@@ -15,7 +16,7 @@ SIM_DATA_SCHEMA = str(_chipflow_schema_uri("simulatable-data", 0))
 
 class SimInterface(TypedDict):
     uid: str
-    parameters: dict
+    parameters: List[Tuple[str, Any]]
 
 class SimData(TypedDict):
     file_name: str
