@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include "models.h"
 
-namespace cxxrtl_design {
+namespace chipflow {
 
 // Helper functions
 
@@ -134,8 +134,10 @@ void close_event_log() {
     }
 }
 
+namespace models {
+
 // SPI flash
-void spiflash_model::load_data(const std::string &filename, unsigned offset) {
+void spiflash::load_data(const std::string &filename, unsigned offset) {
     std::ifstream in(filename, std::ifstream::binary);
     if (offset >= data.size()) {
         throw std::out_of_range("flash: offset beyond end");
@@ -145,7 +147,7 @@ void spiflash_model::load_data(const std::string &filename, unsigned offset) {
     }
     in.read(reinterpret_cast<char*>(data.data() + offset), (data.size() - offset));
 }
-void spiflash_model::step(unsigned timestamp) {
+void spiflash::step(unsigned timestamp) {
     auto process_byte = [&]() {
         s.out_buffer = 0;
         if (s.byte_count == 0) {
@@ -221,7 +223,7 @@ void spiflash_model::step(unsigned timestamp) {
 
 // UART
 
-void uart_model::step(unsigned timestamp) {
+void uart::step(unsigned timestamp) {
 
     for (auto action : get_pending_actions(name)) {
         if (action.event == "tx") {
@@ -275,7 +277,7 @@ void uart_model::step(unsigned timestamp) {
 }
 
 // Generic SPI model
-void spi_model::step(unsigned timestamp) {
+void spi::step(unsigned timestamp) {
     for (auto action : get_pending_actions(name)) {
         if (action.event == "set_data") {
             s.out_buffer = s.send_data = uint32_t(action.payload);
@@ -308,7 +310,7 @@ void spi_model::step(unsigned timestamp) {
 }
 
 // Generic I2C model
-void i2c_model::step(unsigned timestamp) {
+void i2c::step(unsigned timestamp) {
     bool sda = !bool(sda_oe), scl = !bool(scl_oe);
 
     for (auto action : get_pending_actions(name)) {
@@ -370,4 +372,5 @@ void i2c_model::step(unsigned timestamp) {
     scl_i.set(scl);
 }
 
-}
+} //chipflow::models
+} //chipflow
