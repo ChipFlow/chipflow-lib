@@ -1,24 +1,25 @@
-# amaranth: UnusedElaboratable=no
-
 # SPDX-License-Identifier: BSD-2-Clause
 import copy
 import logging
 import os
 import re
 import subprocess
+import warnings
 
 from pprint import pformat
 from typing import TYPE_CHECKING, List, Generic
 
 from amaranth import Module, Signal, ClockDomain, ClockSignal, ResetSignal, unsigned
 from amaranth.lib import io, data
+from amaranth.hdl import UnusedElaboratable
 from amaranth.lib.cdc import FFSynchronizer
 from amaranth.back import rtlil  #type: ignore[reportAttributeAccessIssue]
 from amaranth.hdl import Fragment
 from amaranth.hdl._ir import PortDirection
 
 from .. import ChipFlowError
-from ._utils import load_pinlock, PortDesc, Pin, IOModel, IOTripPoint, Process
+from ..config_models import Process
+from ._utils import load_pinlock, PortDesc, Pin, IOModel, IOTripPoint
 from ._sky130 import Sky130DriveMode
 
 if TYPE_CHECKING:
@@ -487,6 +488,7 @@ class SiliconPlatform:
         return fragment.prepare(ports)
 
     def build(self, elaboratable, name="top"):
+        warnings.simplefilter(action="ignore", category=UnusedElaboratable)
         fragment = self._prepare(elaboratable, name)
         rtlil_text, _ = rtlil.convert_fragment(fragment, name)
 

@@ -68,9 +68,9 @@ test-cov-html.cmd = "pytest --cov=chipflow_lib --cov-report=html"
 test-docs.cmd = "sphinx-build -b doctest docs/ docs/_build"
 lint.composite = [ "./tools/license_check.sh", "ruff check {args}", "pyright chipflow_lib"]
 docs.cmd = "sphinx-build docs/ docs/_build/ -W --keep-going"
-test-silicon.cmd = "pytest tests/test_silicon_platform.py tests/test_silicon_platform_additional.py tests/test_silicon_platform_amaranth.py tests/test_silicon_platform_build.py tests/test_silicon_platform_port.py --cov=chipflow_lib.platforms.silicon --cov-report=term"
 _check-project.call = "tools.check_project:main"
 chipflow.shell = "cd $PDM_RUN_CWD && chipflow"
+test-all.composite = [ 'lint', 'test', 'test-docs' ]
 
 [dependency-groups]
 dev = [

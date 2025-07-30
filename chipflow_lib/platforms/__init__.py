@@ -8,6 +8,7 @@ This module defines the functionality you use in you code to target the ChipFlow
 
 from .silicon import SiliconPlatformPort, SiliconPlatform
 from .sim import SimPlatform
+from ._software import SoftwarePlatform
 from ._utils import (
         IO_ANNOTATION_SCHEMA, IOSignature, IOModel, IOTripPoint, IOModelOptions,
         OutputIOSignature, InputIOSignature, BidirIOSignature,
@@ -16,15 +17,15 @@ from ._packages import PACKAGE_DEFINITIONS
 from ._sky130 import Sky130DriveMode
 from ._signatures import (
         JTAGSignature, SPISignature, I2CSignature, UARTSignature, GPIOSignature, QSPIFlashSignature,
-        attach_simulation_data
+        attach_data, SoftwareDriverSignature, SoftwareBuild
         )
 
 __all__ = ['IO_ANNOTATION_SCHEMA', 'IOSignature',
            'IOModel', 'IOModelOptions', 'IOTripPoint',
            'OutputIOSignature', 'InputIOSignature', 'BidirIOSignature',
            'SiliconPlatformPort', 'SiliconPlatform',
-           'SimPlatform',
+           'SimPlatform', 'SoftwarePlatform',
            'JTAGSignature', 'SPISignature', 'I2CSignature', 'UARTSignature', 'GPIOSignature', 'QSPIFlashSignature',
-           'attach_simulation_data',
+           'attach_data', 'SoftwareDriverSignature', 'SoftwareBuild',
            'Sky130DriveMode',
            'PACKAGE_DEFINITIONS']

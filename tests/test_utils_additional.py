@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-2-Clause
 import unittest
 
-from amaranth import Const
 from amaranth.lib import io
 
 from chipflow_lib.platforms import (
@@ -30,7 +29,7 @@ class TestIOSignature(unittest.TestCase):
     def test_pin_signature_annotations(self):
         """Test IOSignature annotations method"""
         # Create signature
-        sig = IOSignature(direction=io.Direction.Output, width=8, init=Const.cast(42))
+        sig = IOSignature(direction=io.Direction.Output, width=8, init=42)
 
         # Create a mock object to pass to annotations
         mock_obj = object()
@@ -58,7 +57,7 @@ class TestIOSignature(unittest.TestCase):
         self.assertEqual(json_data['direction'], 'o')
         self.assertEqual(json_data['width'], 8)
         # The init field contains an Amaranth Const object, check its value
-        self.assertEqual(json_data['init'].value, 42)
+        self.assertEqual(json_data['init'], 42)
 
 
 class TestIOModel(unittest.TestCase):

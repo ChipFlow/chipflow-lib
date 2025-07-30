@@ -10,7 +10,7 @@ from pprint import pformat
 from typing import Set, List, Dict, Optional, Union, Literal, Tuple, TypeVar
 
 from dataclasses import dataclass, asdict
-from enum import Enum, IntEnum, StrEnum, auto
+from enum import IntEnum, StrEnum, auto
 from math import ceil, floor
 from typing import (
     Any, Annotated, NamedTuple, Generic, Self,
@@ -20,22 +20,20 @@ from typing_extensions import (
     TypedDict, Unpack, NotRequired
 )
 
-
+from amaranth import Module
 from amaranth.lib import wiring, io
 from amaranth.lib.wiring import In, Out
 from pydantic import (
-        ConfigDict, PlainSerializer,
-        WrapValidator
+        ConfigDict, PlainSerializer
         )
 
 
 from .. import ChipFlowError, _ensure_chipflow_root, _get_cls_by_reference
-from .._appresponse import AppResponseModel, OmitIfNone
 from ._annotate import amaranth_annotate
 from ._sky130 import Sky130DriveMode
+from ..config_models import Config, Process, Voltage, VoltageRange
 
 if TYPE_CHECKING:
-    from ..config_models import Config
     from ._openframe import OpenframePackageDef
 
 
@@ -44,21 +42,6 @@ logger = logging.getLogger(__name__)
 
 def _chipflow_schema_uri(name: str, version: int) -> str:
     return f"https://api.chipflow.com/schemas/{version}/{name}"
-
-Voltage = Annotated[
-              float,
-              PlainSerializer(lambda x: f'{x:.1e}V', return_type=str),
-              WrapValidator(lambda v, h: h(v.strip('Vv ') if isinstance(v, str) else h(v)))
-          ]
-
-
-class VoltageRange(AppResponseModel):
-    """
-    Models a voltage range for a power domain or IO
-    """
-    min: Annotated[Optional[Voltage], OmitIfNone()] = None
-    max: Annotated[Optional[Voltage], OmitIfNone()] = None
-    typical: Annotated[Optional[Voltage], OmitIfNone()] = None
 
 
 class IOTripPoint(StrEnum):
@@ -593,7 +576,6 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
             component: Amaranth `wiring.Component` to allocate
 
         """
-        print(f"registering {component}")
         self._components[name] = component
         self._interfaces[name] = component.metadata.as_json()
 
@@ -1094,25 +1076,6 @@ class GAPackageDef(BasePackageDef):
         return {0: GAPin('A', 2)}
 
 
-class Process(Enum):
-    """
-    IC manufacturing process
-    """
-    #: Skywater foundry open-source 130nm process
-    SKY130 = "sky130"
-    #: GlobalFoundries open-source 130nm process
-    GF180 = "gf180"
-    #: Pragmatic Semiconductor FlexIC process (old)
-    HELVELLYN2 = "helvellyn2"
-    #: GlobalFoundries 130nm BCD process
-    GF130BCD = "gf130bcd"
-    #: IHP open source 130nm SiGe Bi-CMOS process
-    IHP_SG13G2 = "ihp_sg13g2"
-
-    def __str__(self):
-        return f'{self.value}'
-
-
 def load_pinlock():
     chipflow_root = _ensure_chipflow_root()
     lockfile = pathlib.Path(chipflow_root, 'pins.lock')
@@ -1126,7 +1089,10 @@ def load_pinlock():
     raise ChipFlowError("Lockfile `pins.lock` not found. Run `chipflow pin lock`")
 
 
-def top_components(config):
+def top_components(config: 'Config') -> Dict[str, wiring.Component]:
+    """
+    Return the top level components for the design, as configured in ``chipflow.toml``
+    """
     component_configs = {}
     result = {}
 
@@ -1151,3 +1117,15 @@ def top_components(config):
             logger.debug(f"top members for {name}:\n{pformat(result[name].metadata.origin.signature.members)}")
 
     return result
+
+
+def get_software_builds(m: Module, component: str):
+    from ._signatures import DATA_SCHEMA, SoftwareBuild
+    builds = {}
+    iface = getattr(m.submodules, component).metadata.as_json()
+    for interface, interface_desc in iface['interface']['members'].items():
+        annotations = interface_desc['annotations']
+        if DATA_SCHEMA in annotations \
+        and annotations[DATA_SCHEMA]['data']['type'] == "SoftwareBuild":
+            builds[interface] = pydantic.TypeAdapter(SoftwareBuild).validate_python(annotations[DATA_SCHEMA]['data'])
+    return builds
