@@ -807,8 +807,7 @@ class QuadPackageDef(LinearAllocPackageDef):
 
     def model_post_init(self, __context):
         pins = set([i for i in range(1, self.width * 2 + self.height * 2)])
-        pins.difference_update(*[x.to_set() for x in self._power])
-        pins.difference_update(self._jtag.to_set())
+        pins -= set(self.bringup_pins.to_set())
 
         self._ordered_pins: List[Pin] = sorted(pins)
         return super().model_post_init(__context)
