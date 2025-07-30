@@ -1,8 +1,11 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 import re
+import sys
+
+from pathlib import Path
 from typing import List, Tuple, Any
-from typing_extensions import Unpack, TypedDict
+from typing_extensions import Unpack, TypedDict, NotRequired
 
 from amaranth.lib import wiring
 from amaranth.lib.wiring import Out
@@ -12,6 +15,7 @@ from ._annotate import amaranth_annotate
 
 SIM_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("simulatable-interface", 0))
 SIM_DATA_SCHEMA = str(_chipflow_schema_uri("simulatable-data", 0))
+DRIVER_MODEL_SCHEMA = str(_chipflow_schema_uri("driver-model", 0))
 
 class SimInterface(TypedDict):
     uid: str
@@ -20,6 +24,13 @@ class SimInterface(TypedDict):
 class SimData(TypedDict):
     file_name: str
     offset: int
+
+class DriverModel(TypedDict):
+    h_files: List[Path]
+    c_files: NotRequired[List[Path]]
+    include_dirs: NotRequired[List[Path]]
+    _base_path: NotRequired[Path]
+
 
 _VALID_UID = re.compile('[a-zA-Z_.]').search
 
@@ -127,4 +138,15 @@ class GPIOSignature(wiring.Signature):
 def attach_simulation_data(c: wiring.Component, **kwargs: Unpack[SimData]):
     setattr(c.signature, '__chipflow_simulation_data__', kwargs)
     amaranth_annotate(SimData, SIM_DATA_SCHEMA, '__chipflow_simulation_data__', decorate_object=True)(c.signature)
+
+def driver_model(**kwargs: Unpack[DriverModel]):
+    def decorate(klass):
+        class_file = sys.modules[klass.__module__].__file__
+        assert class_file
+
+        kwargs['_base_path'] = Path(class_file).parent.absolute()
+        klass.__chipflow_driver_model__ = kwargs
+        amaranth_annotate(DriverModel, DRIVER_MODEL_SCHEMA, '__chipflow_driver_model__')(klass)
+        return klass
+    return decorate
 

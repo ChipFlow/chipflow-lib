@@ -11,7 +11,7 @@ class SoftwareGenerator:
         self.defines = []
         self.periphs = []
         self.extra_init = []
-        print("initialised SoftwareGenerator")
+        print("Initialised SoftwareGenerator")
 
     def generate(self, out_dir):
         Path(out_dir).mkdir(parents=True, exist_ok=True)

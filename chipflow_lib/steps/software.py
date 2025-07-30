@@ -22,7 +22,7 @@ class SoftwareStep(StepBase):
         self.build()
 
     def doit_build(self):
-        "Run the overridden doit_build_module"
+        "Run the overridden :doit_build_module"
         DoitMain(ModuleTaskLoader(self.doit_build_module)).run(["build_software"])
 
     def build(self, *args):
