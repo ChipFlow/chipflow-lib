@@ -21,10 +21,10 @@ from typing_extensions import (
 )
 
 
-from amaranth.lib import wiring, io, meta
+from amaranth.lib import wiring, io
 from amaranth.lib.wiring import In, Out
 from pydantic import (
-        ConfigDict, TypeAdapter, PlainSerializer,
+        ConfigDict, PlainSerializer,
         WrapValidator
         )
 
