@@ -1,50 +1,118 @@
 # SPDX-License-Identifier: BSD-2-Clause
+
+import sys
+
+from collections import defaultdict
+from pydantic import BaseModel
 from pathlib import Path
+from typing import NamedTuple, Optional
+
+from ..platforms._signatures import DriverModel, SoftwareBuild
+from ..config_models import CompilerConfig
+
+class Periph(NamedTuple):
+    name: str
+    component: str
+    regs_struct: str
+    address: int
 
 
-class SoftwareGenerator:
-    def __init__(self, *, rom_start, rom_size, ram_start, ram_size):
-        self.rom_start = rom_start
-        self.rom_size = rom_size
-        self.ram_start = ram_start
-        self.ram_size = ram_size
-        self.defines = []
-        self.periphs = []
-        self.extra_init = []
-        print("initialised SoftwareGenerator")
+class SoftwareGenerator(BaseModel):
+    build: SoftwareBuild
+    rom_start: int
+    rom_size: int
+    ram_start: int
+    ram_size: int
+    compiler_config: 'CompilerConfig'
+    _periphs: set[Periph] = set()
+    _drivers: dict = defaultdict(set)
+    _startup_asm: Optional[Path] = None
+    _link_script: Optional[Path] = None
 
-    def generate(self, out_dir):
-        Path(out_dir).mkdir(parents=True, exist_ok=True)
-        print(f"generating in {out_dir}")
-        with open(Path(out_dir) / "start.S", "w") as f:
-            f.write(self.start)
-        with open(Path(out_dir) / "sections.lds", "w") as f:
-            f.write(self.lds)
-        with open(Path(out_dir) / "soc.h", "w") as f:
-            f.write(self.soc_h)
+    def generate(self):
+        out_dir = self.build.build_dir / "generated"
+        out_dir.mkdir(parents=True, exist_ok=True)
 
-    def add_periph(self, periph_type, name, address):
-        self.periphs.append((periph_type, name, address))
+        start = Path(out_dir) / "start.S"
+        start.write_text(self.start)
+        self._startup_asm = start
 
-    def add_extra_init(self, asm):
-        self.extra_init.append(asm)
+        lds = Path(out_dir) / "sections.lds"
+        lds.write_text(self.lds)
+        self._link_script = lds
+
+        soc_h = Path(out_dir) / "soc.h"
+        soc_h.write_text(self.soc_h)
+        self._drivers['h_files'].add(soc_h)
+
+        self._drivers['include_dirs'].add(out_dir)
+
+    def add_periph(self, name, address, model: DriverModel):
+
+        assert '_base_path' in model
+
+        for k in ('c_files', 'h_files', 'include_dirs'):
+            if k in model:
+                for p in model[k]:   # type: ignore
+                    if not p.is_absolute():
+                        self._drivers[k].add(model['_base_path'] / p)
+                    else:
+                        self._drivers[k].add(p)
+
+        component = model['component']['name']  #type: ignore
+        regs_struct = model['regs_struct']
+        self._periphs.add(Periph(name, component, regs_struct, address))
+
+    @property
+    def compiler(self):
+        return  f"{sys.executable} -m ziglang cc -target riscv32-freestanding-musl"
+
+    @property
+    def cflags(self):
+        cflags = "-g -mcpu=baseline_rv32-a-c-d -mabi=ilp32 "
+        cflags += "-static -ffreestanding -nostdlib "
+        cflags += f"-Wl,-Bstatic,-T,{self._link_script},--strip-debug "
+        cflags += f"-I{self.build.build_dir}"
+        return cflags
+
+    @property
+    def sources(self):
+        sources = set(self._drivers['c_files']).union(self.build.sources)
+        return [self._startup_asm] + sorted(sources)
+
+    @property
+    def includes(self):
+        includes = set(self._drivers['h_files']).union(self.build.includes)
+        return sorted(includes)
+
+    @property
+    def include_dirs(self):
+        inc_dirs = set(self._drivers['include_dirs']).union(self.build.include_dirs)
+        return sorted(inc_dirs)
+
+    @property
+    def link_script(self):
+        return self._link_script
+
+    @property
+    def periphs(self):
+        return sorted(self._periphs)
 
     @property
     def soc_h(self):
         result = "#ifndef SOC_H\n"
-        result += "#define SOC_H\n"
-        periph_types = sorted(set(x[0] for x in self.periphs))
+        result += "#define SOC_H\n\n"
 
-        for t in periph_types:
-            result += f'#include "drivers/{t}.h"\n'
+        for i in self.includes:
+            result += f'#include "{i}"\n'
         result += "\n"
 
         uart = None
 
-        for t, n, a in self.periphs:
-            if uart is None and t == "uart":  # first UART
-                uart = n
-            result += f'#define {n} ((volatile {t}_regs_t *const)0x{a:08x})\n'
+        for n, t, r, a in self.periphs:
+            if uart is None and t == "UARTPeripheral":  # first UART
+                uart = n.upper()
+            result += f'#define {n.upper()} ((volatile {r} *const)0x{a:08x})\n'
 
         result += '\n'
 
@@ -62,7 +130,6 @@ class SoftwareGenerator:
 
     @property
     def start(self):
-        joined_init = '\n'.join(self.extra_init)
         return f""".section .text
 
 start:
@@ -103,8 +170,6 @@ addi x29, zero, 0
 addi x30, zero, 0
 addi x31, zero, 0
 
-{joined_init}
-
 # copy data section
 la a0, _sidata
 la a1, _sdata
@@ -136,9 +201,11 @@ j loop
 
     @property
     def lds(self):
+        rom_start = self.rom_start + self.build.offset
+        rom_size = self.rom_size - self.build.offset
         return f"""MEMORY
 {{
-    FLASH (rx)      : ORIGIN = 0x{self.rom_start:08x}, LENGTH = 0x{self.rom_size:08x}
+    FLASH (rx)      : ORIGIN = 0x{rom_start:08x}, LENGTH = 0x{rom_size:08x}
     RAM (xrw)       : ORIGIN = 0x{self.ram_start:08x}, LENGTH = 0x{self.ram_size:08x}
 }}
 
