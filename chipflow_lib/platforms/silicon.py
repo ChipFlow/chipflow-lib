@@ -333,16 +333,6 @@ class Sky130Port(SiliconPlatformPort):
         self._gpio_analog_sel = None # analog mux select
         self._gpio_analog_pol = None # analog mux select
 
-    def wire(self, m: Module, interface: PureInterface):
-        super().wire(m, interface)
-
-        # wire up drive mode bits
-        bit = 0
-        for i in self._dms:
-            m.d.comb += self._dm0[bit].eq(i[0]) # type: ignore
-            m.d.comb += self._dm1[bit].eq(i[1]) # type: ignore
-            m.d.comb += self._dm2[bit].eq(i[2]) # type: ignore
-
     def instantiate_toplevel(self):
         ports = super().instantiate_toplevel()
         for s, d in self._signals:
