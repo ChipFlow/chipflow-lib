@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 import logging
-import os
 import sys
 
 from dataclasses import dataclass
@@ -155,7 +154,7 @@ _COMMON_BUILDER = BasicCxxBuilder(
 
 class SimPlatform:
     def __init__(self, config):
-        self.build_dir = os.path.join(os.environ['CHIPFLOW_ROOT'], 'build', 'sim')
+        self.build_dir = _ensure_chipflow_root() / 'build' / 'sim'
         self.extra_files = dict()
         self.sim_boxes = dict()
         self._ports: Dict[str, io.SimulationPort] = {}

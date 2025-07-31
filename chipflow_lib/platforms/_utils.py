@@ -602,7 +602,6 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
             component: Amaranth `wiring.Component` to allocate
 
         """
-        print(f"registering {component}")
         self._components[name] = component
         self._interfaces[name] = component.metadata.as_json()
 

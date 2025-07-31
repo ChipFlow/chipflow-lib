@@ -1,8 +1,7 @@
 # -*- coding: utf-8 *-*
 # SPDX-License-Identifier: BSD-2-Clause
 
-from pathlib import Path
-from typing import List, Tuple, Any, Callable, TypeVar, Generic
+from typing import List, Tuple, Callable, TypeVar, Generic
 from typing_extensions import TypedDict, NotRequired
 
 T=TypeVar('T')

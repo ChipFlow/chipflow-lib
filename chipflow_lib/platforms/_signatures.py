@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import List, Tuple, Any
 from typing_extensions import Unpack, TypedDict, NotRequired
 
-from amaranth import Elaboratable
 from amaranth.lib import wiring
 from amaranth.lib.wiring import Out
 
@@ -27,11 +26,20 @@ class SimData(TypedDict):
     offset: int
 
 class DriverModel(TypedDict):
-    buses: List[Elaboratable]
+    """
+    Options for @`driver_model` decorator
+
+    Attributes:
+        h_files: Header files for the driver
+        c_files: C files for the driver
+        busses: List of buses of this `Component` whos address range should be passed to the driver (defaults to ['bus'])
+        include_dirs: any extra include directories needed by the driver
+    """
     h_files: List[Path]
     c_files: NotRequired[List[Path]]
     include_dirs: NotRequired[List[Path]]
-    _base_path: NotRequired[Path]
+    busses: NotRequired[List[str]]
+    _base_path: NotRequired[Path]  # gets filled by the decorator to the base directory where the Component was defined
 
 _VALID_UID = re.compile('[a-zA-Z_.]').search
 
@@ -140,14 +148,30 @@ def attach_simulation_data(c: wiring.Component, **kwargs: Unpack[SimData]):
     setattr(c.signature, '__chipflow_simulation_data__', kwargs)
     amaranth_annotate(SimData, SIM_DATA_SCHEMA, '__chipflow_simulation_data__', decorate_object=True)(c.signature)
 
-def driver_model(**kwargs: Unpack[DriverModel]):
+
+def driver_model(**model: Unpack[DriverModel]):
     def decorate(klass):
+
         class_file = sys.modules[klass.__module__].__file__
         assert class_file
 
-        kwargs['_base_path'] = Path(class_file).parent.absolute()
-        klass.__chipflow_driver_model__ = kwargs
-        amaranth_annotate(DriverModel, DRIVER_MODEL_SCHEMA, '__chipflow_driver_model__')(klass)
+        model['_base_path'] = Path(class_file).parent.absolute()
+        if 'busses' not in model:
+            model['busses'] = ['bus']
+
+        print(f"Decorating {klass}")
+        original_init = klass.__init__
+        def new_init(self,*args, **kwargs):
+
+            print(f"Decorating {self} with driver_model({model})")
+            original_init(self, *args, **kwargs)
+            print(f"Ran original init")
+            self.signature.__chipflow_driver_model__ = model
+
+            amaranth_annotate(DriverModel, DRIVER_MODEL_SCHEMA, '__chipflow_driver_model__', decorate_object=True)(self.signature)
+
+        klass.__init__ = new_init
+        print(f" new init {klass.__init__} was {original_init}")
         return klass
     return decorate
 
