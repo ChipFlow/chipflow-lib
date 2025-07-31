@@ -4,7 +4,7 @@ import logging
 import pathlib
 import pydantic
 
-from collections import OrderedDict, deque
+from collections import OrderedDict, deque, defaultdict
 from collections.abc import Iterable
 from pprint import pformat
 from typing import Set, List, Dict, Optional, Union, Literal, Tuple
@@ -655,8 +655,26 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
                                            port_name='rst_n',
                                            iomodel=IOModel(width=1, direction=io.Direction.Input, clock_domain="sync",
                                                            invert=True)
-                                      )
+                                      ),
+
                        }
+
+        powerpins = defaultdict(list)
+        for pp in self.bringup_pins.core_power:
+            vss = "vss"
+            vdd = "vdd"
+            if pp.name:
+                vss = f"vss{pp.name}"
+                vdd = f"vdd{pp.name}"
+            powerpins[vss].append(pp.power)
+            powerpins[vdd].append(pp.ground)
+
+        for domain, pins in powerpins.items():
+            d[domain] = PortDesc(type='power',
+                                 pins=pins,
+                                 port_name=domain,
+                                 iomodel=IOModel(width=len(pins), direction=io.Direction.Input))
+
         assert config.chipflow.silicon
         if config.chipflow.silicon.debug and \
            config.chipflow.silicon.debug['heartbeat']:
@@ -665,6 +683,7 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
                                   port_name='heartbeat',
                                   iomodel=IOModel(width=1, direction=io.Direction.Output, clock_domain="sync")
                               )
+
         #TODO: JTAG
         return {'bringup_pins': d}
 
@@ -682,6 +701,7 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
         ...
 
     @property
+    @abc.abstractmethod
     def bringup_pins(self) -> BringupPins:
         """
         To aid bringup, these are always in the same place for each package type.
