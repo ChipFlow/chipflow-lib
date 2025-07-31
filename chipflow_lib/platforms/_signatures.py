@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import List, Tuple, Any
 from typing_extensions import Unpack, TypedDict, NotRequired
 
+from amaranth import Elaboratable
 from amaranth.lib import wiring
 from amaranth.lib.wiring import Out
 
@@ -26,11 +27,11 @@ class SimData(TypedDict):
     offset: int
 
 class DriverModel(TypedDict):
+    buses: List[Elaboratable]
     h_files: List[Path]
     c_files: NotRequired[List[Path]]
     include_dirs: NotRequired[List[Path]]
     _base_path: NotRequired[Path]
-
 
 _VALID_UID = re.compile('[a-zA-Z_.]').search
 
