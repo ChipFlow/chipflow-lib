@@ -9,7 +9,7 @@ import subprocess
 
 from dataclasses import dataclass
 from pprint import pformat
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Generic
 
 from amaranth import Module, Signal, ClockDomain, ClockSignal, ResetSignal, unsigned
 from amaranth.lib import wiring, io, data
@@ -69,7 +69,7 @@ class Heartbeat(Component):
         return m
 
 
-class SiliconPlatformPort(io.PortLike):
+class SiliconPlatformPort(io.PortLike, Generic[Pin]):
     def __init__(self,
                  name: str,
                  port_desc: PortDesc):
@@ -445,8 +445,10 @@ class SiliconPlatform:
         pinlock = load_pinlock()
         for component, iface in pinlock.port_map.ports.items():
             for interface, v in iface.items():
-                for name, port in v.items():
-                    self._ports[port.port_name] = port_for_process(self._config.chipflow.silicon.process)(port.port_name, port)
+                for name, port_desc in v.items():
+                    if port_desc.type == "power":
+                        continue
+                    self._ports[port_desc.port_name] = port_for_process(self._config.chipflow.silicon.process)(port_desc.port_name, port_desc)
 
         for clock in pinlock.port_map.get_clocks():
             assert 'clock_domain' in clock.iomodel
