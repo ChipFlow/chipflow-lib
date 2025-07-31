@@ -66,4 +66,15 @@ def _wire_up_ports(m: Module, top, platform):
                 wire = (iface if isinstance(iface.signature, IOSignature)
                         else getattr(iface, name))
                 port = platform._ports[port.port_name]
-                port.wire_up(m, wire)
+                if hasattr(port, 'wire_up'):
+                    port.wire_up(m, wire)
+                else:
+                    inv_mask = sum(inv << bit for bit, inv in enumerate(port.invert))
+                    if hasattr(wire, 'i'):
+                        m.d.comb += wire.i.eq(port.i ^ inv_mask)
+                    if hasattr(wire, 'o'):
+                            m.d.comb += port.o.eq(wire.o ^ inv_mask)
+                    if hasattr(wire, 'oe'):
+                            m.d.comb += port.oe.eq(wire.oe)
+                    if hasattr(wire, 'ie'):
+                            m.d.comb += port.ie.eq(wire.ie)
