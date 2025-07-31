@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, List
 from amaranth import Module, Signal, ClockDomain, ClockSignal, ResetSignal, unsigned
 from amaranth.lib import wiring, io, data
 from amaranth.lib.cdc import FFSynchronizer
-from amaranth.lib.wiring import Component, In, PureInterface
+from amaranth.lib.wiring import Component, In
 from amaranth.back import rtlil  #type: ignore[reportAttributeAccessIssue]
 from amaranth.hdl import Fragment
 from amaranth.hdl._ir import PortDirection

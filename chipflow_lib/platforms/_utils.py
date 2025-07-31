@@ -7,14 +7,13 @@ import pydantic
 from collections import OrderedDict, deque, defaultdict
 from collections.abc import Iterable
 from pprint import pformat
-from typing import Set, List, Dict, Optional, Union, Literal, Tuple
+from typing import Set, List, Dict, Optional, Union, Literal, Tuple, TypeVar
 
 from dataclasses import dataclass, asdict
 from enum import Enum, IntEnum, StrEnum, auto
 from math import ceil, floor
 from typing import (
-    Any, Annotated, NamedTuple, Self,
-    TYPE_CHECKING
+    Any, Annotated, NamedTuple, Self, TYPE_CHECKING
 )
 from typing_extensions import (
     TypedDict, Unpack, NotRequired
@@ -267,8 +266,9 @@ def BidirIOSignature(width: int, **kwargs: Unpack[IOModelOptions]):
     model: IOModel = kwargs | {'width': width, 'direction': io.Direction.Bidir}   # type: ignore[reportGeneralTypeIssues]
     return IOSignature(**model)
 
+# TODO: limit to pyantic serialisable types?
 
-Pin = Union[Tuple[Any,...], str, int]
+Pin = TypeVar('Pin')
 PinSet = Set[Pin]
 PinList = List[Pin]
 Pins = Union[PinSet, PinList]
@@ -402,7 +402,6 @@ def _group_consecutive_items(ordering: PinList, lst: PinList) -> OrderedDict[int
         # logger.debug(f"adding to group {len(g)} pins {g}")
         d.setdefault(len(g), []).append(g)
     return d
-
 
 def _find_contiguous_sequence(ordering: PinList, lst: PinList, total: int) -> PinList:
     """Find the next sequence of n consecutive numbers in a sorted list
@@ -664,8 +663,8 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
             vss = "vss"
             vdd = "vdd"
             if pp.name:
-                vss = f"vss{pp.name}"
-                vdd = f"vdd{pp.name}"
+                vss = f"{pp.name}vss"
+                vdd = f"{pp.name}vdd"
             powerpins[vss].append(pp.power)
             powerpins[vdd].append(pp.ground)
 
@@ -769,12 +768,14 @@ class BareDiePackageDef(LinearAllocPackageDef):
 
     @property
     def bringup_pins(self) -> BringupPins:
-        core_power = PowerPins(
-            (_Side.N, 1),
-            (_Side.N, 2)
-        )
+        #TODO, this makes no sense for anything that isn't tiny..
+        core_power = [
+                PowerPins((_Side.N, 1), (_Side.N, 2)),
+                PowerPins((_Side.W, 1), (_Side.W, 2), name='d')
+                ]
+
         return BringupPins(
-            core_power=[core_power],
+            core_power=core_power,
             core_clock=(_Side.N, 3),
             core_reset=(_Side.N, 3),
             core_heartbeat=(_Side.E, 1),
@@ -849,27 +850,34 @@ class QuadPackageDef(LinearAllocPackageDef):
         Power pins are always a matched pair in the middle of a side, with the number
         varying with the size of the package.
         We don't move power pins from these locations to allow for easier bring up test.
+        returns two lists, core power pins and io power pins
         """
-        pins = []
+        pins: List[PowerPins] = []
+        # heuristic for sensible number of power pins for a given size
         n = (self.width + self.height)//12
         # Left
         p = self.height//2 + self.height//2
-        pins.append(PowerPins(p, p +1))
+        assert p > 3
+        pins.append(PowerPins(p-2, p-1))
+        pins.append(PowerPins(p, p+1, name='d'))
         # Bottom
         start = self.height
         if n > 2:
-            p = start + self.width//2 + self.width//2
-            pins.append(PowerPins(p, p+1))
+            p = start + self.width//2
+            pins.append(PowerPins(p-2, p-1))
+            pins.append(PowerPins(p, p+1, name='d'))
         # Right
         start = start + self.width
         if n > 1:
-            p = start + self.height//2 + self.height//2
-            pins.append(PowerPins(p, p+1))
+            p = start + self.height//2
+            pins.append(PowerPins(p-2, p-1))
+            pins.append(PowerPins(p, p+1, name='d'))
         # Top
         start = start + self.height
         if n > 3:
-            p = start + self.width//2 + self.width//2
-            pins.append(PowerPins(p, p+1))
+            p = start + self.width//2
+            pins.append(PowerPins(p-2, p-1))
+            pins.append(PowerPins(p, p+1, name='d'))
         return pins
 
 
@@ -961,29 +969,58 @@ class GAPackageDef(BasePackageDef):
     width:int
     height: int
     layout_type: GALayout= GALayout.FULL
-    channel_width: Optional[int]
-    island_width: Optional[int]
-    missing_pins: Optional[Set[GAPin]]
-    additional_pins: Optional[Set[GAPin]]
+    channel_width: Optional[int] = None
+    island_width: Optional[int] = None
+    missing_pins: Optional[Set[GAPin]] = None
+    additional_pins: Optional[Set[GAPin]] = None
 
-    def model_post_init(self, __context):
-        def int_to_alpha(i: int):
-            "Covert int to alpha representation, starting at 1"
-            valid_letters = "ABCDEFGHJKLMPRSTUVWXY"
-            out = ''
-            while i > 0:
-                char = i % len(valid_letters)
-                i = i // len(valid_letters)
-                out = valid_letters[char-1] + out
-            return out
+    @staticmethod
+    def _int_to_alpha(i: int):
+        "Covert int to alpha representation, starting at 1"
+        valid_letters = "ABCDEFGHJKLMPRSTUVWXY"
+        out = ''
+        while i > 0:
+            char = i % len(valid_letters)
+            i = i // len(valid_letters)
+            out = valid_letters[char-1] + out
+        return out
 
+    def _get_all_pins(self) -> Tuple[Set[GAPin], Set[GAPin] | None]:
         def pins_for_range(h1: int, h2: int, w1: int, w2: int) -> Set[GAPin]:
-            pins = [GAPin(int_to_alpha(h),w) for h in range(h1, h2) for w in range(w1, w2)]
+            pins = [GAPin(self._int_to_alpha(h),w) for h in range(h1, h2) for w in range(w1, w2)]
             return set(pins)
 
-        def sort_by_quadrant(pins: Set[GAPin]) -> List[Pin]:
+
+        match self.layout_type:
+            case GALayout.FULL:
+                pins = pins_for_range(1, self.height, 1, self.width)
+                return (pins, None)
+
+            case GALayout.PERIMETER:
+                assert self.channel_width is not None
+                pins = pins_for_range(1, self.height, 1, self.width) - \
+                       pins_for_range(1 + self.channel_width, self.height-self.channel_width,  1 + self.channel_width, self.width - self.channel_width)
+                return (pins, None)
+
+            case GALayout.ISLAND:
+                assert self.channel_width is not None
+                assert self.island_width is not None
+                outer_pins = pins_for_range(1, self.height, 1, self.width) - \
+                             pins_for_range(1 + self.channel_width, self.height-self.channel_width,  1 + self.channel_width, self.width - self.channel_width)
+                inner_pins = pins_for_range(ceil(self.height/ 2 - self.island_width /2), floor(self.height/2 + self.island_width /2),
+                                            ceil(self.width / 2 - self.island_width /2), floor(self.width /2 + self.island_width /2))
+                return (outer_pins, inner_pins)
+
+            case GALayout.CHANNEL:
+                assert self.channel_width is not None
+                pins = pins_for_range(1, self.channel_width + 1, 1, self.width) | \
+                       pins_for_range(self.height - self.channel_width, self.height, 1, self.width)
+                return (pins, None)
+
+    def model_post_init(self, __context):
+        def sort_by_quadrant(pins: Set[GAPin]) -> List[GAPin]:
             quadrants:List[Set[GAPin]] = [set(), set(), set(), set()]
-            midline_h = int_to_alpha(self.height // 2)
+            midline_h = self._int_to_alpha(self.height // 2)
             midline_w = self.width // 2
             for pin in pins:
                 if pin.h < midline_h and pin.w < midline_w:
@@ -996,40 +1033,13 @@ class GAPackageDef(BasePackageDef):
                     quadrants[3].add(pin)
             ret = []
             for q in range(0,3):
-                ret.append(sorted(quadrants[q]))
+                ret.extend(sorted(quadrants[q]))
             return ret
 
-        self._ordered_pins: List[Pin] = []
-        match self.layout_type:
-            case GALayout.FULL:
-                pins = pins_for_range(1, self.height, 1, self.width)
-                pins -= self.bringup_pins.to_set()
-                self._ordered_pins = sort_by_quadrant(pins)
-
-            case GALayout.PERIMETER:
-                assert self.channel_width is not None
-                pins = pins_for_range(1, self.height, 1, self.width) - \
-                       pins_for_range(1 + self.channel_width, self.height-self.channel_width,  1 + self.channel_width, self.width - self.channel_width)
-                pins -= self.bringup_pins.to_set()
-                self._ordered_pins = sort_by_quadrant(pins)
-
-            case GALayout.ISLAND:
-                assert self.channel_width is not None
-                assert self.island_width is not None
-                outer_pins = pins_for_range(1, self.height, 1, self.width) - \
-                             pins_for_range(1 + self.channel_width, self.height-self.channel_width,  1 + self.channel_width, self.width - self.channel_width)
-                outer_pins -= self.bringup_pins.to_set()
-                inner_pins = pins_for_range(ceil(self.height/ 2 - self.island_width /2), floor(self.height/2 + self.island_width /2),
-                                            ceil(self.width / 2 - self.island_width /2), floor(self.width /2 + self.island_width /2))
-                # TODO, allocate island as power
-                self._ordered_pins = sort_by_quadrant(outer_pins) + sorted(inner_pins)
-
-            case GALayout.CHANNEL:
-                assert self.channel_width is not None
-                pins = pins_for_range(1, self.channel_width + 1, 1, self.width) | \
-                       pins_for_range(self.height - self.channel_width, self.height, 1, self.width)
-                pins -= self.bringup_pins.to_set()
-                self._ordered_pins = sort_by_quadrant(pins)
+        self._ordered_pins: List[GAPin] = []
+        pins, _ = self._get_all_pins()
+        pins -= self.bringup_pins.to_set()
+        self._ordered_pins = sort_by_quadrant(pins)
 
         return super().model_post_init(__context)
 
@@ -1061,8 +1071,31 @@ class GAPackageDef(BasePackageDef):
 
     @property
     def _power(self) -> List[PowerPins]:
-        return [PowerPins(1,2)]
+        #TODO build an internal padring mapping
+        # for now, just distribute evenly
+        power_pins = []
 
+        pins, inner = self._get_all_pins()
+        #allocate all of inner to core pins, alternating
+        try:
+            if inner:
+                it = iter(sorted(inner))
+                for p in it:
+                    power_pins.append(PowerPins(p, next(it)))
+        except StopIteration:
+            pass
+        # distribute the rest evenly
+        try:
+            it = iter(sorted(pins))
+            for p in it:
+                for name in ('','d'):
+                    power_pins.append(PowerPins(p, next(it)))
+                for i in range(0,15):
+                    next(it)
+        except StopIteration:
+            pass
+
+        return power_pins
 
     @property
     def _jtag(self) -> JTAGPins:
