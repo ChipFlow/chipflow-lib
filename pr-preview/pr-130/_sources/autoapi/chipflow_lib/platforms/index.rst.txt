@@ -40,7 +40,7 @@ Package Contents
 
 .. py:class:: SiliconPlatformPort(name, port_desc)
 
-   Bases: :py:obj:`amaranth.lib.io.PortLike`
+   Bases: :py:obj:`amaranth.lib.io.PortLike`, :py:obj:`Generic`\ [\ :py:obj:`chipflow_lib.platforms._utils.Pin`\ ]
 
 
    Represents an abstract library I/O port that can be passed to a buffer.
