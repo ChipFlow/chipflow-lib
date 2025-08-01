@@ -95,7 +95,7 @@ class SimStep(StepBase):
         _wire_up_ports(m, top, self._platform)
 
         #FIXME: common source for build dir
-        self._platform.build(m)
+        self._platform.build(m, top)
         with common() as common_dir, source() as source_dir, runtime() as runtime_dir:
             context = {
                 "COMMON_DIR": common_dir,
@@ -108,4 +108,5 @@ class SimStep(StepBase):
             for k,v in VARIABLES.items():
                 context[k] = v.format(**context)
             print(f"substituting:\n{pformat(context)}")
-            DoitMain(ContextTaskLoader(DOIT_CONFIG, TASKS, context)).run(["build_sim"])
+            if DoitMain(ContextTaskLoader(DOIT_CONFIG, TASKS, context)).run(["build_sim"]) !=0:
+                raise ChipFlowError("Failed building simulator")

@@ -10,7 +10,7 @@
 #include "vendor/nlohmann/json.hpp"
 
 
-namespace cxxrtl_design {
+namespace chipflow {
 
 using namespace cxxrtl;
 
@@ -30,9 +30,12 @@ void log_event(unsigned timestamp, const std::string &peripheral, const std::str
 std::vector<action> get_pending_actions(const std::string &peripheral);
 void close_event_log();
 
-struct spiflash_model {
+namespace models {
+
+
+struct spiflash {
     std::string name;
-    spiflash_model(const std::string &name, const value<1> &clk, const value<1> &csn, const value<4> &d_o, const value<4> &d_oe, value<4> &d_i) : 
+    spiflash(const std::string &name, const value<1> &clk, const value<1> &csn, const value<4> &d_o, const value<4> &d_oe, value<4> &d_i) : 
         name(name), clk(clk), csn(csn), d_o(d_o), d_oe(d_oe), d_i(d_i) {
         data.resize(16*1024*1024);
         std::fill(data.begin(), data.end(), 0xFF); // flash starting value
@@ -61,9 +64,9 @@ private:
     } s;
 };
 
-struct uart_model {
+struct uart {
     std::string name;
-    uart_model(const std::string &name, const value<1> &tx, value<1> &rx, unsigned baud_div = 25000000/115200) : name(name), tx(tx), rx(rx), baud_div(baud_div) {};
+    uart(const std::string &name, const value<1> &tx, value<1> &rx, unsigned baud_div = 25000000/115200) : name(name), tx(tx), rx(rx), baud_div(baud_div) {};
 
     void step(unsigned timestamp);
 private:
@@ -82,18 +85,19 @@ private:
     } s;
 };
 
-struct gpio_model {
-    static constexpr unsigned width = 8;
+template<int pin_count>
+struct gpio {
     std::string name;
-    gpio_model(const std::string &name, const value<width> &o, const value<width> &oe, value<width> &i) : name(name), o(o), oe(oe), i(i) {};
+
+    gpio(const std::string &name, const value<pin_count> &o, const value<pin_count> &oe, value<pin_count> &i) : name(name), o(o), oe(oe), i(i) {};
 
     void step(unsigned timestamp);
 
 private:
     uint32_t input_data = 0;
-    const value<width> &o;
-    const value<width> &oe;
-    value<width> &i;
+    const value<pin_count> &o;
+    const value<pin_count> &oe;
+    value<pin_count> &i;
     struct {
         uint32_t o_last = 0;
         uint32_t oe_last = 0;
@@ -101,9 +105,42 @@ private:
 };
 
 
-struct spi_model {
+// GPIO
+template<int pin_count>
+void gpio<pin_count>::step(unsigned timestamp) {
+    uint32_t o_value = o.template get<uint32_t>();
+    uint32_t oe_value = oe.template get<uint32_t>();
+
+    for (auto action : get_pending_actions(name)) {
+        if (action.event == "set") {
+            auto bin = std::string(action.payload);
+            input_data = 0;
+            for (unsigned i = 0; i < pin_count; i++) {
+                if (bin.at((pin_count - 1) - i) == '1')
+                    input_data |= (1U << i);
+            }
+        }
+    }
+
+    if (o_value != s.o_last || oe_value != s.oe_last) {
+        std::string formatted_value;
+        for (int i = pin_count - 1; i >= 0; i--) {
+            if (oe_value & (1U << unsigned(i)))
+                formatted_value += (o_value & (1U << unsigned(i))) ? '1' : '0';
+            else
+                formatted_value += 'Z';
+        }
+        log_event(timestamp, name, "change", json(formatted_value));
+    }
+
+    i.set((input_data & ~oe_value) | (o_value & oe_value));
+    s.o_last = o_value;
+    s.oe_last = oe_value;
+}
+
+struct spi {
     std::string name;
-    spi_model(const std::string &name, const value<1> &clk, const value<1> &csn, const value<1> &copi, value<1> &cipo) : 
+    spi(const std::string &name, const value<1> &clk, const value<1> &copi, value<1> &cipo, const value<1> &csn) : 
         name(name), clk(clk), csn(csn), copi(copi), cipo(cipo) {
     };
 
@@ -125,9 +162,9 @@ private:
     } s;
 };
 
-struct i2c_model {
+struct i2c {
     std::string name;
-    i2c_model(const std::string &name, const value<1> &sda_oe, value<1> &sda_i, const value<1> &scl_oe, value<1> &scl_i) : name(name), sda_oe(sda_oe), sda_i(sda_i), scl_oe(scl_oe), scl_i(scl_i) {};
+    i2c(const std::string &name, const value<1> &scl_o, const value<1> &scl_oe, value<1> &scl_i, const value<1> &sda_o, const value<1> &sda_oe, value<1> &sda_i)  : name(name), sda_oe(sda_oe), sda_i(sda_i), scl_oe(scl_oe), scl_i(scl_i) {};
 
     void step(unsigned timestamp);
 private:
@@ -150,6 +187,7 @@ private:
 };
 
 
-}
+} //chipflow::simulation
+} //chipflow
 
 #endif
