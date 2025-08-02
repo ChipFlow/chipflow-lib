@@ -11,4 +11,5 @@ __all__ = ['IO_ANNOTATION_SCHEMA', 'IOSignature', 'IOModel',
            'GAPackageDef', 'QuadPackageDef', 'BareDiePackageDef', 'BasePackageDef',
            'BringupPins', 'JTAGPins', 'PowerPins',
            'SiliconPlatformPort', 'SiliconPlatform',
-           'SoftwarePlatform', 'SimPlatform']
+           'SoftwarePlatform', 'SimPlatform',
+           ]

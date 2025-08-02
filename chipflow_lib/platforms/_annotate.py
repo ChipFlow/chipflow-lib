@@ -1,3 +1,4 @@
+import json
 from types import MethodType
 import pydantic
 from amaranth.lib import meta
@@ -25,9 +26,6 @@ def amaranth_annotate(modeltype: type[_T_TypedDict], schema_id: str, member: str
     PydanticModel = pydantic.TypeAdapter(modeltype)
 
     def annotation_schema():
-        class Model(pydantic.BaseModel):
-            data_td: _T_TypedDict
-
         schema = PydanticModel.json_schema()
         schema['$schema'] = "https://json-schema.org/draft/2020-12/schema"
         schema['$id'] = schema_id
@@ -45,7 +43,11 @@ def amaranth_annotate(modeltype: type[_T_TypedDict], schema_id: str, member: str
             return self.parent
 
         def as_json(self):  # type: ignore
-            return PydanticModel.dump_python(getattr(self.parent, member))
+            # TODO: this is slow, but atm necessary as dump_python doesn't do the appropriate
+            # transformation of things like PosixPath. Figure out why, maybe log issue/PR with
+            # pydantic
+            # return json.loads(PydanticModel.dump_json(getattr(self.parent, member)))
+            return PydanticModel.dump_python(getattr(self.parent, member), mode='json')
 
     def decorate_class(klass):
         if hasattr(klass, 'annotations'):
@@ -70,7 +72,7 @@ def amaranth_annotate(modeltype: type[_T_TypedDict], schema_id: str, member: str
             print(f"annotation obj {obj}")
             annotations = old_annotations(origin)  # type: ignore
             annotation = Annotation(self)
-            print("  returning {annotations + (annotation,)}")
+            print(f"  returning {[a.as_json() for a in (annotations + (annotation,))]}")
             return annotations + (annotation,)  # type: ignore
 
         setattr(obj, 'annotations',  MethodType(annotations, obj))
@@ -87,7 +89,7 @@ def amaranth_annotate(modeltype: type[_T_TypedDict], schema_id: str, member: str
         #     else:
         #         annotations = super(obj.__class__, obj).annotations(obj)
         #     annotation = Annotation(self)
-        #     print("  returning {annotations + (annotation,)}")
+        #     print("  returning {[a.to_json() for a in (annotations + (annotation,))}")
         #     return annotations + (annotation,)
 
         return obj

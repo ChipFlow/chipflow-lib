@@ -3,43 +3,97 @@
 import re
 import sys
 
+from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Tuple, Any
+from typing import (
+        List, Tuple, Any, Self, Protocol, runtime_checkable,
+        Literal, Union, TypeVar, Generic, Annotated
+        )
+
 from typing_extensions import Unpack, TypedDict, NotRequired
 
 from amaranth.lib import wiring
 from amaranth.lib.wiring import Out
+from pydantic import PlainSerializer, WithJsonSchema, WrapValidator
 
+from .. import _ensure_chipflow_root
 from ._utils import InputIOSignature, OutputIOSignature, BidirIOSignature, IOModelOptions, _chipflow_schema_uri
 from ._annotate import amaranth_annotate
 
 SIM_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("simulatable-interface", 0))
-SIM_DATA_SCHEMA = str(_chipflow_schema_uri("simulatable-data", 0))
+DATA_SCHEMA = str(_chipflow_schema_uri("simulatable-data", 0))
 DRIVER_MODEL_SCHEMA = str(_chipflow_schema_uri("driver-model", 0))
 
 class SimInterface(TypedDict):
     uid: str
     parameters: List[Tuple[str, Any]]
 
-class SimData(TypedDict):
-    file_name: str
+@runtime_checkable
+@dataclass
+class DataclassProtocol(Protocol):
+    pass
+
+
+@dataclass
+class SoftwareBuild:
+    """
+    This holds the information needed for building software and providing the built outcome
+    """
+
+    user_files: list[Path]
     offset: int
+    filename: Path
+    build_dir: Path
+    type: Literal["SoftwareBuild"] = "SoftwareBuild"
+
+    def __init__(self, user_files: list[Path], *, offset=0):
+        self.build_dir = _ensure_chipflow_root() / 'build' / 'software'
+        self.filename = self.build_dir / 'software.bin'
+        self.user_files = list(user_files)
+        self.offset = offset
+
+
+_T_DataClass = TypeVar('_T_DataClass', bound=DataclassProtocol)
+class Data(TypedDict, Generic[_T_DataClass]):
+    data: _T_DataClass
+
 
 class DriverModel(TypedDict):
     """
-    Options for @`driver_model` decorator
+    Options for `DriverSignature`
 
     Attributes:
+        component: The `wiring.Component` that this is the signature for.
+        regs_struct: The name of the C struct that represents the registers of this component
         h_files: Header files for the driver
         c_files: C files for the driver
-        busses: List of buses of this `Component` whos address range should be passed to the driver (defaults to ['bus'])
+        regs_bus: The bus of this `Component` which contains its control registers
         include_dirs: any extra include directories needed by the driver
     """
-    h_files: List[Path]
-    c_files: NotRequired[List[Path]]
-    include_dirs: NotRequired[List[Path]]
-    busses: NotRequired[List[str]]
+    # we just extrat the info we need, don't actually serialise a `wiring.Component`...
+    component: Annotated[
+                wiring.Component,
+                PlainSerializer(lambda x: {
+                    'name': x.__class__.__name__,
+                    'file': sys.modules[x.__module__].__file__
+                    }, return_type=dict),
+                WithJsonSchema({
+                    'type': 'object',
+                    'properties': {
+                        'name': { 'type': 'string' },
+                        'file': { 'type': 'string' },
+                        }
+                    }),
+                WrapValidator(lambda v, h: v)  # Don't care about it actually..
+          ] | dict
+
+    regs_struct: str
+    h_files: NotRequired[list[Path]]
+    c_files: NotRequired[list[Path]]
+    include_dirs: NotRequired[list[Path]]
+    regs_bus: NotRequired[str]
     _base_path: NotRequired[Path]  # gets filled by the decorator to the base directory where the Component was defined
+
 
 _VALID_UID = re.compile('[a-zA-Z_.]').search
 
@@ -144,34 +198,36 @@ class GPIOSignature(wiring.Signature):
         return [('pin_count',self._pin_count)]
 
 
-def attach_simulation_data(c: wiring.Component, **kwargs: Unpack[SimData]):
-    setattr(c.signature, '__chipflow_simulation_data__', kwargs)
-    amaranth_annotate(SimData, SIM_DATA_SCHEMA, '__chipflow_simulation_data__', decorate_object=True)(c.signature)
+def attach_data(c: wiring.Component, data: DataclassProtocol):
+    data_dict: Data = {'data':data}
+    setattr(c.signature, '__chipflow_data__', data_dict)
+    amaranth_annotate(Data, DATA_SCHEMA, '__chipflow_data__', decorate_object=True)(c.signature)
 
 
-def driver_model(**model: Unpack[DriverModel]):
-    def decorate(klass):
+class DriverSignature(wiring.Signature):
 
-        class_file = sys.modules[klass.__module__].__file__
-        assert class_file
+    def __init__(self, members, **kwargs: Unpack[DriverModel]):
 
-        model['_base_path'] = Path(class_file).parent.absolute()
-        if 'busses' not in model:
-            model['busses'] = ['bus']
+        definition_file = sys.modules[kwargs['component'].__module__].__file__
+        assert definition_file
+        base_path = Path(definition_file).parent.absolute()
+        kwargs['_base_path'] = base_path
+        if 'regs_bus' not in kwargs:
+            kwargs['regs_bus'] = 'bus'
 
-        print(f"Decorating {klass}")
-        original_init = klass.__init__
-        def new_init(self,*args, **kwargs):
+        include_dirs = []
+        if 'include_dirs' in kwargs:
+            for i in kwargs['include_dirs']:
+                if not Path(i).is_absolute():
+                    include_dirs.append(base_path / i)
+                else:
+                    include_dirs.append(Path(i))
 
-            print(f"Decorating {self} with driver_model({model})")
-            original_init(self, *args, **kwargs)
-            print(f"Ran original init")
-            self.signature.__chipflow_driver_model__ = model
+        kwargs['include_dirs'] = include_dirs
 
-            amaranth_annotate(DriverModel, DRIVER_MODEL_SCHEMA, '__chipflow_driver_model__', decorate_object=True)(self.signature)
+        self.__chipflow_driver_model__ = kwargs
+        amaranth_annotate(DriverModel, DRIVER_MODEL_SCHEMA, '__chipflow_driver_model__', decorate_object=True)(self)
+        super().__init__(members=members)
 
-        klass.__init__ = new_init
-        print(f" new init {klass.__init__} was {original_init}")
-        return klass
-    return decorate
+
 

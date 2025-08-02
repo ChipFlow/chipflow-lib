@@ -8,6 +8,7 @@ from amaranth import Module
 
 from . import StepBase
 from ..platforms._internal import SoftwarePlatform, top_components
+from ..software.soft_gen import SoftwareGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -26,10 +27,6 @@ class SoftwareStep(StepBase):
     def run_cli(self, args):
         self.build()
 
-    def doit_build(self):
-        "Run the overridden :doit_build_module"
-        DoitMain(ModuleTaskLoader(self.doit_build_module)).run(["build_software"])
-
     def build(self, *args):
         "Build the software for your design"
 
@@ -43,6 +40,10 @@ class SoftwareStep(StepBase):
         for n, t in top.items():
             setattr(m.submodules, n, t)
 
-        self._platform.build(m, top)
+        generators = self._platform.build(m, top)
 
-        self.doit_build()
+        from ..platforms import software_build
+        for name, gen in generators.items():
+            loader = ModuleTaskLoader(software_build)
+            loader.task_opts = {"build_software": {"generator": gen}, "build_software_elf": {'generator': gen}}  #type: ignore
+            DoitMain(loader).run(["build_software"])

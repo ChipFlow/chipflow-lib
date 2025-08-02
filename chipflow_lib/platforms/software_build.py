@@ -7,6 +7,7 @@ from doit import create_after, task_params
 
 from ._signatures import DriverModel
 from .._doit import TaskParams
+from ..software.soft_gen import SoftwareGenerator
 
 BUILD_DIR = "./build/software"
 RISCVCC = f"{sys.executable} -m ziglang cc -target riscv32-freestanding-musl"
@@ -17,47 +18,39 @@ CFLAGS = "-g -mcpu=baseline_rv32-a-c-d -mabi=ilp32 -Wl,-Bstatic,-T,"
 CFLAGS += f"{LINKER_SCR},--strip-debug -static -ffreestanding -nostdlib {CINCLUDES}"
 
 
-def collate_driver_list(dl: List[DriverModel]) -> Tuple[List[str], List[str]]:
-    "Collates a list of `DriverModel`s and returns a pair of lists of absolute paths to sources and headers"
-    sources = []
-    headers = []
-    for dm in dl:
-        assert '_base_path' in dm
-        base = dm['_base_path']
-        if 'c_files' in dm:
-            sources.extend([base / f for f in  dm['c_files']])
-        if 'h_files' in dm:
-            sources.extend([base / f for f in  dm['h_files']])
-    return (sources, headers)
-
-
 @task_params([
-    TaskParams(name="drivers", default=list()),
+    TaskParams(name="generator", default=None, type=SoftwareGenerator.model_validate_json), #type: ignore
     ])
-def task_build_software_elf(drivers):
-    sources, includes = collate_driver_list(drivers)
-    sources.append(SOFTWARE_START)
-    sources_str = " ".join(sources)
+def task_build_software_elf(generator):
+    sources = set([str(f) for f in generator.drivers['c_files']])
+    sources |= set([str(f) for f in generator.build.user_files])
+    sources.add(SOFTWARE_START)
+    print(sources)
+    includes = set([str(f) for f in generator.drivers['h_files']])
+    inc_dirs = ' '.join([f"-I{f}" for f in generator.drivers['include_dirs']])
+    print(generator.build)
+    sources_str = " ".join(list(sources))
 
     return {
-        "actions": [f"{RISCVCC} {CFLAGS} -o {BUILD_DIR}/software.elf {sources_str}"],
-        "file_dep": sources + includes + [LINKER_SCR],
-        "targets": [f"{BUILD_DIR}/software.elf"],
+        "actions": [f"{RISCVCC} {CFLAGS} {inc_dirs} -o {generator.build.build_dir}/software.elf {sources_str}"],
+        "file_dep": list(sources) + list(includes) + [LINKER_SCR],
+        "targets": [f"{generator.build.build_dir}/software.elf"],
         "verbosity": 2
     }
 
 
-@create_after(executed="build_software_elf", target_regex=".*/software\\.bin")
-def task_build_software():
+@task_params([
+    TaskParams(name="generator", default=None, type=SoftwareGenerator.model_validate_json), #type: ignore
+    ])
+def task_build_software(generator):
+    build_dir = generator.build.build_dir
     return {
         "actions": [f"{sys.executable} -m ziglang objcopy -O binary "
-                    f"{BUILD_DIR}/software.elf {BUILD_DIR}/software.bin"],
-        "file_dep": [f"{BUILD_DIR}/software.elf"],
-        "targets": [f"{BUILD_DIR}/software.bin"],
+                    f"{build_dir}/software.elf {build_dir}/software.bin"],
+        "task_dep": ['build_software_elf'],
+        "file_dep": [f"{build_dir}/software.elf"],
+        "targets": [f"{build_dir}/software.bin"],
     }
 
-
-def _create_build_dir():
-    Path(f"{BUILD_DIR}/drivers").mkdir(parents=True, exist_ok=True)
 
 

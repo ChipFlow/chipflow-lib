@@ -20,7 +20,7 @@ from pydantic import BaseModel
 from .. import ChipFlowError, _ensure_chipflow_root
 from ._signatures import (
         I2CSignature, GPIOSignature, UARTSignature, SPISignature, QSPIFlashSignature,
-        SIM_ANNOTATION_SCHEMA, SIM_DATA_SCHEMA, SimInterface
+        SIM_ANNOTATION_SCHEMA, DATA_SCHEMA, SimInterface
         )
 from ._utils import load_pinlock, Interface
 
@@ -214,8 +214,8 @@ class SimPlatform:
             for interface, interface_desc in iface['interface']['members'].items():
                 annotations = interface_desc['annotations']
 
-                if SIM_DATA_SCHEMA in annotations:
-                    self._sim_data[interface] = annotations[SIM_DATA_SCHEMA]
+                if DATA_SCHEMA in annotations:
+                    self._sim_data[interface] = annotations[DATA_SCHEMA]['data']
 
         data_load = []
         for i,d in self._sim_data.items():

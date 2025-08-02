@@ -17,7 +17,7 @@ from ._packages import PACKAGE_DEFINITIONS
 from ._sky130 import Sky130DriveMode
 from ._signatures import (
         JTAGSignature, SPISignature, I2CSignature, UARTSignature, GPIOSignature, QSPIFlashSignature,
-        attach_simulation_data, driver_model, DriverModel
+        attach_data, DriverSignature, SoftwareBuild
         )
 
 __all__ = ['IO_ANNOTATION_SCHEMA', 'IOSignature',
@@ -26,6 +26,6 @@ __all__ = ['IO_ANNOTATION_SCHEMA', 'IOSignature',
            'SiliconPlatformPort', 'SiliconPlatform',
            'SimPlatform', 'SoftwarePlatform',
            'JTAGSignature', 'SPISignature', 'I2CSignature', 'UARTSignature', 'GPIOSignature', 'QSPIFlashSignature',
-           'attach_simulation_data', 'driver_model', 'DriverModel',
+           'attach_data', 'DriverSignature',
            'Sky130DriveMode',
            'PACKAGE_DEFINITIONS']

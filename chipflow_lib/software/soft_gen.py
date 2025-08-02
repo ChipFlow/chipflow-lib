@@ -1,20 +1,32 @@
 # SPDX-License-Identifier: BSD-2-Clause
+
+from collections import defaultdict
+from pydantic import BaseModel
 from pathlib import Path
+from typing import NamedTuple, Optional
+
+from .. import ChipFlowError
+from ..platforms._signatures import DriverModel, SoftwareBuild
+
+class Periph(NamedTuple):
+    name: str
+    component: str
+    regs_struct: str
+    address: int
 
 
-class SoftwareGenerator:
-    def __init__(self, *, rom_start, rom_size, ram_start, ram_size):
-        self.rom_start = rom_start
-        self.rom_size = rom_size
-        self.ram_start = ram_start
-        self.ram_size = ram_size
-        self.defines = []
-        self.periphs = []
-        self.extra_init = []
-        print("Initialised SoftwareGenerator")
+class SoftwareGenerator(BaseModel):
+    build: SoftwareBuild
+    rom_start: int
+    rom_size: int
+    ram_start: int
+    ram_size: int
+    periphs: list[Periph] = []
+    drivers: dict = defaultdict(list)
 
-    def generate(self, out_dir):
-        Path(out_dir).mkdir(parents=True, exist_ok=True)
+    def generate(self):
+        out_dir = self.build.build_dir / "generated"
+        out_dir.mkdir(parents=True, exist_ok=True)
         print(f"generating in {out_dir}")
         with open(Path(out_dir) / "start.S", "w") as f:
             f.write(self.start)
@@ -23,28 +35,40 @@ class SoftwareGenerator:
         with open(Path(out_dir) / "soc.h", "w") as f:
             f.write(self.soc_h)
 
-    def add_periph(self, periph_type, name, address):
-        self.periphs.append((periph_type, name, address))
+    def add_periph(self, name, address, model: DriverModel):
 
-    def add_extra_init(self, asm):
-        self.extra_init.append(asm)
+        assert '_base_path' in model
+
+        for k in ('c_files', 'h_files', 'include_dirs'):
+            if k in model:
+                for p in model[k]:   # type: ignore
+                    print(f"adding {k} {p}")
+                    if not p.is_absolute():
+                        print(model['_base_path'] / p)
+                        self.drivers[k].append(model['_base_path'] / p)
+                    else:
+                        print(p)
+                        self.drivers[k].append(p)
+
+        component = model['component']['name']  #type: ignore
+        regs_struct = model['regs_struct']
+        self.periphs.append(Periph(name, component, regs_struct, address))
 
     @property
     def soc_h(self):
         result = "#ifndef SOC_H\n"
-        result += "#define SOC_H\n"
-        periph_types = sorted(set(x[0] for x in self.periphs))
+        result += "#define SOC_H\n\n"
 
-        for t in periph_types:
-            result += f'#include "drivers/{t}.h"\n'
+        for i in self.drivers['h_files']:
+            result += f'#include "{i}"\n'
         result += "\n"
 
         uart = None
 
-        for t, n, a in self.periphs:
-            if uart is None and t == "uart":  # first UART
+        for n, t, r, a in self.periphs:
+            if uart is None and t == "UARTPeripheral":  # first UART
                 uart = n
-            result += f'#define {n} ((volatile {t}_regs_t *const)0x{a:08x})\n'
+            result += f'#define {n} ((volatile {r} *const)0x{a:08x})\n'
 
         result += '\n'
 
@@ -62,7 +86,6 @@ class SoftwareGenerator:
 
     @property
     def start(self):
-        joined_init = '\n'.join(self.extra_init)
         return f""".section .text
 
 start:
@@ -102,8 +125,6 @@ addi x28, zero, 0
 addi x29, zero, 0
 addi x30, zero, 0
 addi x31, zero, 0
-
-{joined_init}
 
 # copy data section
 la a0, _sidata
