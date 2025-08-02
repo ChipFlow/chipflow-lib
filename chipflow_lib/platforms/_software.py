@@ -95,9 +95,8 @@ class SoftwarePlatform:
 
             for component, build in data.items():
 
-                # TODO: This is a nasty hack. Need to a) decorate spiflash in such a way that we can determine
-                # which window is ROM and also should have an image generated for it, and b) figure out
-                # how to tell which bus is which in `get_windows`
+                # TODO: This is a nasty hack. basically it works becuase we assume that CSR addresses are later than ROB..
+                # Need to figure out how to tell which bus is which in `get_windows` (using regs_bus)
 
                 rom = windows[component][0]
                 rom_start = rom[0]
@@ -107,7 +106,11 @@ class SoftwarePlatform:
                 sw = SoftwareGenerator(build=build, rom_start=rom_start, rom_size=rom_size, ram_start=ram_start, ram_size=ram_size)
 
                 for k,v in driver_models.items():
-                    addr = windows[k][0][0]
+                    # more of that nasty hack
+                    if k == component:
+                        addr = windows[k][1][0]
+                    else:
+                        addr = windows[k][0][0]
                     name = '_'.join(k)
                     sw.add_periph(name, addr, v)
 

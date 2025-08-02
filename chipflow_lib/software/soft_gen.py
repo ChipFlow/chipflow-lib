@@ -197,9 +197,11 @@ j loop
 
     @property
     def lds(self):
+        rom_start = self.rom_start + self.build.offset
+        rom_size = self.rom_size - self.build.offset
         return f"""MEMORY
 {{
-    FLASH (rx)      : ORIGIN = 0x{self.rom_start:08x}, LENGTH = 0x{self.rom_size:08x}
+    FLASH (rx)      : ORIGIN = 0x{rom_start:08x}, LENGTH = 0x{rom_size:08x}
     RAM (xrw)       : ORIGIN = 0x{self.ram_start:08x}, LENGTH = 0x{self.ram_size:08x}
 }}
 
