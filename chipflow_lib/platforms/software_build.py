@@ -9,31 +9,19 @@ from ._signatures import DriverModel
 from .._doit import TaskParams
 from ..software.soft_gen import SoftwareGenerator
 
-BUILD_DIR = "./build/software"
-RISCVCC = f"{sys.executable} -m ziglang cc -target riscv32-freestanding-musl"
-CINCLUDES = f"-I. -I{BUILD_DIR}"
-LINKER_SCR = f"{BUILD_DIR}/generated/sections.lds"
-SOFTWARE_START = f"{BUILD_DIR}/generated/start.S"
-CFLAGS = "-g -mcpu=baseline_rv32-a-c-d -mabi=ilp32 -Wl,-Bstatic,-T,"
-CFLAGS += f"{LINKER_SCR},--strip-debug -static -ffreestanding -nostdlib {CINCLUDES}"
-
-
 @task_params([
     TaskParams(name="generator", default=None, type=SoftwareGenerator.model_validate_json), #type: ignore
     ])
 def task_build_software_elf(generator):
-    sources = set([str(f) for f in generator.drivers['c_files']])
-    sources |= set([str(f) for f in generator.build.user_files])
-    sources.add(SOFTWARE_START)
-    print(sources)
-    includes = set([str(f) for f in generator.drivers['h_files']])
-    inc_dirs = ' '.join([f"-I{f}" for f in generator.drivers['include_dirs']])
-    print(generator.build)
-    sources_str = " ".join(list(sources))
-
+    generator.generate()
+    sources = [str(f) for f in generator.sources]
+    includes = [str(f) for f in generator.includes]
+    inc_dirs = ' '.join([f"-I{f}" for f in generator.include_dirs])
+    sources_str = " ".join(sources)
+    link_scr = str(generator.link_script)
     return {
-        "actions": [f"{RISCVCC} {CFLAGS} {inc_dirs} -o {generator.build.build_dir}/software.elf {sources_str}"],
-        "file_dep": list(sources) + list(includes) + [LINKER_SCR],
+        "actions": [f"{generator.compiler} {generator.cflags} {inc_dirs} -o {generator.build.build_dir}/software.elf {sources_str}"],
+        "file_dep": sources + includes + [link_scr],
         "targets": [f"{generator.build.build_dir}/software.elf"],
         "verbosity": 2
     }

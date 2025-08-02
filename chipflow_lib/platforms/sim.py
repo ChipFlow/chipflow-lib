@@ -2,6 +2,7 @@
 
 import logging
 import sys
+import warnings
 
 from dataclasses import dataclass
 from enum import StrEnum
@@ -12,6 +13,7 @@ from typing import Dict, List, Optional, Type
 from amaranth import Module, ClockSignal, ResetSignal, ClockDomain
 from amaranth.lib import io, wiring
 from amaranth.back import rtlil  # type: ignore[reportAttributeAccessIssue]
+from amaranth.hdl import UnusedElaboratable
 from amaranth.hdl._ir import PortDirection
 from amaranth.lib.cdc import FFSynchronizer
 from jinja2 import Environment, PackageLoader, select_autoescape
@@ -171,6 +173,8 @@ class SimPlatform:
         self.extra_files[filename] = content
 
     def build(self, e, top):
+        warnings.simplefilter(action="ignore", category=UnusedElaboratable)
+
         Path(self.build_dir).mkdir(parents=True, exist_ok=True)
 
         ports = []

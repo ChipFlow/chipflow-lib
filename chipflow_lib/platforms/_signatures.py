@@ -40,16 +40,20 @@ class SoftwareBuild:
     This holds the information needed for building software and providing the built outcome
     """
 
-    user_files: list[Path]
+    sources: list[Path]
+    includes: list[Path]
+    include_dirs: list[Path]
     offset: int
     filename: Path
     build_dir: Path
     type: Literal["SoftwareBuild"] = "SoftwareBuild"
 
-    def __init__(self, user_files: list[Path], *, offset=0):
+    def __init__(self, *, sources: list[Path], includes: list[Path] = [], include_dirs = [], offset=0):
         self.build_dir = _ensure_chipflow_root() / 'build' / 'software'
         self.filename = self.build_dir / 'software.bin'
-        self.user_files = list(user_files)
+        self.sources= list(sources)
+        self.includes = list(includes)
+        self.include_dirs = list(include_dirs)
         self.offset = offset
 
 
@@ -207,7 +211,7 @@ def attach_data(c: wiring.Component, data: DataclassProtocol):
 class DriverSignature(wiring.Signature):
 
     def __init__(self, members, **kwargs: Unpack[DriverModel]):
-
+        print(f"DriverSignature: {kwargs}")
         definition_file = sys.modules[kwargs['component'].__module__].__file__
         assert definition_file
         base_path = Path(definition_file).parent.absolute()
@@ -215,15 +219,10 @@ class DriverSignature(wiring.Signature):
         if 'regs_bus' not in kwargs:
             kwargs['regs_bus'] = 'bus'
 
-        include_dirs = []
-        if 'include_dirs' in kwargs:
-            for i in kwargs['include_dirs']:
-                if not Path(i).is_absolute():
-                    include_dirs.append(base_path / i)
-                else:
-                    include_dirs.append(Path(i))
-
-        kwargs['include_dirs'] = include_dirs
+        # execute any generators here
+        for k in ('c_files', 'h_files', 'includedirs'):
+            if k in kwargs:
+                kwargs[k] = list(kwargs[k])  #type: ignore
 
         self.__chipflow_driver_model__ = kwargs
         amaranth_annotate(DriverModel, DRIVER_MODEL_SCHEMA, '__chipflow_driver_model__', decorate_object=True)(self)

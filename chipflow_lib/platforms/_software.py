@@ -1,12 +1,14 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 import logging
+import warnings
 
 from collections import defaultdict
 from pathlib import Path
 from pprint import pformat
 
 from amaranth import Fragment
+from amaranth.hdl import UnusedElaboratable
 from amaranth.lib import wiring
 from amaranth_soc import wishbone
 from pydantic import TypeAdapter
@@ -52,6 +54,7 @@ class SoftwarePlatform:
         self._config = config
 
     def build(self, e, top):
+        warnings.simplefilter(action="ignore", category=UnusedElaboratable)
 
         frag = Fragment.get(e, None)
 
