@@ -6,8 +6,8 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import (
-        List, Tuple, Any, Self, Protocol, runtime_checkable,
-        Literal, Union, TypeVar, Generic, Annotated
+        List, Tuple, Any, Protocol, runtime_checkable,
+        Literal, TypeVar, Generic, Annotated
         )
 
 from typing_extensions import Unpack, TypedDict, NotRequired
@@ -202,16 +202,17 @@ class GPIOSignature(wiring.Signature):
         return [('pin_count',self._pin_count)]
 
 
-def attach_data(c: wiring.Component, data: DataclassProtocol):
+def attach_data(external_interface: wiring.PureInterface, component: wiring.Component, data: DataclassProtocol):
     data_dict: Data = {'data':data}
-    setattr(c.signature, '__chipflow_data__', data_dict)
-    amaranth_annotate(Data, DATA_SCHEMA, '__chipflow_data__', decorate_object=True)(c.signature)
+    setattr(component.signature, '__chipflow_data__', data_dict)
+    amaranth_annotate(Data, DATA_SCHEMA, '__chipflow_data__', decorate_object=True)(component.signature)
+    setattr(external_interface.signature, '__chipflow_data__', data_dict)
+    amaranth_annotate(Data, DATA_SCHEMA, '__chipflow_data__', decorate_object=True)(external_interface.signature)
 
 
 class DriverSignature(wiring.Signature):
 
     def __init__(self, members, **kwargs: Unpack[DriverModel]):
-        print(f"DriverSignature: {kwargs}")
         definition_file = sys.modules[kwargs['component'].__module__].__file__
         assert definition_file
         base_path = Path(definition_file).parent.absolute()
@@ -227,6 +228,5 @@ class DriverSignature(wiring.Signature):
         self.__chipflow_driver_model__ = kwargs
         amaranth_annotate(DriverModel, DRIVER_MODEL_SCHEMA, '__chipflow_driver_model__', decorate_object=True)(self)
         super().__init__(members=members)
-
 
 

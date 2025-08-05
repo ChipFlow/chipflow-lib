@@ -224,7 +224,7 @@ class SimPlatform:
         data_load = []
         for i,d in self._sim_data.items():
             args = [f"0x{d['offset']:X}U"]
-            p = Path(d['file_name'])
+            p = Path(d['filename'])
             if not p.is_absolute():
                 p = _ensure_chipflow_root() / p
             data_load.append({'model_name': i, 'file_name': p, 'args': args})
