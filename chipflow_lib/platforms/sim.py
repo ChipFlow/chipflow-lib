@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 import logging
-import os
 import sys
+import warnings
 
 from dataclasses import dataclass
 from enum import StrEnum
@@ -12,15 +12,16 @@ from typing import Dict, List, Optional, Type
 from amaranth import Module, ClockSignal, ResetSignal, ClockDomain
 from amaranth.lib import io, wiring
 from amaranth.back import rtlil  # type: ignore[reportAttributeAccessIssue]
+from amaranth.hdl import UnusedElaboratable
 from amaranth.hdl._ir import PortDirection
 from amaranth.lib.cdc import FFSynchronizer
 from jinja2 import Environment, PackageLoader, select_autoescape
-from pydantic import BaseModel
+from pydantic import BaseModel, TypeAdapter
 
 from .. import ChipFlowError, _ensure_chipflow_root
 from ._signatures import (
         I2CSignature, GPIOSignature, UARTSignature, SPISignature, QSPIFlashSignature,
-        SIM_ANNOTATION_SCHEMA, SIM_DATA_SCHEMA, SimInterface
+        SIM_ANNOTATION_SCHEMA, DATA_SCHEMA, SimInterface, SoftwareBuild
         )
 from ._utils import load_pinlock, Interface
 
@@ -132,7 +133,7 @@ def find_builder(builders: List[BasicCxxBuilder], sim_interface: SimInterface):
     for b in builders:
         if uid in b._table:
             return b
-    logger.warn(f"Unable to find builder for '{uid}'")
+    logger.warn(f"Unable to find a simulation model for '{uid}'")
     return None
 
 
@@ -152,7 +153,7 @@ _COMMON_BUILDER = BasicCxxBuilder(
 
 class SimPlatform:
     def __init__(self, config):
-        self.build_dir = os.path.join(os.environ['CHIPFLOW_ROOT'], 'build', 'sim')
+        self.build_dir = _ensure_chipflow_root() / 'build' / 'sim'
         self.extra_files = dict()
         self.sim_boxes = dict()
         self._ports: Dict[str, io.SimulationPort] = {}
@@ -161,7 +162,6 @@ class SimPlatform:
         self._resets = {}
         self._builders: List[BasicCxxBuilder] = [ _COMMON_BUILDER ]
         self._top_sim = {}
-        self._sim_data = {}
 
     def add_file(self, filename, content):
         if not isinstance(content, (str, bytes)):
@@ -169,6 +169,8 @@ class SimPlatform:
         self.extra_files[filename] = content
 
     def build(self, e, top):
+        warnings.simplefilter(action="ignore", category=UnusedElaboratable)
+
         Path(self.build_dir).mkdir(parents=True, exist_ok=True)
 
         ports = []
@@ -208,17 +210,20 @@ class SimPlatform:
         metadata = {}
         for key in top.keys():
             metadata[key] = getattr(e.submodules, key).metadata.as_json()
+
+
+        sim_data = {}
         for component, iface in metadata.items():
             for interface, interface_desc in iface['interface']['members'].items():
                 annotations = interface_desc['annotations']
-
-                if SIM_DATA_SCHEMA in annotations:
-                    self._sim_data[interface] = annotations[SIM_DATA_SCHEMA]
+                if DATA_SCHEMA in annotations \
+                and annotations[DATA_SCHEMA]['data']['type'] == "SoftwareBuild":
+                    sim_data[interface] = TypeAdapter(SoftwareBuild).validate_python(annotations[DATA_SCHEMA]['data'])
 
         data_load = []
-        for i,d in self._sim_data.items():
-            args = [f"0x{d['offset']:X}U"]
-            p = Path(d['file_name'])
+        for i,d in sim_data.items():
+            args = [f"0x{d.offset:X}U"]
+            p = d.filename
             if not p.is_absolute():
                 p = _ensure_chipflow_root() / p
             data_load.append({'model_name': i, 'file_name': p, 'args': args})

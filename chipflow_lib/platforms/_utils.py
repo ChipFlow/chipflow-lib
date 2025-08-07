@@ -20,7 +20,7 @@ from typing_extensions import (
     TypedDict, Unpack, NotRequired
 )
 
-
+from amaranth import Module
 from amaranth.lib import wiring, io
 from amaranth.lib.wiring import In, Out
 from pydantic import (
@@ -593,7 +593,6 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
             component: Amaranth `wiring.Component` to allocate
 
         """
-        print(f"registering {component}")
         self._components[name] = component
         self._interfaces[name] = component.metadata.as_json()
 
@@ -1126,7 +1125,10 @@ def load_pinlock():
     raise ChipFlowError("Lockfile `pins.lock` not found. Run `chipflow pin lock`")
 
 
-def top_components(config):
+def top_components(config: 'Config') -> Dict[str, wiring.Component]:
+    """
+    Return the top level components for the design, as configured in ``chipflow.toml``
+    """
     component_configs = {}
     result = {}
 
@@ -1151,3 +1153,15 @@ def top_components(config):
             logger.debug(f"top members for {name}:\n{pformat(result[name].metadata.origin.signature.members)}")
 
     return result
+
+
+def get_software_builds(m: Module, component: str):
+    from ._signatures import DATA_SCHEMA, SoftwareBuild
+    builds = {}
+    iface = getattr(m.submodules, component).metadata.as_json()
+    for interface, interface_desc in iface['interface']['members'].items():
+        annotations = interface_desc['annotations']
+        if DATA_SCHEMA in annotations \
+        and annotations[DATA_SCHEMA]['data']['type'] == "SoftwareBuild":
+            builds[interface] = pydantic.TypeAdapter(SoftwareBuild).validate_python(annotations[DATA_SCHEMA]['data'])
+    return builds
