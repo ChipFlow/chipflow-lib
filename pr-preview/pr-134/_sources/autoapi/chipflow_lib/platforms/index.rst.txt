@@ -178,10 +178,8 @@ Package Contents
    Bases: :py:obj:`enum.StrEnum`
 
 
-   Models the potential drive modes of an IO pad.
-   Depending on process and cell library, these may be statically or dynamically configurable.
-
-   You will get an error if the option is not available with the chosen process and cell library
+   Models the potential drive modes of an SkyWater 130 IO cell [sky130_fd_io__gpiov2](https://skywater-pdk.readthedocs.io/en/main/contents/libraries/sky130_fd_io/docs/user_guide.html)
+   These are both statically configurable and can be set at runtime on the `:py:mod:drive_mode.Sky130Port` lines on the port.
 
 
 .. py:class:: JTAGSignature(**kwargs)
