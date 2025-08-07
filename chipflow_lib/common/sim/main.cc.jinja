@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
     top.{{reset}}.set(true);
     {% endfor %}
 
-    for (int i = 0; i < 3000000; i++)
+    for (int i = 0; i < {{num_steps}}; i++)
         tick();
 
     close_event_log();
