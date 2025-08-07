@@ -237,7 +237,8 @@ class SimPlatform:
                     interfaces = [exp for exp in self._top_sim.keys()],
                     clocks = [cxxrtlmangle(f"io${clk}$i") for clk in self._clocks.keys()],
                     resets = [cxxrtlmangle(f"io${rst}$i") for rst in self._resets.keys()],
-                    data_load = data_load
+                    data_load = data_load,
+                    num_steps = self._config.chipflow.simulation.num_steps,
                 ),
                 file=main_file)
 
