@@ -27,5 +27,5 @@ class SoftwareStep(StepBase):
 
     def build(self, *args):
         "Build the software for your design"
-        print("building software")
+        print("Building software...")
         self.doit_build()

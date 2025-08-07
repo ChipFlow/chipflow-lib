@@ -4,7 +4,6 @@ import logging
 
 from contextlib import contextmanager
 from pathlib import Path
-from pprint import pformat
 
 from doit.cmd_base import TaskLoader2, loader
 from doit.doit_cmd import DoitMain
@@ -68,7 +67,6 @@ class ContextTaskLoader(TaskLoader2):
                         d[k.format(**self.subs)] = [i.format(**self.subs) for i in v]
                     case _:
                         raise ChipFlowError("Unexpected task definition")
-            print(f"adding task: {pformat(d)}")
             task_list.append(dict_to_task(d))
         return task_list
 
@@ -78,7 +76,7 @@ class SimStep(StepBase):
         self._config = config
 
     def build(self, *args):
-        print("building sim")
+        print("Building simulation...")
         m = Module()
         self._platform.instantiate_ports(m)
 
@@ -95,7 +93,7 @@ class SimStep(StepBase):
         _wire_up_ports(m, top, self._platform)
 
         #FIXME: common source for build dir
-        self._platform.build(m)
+        self._platform.build(m, top)
         with common() as common_dir, source() as source_dir, runtime() as runtime_dir:
             context = {
                 "COMMON_DIR": common_dir,
@@ -107,5 +105,5 @@ class SimStep(StepBase):
                 }
             for k,v in VARIABLES.items():
                 context[k] = v.format(**context)
-            print(f"substituting:\n{pformat(context)}")
-            DoitMain(ContextTaskLoader(DOIT_CONFIG, TASKS, context)).run(["build_sim"])
+            if DoitMain(ContextTaskLoader(DOIT_CONFIG, TASKS, context)).run(["build_sim"]) !=0:
+                raise ChipFlowError("Failed building simulator")
