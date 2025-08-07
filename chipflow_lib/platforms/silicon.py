@@ -334,6 +334,7 @@ def port_for_process(p: Process):
 
 
 class IOBuffer(io.Buffer):
+
     def elaborate(self, platform):
         if not isinstance(self.port, SiliconPlatformPort):
             raise TypeError(f"Cannot elaborate SiliconPlatform buffer with port {self.port!r}")
@@ -342,18 +343,18 @@ class IOBuffer(io.Buffer):
         invert = sum(bit << idx for idx, bit in enumerate(self.port.invert))
         if self.direction is not io.Direction.Input:
             if invert != 0:
-                o_inv = Signal.like(self.o)
-                m.d.comb += o_inv.eq(self.o ^ invert)
+                o_inv = Signal.like(self.o)             # type: ignore[reportAttributeAccessIssue]
+                m.d.comb += o_inv.eq(self.o ^ invert)   # type: ignore[reportAttributeAccessIssue]
             else:
-                o_inv = self.o
-            m.d.comb += self.port.o.eq(o_inv)
-            m.d.comb += self.port.oe.eq(self.oe)
+                o_inv = self.o                          # type: ignore[reportAttributeAccessIssue]
+            m.d.comb += self.port.o.eq(o_inv)           # type: ignore[reportAttributeAccessIssue]
+            m.d.comb += self.port.oe.eq(self.oe)        # type: ignore[reportAttributeAccessIssue]
         if self.direction is not io.Direction.Output:
             if invert:
-                i_inv = Signal.like(self.i)
-                m.d.comb += self.i.eq(i_inv ^ invert)
+                i_inv = Signal.like(self.i)             # type: ignore[reportAttributeAccessIssue]
+                m.d.comb += self.i.eq(i_inv ^ invert)   # type: ignore[reportAttributeAccessIssue]
             else:
-                i_inv = self.i
+                i_inv = self.i                          # type: ignore[reportAttributeAccessIssue]
             m.d.comb += i_inv.eq(self.port.i)
 
         return m
@@ -370,16 +371,16 @@ class FFBuffer(io.FFBuffer):
 
         if self.direction is not io.Direction.Output:
             i_ff = Signal(reset_less=True)
-            m.d[self.i_domain] += i_ff.eq(io_buffer.i)
-            m.d.comb += self.i.eq(i_ff)
+            m.d[self.i_domain] += i_ff.eq(io_buffer.i)  # type: ignore[reportAttributeAccessIssue]
+            m.d.comb += self.i.eq(i_ff)                 # type: ignore[reportAttributeAccessIssue]
 
         if self.direction is not io.Direction.Input:
             o_ff = Signal(reset_less=True)
             oe_ff = Signal(reset_less=True)
-            m.d[self.o_domain] += o_ff.eq(self.o)
-            m.d[self.o_domain] += oe_ff.eq(self.oe)
-            m.d.comb += io_buffer.o.eq(o_ff)
-            m.d.comb += io_buffer.oe.eq(oe_ff)
+            m.d[self.o_domain] += o_ff.eq(self.o)       # type: ignore[reportAttributeAccessIssue]
+            m.d[self.o_domain] += oe_ff.eq(self.oe)     # type: ignore[reportAttributeAccessIssue]
+            m.d.comb += io_buffer.o.eq(o_ff)            # type: ignore[reportAttributeAccessIssue]
+            m.d.comb += io_buffer.oe.eq(oe_ff)          # type: ignore[reportAttributeAccessIssue]
 
         return m
 
