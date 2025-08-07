@@ -288,7 +288,7 @@
 <td><p>Options for an IO pad/pin.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.platforms.Sky130DriveMode" title="chipflow_lib.platforms.Sky130DriveMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sky130DriveMode</span></code></a></p></td>
-<td><p>Models the potential drive modes of an IO pad.</p></td>
+<td><p>Models the potential drive modes of an SkyWater 130 IO cell [sky130_fd_io__gpiov2](<a class="reference external" href="https://skywater-pdk.readthedocs.io/en/main/contents/libraries/sky130_fd_io/docs/user_guide.html">https://skywater-pdk.readthedocs.io/en/main/contents/libraries/sky130_fd_io/docs/user_guide.html</a>)</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.JTAGSignature" title="chipflow_lib.platforms.JTAGSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JTAGSignature</span></code></a></p></td>
 <td><p>Description of an interface object.</p></td>
@@ -528,9 +528,8 @@ intended for connection to the physical pads of the integrated circuit package.<
 <dt class="sig sig-object py" id="chipflow_lib.platforms.Sky130DriveMode">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">Sky130DriveMode</span></span><a class="headerlink" href="#chipflow_lib.platforms.Sky130DriveMode" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></a></p>
-<p>Models the potential drive modes of an IO pad.
-Depending on process and cell library, these may be statically or dynamically configurable.</p>
-<p>You will get an error if the option is not available with the chosen process and cell library</p>
+<p>Models the potential drive modes of an SkyWater 130 IO cell [sky130_fd_io__gpiov2](<a class="reference external" href="https://skywater-pdk.readthedocs.io/en/main/contents/libraries/sky130_fd_io/docs/user_guide.html">https://skywater-pdk.readthedocs.io/en/main/contents/libraries/sky130_fd_io/docs/user_guide.html</a>)
+These are both statically configurable and can be set at runtime on the <cite>:py:mod:drive_mode.Sky130Port</cite> lines on the port.</p>
 </dd></dl>
 
 <dl class="py class">
