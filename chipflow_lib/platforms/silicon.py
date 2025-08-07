@@ -336,6 +336,15 @@ def port_for_process(p: Process):
 
 
 class IOBuffer(io.Buffer):
+    # Type annotation - should go in amaranth-stubs eventually
+    @property
+    def i(self) -> Signal: ...
+    @property
+    def o(self) -> Signal: ...
+    @property
+    def oe(self) -> Signal: ...
+
+
     def elaborate(self, platform):
         if not isinstance(self.port, SiliconPlatformPort):
             raise TypeError(f"Cannot elaborate SiliconPlatform buffer with port {self.port!r}")
@@ -362,6 +371,15 @@ class IOBuffer(io.Buffer):
 
 
 class FFBuffer(io.FFBuffer):
+    # Type annotation - should go in amaranth-stubs eventually
+    @property
+    def i(self) -> Signal: ...
+    @property
+    def o(self) -> Signal: ...
+    @property
+    def oe(self) -> Signal: ...
+
+
     def elaborate(self, platform):
         if not isinstance(self.port, SiliconPlatformPort):
             raise TypeError(f"Cannot elaborate SiliconPlatform buffer with port {self.port!r}")
