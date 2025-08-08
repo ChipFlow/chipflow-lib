@@ -11,8 +11,6 @@
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=25af2a20" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/autodoc_pydantic.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
@@ -211,10 +209,6 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Getting Started with ChipFlow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../chipflow-toml-guide.html">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../chipflow-toml-guide.html#project-name">project_name</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../chipflow-toml-guide.html#clock-domains">clock_domains</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../chipflow-toml-guide.html#process">process</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../chipflow-toml-guide.html#package">package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../chipflow-commands.html">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a></li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../../index.html">API Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">chipflow_lib</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of chipflow_lib</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
@@ -286,14 +280,25 @@
 <h2>Package Contents<a class="headerlink" href="#package-contents" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="chipflow_lib.steps.IOSignature">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.steps.</span></span><span class="sig-name descname"><span class="pre">IOSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.steps.IOSignature" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.steps.</span></span><span class="sig-name descname"><span class="pre">IOSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_have_oe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.steps.IOSignature" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">amaranth.lib.wiring.Signature</span></code></a></p>
 <p>An <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Amaranth</span> <span class="pre">Signature</span></code></a> used to decorate wires that would usually be brought out onto a port on the package.
-This class is generally not directly used.  Instead, you would typically utilize the more specific
+This class is generally not directly used.
+Instead, you would typically utilize the more specific
 <code class="xref py py-obj docutils literal notranslate"><span class="pre">InputIOSignature</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">OutputIOSignature</span></code>, or <code class="xref py py-obj docutils literal notranslate"><span class="pre">BidirIOSignature</span></code> for defining pin interfaces.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>kwargs</strong> (<em>typing_extensions.Unpack</em><em>[</em><a class="reference internal" href="../platforms/index.html#chipflow_lib.platforms.IOModel" title="chipflow_lib.platforms.IOModel"><em>IOModel</em></a><em>]</em>)</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>direction</strong> (<a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/io.html#amaranth.lib.io.Direction" title="(in Amaranth language &amp; toolchain v0.5.4)"><em>amaranth.lib.io.Direction</em></a>) – Input, Output or Bidir</p></li>
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – width of port, default is 1</p></li>
+<li><p><strong>invert</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable" title="(in Python v3.13)"><em>collections.abc.Iterable</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>]</em><em>]</em>) – Polarity inversion. If the value is a simple <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, it specifies inversion for
+the entire port. If the value is an iterable of <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, the iterable must have the
+same length as the width of <code class="code highlight py python docutils literal highlight-python"><span class="n">io</span></code>, and the inversion is specified for individual wires.</p></li>
+<li><p><strong>all_have_oe</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – controls whether each output wire is associated with an individual Output Enable bit
+or a single OE bit will be used for entire port, the default value is False, indicating that a
+single OE bit controls the entire port.</p></li>
+<li><p><strong>init</strong> – a  <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/guide.html#lang-constcasting" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">const-castable object</span></a> for the initial values of the port</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="py property">
@@ -307,9 +312,9 @@ This class is generally not directly used.  Instead, you would typically utilize
 </dl>
 </dd></dl>
 
-<dl class="py property">
+<dl class="py method">
 <dt class="sig sig-object py" id="chipflow_lib.steps.IOSignature.width">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">width</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></em><a class="headerlink" href="#chipflow_lib.steps.IOSignature.width" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">width</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.steps.IOSignature.width" title="Link to this definition">¶</a></dt>
 <dd><p>The width of the IO port, in wires</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -318,24 +323,31 @@ This class is generally not directly used.  Instead, you would typically utilize
 </dl>
 </dd></dl>
 
-<dl class="py property">
+<dl class="py method">
 <dt class="sig sig-object py" id="chipflow_lib.steps.IOSignature.invert">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">invert</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable" title="(in Python v3.13)"><span class="pre">collections.abc.Iterable</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#chipflow_lib.steps.IOSignature.invert" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">invert</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.steps.IOSignature.invert" title="Link to this definition">¶</a></dt>
 <dd><p>A tuple as wide as the IO port, with a bool for the polarity inversion for each wire</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable" title="(in Python v3.13)">collections.abc.Iterable</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py property">
+<dl class="py method">
 <dt class="sig sig-object py" id="chipflow_lib.steps.IOSignature.options">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">options</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../platforms/index.html#chipflow_lib.platforms.IOModelOptions" title="chipflow_lib.platforms.IOModelOptions"><span class="pre">IOModelOptions</span></a></em><a class="headerlink" href="#chipflow_lib.steps.IOSignature.options" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">options</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.steps.IOSignature.options" title="Link to this definition">¶</a></dt>
 <dd><p>Options set on the io port at construction</p>
+<dl class="simple">
+<dt>Valid options are:</dt><dd><p>“all_have_oe”: For a bidirectional port, each wire can
+have it’s direction dynamically controlled seperately,
+so each wire also has a corresponding Output Enable wire.
+“init”: the initial value that this io port will have at power-up and reset.</p>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../platforms/index.html#chipflow_lib.platforms.IOModelOptions" title="chipflow_lib.platforms.IOModelOptions">IOModelOptions</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -375,12 +387,6 @@ inheritance.</p>
 <dt class="sig sig-object py" id="chipflow_lib.steps.StepBase.run_cli">
 <span class="sig-name descname"><span class="pre">run_cli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.steps.StepBase.run_cli" title="Link to this definition">¶</a></dt>
 <dd><p>Called when this step’s is used from <cite>chipflow</cite> command</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="chipflow_lib.steps.StepBase.build">
-<span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.steps.StepBase.build" title="Link to this definition">¶</a></dt>
-<dd><p>builds the design</p>
 </dd></dl>
 
 </dd></dl>
@@ -440,16 +446,15 @@ inheritance.</p>
 <li><a class="reference internal" href="#package-contents">Package Contents</a><ul>
 <li><a class="reference internal" href="#chipflow_lib.steps.IOSignature"><code class="docutils literal notranslate"><span class="pre">IOSignature</span></code></a><ul>
 <li><a class="reference internal" href="#chipflow_lib.steps.IOSignature.direction"><code class="docutils literal notranslate"><span class="pre">IOSignature.direction</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.steps.IOSignature.width"><code class="docutils literal notranslate"><span class="pre">IOSignature.width</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.steps.IOSignature.invert"><code class="docutils literal notranslate"><span class="pre">IOSignature.invert</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.steps.IOSignature.options"><code class="docutils literal notranslate"><span class="pre">IOSignature.options</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.steps.IOSignature.width"><code class="docutils literal notranslate"><span class="pre">IOSignature.width()</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.steps.IOSignature.invert"><code class="docutils literal notranslate"><span class="pre">IOSignature.invert()</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.steps.IOSignature.options"><code class="docutils literal notranslate"><span class="pre">IOSignature.options()</span></code></a></li>
 <li><a class="reference internal" href="#chipflow_lib.steps.IOSignature.annotations"><code class="docutils literal notranslate"><span class="pre">IOSignature.annotations()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#chipflow_lib.steps.StepBase"><code class="docutils literal notranslate"><span class="pre">StepBase</span></code></a><ul>
 <li><a class="reference internal" href="#chipflow_lib.steps.StepBase.build_cli_parser"><code class="docutils literal notranslate"><span class="pre">StepBase.build_cli_parser()</span></code></a></li>
 <li><a class="reference internal" href="#chipflow_lib.steps.StepBase.run_cli"><code class="docutils literal notranslate"><span class="pre">StepBase.run_cli()</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.steps.StepBase.build"><code class="docutils literal notranslate"><span class="pre">StepBase.build()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -469,6 +474,5 @@ inheritance.</p>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>
-    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
     </body>
 </html>

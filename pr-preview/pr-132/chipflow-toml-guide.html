@@ -11,8 +11,6 @@
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=25af2a20" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
-    <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
-    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
@@ -211,10 +209,6 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started with ChipFlow</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="#project-name">project_name</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#clock-domains">clock_domains</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#process">process</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#package">package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-commands.html">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="autoapi/index.html">API Reference</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="autoapi/chipflow_lib/index.html">chipflow_lib</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of chipflow_lib</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -274,54 +268,71 @@
 <span class="k">[chipflow.top]</span>
 <span class="n">soc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;my_design.design:MySoC&quot;</span>
 
+<span class="k">[chipflow.steps]</span>
+<span class="n">silicon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;chipflow_lib.steps.silicon:SiliconStep&quot;</span>
+
+<span class="k">[chipflow.clocks]</span>
+<span class="n">default</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;sys_clk&#39;</span>
+
+<span class="k">[chipflow.resets]</span>
+<span class="n">default</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;sys_rst_n&#39;</span>
+
 <span class="k">[chipflow.silicon]</span>
 <span class="n">process</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;gf130bcd&quot;</span>
 <span class="n">package</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;pga144&quot;</span>
+
+<span class="k">[chipflow.silicon.pads]</span>
+<span class="c1"># System</span>
+<span class="n">sys_clk</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;clock&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;114&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="n">sys_rst_n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;reset&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;115&quot;</span><span class="w"> </span><span class="p">}</span>
+
+<span class="k">[chipflow.silicon.power]</span>
+<span class="n">dvss0</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;power&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w">   </span><span class="s2">&quot;1&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="n">dvdd0</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;ground&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w">   </span><span class="s2">&quot;9&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="n">vss0</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;power&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w">  </span><span class="s2">&quot;17&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="n">vdd0</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;ground&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w">  </span><span class="s2">&quot;25&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="n">dvss1</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;power&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w">  </span><span class="s2">&quot;33&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="n">dvdd1</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;ground&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w">  </span><span class="s2">&quot;41&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="n">vss1</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;power&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w">  </span><span class="s2">&quot;49&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="n">vdd1</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;ground&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w">  </span><span class="s2">&quot;57&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="n">dvss2</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;power&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w">  </span><span class="s2">&quot;65&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="n">dvdd2</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;ground&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w">  </span><span class="s2">&quot;73&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="n">vss2</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;power&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w">  </span><span class="s2">&quot;81&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="n">vdd2</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;ground&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w">  </span><span class="s2">&quot;89&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="n">dvss3</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;power&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w">  </span><span class="s2">&quot;97&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="n">dvdd3</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;ground&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;105&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="n">vss3</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;power&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;113&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="n">vdd3</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;ground&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;121&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="n">dvss4</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;power&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;129&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="n">dvdd4</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;ground&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;137&quot;</span><span class="w"> </span><span class="p">}</span>
 </pre></div>
 </div>
-<section id="chipflow-table">
-<h2><code class="docutils literal notranslate"><span class="pre">[chipflow]</span></code> table<a class="headerlink" href="#chipflow-table" title="Link to this heading">¶</a></h2>
-<p><span class="sd-sphinx-override sd-badge sd-outline-primary sd-text-primary">Required</span></p>
-<p>The top level configuration for inputs to the ChipFlow tools.</p>
-</section>
-</section>
-<section id="project-name">
-<h1>project_name<a class="headerlink" href="#project-name" title="Link to this heading">¶</a></h1>
-<p><span class="sd-sphinx-override sd-badge sd-outline-primary sd-text-primary">Required</span></p>
+<section id="chipflow">
+<h2><code class="docutils literal notranslate"><span class="pre">[chipflow]</span></code><a class="headerlink" href="#chipflow" title="Link to this heading">¶</a></h2>
+<div class="highlight-TOML notranslate"><div class="highlight"><pre><span></span><span class="k">[chipflow]</span>
+<span class="n">project_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;my_project&quot;</span>
+</pre></div>
+</div>
 <p>The <code class="docutils literal notranslate"><span class="pre">project_name</span></code> is a human-readable identifier for this project. If not set, the tool and library will use the project name configured in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>.</p>
-<div class="highlight-TOML notranslate"><div class="highlight"><pre><span></span><span class="k">[chipflow]</span>
-<span class="n">project_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;my_project&#39;</span>
-</pre></div>
-</div>
 </section>
-<section id="clock-domains">
-<h1>clock_domains<a class="headerlink" href="#clock-domains" title="Link to this heading">¶</a></h1>
-<p><span class="sd-sphinx-override sd-badge sd-outline-secondary sd-text-secondary">Optional</span></p>
-<p>A list of top-level clock domains for your design. If omitted, defaults to the <cite>Amaranth</cite> default <code class="docutils literal notranslate"><span class="pre">sync</span></code>, and sync is always assumed to be the name of the core clock for bringup.</p>
-<div class="highlight-TOML notranslate"><div class="highlight"><pre><span></span><span class="k">[chipflow]</span>
-<span class="n">clock_domains</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;sync&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;peripheral&#39;</span><span class="p">]</span>
-</pre></div>
-</div>
-<section id="chipflow-top-table">
-<h2><code class="docutils literal notranslate"><span class="pre">[chipflow.top]</span></code> table<a class="headerlink" href="#chipflow-top-table" title="Link to this heading">¶</a></h2>
-<p><span class="sd-sphinx-override sd-badge sd-outline-primary sd-text-primary">Required</span></p>
-<p>This section outlines the design modules that need to be instantiated.
-A new top module will be automatically generated, incorporating all specified modules along with their interfaces.
-Each entry follows the format <cite>&lt;instance name&gt; = &lt;module class path&gt;</cite>.</p>
-<p>The instance name is the name the python object will be given in your design, and the <a class="reference internal" href="#term-module-class-path"><span class="xref std std-term">module class path</span></a></p>
+<section id="chipflow-top">
+<h2><code class="docutils literal notranslate"><span class="pre">[chipflow.top]</span></code><a class="headerlink" href="#chipflow-top" title="Link to this heading">¶</a></h2>
 <div class="highlight-TOML notranslate"><div class="highlight"><pre><span></span><span class="k">[chipflow.top]</span>
 <span class="n">soc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;my_design.design:MySoC&quot;</span>
 </pre></div>
 </div>
+<p>This section outlines the design modules that need to be instantiated.
+A new top module will be automatically generated, incorporating all specified modules along with their interfaces.
+Each entry follows the format <cite>&lt;instance name&gt; = &lt;module class path&gt;</cite>.</p>
+<p>The instance name is the name the python object will be given in your design, and the <a class="reference internal" href="#term-module-class-path"><span class="xref std std-term">module class path</span></a></p>
 <dl class="simple glossary">
 <dt id="term-module-class-path">module class path<a class="headerlink" href="#term-module-class-path" title="Link to this term">¶</a></dt><dd><p>The module class path offers a way to locate Python objects as entry points.
 It consists of a module’s <a class="reference external" href="https://docs.python.org/3/glossary.html#term-qualified-name" title="(in Python v3.13)"><span class="xref std std-term">qualified name</span></a> followed by a colon (:) and then the <a class="reference external" href="https://docs.python.org/3/glossary.html#term-qualified-name" title="(in Python v3.13)"><span class="xref std std-term">qualified name</span></a> of the class within that module.</p>
 </dd>
 </dl>
 </section>
-<section id="chipflow-steps-table">
-<span id="chipflow-toml-steps"></span><h2><code class="docutils literal notranslate"><span class="pre">[chipflow.steps]</span></code> table<a class="headerlink" href="#chipflow-steps-table" title="Link to this heading">¶</a></h2>
-<p><span class="sd-sphinx-override sd-badge sd-outline-secondary sd-text-secondary">Optional</span></p>
+<section id="chipflow-steps">
+<span id="chipflow-toml-steps"></span><h2><code class="docutils literal notranslate"><span class="pre">[chipflow.steps]</span></code><a class="headerlink" href="#chipflow-steps" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">steps</span></code> section allows overriding or addition to the standard steps available from <cite>chipflow_lib</cite>.</p>
 <p>For example, if you want to override the standard silicon preparation step, you could derive from <code class="xref py py-class docutils literal notranslate"><span class="pre">chipflow_lib.steps.silicon.SiliconStep</span></code>, add your custom functionality
 and add the following to your <cite>chipflow.toml</cite>, with the appropriate <a class="reference internal" href="#term-module-class-path"><span class="xref std std-term">module class path</span></a>:</p>
@@ -331,22 +342,39 @@ and add the following to your <cite>chipflow.toml</cite>, with the appropriate <
 </div>
 <p>You probably won’t need to change these if you’re starting from an example repository.</p>
 </section>
+<section id="chipflow-clocks">
+<h2><code class="docutils literal notranslate"><span class="pre">[chipflow.clocks]</span></code><a class="headerlink" href="#chipflow-clocks" title="Link to this heading">¶</a></h2>
+<div class="highlight-TOML notranslate"><div class="highlight"><pre><span></span><span class="k">[chipflow.clocks]</span>
+<span class="n">default</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;sys_clk&#39;</span>
+</pre></div>
+</div>
+<p>This section links the clock domains utilized in the design to specific pads.
+These pads need to be specified in the <a class="reference internal" href="#silicon-pads">[silicon.pads]</a> section with the <a class="reference internal" href="#term-type"><span class="xref std std-term">type</span></a> set to <a class="reference internal" href="#term-clock"><span class="xref std std-term">clock</span></a>.
+The <code class="docutils literal notranslate"><span class="pre">default</span></code> clock domain is associated with the Amaranth <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/guide.html#lang-domains" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref any docutils literal notranslate"><span class="pre">sync</span></code></a> <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/guide.html#lang-clockdomains" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">clock domain</span></a>.
+Currently, only one <code class="docutils literal notranslate"><span class="pre">default</span></code> clock domain is supported.</p>
+</section>
+<section id="chipflow-resets">
+<h2><code class="docutils literal notranslate"><span class="pre">[chipflow.resets]</span></code><a class="headerlink" href="#chipflow-resets" title="Link to this heading">¶</a></h2>
+<div class="highlight-TOML notranslate"><div class="highlight"><pre><span></span><span class="k">[chipflow.resets]</span>
+<span class="n">default</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;sys_rst_n&#39;</span>
+</pre></div>
+</div>
+<p>This section identifies the input pads designated for reset functionality.
+These pads need to be specified in the <a class="reference internal" href="#silicon-pads">[silicon.pads]</a> section with the <a class="reference internal" href="#term-type"><span class="xref std std-term">type</span></a> set to <a class="reference internal" href="#term-reset"><span class="xref std std-term">reset</span></a>.
+The logic that synchronizes the reset signal with the clock will be generated automatically.</p>
+</section>
 <section id="chipflow-silicon">
 <h2><code class="docutils literal notranslate"><span class="pre">[chipflow.silicon]</span></code><a class="headerlink" href="#chipflow-silicon" title="Link to this heading">¶</a></h2>
-<p><span class="sd-sphinx-override sd-badge sd-outline-primary sd-text-primary">Required</span></p>
-<p>The <code class="docutils literal notranslate"><span class="pre">silicon</span></code> section sets the Foundry <code class="docutils literal notranslate"><span class="pre">process</span></code> (i.e. PDK) that we are targeting for manufacturing, and the physical <code class="docutils literal notranslate"><span class="pre">package</span></code> (including pad ring) we want to place our design inside.</p>
-<p>You’ll choose the <code class="docutils literal notranslate"><span class="pre">process</span></code> and <code class="docutils literal notranslate"><span class="pre">package</span></code> based in the requirements of your design.</p>
 <div class="highlight-TOML notranslate"><div class="highlight"><pre><span></span><span class="k">[chipflow.silicon]</span>
 <span class="n">process</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;ihp_sg13g2&quot;</span>
 <span class="n">package</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;pga144&quot;</span>
 </pre></div>
 </div>
+<p>The <code class="docutils literal notranslate"><span class="pre">silicon</span></code> section sets the Foundry <code class="docutils literal notranslate"><span class="pre">process</span></code> (i.e. PDK) that we are targeting for manufacturing, and the physical <code class="docutils literal notranslate"><span class="pre">package</span></code> (pad ring) we want to place our design inside.
+You’ll choose the <code class="docutils literal notranslate"><span class="pre">process</span></code> and <code class="docutils literal notranslate"><span class="pre">package</span></code> based in the requirements of your design.</p>
 </section>
-</section>
-<section id="process">
-<h1>process<a class="headerlink" href="#process" title="Link to this heading">¶</a></h1>
-<p><span class="sd-sphinx-override sd-badge sd-outline-primary sd-text-primary">Required</span></p>
-<p>Foundry process to use</p>
+<section id="available-processes">
+<h2>Available processes<a class="headerlink" href="#available-processes" title="Link to this heading">¶</a></h2>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -388,10 +416,8 @@ and add the following to your <cite>chipflow.toml</cite>, with the appropriate <
 </table>
 </div>
 </section>
-<section id="package">
-<h1>package<a class="headerlink" href="#package" title="Link to this heading">¶</a></h1>
-<p><span class="sd-sphinx-override sd-badge sd-outline-primary sd-text-primary">Required</span></p>
-<p>The form of IC packaging to use</p>
+<section id="available-pad-rings">
+<h2>Available pad rings<a class="headerlink" href="#available-pad-rings" title="Link to this heading">¶</a></h2>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -440,11 +466,17 @@ and add the following to your <cite>chipflow.toml</cite>, with the appropriate <
 </tbody>
 </table>
 </div>
-<section id="power-connections">
-<h2>Power connections<a class="headerlink" href="#power-connections" title="Link to this heading">¶</a></h2>
-<p>The package definition provides default locations for pins needed for bringup and test, like core power, ground, clock and reset, along with JTAG.</p>
-<p>These can be determined by calling <cite>BasePackageDef.bringup_pins</cite>.</p>
-<p>For ports that require their own power lines, you can set <code class="docutils literal notranslate"><span class="pre">allocate_power</span></code> and <code class="docutils literal notranslate"><span class="pre">power_voltage</span></code> in their <cite>IOSignature</cite>.</p>
+</section>
+<section id="silicon-pads">
+<h2><code class="docutils literal notranslate"><span class="pre">[silicon.pads]</span></code><a class="headerlink" href="#silicon-pads" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">silicon.pads</span></code> section lists special pads. In general you are unlikely to need to add to this.
+Each pad specified with the name used by the design and two parameters: <a class="reference internal" href="#term-type"><span class="xref std std-term">type</span></a> and <a class="reference internal" href="#term-loc"><span class="xref std std-term">loc</span></a>.</p>
+<div class="highlight-TOML notranslate"><div class="highlight"><pre><span></span><span class="k">[chipflow.silicon.pads]</span>
+<span class="n">sys_clk</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;clock&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;114&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="n">sys_rst_n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;reset&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">loc</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;115&quot;</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>In the above example two pads specified, <code class="docutils literal notranslate"><span class="pre">sys_clk</span></code> pad for clock input and <code class="docutils literal notranslate"><span class="pre">sys_rst_n</span></code> for reset.</p>
 <dl class="simple glossary">
 <dt id="term-loc">loc<a class="headerlink" href="#term-loc" title="Link to this term">¶</a></dt><dd><p>This is the physical location of the pad on your chosen pad ring. How these are indexed varies by the pad ring.</p>
 </dd>
@@ -455,6 +487,13 @@ and add the following to your <cite>chipflow.toml</cite>, with the appropriate <
 <dt id="term-reset">reset<a class="headerlink" href="#term-reset" title="Link to this term">¶</a></dt><dd><p>External reset input.</p>
 </dd>
 </dl>
+</section>
+<section id="silicon-power">
+<h2><code class="docutils literal notranslate"><span class="pre">[silicon.power]</span></code><a class="headerlink" href="#silicon-power" title="Link to this heading">¶</a></h2>
+<p>This section outlines the connection of pads to the power supply available for the selected process and package.
+These pads are declared with the <a class="reference internal" href="#term-type"><span class="xref std std-term">type</span></a> and <a class="reference internal" href="#term-loc"><span class="xref std std-term">loc</span></a> parameters, similar to the <a class="reference internal" href="#silicon-pads">[silicon.pads]</a> section.
+Note that in this context, the <a class="reference internal" href="#term-type"><span class="xref std std-term">type</span></a> parameter can only be <code class="docutils literal notranslate"><span class="pre">ground</span></code> or <code class="docutils literal notranslate"><span class="pre">power</span></code>.</p>
+<p>This is a work in progress, and currently you can use the defaults provided by customer support.</p>
 </section>
 </section>
 
@@ -514,19 +553,16 @@ and add the following to your <cite>chipflow.toml</cite>, with the appropriate <
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></a><ul>
-<li><a class="reference internal" href="#chipflow-table"><code class="docutils literal notranslate"><span class="pre">[chipflow]</span></code> table</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#project-name">project_name</a></li>
-<li><a class="reference internal" href="#clock-domains">clock_domains</a><ul>
-<li><a class="reference internal" href="#chipflow-top-table"><code class="docutils literal notranslate"><span class="pre">[chipflow.top]</span></code> table</a></li>
-<li><a class="reference internal" href="#chipflow-steps-table"><code class="docutils literal notranslate"><span class="pre">[chipflow.steps]</span></code> table</a></li>
+<li><a class="reference internal" href="#chipflow"><code class="docutils literal notranslate"><span class="pre">[chipflow]</span></code></a></li>
+<li><a class="reference internal" href="#chipflow-top"><code class="docutils literal notranslate"><span class="pre">[chipflow.top]</span></code></a></li>
+<li><a class="reference internal" href="#chipflow-steps"><code class="docutils literal notranslate"><span class="pre">[chipflow.steps]</span></code></a></li>
+<li><a class="reference internal" href="#chipflow-clocks"><code class="docutils literal notranslate"><span class="pre">[chipflow.clocks]</span></code></a></li>
+<li><a class="reference internal" href="#chipflow-resets"><code class="docutils literal notranslate"><span class="pre">[chipflow.resets]</span></code></a></li>
 <li><a class="reference internal" href="#chipflow-silicon"><code class="docutils literal notranslate"><span class="pre">[chipflow.silicon]</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#process">process</a></li>
-<li><a class="reference internal" href="#package">package</a><ul>
-<li><a class="reference internal" href="#power-connections">Power connections</a></li>
+<li><a class="reference internal" href="#available-processes">Available processes</a></li>
+<li><a class="reference internal" href="#available-pad-rings">Available pad rings</a></li>
+<li><a class="reference internal" href="#silicon-pads"><code class="docutils literal notranslate"><span class="pre">[silicon.pads]</span></code></a></li>
+<li><a class="reference internal" href="#silicon-power"><code class="docutils literal notranslate"><span class="pre">[silicon.power]</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -542,6 +578,5 @@ and add the following to your <cite>chipflow.toml</cite>, with the appropriate <
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>
-    <script src="_static/design-tabs.js?v=f930bc37"></script>
     </body>
 </html>
