@@ -23,17 +23,16 @@ jobs:
     environment: ${{ vars.ENVIRONMENT }}
     strategy:
       matrix:
-        dry: [true, false]
         repo:
           - name: "ChipFlow/chipflow-examples"
             design: "minimal"
+          - name: "ChipFlow/chipflow-examples"
+            design: "mcu_soc"
     env:
-      DRY: ${{ matrix.dry && '--dry-run' || '' }}
-      is_dry: ${{ matrix.dry && '(dry run)' || '' }}
       our_path: ${{ github.workspace}}
       test_repo_path: "${{ github.workspace }}/${{ matrix.repo.name }}"
 
-    name:  ${{ matrix.dry && 'Test Submit - Dry run' || 'Test submit' }}
+    name: 'Submit examples: ${{matrix.repo.design}}'
 
     steps:
       - name: Check out source code
@@ -100,6 +99,20 @@ jobs:
         run: |
           pdm run chipflow pin lock
           pdm sim-check
+
+      - name: Submit build dry run
+        working-directory: ${{ env.test_repo_path }}/${{ matrix.repo.design }}
+        run: |
+          set -o pipefail
+          pdm run chipflow silicon submit --dry-run
+
+      - name: Upload build artefacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: submit-artefacts-${{ matrix.repo.design }}
+          path: |
+            ${{ env.test_repo_path }}/${{ matrix.repo.design }}/rtlil
+            ${{ env.test_repo_path }}/${{ matrix.repo.design }}/config
 
       - name: Submit build ${{ env.is_dry }}
         working-directory: ${{ env.test_repo_path }}/${{ matrix.repo.design }}
