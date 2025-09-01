@@ -1,0 +1,192 @@
+chipflow_lib.platforms
+======================
+
+.. py:module:: chipflow_lib.platforms
+
+.. autoapi-nested-parse::
+
+   Platform definititions
+   ----------------------
+
+   This module defines the functionality you use in you code to target the ChipFlow platform
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   chipflow_lib.platforms.SiliconPlatformPort
+   chipflow_lib.platforms.IOSignature
+   chipflow_lib.platforms.IOModel
+   chipflow_lib.platforms.IOTripPoint
+   chipflow_lib.platforms.IOModelOptions
+   chipflow_lib.platforms.Sky130DriveMode
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   chipflow_lib.platforms.OutputIOSignature
+   chipflow_lib.platforms.InputIOSignature
+   chipflow_lib.platforms.BidirIOSignature
+
+
+Package Contents
+----------------
+
+.. py:class:: SiliconPlatformPort(name, port_desc)
+
+   Bases: :py:obj:`amaranth.lib.io.PortLike`, :py:obj:`Generic`\ [\ :py:obj:`chipflow_lib.platforms._utils.Pin`\ ]
+
+
+   Represents an abstract library I/O port that can be passed to a buffer.
+
+   The port types supported by most platforms are :class:`SingleEndedPort` and
+   :class:`DifferentialPort`. Platforms may define additional port types where appropriate.
+
+   .. note::
+
+       :class:`amaranth.hdl.IOPort` is not an instance of :class:`amaranth.lib.io.PortLike`.
+
+
+   .. py:property:: direction
+
+      Direction of the port.
+
+      :rtype: :class:`Direction`
+
+
+.. py:class:: IOSignature(**kwargs)
+
+   Bases: :py:obj:`amaranth.lib.wiring.Signature`
+
+
+   An :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` used to decorate wires that would usually be brought out onto a port on the package.
+   This class is generally not directly used.  Instead, you would typically utilize the more specific
+   :py:obj:`InputIOSignature`, :py:obj:`OutputIOSignature`, or :py:obj:`BidirIOSignature` for defining pin interfaces.
+
+
+   .. py:property:: direction
+      :type: amaranth.lib.io.Direction
+
+
+      The direction of the IO port
+
+
+   .. py:property:: width
+      :type: int
+
+
+      The width of the IO port, in wires
+
+
+   .. py:property:: invert
+      :type: collections.abc.Iterable[bool]
+
+
+      A tuple as wide as the IO port, with a bool for the polarity inversion for each wire
+
+
+   .. py:property:: options
+      :type: IOModelOptions
+
+
+      Options set on the io port at construction
+
+
+   .. py:method:: annotations(*args)
+
+      Annotate an interface object.
+
+      Subclasses of :class:`Signature` may override this method to provide annotations for
+      a corresponding interface object. The default implementation provides none.
+
+      See :mod:`amaranth.lib.meta` for details.
+
+      :returns: :py:`tuple()`
+      :rtype: iterable of :class:`~.meta.Annotation`
+
+
+
+.. py:class:: IOModel
+
+   Bases: :py:obj:`IOModelOptions`
+
+
+   Setting for IO Ports (see also base class `IOModelOptions`)
+
+   :Attributes: * **direction** -- `io.Direction.Input`, `io.Direction.Output` or `io.Direction.Bidir`
+                * **width** -- width of port, default is 1
+
+
+.. py:class:: IOTripPoint
+
+   Bases: :py:obj:`enum.StrEnum`
+
+
+   Models various options for trip points for inputs.
+   Depending on process and cell library, these may be statically or dynamically configurable.
+
+   You will get an error if the option is not available with the chosen process and cell library
+
+
+.. py:class:: IOModelOptions
+
+   Bases: :py:obj:`typing_extensions.TypedDict`
+
+
+   Options for an IO pad/pin.
+
+   :Attributes: * **invert** -- Polarity inversion. If the value is a simple :class:`bool`, it specifies inversion for
+                  the entire port. If the value is an iterable of :class:`bool`, the iterable must have the
+                  same length as the width of :py:`io`, and the inversion is specified for individual wires.
+                * **individual_oe** -- controls whether each output wire is associated with an individual Output Enable bit
+                  or if a single OE bit will be used for entire port. The default value is False (indicating that a
+                  single OE bit controls the entire port).
+                * **power_domain** -- The name of the I/O power domain. NB there is only one of these, so IO with multiple power domains must be split up.
+                * **clock_domain** -- the name of the I/O's clock domain (see `Amaranth.ClockDomain`). NB there is only one of these, so IO with multiple clocks must be split up.
+                * **buffer_in** -- Should the IO pad have an input buffer?
+                * **buffer_out** -- Should the IO pad have an output buffer?
+                * **sky130_drive_mode** -- Drive mode for output buffer on sky130
+                * **trip_point** -- Trip Point configutation for input buffer
+                * **init** -- The value for the initial values of the port
+                * **init_oe** -- The value for the initial values of the output enable(s) of the port
+
+
+.. py:function:: OutputIOSignature(width, **kwargs)
+
+   This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package output signals
+   intended for connection to the physical pads of the integrated circuit package.
+
+   :param width: specifies the number of individual output wires within this port, each of which will correspond to a separate physical pad on the integrated circuit package.
+
+
+.. py:function:: InputIOSignature(width, **kwargs)
+
+   This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package input signals
+   intended for connection to the physical pads of the integrated circuit package.
+
+   :param width: specifies the number of individual input wires within this port, each of which will correspond to a separate physical pad on the integrated circuit package.
+
+
+.. py:function:: BidirIOSignature(width, **kwargs)
+
+   This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package bi-directional signals
+   intended for connection to the physical pads of the integrated circuit package.
+
+   :param width: specifies the number of individual input/output wires within this port. Each pair of input/output wires will correspond to a separate physical pad on the integrated circuit package.
+
+
+.. py:class:: Sky130DriveMode
+
+   Bases: :py:obj:`enum.StrEnum`
+
+
+   Models the potential drive modes of an SkyWater 130 IO cell [sky130_fd_io__gpiov2](https://skywater-pdk.readthedocs.io/en/main/contents/libraries/sky130_fd_io/docs/user_guide.html)
+   These are both statically configurable and can be set at runtime on the `:py:mod:drive_mode.Sky130Port` lines on the port.
+
+
