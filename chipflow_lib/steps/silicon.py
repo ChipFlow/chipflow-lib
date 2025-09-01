@@ -201,7 +201,7 @@ class SiliconStep:
             except requests.ConnectionError as e:
                 if type(e.__context__) is urllib3.exceptions.MaxRetryError:
                     network_err(e)
-            except requests.exceptions.ReadTimeout as e:
+            except Exception as e:
                 network_err(e)
 
             assert resp
