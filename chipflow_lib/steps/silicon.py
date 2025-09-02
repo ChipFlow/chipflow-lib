@@ -196,15 +196,12 @@ class SiliconStep:
                     },
                     allow_redirects=False
                     )
-            except requests.ConnectTimeout as e:
-               network_err(e)
-            except requests.ConnectionError as e:
-                if type(e.__context__) is urllib3.exceptions.MaxRetryError:
-                    network_err(e)
             except Exception as e:
-                network_err(e)
+                logger.error(f"Unexpected error submitting design: {e}")
+                sp.fail(f"Unexpected error: {e}")
 
-            assert resp
+            assert resp is not None
+
             # Parse response body
             try:
                 resp_data = resp.json()
@@ -265,6 +262,7 @@ class SiliconStep:
                     timeout=(2.0, 60.0)  # fail if connect takes >2s, long poll for 60s at a time
                 )
                 if log_resp.status_code == 200:
+                    logger.debug(f"response from {self._log_stream_url}:\n{log_resp}")
                     for line in log_resp.iter_lines():
                         line_str = line.decode("utf-8") if line else ""
                         logger.debug(line_str)
