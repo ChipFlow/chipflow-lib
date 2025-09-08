@@ -7,12 +7,10 @@ import inspect
 import json
 import logging
 import os
-import re
 import requests
 import shutil
 import subprocess
 import sys
-import time
 import urllib3
 from pprint import pformat
 
@@ -29,6 +27,18 @@ from ..platforms._internal import SiliconPlatform, top_components, load_pinlock
 
 
 logger = logging.getLogger(__name__)
+
+
+def halo_logging(closure):
+    class ClosureStreamHandler(logging.StreamHandler):
+        def emit(self, record):
+            # Call the closure with the log message
+            closure(self.format(record))
+
+    handler = ClosureStreamHandler()
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
 
 class SiliconTop(StepBase, Elaboratable):
@@ -122,6 +132,7 @@ class SiliconStep:
         else:
             interval = -1
         with  Halo(text="Submitting...", spinner="dots", interval=interval) as sp:
+
             fh = None
             submission_name = self.determine_submission_name()
             data = {
@@ -234,7 +245,6 @@ class SiliconStep:
                     headers["Authorization"] = "REDACTED"
                 logger.debug(f"Request headers: {headers}")
 
-                logger.debug(f"Request data: {data}")
                 logger.debug(f"Response headers: {dict(resp.headers)}")
                 logger.debug(f"Response body: {resp_data}")
                 sp.text = ""
@@ -248,60 +258,56 @@ class SiliconStep:
                 exit(2)
 
     def _long_poll_stream(self, sp, network_err):
-        steps = self._last_log_steps
-        stream_event_counter = 0
         assert self._chipflow_api_key
         # after 4 errors, return to _stream_logs loop and query the build status again
-        while (stream_event_counter < 4):
-            sp.text = "Build running... " + ' -> '.join(steps)
-            try:
-                log_resp = requests.get(
-                    self._log_stream_url,
-                    auth=("", self._chipflow_api_key),
-                    stream=True,
-                    timeout=(2.0, 60.0)  # fail if connect takes >2s, long poll for 60s at a time
-                )
-                if log_resp.status_code == 200:
-                    logger.debug(f"response from {self._log_stream_url}:\n{log_resp}")
-                    for line in log_resp.iter_lines():
-                        line_str = line.decode("utf-8") if line else ""
-                        logger.debug(line_str)
-                        match line_str[0:8]:
-                            case "DEBUG   ":
-                                sp.info(line_str) if log_level <= logging.DEBUG else None
-                            case "INFO    ":
-                                sp.info(line_str) if log_level <= logging.INFO else None
-                                # Some special handling for more user feedback
-                                if line_str.endswith("started"):
-                                    steps = re.findall(r"([0-9a-z_.]+)\:+?", line_str[18:])[0:2]
-                                    sp.text = "Build running... " + ' -> '.join(steps)
-                            case "WARNING ":
-                                sp.info(line_str) if log_level <= logging.WARNING else None
-                            case "ERROR   ":
-                                sp.info(line_str) if log_level <= logging.ERROR else None
-                        sp.start()
-                else:
-                    stream_event_counter +=1
-                    logger.debug(f"Failed to stream logs: {log_resp.text}")
-                    sp.text = "💥 Failed streaming build logs. Trying again!"
-                    break
-            except requests.ConnectionError as e:
-                if type(e.__context__) is urllib3.exceptions.ReadTimeoutError:
-                    continue  #just timed out, continue long poll
-                sp.text = "💥 Failed connecting to ChipFlow Cloud."
-                logger.debug(f"Error while streaming logs: {e}")
-                break
-            except (requests.RequestException, requests.exceptions.ReadTimeout) as e:
-                if type(e.__context__) is urllib3.exceptions.ReadTimeoutError:
-                    continue  #just timed out, continue long poll
-                sp.text = "💥 Failed streaming build logs. Trying again!"
-                logger.debug(f"Error while streaming logs: {e}")
-                stream_event_counter +=1
-                continue
+        logger.debug("Long poll start")
+        try:
+            log_resp = requests.get(
+                self._log_stream_url,
+                auth=("", self._chipflow_api_key),
+                stream=True,
+                timeout=(2.0, 60.0)  # fail if connect takes >2s, long poll for 60s at a time
+            )
+            if log_resp.status_code == 200:
+                logger.debug(f"response from {self._log_stream_url}:\n{log_resp}")
+                for line in log_resp.iter_lines():
+                    message = line.decode("utf-8") if line else ""
+                    try:
+                        level, time, step = message.split(maxsplit=2)
+                    except ValueError:
+                        continue
 
-        # save steps so we coninue where we left off if we manage to reconnect
-        self._last_log_steps = steps
-        return stream_event_counter
+                    match level:
+                        case "DEBUG":
+                            sp.info(message) if log_level <= logging.DEBUG else None
+                        case "INFO" | "INFO+":
+                            sp.info(message) if log_level <= logging.INFO else None
+                        case "WARNING":
+                            sp.info(message) if log_level <= logging.WARNING else None
+                        case "ERROR":
+                            sp.info(message) if log_level <= logging.ERROR else None
+
+                    if step != self._last_log_step:
+                        sp.text = f"Build running: {self._last_log_step}"
+                        self._last_log_step = step
+            else:
+                logger.debug(f"Failed to stream logs: {log_resp.text}")
+                sp.text = "💥 Failed streaming build logs. Trying again!"
+                return True
+        except requests.ConnectionError as e:
+            if type(e.__context__) is urllib3.exceptions.ReadTimeoutError:
+                return True
+            sp.text = "💥 Failed connecting to ChipFlow Cloud."
+            logger.debug(f"Error while streaming logs: {e}")
+            return False
+        except (requests.RequestException, requests.exceptions.ReadTimeout) as e:
+            if type(e.__context__) is urllib3.exceptions.ReadTimeoutError:
+                return True
+            sp.text = "💥 Failed streaming build logs. Trying again!"
+            logger.debug(f"Error while streaming logs: {e}")
+            return False
+
+        return True
 
     def _stream_logs(self, sp, network_err):
         sp.start("Streaming the logs...")
@@ -310,18 +316,19 @@ class SiliconStep:
         timeout = 10.0
         build_status = "pending"
         stream_event_counter = 0
-        self._last_log_steps = []
+        self._last_log_step = ""
         assert self._chipflow_api_key is not None
-        while fail_counter < 10 and stream_event_counter < 10:
-            sp.text = f"Waiting for build to run... {build_status}"
-            time.sleep(timeout)  # Wait before polling
+        sp.text = f"Waiting for build to run... {build_status}"
+
+        while fail_counter < 5:
             try:
+                logger.debug(f"Checking build status, iteration {fail_counter}")
                 status_resp = requests.get(
                     self._build_status_url,
                     auth=("", self._chipflow_api_key),
                     timeout=timeout
                 )
-            except requests.exceptions.ReadTimeout as e:
+            except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError) as e:
                 sp.text = "💥 Error connecting to ChipFlow Cloud. Trying again! "
                 fail_counter += 1
                 logger.debug(f"Failed to fetch build status{fail_counter} times: {e}")
@@ -337,8 +344,6 @@ class SiliconStep:
             build_status = status_data.get("status")
             logger.debug(f"Build status: {build_status}")
 
-            sp.text = f"Polling build status... {build_status}"
-
             if build_status == "completed":
                 sp.succeed("✅ Build completed successfully!")
                 return 0
@@ -346,13 +351,13 @@ class SiliconStep:
                 sp.succeed("❌ Build failed.")
                 return 1
             elif build_status == "running":
-                stream_event_counter += self._long_poll_stream(sp, network_err)
-
-        if fail_counter >=10 or stream_event_counter >= 10:
-            sp.text = ""
-            sp.fail("💥 Failed fetching build status. Perhaps you hit a network error?")
-            logger.debug(f"Failed to fetch build status {fail_counter} times and failed streaming {stream_event_counter} times. Exiting.")
-            return 2
+                sp.text = f"Build status: {build_status}"
+                if not self._long_poll_stream(sp, network_err):
+                    sp.text = ""
+                    sp.fail("💥 Failed fetching build status. Perhaps you hit a network error?")
+                    logger.debug(f"Failed to fetch build status {fail_counter} times and failed streaming {stream_event_counter} times. Exiting.")
+                    return 2
+                # check status and go again
 
     def determine_submission_name(self):
         if "CHIPFLOW_SUBMISSION_NAME" in os.environ:
