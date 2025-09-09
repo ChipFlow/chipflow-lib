@@ -18,4 +18,5 @@ __pycache__/
 .doit.db
 
 docs/_build
+docs/autoapi
 .cache

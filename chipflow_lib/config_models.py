@@ -19,6 +19,8 @@ class SiliconConfig(BaseModel):
     debug: Optional[Dict[str, bool]] = None
     # This is still kept around to allow forcing pad locations.
 
+class SimulationConfig(BaseModel):
+    num_steps: int = 3000000
 
 class ChipFlowConfig(BaseModel):
     """Root configuration for chipflow.toml."""
@@ -26,6 +28,7 @@ class ChipFlowConfig(BaseModel):
     top: Dict[str, Any] = {}
     steps: Optional[Dict[str, str]] = None
     silicon: Optional[SiliconConfig] = None
+    simulation: SimulationConfig = SimulationConfig()
     clock_domains: Optional[List[str]] = None
 
 

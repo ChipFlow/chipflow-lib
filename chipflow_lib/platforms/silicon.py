@@ -303,6 +303,8 @@ class Sky130Port(SiliconPlatformPort):
     def wire_up(self, m, wire):
         super().wire_up(m, wire)
 
+        # wire up drive mode bits
+
         if hasattr(wire, 'drive_mode'):
             m.d.comb += self.drive_mode.eq(wire.drive_mode)
 
