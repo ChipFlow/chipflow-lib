@@ -29,7 +29,7 @@ Classes
    chipflow_lib.platforms.UARTSignature
    chipflow_lib.platforms.GPIOSignature
    chipflow_lib.platforms.QSPIFlashSignature
-   chipflow_lib.platforms.DriverSignature
+   chipflow_lib.platforms.SoftwareDriverSignature
    chipflow_lib.platforms.SoftwareBuild
 
 
@@ -322,7 +322,7 @@ Package Contents
        ensure this remains the case when additional functionality is added.
 
 
-.. py:class:: DriverSignature(members, **kwargs)
+.. py:class:: SoftwareDriverSignature(members, **kwargs)
 
    Bases: :py:obj:`amaranth.lib.wiring.Signature`
 
