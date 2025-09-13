@@ -21,8 +21,8 @@ from chipflow_lib import (
 
 from chipflow_lib.cli import run as cli_run
 from chipflow_lib.steps.silicon import SiliconStep, SiliconTop
-from chipflow_lib.config_models import Config, ChipFlowConfig, SiliconConfig
-from chipflow_lib.platforms._internal import Process
+from chipflow_lib.config_models import Config, ChipFlowConfig, SiliconConfig, Process
+
 
 DEFAULT_PINLOCK = {
     "process" : "ihp_sg13g2",
@@ -37,6 +37,7 @@ DEFAULT_PINLOCK = {
     "port_map" : {},
     "metadata" : {},
 }
+
 
 class TestSiliconStep(unittest.TestCase):
     def writeConfig(self, config, pinlock=DEFAULT_PINLOCK):

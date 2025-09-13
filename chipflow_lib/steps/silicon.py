@@ -23,7 +23,8 @@ from halo import Halo
 from . import StepBase, _wire_up_ports
 from .. import ChipFlowError
 from ..cli import log_level
-from ..platforms._internal import SiliconPlatform, top_components, load_pinlock
+from ..platforms._utils import top_components, load_pinlock
+from ..platforms.silicon import SiliconPlatform
 
 
 logger = logging.getLogger(__name__)
