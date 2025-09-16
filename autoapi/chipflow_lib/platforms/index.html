@@ -308,6 +308,12 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.platforms.QSPIFlashSignature" title="chipflow_lib.platforms.QSPIFlashSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">QSPIFlashSignature</span></code></a></p></td>
 <td><p>Description of an interface object.</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.SoftwareDriverSignature" title="chipflow_lib.platforms.SoftwareDriverSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SoftwareDriverSignature</span></code></a></p></td>
+<td><p>Description of an interface object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.platforms.SoftwareBuild" title="chipflow_lib.platforms.SoftwareBuild"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SoftwareBuild</span></code></a></p></td>
+<td><p>This holds the information needed for building software and providing the built outcome</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -676,6 +682,45 @@ ensure this remains the case when additional functionality is added.</p>
 </dl>
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="chipflow_lib.platforms.SoftwareDriverSignature">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">SoftwareDriverSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">members</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.SoftwareDriverSignature" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">amaranth.lib.wiring.Signature</span></code></a></p>
+<p>Description of an interface object.</p>
+<p>An interface object is a Python object that has a <code class="code highlight py python docutils literal highlight-python"><span class="n">signature</span></code> attribute containing
+a <code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> object, as well as an attribute for every member of its signature.
+Signatures and interface objects are tightly linked: an interface object can be created out
+of a signature, and the signature is used when <code class="xref py py-func docutils literal notranslate"><span class="pre">connect()</span></code>ing two interface objects
+together. See the <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#wiring-intro1" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">introduction to interfaces</span></a> for a more detailed
+explanation of why this is useful.</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> can be used as a base class to define <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#wiring-customizing" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">customized</span></a>
+signatures and interface objects.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> objects are immutable. Classes inheriting from <code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> must
+ensure this remains the case when additional functionality is added.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>typing_extensions.Unpack</em><em>[</em><em>DriverModel</em><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="chipflow_lib.platforms.SoftwareBuild">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">SoftwareBuild</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sources</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">includes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_dirs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.SoftwareBuild" title="Link to this definition">¶</a></dt>
+<dd><p>This holds the information needed for building software and providing the built outcome</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sources</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.13)"><em>pathlib.Path</em></a><em>]</em>)</p></li>
+<li><p><strong>includes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.13)"><em>pathlib.Path</em></a><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 
@@ -762,6 +807,8 @@ ensure this remains the case when additional functionality is added.</p>
 <li><a class="reference internal" href="#chipflow_lib.platforms.UARTSignature"><code class="docutils literal notranslate"><span class="pre">UARTSignature</span></code></a></li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.GPIOSignature"><code class="docutils literal notranslate"><span class="pre">GPIOSignature</span></code></a></li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.QSPIFlashSignature"><code class="docutils literal notranslate"><span class="pre">QSPIFlashSignature</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.platforms.SoftwareDriverSignature"><code class="docutils literal notranslate"><span class="pre">SoftwareDriverSignature</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.platforms.SoftwareBuild"><code class="docutils literal notranslate"><span class="pre">SoftwareBuild</span></code></a></li>
 </ul>
 </li>
 </ul>
