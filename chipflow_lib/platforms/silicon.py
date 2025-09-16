@@ -488,9 +488,16 @@ class SiliconPlatform:
         return fragment.prepare(ports)
 
     def build(self, elaboratable, name="top"):
+        # hide Amaranth `UnusedElaboratable` warnings
         warnings.simplefilter(action="ignore", category=UnusedElaboratable)
-        fragment = self._prepare(elaboratable, name)
-        rtlil_text, _ = rtlil.convert_fragment(fragment, name)
+        try:
+            fragment = self._prepare(elaboratable, name)
+            rtlil_text, _ = rtlil.convert_fragment(fragment, name)
+        except Exception as e:
+            raise ChipFlowError("Error found when building design.") from e
+
+        # Enable warnings when an exception hasn't occured
+        warnings.filterwarnings("default", category=UnusedElaboratable)
 
         # Integrate Amaranth design with external Verilog
         yosys_script = [

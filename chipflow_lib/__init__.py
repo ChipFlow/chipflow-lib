@@ -68,4 +68,4 @@ def _parse_config() -> 'Config':
     except FileNotFoundError:
        raise ChipFlowError(f"Config file not found. I expected to find it at {config_file}")
     except tomli.TOMLDecodeError as e:
-        raise ChipFlowError(f"TOML Error found when loading {config_file}: {e.msg} at line {e.lineno}, column {e.colno}")
+        raise ChipFlowError(f"{config_file} has a formatting error: {e.msg} at line {e.lineno}, column {e.colno}")

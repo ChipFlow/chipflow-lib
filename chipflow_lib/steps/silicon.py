@@ -82,10 +82,12 @@ class SiliconStep:
         submit_subparser = action_argument.add_parser(
             "submit", help=inspect.getdoc(self.submit).splitlines()[0])  # type: ignore
         submit_subparser.add_argument(
-            "--dry-run", help=argparse.SUPPRESS,
+            "--dry-run",
+            help="Build but do not submit design to cloud. Will output `rtlil` and `config` files.",
             default=False, action="store_true")
         submit_subparser.add_argument(
-            "--wait", help=argparse.SUPPRESS,
+            "--wait",
+            help="Maintain connection to cloud and trace build messages. Filtering is based on the log level (see `verbose` option).",
             default=False, action="store_true")
 
     def run_cli(self, args):
@@ -172,10 +174,11 @@ class SiliconStep:
                 logger.debug(f"data=\n{json.dumps(data, indent=2)}")
                 logger.debug(f"files['config']=\n{config}")
                 shutil.copyfile(rtlil_path, 'rtlil')
-                with open("data", 'w') as f:
+                with open("rtlil", 'w') as f:
                     json.dump(data, f)
                 with open("config", 'w') as f:
                     f.write(config)
+                sp.info(f"Compiled design and configuration can be found in in `rtlil` and `config`")
                 return
 
             def network_err(e):
