@@ -2,6 +2,9 @@
 
 import pytest
 import unittest
+
+from contextlib import redirect_stdout
+from io import StringIO
 from unittest import mock
 
 from chipflow_lib import ChipFlowError
@@ -64,7 +67,7 @@ class TestCLI(unittest.TestCase):
         mock_get_cls.return_value = lambda config: mock_test_cmd
 
         # Capture stdout for assertion
-        with mock.patch("builtins.print") as mock_print:
+        with redirect_stdout(StringIO()) as buffer:
             with pytest.raises(SystemExit) as systemexit:
                 # Run with error action
                 run(["test", "error"])
@@ -72,9 +75,7 @@ class TestCLI(unittest.TestCase):
                 assert systemexit.type is SystemExit
                 assert systemexit.value.code == 1
 
-            # Error message should be printed
-            mock_print.assert_called_once()
-            self.assertIn("Error while executing `test error`", mock_print.call_args[0][0])
+        self.assertIn("Error while executing `test error`", buffer.getvalue())
 
     @mock.patch("chipflow_lib.cli._parse_config")
     @mock.patch("chipflow_lib.cli.PinCommand")
@@ -91,7 +92,7 @@ class TestCLI(unittest.TestCase):
         mock_get_cls.return_value = lambda config: mock_test_cmd
 
         # Capture stdout for assertion
-        with mock.patch("builtins.print") as mock_print:
+        with redirect_stdout(StringIO()) as buffer:
             with pytest.raises(SystemExit) as systemexit:
                 # Run with unexpected error action
                 run(["test", "unexpected"])
@@ -100,9 +101,8 @@ class TestCLI(unittest.TestCase):
                 assert systemexit.value.code == 1
 
             # Error message should be printed
-            mock_print.assert_called_once()
-            self.assertIn("Error while executing `test unexpected`", mock_print.call_args[0][0])
-            self.assertIn("Unexpected error", mock_print.call_args[0][0])
+            self.assertIn("Error while executing `test unexpected`", buffer.getvalue())
+            self.assertIn("Unexpected error", buffer.getvalue())
 
     @mock.patch("chipflow_lib.cli._parse_config")
     @mock.patch("chipflow_lib.cli.PinCommand")
