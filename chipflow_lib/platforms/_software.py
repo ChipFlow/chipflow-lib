@@ -4,7 +4,6 @@ import logging
 import warnings
 
 from collections import defaultdict
-from typing import TYPE_CHECKING
 
 from amaranth import Fragment
 from amaranth.hdl import UnusedElaboratable

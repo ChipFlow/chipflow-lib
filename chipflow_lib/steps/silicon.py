@@ -2,7 +2,6 @@
 
 # SPDX-License-Identifier: BSD-2-Clause
 
-import argparse
 import inspect
 import json
 import logging
@@ -178,7 +177,7 @@ class SiliconStep:
                     json.dump(data, f)
                 with open("config", 'w') as f:
                     f.write(config)
-                sp.info(f"Compiled design and configuration can be found in in `rtlil` and `config`")
+                sp.info("Compiled design and configuration can be found in in `rtlil` and `config`")
                 return
 
             def network_err(e):
