@@ -23,6 +23,12 @@ Classes
    chipflow_lib.platforms.IOTripPoint
    chipflow_lib.platforms.IOModelOptions
    chipflow_lib.platforms.Sky130DriveMode
+   chipflow_lib.platforms.JTAGSignature
+   chipflow_lib.platforms.SPISignature
+   chipflow_lib.platforms.I2CSignature
+   chipflow_lib.platforms.UARTSignature
+   chipflow_lib.platforms.GPIOSignature
+   chipflow_lib.platforms.QSPIFlashSignature
 
 
 Functions
@@ -96,20 +102,6 @@ Package Contents
 
 
       Options set on the io port at construction
-
-
-   .. py:method:: annotations(*args)
-
-      Annotate an interface object.
-
-      Subclasses of :class:`Signature` may override this method to provide annotations for
-      a corresponding interface object. The default implementation provides none.
-
-      See :mod:`amaranth.lib.meta` for details.
-
-      :returns: :py:`tuple()`
-      :rtype: iterable of :class:`~.meta.Annotation`
-
 
 
 .. py:class:: IOModel
@@ -188,5 +180,143 @@ Package Contents
 
    Models the potential drive modes of an SkyWater 130 IO cell [sky130_fd_io__gpiov2](https://skywater-pdk.readthedocs.io/en/main/contents/libraries/sky130_fd_io/docs/user_guide.html)
    These are both statically configurable and can be set at runtime on the `:py:mod:drive_mode.Sky130Port` lines on the port.
+
+
+.. py:class:: JTAGSignature(**kwargs)
+
+   Bases: :py:obj:`amaranth.lib.wiring.Signature`
+
+
+   Description of an interface object.
+
+   An interface object is a Python object that has a :py:`signature` attribute containing
+   a :class:`Signature` object, as well as an attribute for every member of its signature.
+   Signatures and interface objects are tightly linked: an interface object can be created out
+   of a signature, and the signature is used when :func:`connect`\ ing two interface objects
+   together. See the :ref:`introduction to interfaces <wiring-intro1>` for a more detailed
+   explanation of why this is useful.
+
+   :class:`Signature` can be used as a base class to define :ref:`customized <wiring-customizing>`
+   signatures and interface objects.
+
+   .. warning::
+
+       :class:`Signature` objects are immutable. Classes inheriting from :class:`Signature` must
+       ensure this remains the case when additional functionality is added.
+
+
+.. py:class:: SPISignature(**kwargs)
+
+   Bases: :py:obj:`amaranth.lib.wiring.Signature`
+
+
+   Description of an interface object.
+
+   An interface object is a Python object that has a :py:`signature` attribute containing
+   a :class:`Signature` object, as well as an attribute for every member of its signature.
+   Signatures and interface objects are tightly linked: an interface object can be created out
+   of a signature, and the signature is used when :func:`connect`\ ing two interface objects
+   together. See the :ref:`introduction to interfaces <wiring-intro1>` for a more detailed
+   explanation of why this is useful.
+
+   :class:`Signature` can be used as a base class to define :ref:`customized <wiring-customizing>`
+   signatures and interface objects.
+
+   .. warning::
+
+       :class:`Signature` objects are immutable. Classes inheriting from :class:`Signature` must
+       ensure this remains the case when additional functionality is added.
+
+
+.. py:class:: I2CSignature(**kwargs)
+
+   Bases: :py:obj:`amaranth.lib.wiring.Signature`
+
+
+   Description of an interface object.
+
+   An interface object is a Python object that has a :py:`signature` attribute containing
+   a :class:`Signature` object, as well as an attribute for every member of its signature.
+   Signatures and interface objects are tightly linked: an interface object can be created out
+   of a signature, and the signature is used when :func:`connect`\ ing two interface objects
+   together. See the :ref:`introduction to interfaces <wiring-intro1>` for a more detailed
+   explanation of why this is useful.
+
+   :class:`Signature` can be used as a base class to define :ref:`customized <wiring-customizing>`
+   signatures and interface objects.
+
+   .. warning::
+
+       :class:`Signature` objects are immutable. Classes inheriting from :class:`Signature` must
+       ensure this remains the case when additional functionality is added.
+
+
+.. py:class:: UARTSignature(**kwargs)
+
+   Bases: :py:obj:`amaranth.lib.wiring.Signature`
+
+
+   Description of an interface object.
+
+   An interface object is a Python object that has a :py:`signature` attribute containing
+   a :class:`Signature` object, as well as an attribute for every member of its signature.
+   Signatures and interface objects are tightly linked: an interface object can be created out
+   of a signature, and the signature is used when :func:`connect`\ ing two interface objects
+   together. See the :ref:`introduction to interfaces <wiring-intro1>` for a more detailed
+   explanation of why this is useful.
+
+   :class:`Signature` can be used as a base class to define :ref:`customized <wiring-customizing>`
+   signatures and interface objects.
+
+   .. warning::
+
+       :class:`Signature` objects are immutable. Classes inheriting from :class:`Signature` must
+       ensure this remains the case when additional functionality is added.
+
+
+.. py:class:: GPIOSignature(pin_count=1, **kwargs)
+
+   Bases: :py:obj:`amaranth.lib.wiring.Signature`
+
+
+   Description of an interface object.
+
+   An interface object is a Python object that has a :py:`signature` attribute containing
+   a :class:`Signature` object, as well as an attribute for every member of its signature.
+   Signatures and interface objects are tightly linked: an interface object can be created out
+   of a signature, and the signature is used when :func:`connect`\ ing two interface objects
+   together. See the :ref:`introduction to interfaces <wiring-intro1>` for a more detailed
+   explanation of why this is useful.
+
+   :class:`Signature` can be used as a base class to define :ref:`customized <wiring-customizing>`
+   signatures and interface objects.
+
+   .. warning::
+
+       :class:`Signature` objects are immutable. Classes inheriting from :class:`Signature` must
+       ensure this remains the case when additional functionality is added.
+
+
+.. py:class:: QSPIFlashSignature(**kwargs)
+
+   Bases: :py:obj:`amaranth.lib.wiring.Signature`
+
+
+   Description of an interface object.
+
+   An interface object is a Python object that has a :py:`signature` attribute containing
+   a :class:`Signature` object, as well as an attribute for every member of its signature.
+   Signatures and interface objects are tightly linked: an interface object can be created out
+   of a signature, and the signature is used when :func:`connect`\ ing two interface objects
+   together. See the :ref:`introduction to interfaces <wiring-intro1>` for a more detailed
+   explanation of why this is useful.
+
+   :class:`Signature` can be used as a base class to define :ref:`customized <wiring-customizing>`
+   signatures and interface objects.
+
+   .. warning::
+
+       :class:`Signature` objects are immutable. Classes inheriting from :class:`Signature` must
+       ensure this remains the case when additional functionality is added.
 
 

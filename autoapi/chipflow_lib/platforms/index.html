@@ -290,6 +290,24 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.platforms.Sky130DriveMode" title="chipflow_lib.platforms.Sky130DriveMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sky130DriveMode</span></code></a></p></td>
 <td><p>Models the potential drive modes of an SkyWater 130 IO cell [sky130_fd_io__gpiov2](<a class="reference external" href="https://skywater-pdk.readthedocs.io/en/main/contents/libraries/sky130_fd_io/docs/user_guide.html">https://skywater-pdk.readthedocs.io/en/main/contents/libraries/sky130_fd_io/docs/user_guide.html</a>)</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.JTAGSignature" title="chipflow_lib.platforms.JTAGSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JTAGSignature</span></code></a></p></td>
+<td><p>Description of an interface object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.platforms.SPISignature" title="chipflow_lib.platforms.SPISignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SPISignature</span></code></a></p></td>
+<td><p>Description of an interface object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.I2CSignature" title="chipflow_lib.platforms.I2CSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">I2CSignature</span></code></a></p></td>
+<td><p>Description of an interface object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.platforms.UARTSignature" title="chipflow_lib.platforms.UARTSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UARTSignature</span></code></a></p></td>
+<td><p>Description of an interface object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow_lib.platforms.GPIOSignature" title="chipflow_lib.platforms.GPIOSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GPIOSignature</span></code></a></p></td>
+<td><p>Description of an interface object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#chipflow_lib.platforms.QSPIFlashSignature" title="chipflow_lib.platforms.QSPIFlashSignature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">QSPIFlashSignature</span></code></a></p></td>
+<td><p>Description of an interface object.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -402,23 +420,6 @@ This class is generally not directly used.  Instead, you would typically utilize
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="chipflow_lib.platforms.IOSignature.annotations">
-<span class="sig-name descname"><span class="pre">annotations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.IOSignature.annotations" title="Link to this definition">¶</a></dt>
-<dd><p>Annotate an interface object.</p>
-<p>Subclasses of <code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> may override this method to provide annotations for
-a corresponding interface object. The default implementation provides none.</p>
-<p>See <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/meta.html#module-amaranth.lib.meta" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">amaranth.lib.meta</span></code></a> for details.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="code highlight py python docutils literal highlight-python"><span class="nb">tuple</span><span class="p">()</span></code></p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>iterable of <code class="xref py py-class docutils literal notranslate"><span class="pre">Annotation</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
@@ -525,6 +526,156 @@ intended for connection to the physical pads of the integrated circuit package.<
 These are both statically configurable and can be set at runtime on the <cite>:py:mod:drive_mode.Sky130Port</cite> lines on the port.</p>
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="chipflow_lib.platforms.JTAGSignature">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">JTAGSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.JTAGSignature" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">amaranth.lib.wiring.Signature</span></code></a></p>
+<p>Description of an interface object.</p>
+<p>An interface object is a Python object that has a <code class="code highlight py python docutils literal highlight-python"><span class="n">signature</span></code> attribute containing
+a <code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> object, as well as an attribute for every member of its signature.
+Signatures and interface objects are tightly linked: an interface object can be created out
+of a signature, and the signature is used when <code class="xref py py-func docutils literal notranslate"><span class="pre">connect()</span></code>ing two interface objects
+together. See the <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#wiring-intro1" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">introduction to interfaces</span></a> for a more detailed
+explanation of why this is useful.</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> can be used as a base class to define <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#wiring-customizing" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">customized</span></a>
+signatures and interface objects.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> objects are immutable. Classes inheriting from <code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> must
+ensure this remains the case when additional functionality is added.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>typing_extensions.Unpack</em><em>[</em><em>chipflow_lib.platforms._utils.IOModelOptions</em><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="chipflow_lib.platforms.SPISignature">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">SPISignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.SPISignature" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">amaranth.lib.wiring.Signature</span></code></a></p>
+<p>Description of an interface object.</p>
+<p>An interface object is a Python object that has a <code class="code highlight py python docutils literal highlight-python"><span class="n">signature</span></code> attribute containing
+a <code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> object, as well as an attribute for every member of its signature.
+Signatures and interface objects are tightly linked: an interface object can be created out
+of a signature, and the signature is used when <code class="xref py py-func docutils literal notranslate"><span class="pre">connect()</span></code>ing two interface objects
+together. See the <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#wiring-intro1" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">introduction to interfaces</span></a> for a more detailed
+explanation of why this is useful.</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> can be used as a base class to define <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#wiring-customizing" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">customized</span></a>
+signatures and interface objects.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> objects are immutable. Classes inheriting from <code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> must
+ensure this remains the case when additional functionality is added.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>typing_extensions.Unpack</em><em>[</em><em>chipflow_lib.platforms._utils.IOModelOptions</em><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="chipflow_lib.platforms.I2CSignature">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">I2CSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.I2CSignature" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">amaranth.lib.wiring.Signature</span></code></a></p>
+<p>Description of an interface object.</p>
+<p>An interface object is a Python object that has a <code class="code highlight py python docutils literal highlight-python"><span class="n">signature</span></code> attribute containing
+a <code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> object, as well as an attribute for every member of its signature.
+Signatures and interface objects are tightly linked: an interface object can be created out
+of a signature, and the signature is used when <code class="xref py py-func docutils literal notranslate"><span class="pre">connect()</span></code>ing two interface objects
+together. See the <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#wiring-intro1" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">introduction to interfaces</span></a> for a more detailed
+explanation of why this is useful.</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> can be used as a base class to define <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#wiring-customizing" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">customized</span></a>
+signatures and interface objects.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> objects are immutable. Classes inheriting from <code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> must
+ensure this remains the case when additional functionality is added.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>typing_extensions.Unpack</em><em>[</em><em>chipflow_lib.platforms._utils.IOModelOptions</em><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="chipflow_lib.platforms.UARTSignature">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">UARTSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.UARTSignature" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">amaranth.lib.wiring.Signature</span></code></a></p>
+<p>Description of an interface object.</p>
+<p>An interface object is a Python object that has a <code class="code highlight py python docutils literal highlight-python"><span class="n">signature</span></code> attribute containing
+a <code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> object, as well as an attribute for every member of its signature.
+Signatures and interface objects are tightly linked: an interface object can be created out
+of a signature, and the signature is used when <code class="xref py py-func docutils literal notranslate"><span class="pre">connect()</span></code>ing two interface objects
+together. See the <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#wiring-intro1" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">introduction to interfaces</span></a> for a more detailed
+explanation of why this is useful.</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> can be used as a base class to define <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#wiring-customizing" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">customized</span></a>
+signatures and interface objects.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> objects are immutable. Classes inheriting from <code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> must
+ensure this remains the case when additional functionality is added.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>typing_extensions.Unpack</em><em>[</em><em>chipflow_lib.platforms._utils.IOModelOptions</em><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="chipflow_lib.platforms.GPIOSignature">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">GPIOSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pin_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.GPIOSignature" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">amaranth.lib.wiring.Signature</span></code></a></p>
+<p>Description of an interface object.</p>
+<p>An interface object is a Python object that has a <code class="code highlight py python docutils literal highlight-python"><span class="n">signature</span></code> attribute containing
+a <code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> object, as well as an attribute for every member of its signature.
+Signatures and interface objects are tightly linked: an interface object can be created out
+of a signature, and the signature is used when <code class="xref py py-func docutils literal notranslate"><span class="pre">connect()</span></code>ing two interface objects
+together. See the <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#wiring-intro1" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">introduction to interfaces</span></a> for a more detailed
+explanation of why this is useful.</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> can be used as a base class to define <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#wiring-customizing" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">customized</span></a>
+signatures and interface objects.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> objects are immutable. Classes inheriting from <code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> must
+ensure this remains the case when additional functionality is added.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>typing_extensions.Unpack</em><em>[</em><em>chipflow_lib.platforms._utils.IOModelOptions</em><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="chipflow_lib.platforms.QSPIFlashSignature">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow_lib.platforms.</span></span><span class="sig-name descname"><span class="pre">QSPIFlashSignature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platforms.QSPIFlashSignature" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Signature" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">amaranth.lib.wiring.Signature</span></code></a></p>
+<p>Description of an interface object.</p>
+<p>An interface object is a Python object that has a <code class="code highlight py python docutils literal highlight-python"><span class="n">signature</span></code> attribute containing
+a <code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> object, as well as an attribute for every member of its signature.
+Signatures and interface objects are tightly linked: an interface object can be created out
+of a signature, and the signature is used when <code class="xref py py-func docutils literal notranslate"><span class="pre">connect()</span></code>ing two interface objects
+together. See the <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#wiring-intro1" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">introduction to interfaces</span></a> for a more detailed
+explanation of why this is useful.</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> can be used as a base class to define <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#wiring-customizing" title="(in Amaranth language &amp; toolchain v0.5.4)"><span class="xref std std-ref">customized</span></a>
+signatures and interface objects.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> objects are immutable. Classes inheriting from <code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code> must
+ensure this remains the case when additional functionality is added.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>typing_extensions.Unpack</em><em>[</em><em>chipflow_lib.platforms._utils.IOModelOptions</em><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 
@@ -596,7 +747,6 @@ These are both statically configurable and can be set at runtime on the <cite>:p
 <li><a class="reference internal" href="#chipflow_lib.platforms.IOSignature.width"><code class="docutils literal notranslate"><span class="pre">IOSignature.width</span></code></a></li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.IOSignature.invert"><code class="docutils literal notranslate"><span class="pre">IOSignature.invert</span></code></a></li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.IOSignature.options"><code class="docutils literal notranslate"><span class="pre">IOSignature.options</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.platforms.IOSignature.annotations"><code class="docutils literal notranslate"><span class="pre">IOSignature.annotations()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.IOModel"><code class="docutils literal notranslate"><span class="pre">IOModel</span></code></a></li>
@@ -606,6 +756,12 @@ These are both statically configurable and can be set at runtime on the <cite>:p
 <li><a class="reference internal" href="#chipflow_lib.platforms.InputIOSignature"><code class="docutils literal notranslate"><span class="pre">InputIOSignature()</span></code></a></li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.BidirIOSignature"><code class="docutils literal notranslate"><span class="pre">BidirIOSignature()</span></code></a></li>
 <li><a class="reference internal" href="#chipflow_lib.platforms.Sky130DriveMode"><code class="docutils literal notranslate"><span class="pre">Sky130DriveMode</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.platforms.JTAGSignature"><code class="docutils literal notranslate"><span class="pre">JTAGSignature</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.platforms.SPISignature"><code class="docutils literal notranslate"><span class="pre">SPISignature</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.platforms.I2CSignature"><code class="docutils literal notranslate"><span class="pre">I2CSignature</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.platforms.UARTSignature"><code class="docutils literal notranslate"><span class="pre">UARTSignature</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.platforms.GPIOSignature"><code class="docutils literal notranslate"><span class="pre">GPIOSignature</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.platforms.QSPIFlashSignature"><code class="docutils literal notranslate"><span class="pre">QSPIFlashSignature</span></code></a></li>
 </ul>
 </li>
 </ul>

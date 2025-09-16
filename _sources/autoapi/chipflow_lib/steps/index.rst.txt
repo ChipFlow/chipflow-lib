@@ -59,20 +59,6 @@ Package Contents
       Options set on the io port at construction
 
 
-   .. py:method:: annotations(*args)
-
-      Annotate an interface object.
-
-      Subclasses of :class:`Signature` may override this method to provide annotations for
-      a corresponding interface object. The default implementation provides none.
-
-      See :mod:`amaranth.lib.meta` for details.
-
-      :returns: :py:`tuple()`
-      :rtype: iterable of :class:`~.meta.Annotation`
-
-
-
 .. py:class:: StepBase(config={})
 
    Bases: :py:obj:`abc.ABC`
