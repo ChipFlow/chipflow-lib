@@ -113,4 +113,6 @@ def run(argv=sys.argv[1:]):
         if hasattr(args, "action"):
             cmd += f" {args.action}"
         print(f"Error while executing `{cmd}`: {e}")
+        print("Caused by:")
+        traceback.print_exception(e.__cause__)
         exit(1)

@@ -53,7 +53,6 @@ def _wire_up_ports(m: Module, top, platform):
     for n, t in top.items():
         logger.debug(f"    > {n}, {t}")
         setattr(m.submodules, n, t)
-    print("Wiring up ports:")
     for component, iface in platform._pinlock.port_map.ports.items():
         if component.startswith('_'):
             logger.debug(f"Ignoring special component {component}")

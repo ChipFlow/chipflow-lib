@@ -1104,7 +1104,7 @@ def top_components(config: 'Config') -> Dict[str, wiring.Component]:
             logger.debug(f"Config {param} = {conf} found for {name}")
             component_configs[param] = conf
         if name.startswith('_'):
-            raise ChipFlowError(f"Top components cannot start with '_': {name}")
+            raise ChipFlowError(f"Top components cannot start with '_' character, these are reserved for internal use: {name}")
 
     # Second pass: instantiate components
     for name, ref in config.chipflow.top.items():
@@ -1114,7 +1114,7 @@ def top_components(config: 'Config') -> Dict[str, wiring.Component]:
                 result[name] = cls(component_configs[name])
             else:
                 result[name] = cls()
-            logger.debug(f"top members for {name}:\n{pformat(result[name].metadata.origin.signature.members)}")
+            logger.debug(f"Top members for {name}:\n{pformat(result[name].metadata.origin.signature.members)}")
 
     return result
 
