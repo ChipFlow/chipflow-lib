@@ -1,9 +1,10 @@
-import os
+import inspect
 import importlib.resources
 import logging
+import os
+import subprocess
 
 from contextlib import contextmanager
-from pathlib import Path
 
 from doit.cmd_base import TaskLoader2, loader
 from doit.doit_cmd import DoitMain
@@ -12,8 +13,10 @@ from doit.task import dict_to_task
 from amaranth import Module
 
 from . import StepBase, _wire_up_ports
+from ._json_compare import compare_events
 from .. import ChipFlowError, _ensure_chipflow_root
-from ..platforms._utils import top_components
+from ..cli import run
+from ..platforms._utils import top_components, load_pinlock
 from ..platforms.sim import VARIABLES, TASKS, DOIT_CONFIG, SimPlatform
 
 
@@ -75,7 +78,34 @@ class SimStep(StepBase):
         self._platform = SimPlatform(config)
         self._config = config
 
+    def build_cli_parser(self, parser):
+        action_argument = parser.add_subparsers(dest="action")
+        action_argument.add_parser(
+            "build", help=inspect.getdoc(self.build).splitlines()[0])   # type: ignore
+        action_argument.add_parser(
+            "run", help=inspect.getdoc(self.run).splitlines()[0])  # type: ignore
+        action_argument.add_parser(
+            "check", help=inspect.getdoc(self.check).splitlines()[0])  # type: ignore
+
+    def run_cli(self, args):
+        load_pinlock()  # check pinlock first so we error cleanly
+
+        match (args.action):
+            case "build":
+                self.build(args)
+            case "run":
+                self.run(args)
+            case "check":
+                self.check(args)
+
+    @property
+    def sim_dir(self):
+        return _ensure_chipflow_root() / 'build' / 'sim'
+
     def build(self, *args):
+        """
+        Builds the simulation model for the design
+        """
         print("Building simulation...")
         m = Module()
         self._platform.instantiate_ports(m)
@@ -94,7 +124,7 @@ class SimStep(StepBase):
 
         #FIXME: common source for build dir
         self._platform.build(m, top)
-        with common() as common_dir, source() as source_dir, runtime() as runtime_dir:
+        with common() as common_dir, runtime() as runtime_dir:
             context = {
                 "COMMON_DIR": common_dir,
                 "SOURCE_DIR": source_dir,
@@ -107,3 +137,28 @@ class SimStep(StepBase):
                 context[k] = v.format(**context)
             if DoitMain(ContextTaskLoader(DOIT_CONFIG, TASKS, context)).run(["build_sim"]) !=0:
                 raise ChipFlowError("Failed building simulator")
+
+    def run(self, *args):
+        """
+        Run the simulation. Will ensure that the simulation and the software are both built.
+        """
+        run(["software"])
+        self.build(args)
+        result = subprocess.run([self.sim_dir / "sim_soc"], cwd=self.sim_dir)
+
+        if result.returncode != 0:
+            raise ChipFlowError("Simulation failed")
+
+    def check(self, *args):
+        """
+        Run the simulation and check events against reference (tests/events_reference.json). Will ensure that the simulation and the software are both built.
+        """
+        if not self._config.chipflow.test:
+            raise ChipFlowError("No [chipflow.test] section found in configuration")
+        if not self._config.chipflow.test.event_reference:
+            raise ChipFlowError("No event_reference configuration found in [chipflow.test]")
+
+        self.run(args)
+        compare_events(self._config.chipflow.test.event_reference, self.sim_dir / "events.json")
+        print("Integration test passed sucessfully")
+

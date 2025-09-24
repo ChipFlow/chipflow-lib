@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-2-Clause
 from enum import Enum
+from pathlib import Path
 from typing import Dict, Optional, Any, List, Annotated
 
 from pydantic import (
@@ -62,6 +63,9 @@ class CompilerConfig(BaseModel):
 class SoftwareConfig(BaseModel):
     riscv: CompilerConfig = CompilerConfig(cpu="baseline_rv32-a-c-d", abi="ilp32")
 
+class TestConfig(BaseModel):
+    event_reference: Path
+
 class ChipFlowConfig(BaseModel):
     """Root configuration for chipflow.toml."""
     project_name: str
@@ -71,7 +75,7 @@ class ChipFlowConfig(BaseModel):
     simulation: SimulationConfig = SimulationConfig()
     software: SoftwareConfig = SoftwareConfig()
     clock_domains: Optional[List[str]] = None
-
+    test: Optional[TestConfig] = None
 
 class Config(BaseModel):
     """Root configuration model for chipflow.toml."""
