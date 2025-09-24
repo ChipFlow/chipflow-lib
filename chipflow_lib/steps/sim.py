@@ -32,14 +32,6 @@ def common():
         yield f
 
 @contextmanager
-def source():
-    root = _ensure_chipflow_root()
-    sourcedir = Path(root) / 'design' / 'sim'
-    #sim_src = sourcedir.joinpath('design','sim')
-    #with importlib.resources.as_file(sim_src) as f:
-    yield sourcedir
-
-@contextmanager
 def runtime():
     yowasp = importlib.resources.files("yowasp_yosys")
     runtime = yowasp.joinpath('share', 'include', 'backends', 'cxxrtl', 'runtime')
@@ -127,7 +119,6 @@ class SimStep(StepBase):
         with common() as common_dir, runtime() as runtime_dir:
             context = {
                 "COMMON_DIR": common_dir,
-                "SOURCE_DIR": source_dir,
                 "RUNTIME_DIR": runtime_dir,
                 "PROJECT_ROOT": _ensure_chipflow_root(),
                 "BUILD_DIR": _ensure_chipflow_root() / 'build',
