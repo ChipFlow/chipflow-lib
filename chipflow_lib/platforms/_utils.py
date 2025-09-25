@@ -100,7 +100,7 @@ class IOModelOptions(TypedDict):
     init_oe: NotRequired[int | bool]
 
 
-@pydantic.with_config(ConfigDict(arbitrary_types_allowed=True))  # type: ignore[reportCallIssue]
+@pydantic.config.with_config(ConfigDict(arbitrary_types_allowed=True))  # type: ignore[reportCallIssue]
 class IOModel(IOModelOptions):
     """
     Setting for IO Ports (see also base class `IOModelOptions`)
