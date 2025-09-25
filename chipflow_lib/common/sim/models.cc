@@ -75,7 +75,7 @@ void fetch_actions_into_queue() {
 void open_input_commands(const std::string &filename) {
     std::ifstream f(filename);
     if (!f) {
-        throw std::runtime_error("failed to open event log for writing!");
+        throw std::runtime_error("failed to open input event stream!");
     }
     json data = json::parse(f);
     input_cmds = data["commands"];
