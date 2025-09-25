@@ -75,7 +75,8 @@ void fetch_actions_into_queue() {
 void open_input_commands(const std::string &filename) {
     std::ifstream f(filename);
     if (!f) {
-        throw std::runtime_error("failed to open input event stream!");
+	    std::cerr << "WARNING: failed to open input event stream. Add one for design validation - see [chipflow.test] configuration option." << std::endl;
+	    return;
     }
     json data = json::parse(f);
     input_cmds = data["commands"];
