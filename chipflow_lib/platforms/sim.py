@@ -21,7 +21,7 @@ from pydantic import BaseModel, TypeAdapter
 from .. import ChipFlowError, _ensure_chipflow_root
 from ._signatures import (
         I2CSignature, GPIOSignature, UARTSignature, SPISignature, QSPIFlashSignature,
-        SIM_ANNOTATION_SCHEMA, DATA_SCHEMA, SimInterface, SoftwareBuild
+        SIM_ANNOTATION_SCHEMA, DATA_SCHEMA, SimInterface, SoftwareBuild, BinaryData
         )
 from ._utils import load_pinlock, Interface
 
@@ -219,6 +219,10 @@ class SimPlatform:
                 if DATA_SCHEMA in annotations \
                 and annotations[DATA_SCHEMA]['data']['type'] == "SoftwareBuild":
                     sim_data[interface] = TypeAdapter(SoftwareBuild).validate_python(annotations[DATA_SCHEMA]['data'])
+
+                if DATA_SCHEMA in annotations \
+                and annotations[DATA_SCHEMA]['data']['type'] == "BinaryData":
+                    sim_data[interface] = TypeAdapter(BinaryData).validate_python(annotations[DATA_SCHEMA]['data'])
 
         data_load = []
         for i,d in sim_data.items():

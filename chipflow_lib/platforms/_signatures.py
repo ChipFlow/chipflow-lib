@@ -56,6 +56,23 @@ class SoftwareBuild:
         self.include_dirs = list(include_dirs)
         self.offset = offset
 
+@dataclass
+class BinaryData:
+    """
+    This holds the information needed for building software and providing the built outcome
+    """
+    offset: int
+    filename: Path
+    build_dir: Path
+    type: Literal["BinaryData"] = "BinaryData"
+
+    def __init__(self, *, filename: Path, offset=0):
+        self.build_dir = _ensure_chipflow_root() / 'build' / 'software'
+        if Path(filename).is_absolute():
+            self.filename = filename
+        else:
+            self.filename = self.build_dir / filename
+        self.offset = offset
 
 _T_DataClass = TypeVar('_T_DataClass', bound=DataclassProtocol)
 class Data(TypedDict, Generic[_T_DataClass]):
@@ -204,8 +221,9 @@ class GPIOSignature(wiring.Signature):
 
 def attach_data(external_interface: wiring.PureInterface, component: wiring.Component, data: DataclassProtocol):
     data_dict: Data = {'data':data}
-    setattr(component.signature, '__chipflow_data__', data_dict)
-    amaranth_annotate(Data, DATA_SCHEMA, '__chipflow_data__', decorate_object=True)(component.signature)
+    if component is not None:
+        setattr(component.signature, '__chipflow_data__', data_dict)
+        amaranth_annotate(Data, DATA_SCHEMA, '__chipflow_data__', decorate_object=True)(component.signature)
     setattr(external_interface.signature, '__chipflow_data__', data_dict)
     amaranth_annotate(Data, DATA_SCHEMA, '__chipflow_data__', decorate_object=True)(external_interface.signature)
 
