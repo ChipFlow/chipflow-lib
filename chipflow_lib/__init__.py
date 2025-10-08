@@ -23,16 +23,18 @@ class ChipFlowError(Exception):
 
 
 def _get_cls_by_reference(reference, context):
+    logger.debug(f"_get_cls_by_reference({reference}, {context}")
     module_ref, _, class_ref = reference.partition(":")
     try:
         module_obj = importlib.import_module(module_ref)
     except ModuleNotFoundError as e:
-        raise ChipFlowError(f"Module `{module_ref}` referenced by {context} is not found") from e
+        logger.debug(f"import_module({module_ref}) caused {e}")
+        raise ChipFlowError(f"Module `{module_ref}`  was not found (referenced by {context} in [chipflow.top])")
     try:
         return getattr(module_obj, class_ref)
     except AttributeError as e:
-        raise ChipFlowError(f"Module `{module_ref}` referenced by {context} does not define "
-                            f"`{class_ref}`") from e
+        logger.debug(f"getattr({module_obj}, {class_ref})  caused {e}")
+        raise ChipFlowError(f"Class `{class_ref}` not found in module `{module_ref}` (referenced by {context} in [chipflow.top])")
 
 
 def _ensure_chipflow_root():
