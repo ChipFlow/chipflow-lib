@@ -31,6 +31,7 @@ Classes
    chipflow_lib.platforms.QSPIFlashSignature
    chipflow_lib.platforms.SoftwareDriverSignature
    chipflow_lib.platforms.SoftwareBuild
+   chipflow_lib.platforms.BinaryData
 
 
 Functions
@@ -346,6 +347,11 @@ Package Contents
 
 
 .. py:class:: SoftwareBuild(*, sources, includes = [], include_dirs=[], offset=0)
+
+   This holds the information needed for building software and providing the built outcome
+
+
+.. py:class:: BinaryData(*, filename, offset=0)
 
    This holds the information needed for building software and providing the built outcome
 
