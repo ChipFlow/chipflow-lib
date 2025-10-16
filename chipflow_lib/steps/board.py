@@ -1,19 +1,15 @@
-# SPDX-License-Identifier: BSD-2-Clause
-from . import StepBase, setup_amaranth_tools
+"""
+Backward compatibility shim for steps.board module.
 
-class BoardStep(StepBase):
-    """Build the design for a board."""
+This module re-exports board step functionality from the platform module.
+New code should import directly from chipflow_lib.platform instead.
+"""
 
-    def __init__(self, config, platform):
-        self.platform = platform
-        setup_amaranth_tools()
+# Re-export from platform module for backward compatibility
+from ..platform import (  # noqa: F401
+    BoardStep,
+)
 
-    def build_cli_parser(self, parser):
-        pass
-
-    def run_cli(self, args):
-        self.build()
-
-    def build(self, *args):
-        "Build for the given platform"
-        self.platform.build(*args)
+__all__ = [
+    'BoardStep',
+]

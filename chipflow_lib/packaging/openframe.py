@@ -1,15 +1,28 @@
+# SPDX-License-Identifier: BSD-2-Clause
+"""
+Openframe package definition.
+
+This module provides the package definition for the Efabless Openframe
+carriage system, commonly used with open-source silicon projects.
+"""
+
 from typing import List, NamedTuple, Optional, Literal
 
-from ._utils import PowerPins, LinearAllocPackageDef, BringupPins
+from .base import LinearAllocPackageDef
+from .pins import PowerPins, BringupPins
 from ..config_models import Voltage
 
+
 class OFPin(NamedTuple):
+    """Pin identifier for Openframe package"""
     pin: int
     kind: str
     idx: int = 0
     voltage: Optional[Voltage] = None
     name: Optional[str] = None
 
+
+# GPIO pins available for allocation
 OF_GPIO = [
     OFPin(31, "gpio", 0),  # gpio[0]
     OFPin(32, "gpio", 1),  # gpio[1]
@@ -51,73 +64,88 @@ OF_GPIO = [
     OFPin(16, "gpio", 37),  # gpio[37]
     # OFPin(22, "gpio", 38)   # gpio[38] is assigned as clock
     # OFPin(24, "gpio", 39)   # gpio[39] is assigned as heartbeat
-    # OFPin(25, "gpio", 40),  # gpio[40] is assign as reset
+    # OFPin(25, "gpio", 40),  # gpio[40] is assigned as reset
     OFPin(26, "gpio", 41),  # gpio[41]
     OFPin(27, "gpio", 42),  # gpio[42]
     OFPin(28, "gpio", 43),  # gpio[43]
 ]
 
+# Fixed bringup pins
 OF_CLOCK_PIN = OFPin(22, "gpio", 38)
 OF_HEARTBEAT_PIN = OFPin(24, "gpio", 39)
 OF_RESET_PIN = OFPin(25, "gpio", 40)
 
+# Core power pins
 OF_CORE_POWER = [
-    (OFPin(18,"vcc", voltage=1.8, name="d"),     # Power, Digital power supply
-     OFPin(23,"vss", name="d")),                 # Digital power ground
+    (OFPin(18, "vcc", voltage=1.8, name="d"),  # Power, Digital power supply
+     OFPin(23, "vss", name="d")),  # Digital power ground
 ]
 
-OF_OTHER_POWER= [
-    (OFPin(30,"vdd", voltage=3.3, name="a"),     # Power, Analog power supply
-     OFPin(20,"vss", name="a")),                 # Analog power ground
+# Additional power domains (analog, IO, etc.)
+OF_OTHER_POWER = [
+    (OFPin(30, "vdd", voltage=3.3, name="a"),  # Power, Analog power supply
+     OFPin(20, "vss", name="a")),  # Analog power ground
 
-    (OFPin(49,"vcc", voltage=1.8, name="d1"),    # Power, Digital power supply
-     OFPin(39,"vss", name="d1")),                # Digital power ground
+    (OFPin(49, "vcc", voltage=1.8, name="d1"),  # Power, Digital power supply
+     OFPin(39, "vss", name="d1")),  # Digital power ground
 
-    (OFPin(17,"vdd", voltage=3.3, name="io"),    # Power, ESD and padframe power supply
-     OFPin(29,"vss", name="io")),                # ESD and padframe ground
+    (OFPin(17, "vdd", voltage=3.3, name="io"),  # Power, ESD and padframe power supply
+     OFPin(29, "vss", name="io")),  # ESD and padframe ground
 
-    (OFPin(64,"vdd", voltage=3.3, name="io"),    # Power, ESD and padframe power supply
-     OFPin(56,"vss", name="io")),                # ESD and padframe ground
+    (OFPin(64, "vdd", voltage=3.3, name="io"),  # Power, ESD and padframe power supply
+     OFPin(56, "vss", name="io")),  # ESD and padframe ground
 
-    (OFPin(63,"vcc", voltage=1.8, name="d2"),    # Power, Digital power supply
-     OFPin(10,"vss", name="d2")),                # Digital power ground
+    (OFPin(63, "vcc", voltage=1.8, name="d2"),  # Power, Digital power supply
+     OFPin(10, "vss", name="d2")),  # Digital power ground
 
-    (OFPin(40,"vdd", voltage=3.3, name="a1"),    # Power,  Analog power supply
-     OFPin(38,"vss", name="a1")),                # Analog power ground
+    (OFPin(40, "vdd", voltage=3.3, name="a1"),  # Power, Analog power supply
+     OFPin(38, "vss", name="a1")),  # Analog power ground
 
-    (OFPin(47,"vdd", voltage=3.3, name="a1"),    # Power,  Analog power supply
-     OFPin(52,"vss", name="a1")),                # Analog power ground
+    (OFPin(47, "vdd", voltage=3.3, name="a1"),  # Power, Analog power supply
+     OFPin(52, "vss", name="a1")),  # Analog power ground
 
-    (OFPin(9,"vdd", voltage=3.3, name="a2"),     # Power,  Analog power supply
-     OFPin(1,"vss", name="a2")),                 # Analog power ground
+    (OFPin(9, "vdd", voltage=3.3, name="a2"),  # Power, Analog power supply
+     OFPin(1, "vss", name="a2")),  # Analog power ground
 ]
 
+# Other pins
 OF_OTHER = [
     OFPin(19, "NC")  # Not connected
 ]
 
+
 class OpenframePackageDef(LinearAllocPackageDef):
+    """
+    Definition of the Efabless Openframe carriage package.
+
+    This is a standardized package/carrier used for open-source
+    silicon projects, particularly with the Efabless chipIgnite
+    and OpenMPW programs.
+
+    Attributes:
+        name: Package name (default "openframe")
+    """
 
     name: str = "openframe"
     package_type: Literal["OpenframePackageDef"] = "OpenframePackageDef"
+
     def model_post_init(self, __context):
+        """Initialize pin ordering from GPIO list"""
         self._ordered_pins = OF_GPIO
-
         super().model_post_init(__context)
-
 
     @property
     def _core_power(self) -> List[PowerPins]:
+        """Core power pin pairs"""
         pps = []
-
         for power, ground in OF_CORE_POWER:
             pp = PowerPins(power=power, ground=ground, voltage=power.voltage)
             pps.append(pp)
-
         return pps
 
     @property
     def bringup_pins(self) -> BringupPins:
+        """Bringup pins for Openframe package"""
         return BringupPins(
             core_power=self._core_power,
             core_clock=OF_CLOCK_PIN,

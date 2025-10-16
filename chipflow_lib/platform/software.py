@@ -11,9 +11,9 @@ from amaranth_soc import wishbone
 from amaranth_soc.wishbone.sram import WishboneSRAM
 from pydantic import TypeAdapter
 
-from .. import ChipFlowError
-from ._signatures import DRIVER_MODEL_SCHEMA, DriverModel, DATA_SCHEMA, SoftwareBuild
-from ._annotate import submodule_metadata
+from ..utils import ChipFlowError
+from .io.signatures import DRIVER_MODEL_SCHEMA, DriverModel, DATA_SCHEMA, SoftwareBuild
+from .io.annotate import submodule_metadata
 from ..software.soft_gen import SoftwareGenerator
 
 

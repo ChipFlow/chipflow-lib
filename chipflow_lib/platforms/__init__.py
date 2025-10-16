@@ -1,31 +1,66 @@
 """
-Platform definititions
-----------------------
+Backward compatibility shim for platforms module.
 
-This module defines the functionality you use in you code to target the ChipFlow platform
+This module re-exports platform functionality from the platform module.
+New code should import directly from chipflow_lib.platform instead.
 
+Platform definitions
+--------------------
+
+This module defines the functionality you use in your code to target the ChipFlow platform
 """
 
-from .silicon import SiliconPlatformPort, SiliconPlatform
-from .sim import SimPlatform
-from ._software import SoftwarePlatform
-from ._utils import (
-        IO_ANNOTATION_SCHEMA, IOSignature, IOModel, IOTripPoint, IOModelOptions,
-        OutputIOSignature, InputIOSignature, BidirIOSignature,
-        )
-from ._packages import PACKAGE_DEFINITIONS
-from ._sky130 import Sky130DriveMode
-from ._signatures import (
-        JTAGSignature, SPISignature, I2CSignature, UARTSignature, GPIOSignature, QSPIFlashSignature,
-        attach_data, SoftwareDriverSignature, SoftwareBuild, BinaryData
-        )
+# Re-export from platform module for backward compatibility
+from ..platform import (  # noqa: F401
+    SiliconPlatformPort,
+    SiliconPlatform,
+    SimPlatform,
+    SoftwarePlatform,
+    IO_ANNOTATION_SCHEMA,
+    IOSignature,
+    IOModel,
+    IOTripPoint,
+    IOModelOptions,
+    OutputIOSignature,
+    InputIOSignature,
+    BidirIOSignature,
+    JTAGSignature,
+    SPISignature,
+    I2CSignature,
+    UARTSignature,
+    GPIOSignature,
+    QSPIFlashSignature,
+    attach_data,
+    SoftwareDriverSignature,
+    SoftwareBuild,
+    Sky130DriveMode,
+)
 
-__all__ = ['BinaryData', 'IO_ANNOTATION_SCHEMA', 'IOSignature',
-           'IOModel', 'IOModelOptions', 'IOTripPoint',
-           'OutputIOSignature', 'InputIOSignature', 'BidirIOSignature',
-           'SiliconPlatformPort', 'SiliconPlatform',
-           'SimPlatform', 'SoftwarePlatform',
-           'JTAGSignature', 'SPISignature', 'I2CSignature', 'UARTSignature', 'GPIOSignature', 'QSPIFlashSignature',
-           'attach_data', 'SoftwareDriverSignature', 'SoftwareBuild',
-           'Sky130DriveMode',
-           'PACKAGE_DEFINITIONS']
+# Package definitions still live in platforms._packages
+from ._packages import PACKAGE_DEFINITIONS  # noqa: F401
+
+__all__ = [
+    'IO_ANNOTATION_SCHEMA',
+    'IOSignature',
+    'IOModel',
+    'IOModelOptions',
+    'IOTripPoint',
+    'OutputIOSignature',
+    'InputIOSignature',
+    'BidirIOSignature',
+    'SiliconPlatformPort',
+    'SiliconPlatform',
+    'SimPlatform',
+    'SoftwarePlatform',
+    'JTAGSignature',
+    'SPISignature',
+    'I2CSignature',
+    'UARTSignature',
+    'GPIOSignature',
+    'QSPIFlashSignature',
+    'attach_data',
+    'SoftwareDriverSignature',
+    'SoftwareBuild',
+    'Sky130DriveMode',
+    'PACKAGE_DEFINITIONS',
+]

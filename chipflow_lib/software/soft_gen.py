@@ -7,8 +7,8 @@ from pydantic import BaseModel
 from pathlib import Path
 from typing import NamedTuple, Optional
 
-from ..platforms._signatures import DriverModel, SoftwareBuild
-from ..config_models import CompilerConfig
+from ..platform.io.signatures import DriverModel, SoftwareBuild
+from ..config import CompilerConfig
 
 class Periph(NamedTuple):
     name: str
