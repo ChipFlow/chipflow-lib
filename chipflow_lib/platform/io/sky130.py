@@ -1,3 +1,8 @@
+# SPDX-License-Identifier: BSD-2-Clause
+"""
+Sky130-specific IO definitions.
+"""
+
 from enum import StrEnum, auto
 
 # TODO describe how to access the port

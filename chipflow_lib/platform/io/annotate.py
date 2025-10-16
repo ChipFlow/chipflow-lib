@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: BSD-2-Clause
+"""
+Amaranth annotation utilities for ChipFlow.
+"""
 
 from collections.abc import Generator
 from types import MethodType
@@ -117,4 +121,3 @@ def submodule_metadata(fragment: Fragment, component_name: str, recursive=False)
             if isinstance(k, wiring.Component):
                 metadata = k.metadata.as_json()['interface']
                 yield k, name, metadata
-

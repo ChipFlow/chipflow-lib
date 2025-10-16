@@ -14,7 +14,7 @@ from . import (
     _get_cls_by_reference,
     _parse_config,
 )
-from ._pin_lock import PinCommand
+from .packaging import PinCommand
 
 class UnexpectedError(ChipFlowError):
     pass

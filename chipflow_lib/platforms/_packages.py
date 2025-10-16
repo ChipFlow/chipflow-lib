@@ -1,5 +1,4 @@
-from ._utils import QuadPackageDef, BareDiePackageDef, GAPackageDef, Package
-from ._openframe import OpenframePackageDef
+from ..packaging import QuadPackageDef, BareDiePackageDef, GAPackageDef, Package, OpenframePackageDef
 
 # Add any new package types to both PACKAGE_DEFINITIONS and the PackageDef union
 PACKAGE_DEFINITIONS = {

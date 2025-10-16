@@ -6,9 +6,17 @@ from pydantic import BaseModel, PlainSerializer, model_serializer
 
 @dataclass
 class OmitIfNone:
+    """Marker for fields that should be omitted from serialization when None."""
     pass
 
-class AppResponseModel(BaseModel):
+class SelectiveSerializationModel(BaseModel):
+    """
+    Base model that supports selective field serialization.
+
+    Fields annotated with OmitIfNone() will be excluded from serialized
+    output when their value is None. This provides cleaner JSON output
+    for optional configuration fields.
+    """
     @model_serializer
     def _serialize(self):
         skip_if_none = set()

@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
+from __future__ import annotations
 
 import logging
 import sys
@@ -7,7 +8,7 @@ import warnings
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
-from typing import Dict, List, Optional, Type
+from typing import TYPE_CHECKING, Dict, List, Optional, Type
 
 from amaranth import Module, ClockSignal, ResetSignal, ClockDomain
 from amaranth.lib import io, wiring
@@ -18,13 +19,14 @@ from amaranth.lib.cdc import FFSynchronizer
 from jinja2 import Environment, PackageLoader, select_autoescape
 from pydantic import BaseModel, TypeAdapter
 
-from .. import ChipFlowError, _ensure_chipflow_root
-from ._signatures import (
+from ..utils import ChipFlowError, ensure_chipflow_root
+from .io.signatures import (
         I2CSignature, GPIOSignature, UARTSignature, SPISignature, QSPIFlashSignature,
         SIM_ANNOTATION_SCHEMA, DATA_SCHEMA, SimInterface, SoftwareBuild, BinaryData
         )
-from ._utils import load_pinlock, Interface
 
+if TYPE_CHECKING:
+    from ..packaging import Interface
 
 logger = logging.getLogger(__name__)
 __all__ = ["SimPlatform", "BasicCxxBuilder"]
@@ -153,7 +155,7 @@ _COMMON_BUILDER = BasicCxxBuilder(
 
 class SimPlatform:
     def __init__(self, config):
-        self.build_dir = _ensure_chipflow_root() / 'build' / 'sim'
+        self.build_dir = ensure_chipflow_root() / 'build' / 'sim'
         self.extra_files = dict()
         self.sim_boxes = dict()
         self._ports: Dict[str, io.SimulationPort] = {}
@@ -229,7 +231,7 @@ class SimPlatform:
             args = [f"0x{d.offset:X}U"]
             p = d.filename
             if not p.is_absolute():
-                p = _ensure_chipflow_root() / p
+                p = ensure_chipflow_root() / p
             data_load.append({'model_name': i, 'file_name': p, 'args': args})
 
 
@@ -255,6 +257,9 @@ class SimPlatform:
     def instantiate_ports(self, m: Module):
         if hasattr(self, "_pinlock"):
             return
+
+        # Import here to avoid circular dependency
+        from ..packaging import load_pinlock
 
         pinlock = load_pinlock()
         for component, iface in pinlock.port_map.ports.items():

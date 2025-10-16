@@ -1,4 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
+"""
+Common interface signatures for ChipFlow platforms.
+"""
 
 import re
 import sys
@@ -16,9 +19,9 @@ from amaranth.lib import wiring
 from amaranth.lib.wiring import Out
 from pydantic import PlainSerializer, WithJsonSchema, WrapValidator
 
-from .. import _ensure_chipflow_root
-from ._utils import InputIOSignature, OutputIOSignature, BidirIOSignature, IOModelOptions, _chipflow_schema_uri
-from ._annotate import amaranth_annotate
+from ...utils import ensure_chipflow_root
+from .iosignature import InputIOSignature, OutputIOSignature, BidirIOSignature, IOModelOptions, _chipflow_schema_uri
+from .annotate import amaranth_annotate
 
 SIM_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("simulatable-interface", 0))
 DATA_SCHEMA = str(_chipflow_schema_uri("simulatable-data", 0))
@@ -49,7 +52,7 @@ class SoftwareBuild:
     type: Literal["SoftwareBuild"] = "SoftwareBuild"
 
     def __init__(self, *, sources: list[Path], includes: list[Path] = [], include_dirs = [], offset=0):
-        self.build_dir = _ensure_chipflow_root() / 'build' / 'software'
+        self.build_dir = ensure_chipflow_root() / 'build' / 'software'
         self.filename = self.build_dir / 'software.bin'
         self.sources= list(sources)
         self.includes = list(includes)
@@ -67,7 +70,7 @@ class BinaryData:
     type: Literal["BinaryData"] = "BinaryData"
 
     def __init__(self, *, filename: Path, offset=0):
-        self.build_dir = _ensure_chipflow_root() / 'build' / 'software'
+        self.build_dir = ensure_chipflow_root() / 'build' / 'software'
         if Path(filename).is_absolute():
             self.filename = filename
         else:
@@ -246,5 +249,3 @@ class SoftwareDriverSignature(wiring.Signature):
         self.__chipflow_driver_model__ = kwargs
         amaranth_annotate(DriverModel, DRIVER_MODEL_SCHEMA, '__chipflow_driver_model__', decorate_object=True)(self)
         super().__init__(members=members)
-
-
