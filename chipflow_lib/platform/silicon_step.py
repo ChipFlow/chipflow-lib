@@ -108,10 +108,11 @@ class SiliconStep:
 
     def submit(self, rtlil_path, args):
         """Submit the design to the ChipFlow cloud builder.
+
         Options:
-          --dry-run: Don't actually submit
-          --wait: Wait until build has completed. Use '-v' to increase level of verbosity
-          --log-file <file>: Log full debug output to file
+            --dry-run: Don't actually submit
+            --wait: Wait until build has completed. Use '-v' to increase level of verbosity
+            --log-file <file>: Log full debug output to file
         """
         if not args.dry_run:
             # Check for CHIPFLOW_API_KEY_SECRET or CHIPFLOW_API_KEY
