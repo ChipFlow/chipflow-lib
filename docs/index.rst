@@ -10,6 +10,16 @@ It is developed at https://github.com/chipFlow/chipflow-lib/ and licensed `BSD 2
    :caption: User Guide
 
    getting-started
+   architecture
+   simulation-guide
    chipflow-toml-guide
    chipflow-commands
+   using-pin-signatures
    API Reference <autoapi/index>
+   platform-api
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contributor Guide
+
+   contributor-pin-signature-internals
