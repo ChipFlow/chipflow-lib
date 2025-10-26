@@ -108,6 +108,20 @@ napoleon_custom_sections = [
     ("Members", "params_style"), # `amaranth.lib.wiring` signature members
 ]
 
+# Doctest configuration
+doctest_global_setup = """
+from pathlib import Path
+from amaranth import Module
+from amaranth.lib import wiring
+from amaranth.lib.wiring import In, Out, connect, flipped
+from amaranth_soc import csr, wishbone
+from chipflow_lib.platforms import (
+    UARTSignature, GPIOSignature, SPISignature, I2CSignature,
+    QSPIFlashSignature, JTAGSignature,
+    IOTripPoint, Sky130DriveMode,
+    SoftwareDriverSignature, attach_data, SoftwareBuild
+)
+"""
 
 rst_prolog = """
 .. role:: py(code)

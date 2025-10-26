@@ -14,7 +14,7 @@ Let's start with a typical example:
    # Assert that example-chipflow.toml matches the current config schema. If
    # this test fails, then its likely that the content in this file will need
    # to be updated.
-   from chipflow_lib.config import _parse_config_file
+   from chipflow_lib.config.parser import _parse_config_file
    _parse_config_file("docs/example-chipflow.toml")
 
 ``[chipflow]`` table
