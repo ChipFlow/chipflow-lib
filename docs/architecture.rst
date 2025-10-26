@@ -116,7 +116,7 @@ When you run ``chipflow pin lock``:
 
 The ``pins.lock`` file maps abstract interface names to concrete package pin locations:
 
-.. code-block:: json
+.. code-block:: javascript
 
     {
       "uart.tx": {"pin": "42", "loc": "A12"},
@@ -270,7 +270,7 @@ The annotation system is central to how ChipFlow propagates metadata:
 
    Pydantic TypeAdapter generates JSON schema from TypedDict:
 
-   .. code-block:: json
+   .. code-block:: javascript
 
        {
          "$schema": "https://json-schema.org/draft/2020-12/schema",

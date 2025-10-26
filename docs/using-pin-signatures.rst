@@ -399,5 +399,4 @@ See Also
 --------
 
 - :doc:`chipflow-toml-guide` - Configuring your ChipFlow project
-- :doc:`autoapi/chipflow_lib/platform/index` - Platform API reference
 - :doc:`platform-api` - Complete platform API including SimPlatform and attach_data

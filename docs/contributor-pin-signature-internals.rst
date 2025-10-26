@@ -779,4 +779,3 @@ See Also
 --------
 
 - :doc:`using-pin-signatures` - User-facing guide for using pin signatures
-- :doc:`autoapi/chipflow_lib/platform/index` - Full platform API reference
