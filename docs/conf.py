@@ -109,6 +109,28 @@ napoleon_custom_sections = [
 ]
 
 # Doctest configuration
+#
+# Strategy: Selective testing with infrastructure
+# ------------------------------------------------
+# We use Sphinx doctest extension to validate code examples in our documentation.
+# The approach balances completeness with maintainability:
+#
+# 1. Complete, runnable examples use `.. testcode::` and are validated automatically
+# 2. Illustrative code fragments remain as `.. code-block::` for readability
+# 3. Global setup (below) provides common imports to reduce boilerplate
+#
+# When to convert an example to testcode:
+# - Complete class definitions that can be instantiated
+# - Signature usage examples showing public API
+# - Self-contained examples using only documented public APIs
+#
+# When to keep as code-block:
+# - Incomplete fragments (e.g., just showing part of __init__)
+# - Examples requiring external dependencies (chipflow_digital_ip)
+# - Pseudo-code or conceptual illustrations
+#
+# Run tests with: pdm test-docs
+
 doctest_global_setup = """
 from pathlib import Path
 from amaranth import Module
