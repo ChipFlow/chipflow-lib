@@ -58,13 +58,9 @@ Design Flow in Detail
 
 You write your design in Python using Amaranth HDL and ChipFlow signatures:
 
-.. code-block:: python
+.. testcode::
 
-    from chipflow_lib.platforms import UARTSignature, GPIOSignature
-    from amaranth import Module
-    from amaranth.lib.wiring import Component, Out
-
-    class MySoC(Component):
+    class MySoC(wiring.Component):
         def __init__(self):
             super().__init__({
                 "uart": Out(UARTSignature()),
@@ -75,6 +71,11 @@ You write your design in Python using Amaranth HDL and ChipFlow signatures:
             m = Module()
             # Your design logic here
             return m
+
+    # Verify the design can be instantiated
+    design = MySoC()
+    assert hasattr(design, 'uart')
+    assert hasattr(design, 'gpio')
 
 2. Signatures Add Metadata
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
