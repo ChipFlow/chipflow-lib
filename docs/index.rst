@@ -15,7 +15,6 @@ It is developed at https://github.com/chipFlow/chipflow-lib/ and licensed `BSD 2
    chipflow-toml-guide
    chipflow-commands
    using-pin-signatures
-   API Reference <autoapi/index>
    platform-api
 
 .. toctree::
