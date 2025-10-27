@@ -2,8 +2,8 @@
 """
 Openframe package definition.
 
-This module provides the package definition for the Efabless Openframe
-carriage system, commonly used with open-source silicon projects.
+This module provides the package definition for the ChipFoundry Openframe
+harness, commonly used with open-source silicon projects.
 """
 
 from typing import List, NamedTuple, Optional, Literal
@@ -116,10 +116,10 @@ OF_OTHER = [
 
 class OpenframePackageDef(LinearAllocPackageDef):
     """
-    Definition of the Efabless Openframe carriage package.
+    Definition of the ChipFoundry Openframe harness package.
 
     This is a standardized package/carrier used for open-source
-    silicon projects, particularly with the Efabless chipIgnite
+    silicon projects, particularly with the ChipFoundry chipIgnite
     and OpenMPW programs.
 
     Attributes:
