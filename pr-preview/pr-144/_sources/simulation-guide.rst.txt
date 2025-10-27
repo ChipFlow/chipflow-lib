@@ -349,10 +349,18 @@ You can provide input commands via ``design/tests/input.json``. To reduce test c
 
 .. code-block:: json
 
-    [
-      {"wait_for": {"type": "uart_rx", "data": ">"}, "action": {"type": "uart_tx", "data": "help\n"}},
-      {"wait_for": {"type": "uart_rx", "data": "Ready"}, "action": {"type": "gpio_set", "pin": 0, "value": 1}}
-    ]
+    {
+      "commands": [
+        {"type": "action", "peripheral": "uart_0", "event": "tx", "payload": 72},
+        {"type": "wait", "peripheral": "uart_0", "event": "tx", "payload": 62},
+        {"type": "action", "peripheral": "uart_0", "event": "tx", "payload": 10}
+      ]
+    }
+
+Commands are processed sequentially:
+
+- ``action`` commands queue an action (like transmitting data) for a peripheral
+- ``wait`` commands pause execution until the specified event occurs
 
 See the `mcu_soc example <https://github.com/ChipFlow/chipflow-examples/blob/main/mcu_soc/design/tests/input.json>`_ for a working input.json file.
 
