@@ -9,7 +9,7 @@ pin allocation and package description.
 
 import abc
 from collections import defaultdict
-from typing import TYPE_CHECKING, Dict, List, Set
+from typing import TYPE_CHECKING, Dict, Generic, List, Set, TypeVar
 
 import pydantic
 from amaranth.lib import wiring, io
@@ -24,8 +24,11 @@ from .allocation import _linear_allocate_components
 if TYPE_CHECKING:
     from ..config_models import Config, Process
 
+# Type variable for pin types (int for linear allocation, GAPin for grid arrays, etc.)
+PinType = TypeVar('PinType')
 
-class BasePackageDef(pydantic.BaseModel, abc.ABC):
+
+class BasePackageDef(pydantic.BaseModel, Generic[PinType], abc.ABC):
     """
     Abstract base class for the definition of a package.
 
@@ -45,6 +48,7 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
         """Initialize internal tracking structures"""
         self._interfaces: Dict[str, dict] = {}
         self._components: Dict[str, wiring.Component] = {}
+        self._ordered_pins = None  # Subclasses should set this
         return super().model_post_init(__context)
 
     def register_component(self, name: str, component: wiring.Component) -> None:
@@ -130,13 +134,16 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
 
         return {'bringup_pins': d}
 
-    @abc.abstractmethod
     def allocate_pins(self, config: 'Config', process: 'Process', lockfile: LockFile | None) -> LockFile:
         """
         Allocate package pins to the registered components.
 
         Pins should be allocated in the most usable way for users
         of the packaged IC.
+
+        This default implementation uses _linear_allocate_components with
+        self._allocate for the allocation strategy. Subclasses can override
+        if they need completely different allocation logic.
 
         Args:
             config: ChipFlow configuration
@@ -148,6 +155,35 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
 
         Raises:
             UnableToAllocate: If the ports cannot be allocated
+        """
+        assert self._ordered_pins is not None, "Subclass must set self._ordered_pins in model_post_init"
+        portmap = _linear_allocate_components(
+            self._interfaces,
+            lockfile,
+            self._allocate,
+            set(self._ordered_pins)
+        )
+        bringup_pins = self._allocate_bringup(config)
+        portmap.ports['_core'] = bringup_pins
+        package = self._get_package()
+        return LockFile(package=package, process=process, metadata=self._interfaces, port_map=portmap)
+
+    @abc.abstractmethod
+    def _allocate(self, available: Set[PinType], width: int) -> List[PinType]:
+        """
+        Allocate pins from available set.
+
+        Subclasses must implement this to define their allocation strategy.
+
+        Args:
+            available: Set of available pins (type depends on package)
+            width: Number of pins needed
+
+        Returns:
+            List of allocated pins
+
+        Raises:
+            UnableToAllocate: If allocation fails
         """
         ...
 
@@ -173,7 +209,7 @@ class BasePackageDef(pydantic.BaseModel, abc.ABC):
         return sorted(list(pins))
 
 
-class LinearAllocPackageDef(BasePackageDef):
+class LinearAllocPackageDef(BasePackageDef[int]):
     """
     Base class for package types with linear pin/pad allocation.
 
@@ -185,24 +221,6 @@ class LinearAllocPackageDef(BasePackageDef):
 
     Not directly serializable - use concrete subclasses.
     """
-
-    def __init__(self, **kwargs):
-        self._ordered_pins = None
-        super().__init__(**kwargs)
-
-    def allocate_pins(self, config: 'Config', process: 'Process', lockfile: LockFile | None) -> LockFile:
-        """Allocate pins linearly from the ordered pin list"""
-        assert self._ordered_pins
-        portmap = _linear_allocate_components(
-            self._interfaces,
-            lockfile,
-            self._allocate,
-            set(self._ordered_pins)
-        )
-        bringup_pins = self._allocate_bringup(config)
-        portmap.ports['_core'] = bringup_pins
-        package = self._get_package()
-        return LockFile(package=package, process=process, metadata=self._interfaces, port_map=portmap)
 
     def _allocate(self, available: Set[int], width: int) -> List[int]:
         """
