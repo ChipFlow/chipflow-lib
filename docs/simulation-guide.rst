@@ -349,11 +349,18 @@ You can provide input commands via ``design/tests/input.json``:
 
 .. code-block:: json
 
-    [
-      {"timestamp": 1000, "type": "gpio_set", "pin": 0, "value": 1},
-      {"timestamp": 2000, "type": "uart_tx", "data": "test"},
-      {"timestamp": 3000, "type": "gpio_set", "pin": 0, "value": 0}
-    ]
+    {
+      "commands": [
+        {"type": "action", "peripheral": "uart_0", "event": "tx", "payload": 72},
+        {"type": "wait", "peripheral": "uart_0", "event": "tx", "payload": 62},
+        {"type": "action", "peripheral": "uart_0", "event": "tx", "payload": 10}
+      ]
+    }
+
+Commands are processed sequentially:
+
+- ``action`` commands queue an action (like transmitting data) for a peripheral
+- ``wait`` commands pause execution until the specified event occurs
 
 Models process these commands at the specified timestamps.
 
