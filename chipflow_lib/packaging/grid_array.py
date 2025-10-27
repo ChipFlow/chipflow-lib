@@ -217,7 +217,7 @@ class GAPackageDef(BasePackageDef):
             core_power=self._power,
             core_clock=GAPin('A', 2),
             core_reset=GAPin('A', 1),
-            core_heartbeat=GAPin('A', 2),  # Note: Same as clock in original
+            core_heartbeat=GAPin('A', 8),  # Output pin, after JTAG (A3-A7)
             core_jtag=self._jtag
         )
 
