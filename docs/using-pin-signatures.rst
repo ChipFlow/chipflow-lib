@@ -111,11 +111,11 @@ For Sky130 chips, you can configure the I/O cell drive mode:
 
     from chipflow_lib.platforms import Sky130DriveMode, GPIOSignature
 
-    # Use open-drain with strong pull-up for I2C
+    # Use open-drain with strong pull-down for I2C
     super().__init__({
         "i2c_gpio": Out(GPIOSignature(
             pin_count=2,
-            sky130_drive_mode=Sky130DriveMode.OPEN_DRAIN_STRONG_UP
+            sky130_drive_mode=Sky130DriveMode.OPEN_DRAIN_STRONG_DOWN
         ))
     })
 
@@ -395,8 +395,11 @@ Here's a complete working example combining all concepts:
 
             return m
 
+**Note:** For more advanced examples including CPU cores and Wishbone bus integration, see the `chipflow-examples repository <https://github.com/ChipFlow/chipflow-examples>`_, which contains tested and working SoC designs.
+
 See Also
 --------
 
 - :doc:`chipflow-toml-guide` - Configuring your ChipFlow project
 - :doc:`platform-api` - Complete platform API including SimPlatform and attach_data
+- `ChipFlow Examples <https://github.com/ChipFlow/chipflow-examples>`_ - Complete working examples with CPU and Wishbone bus

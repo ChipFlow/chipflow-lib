@@ -755,24 +755,14 @@ Pydantic's ``TypeAdapter`` provides:
 - Type hints for IDE support
 - Serialization to JSON-compatible Python dicts
 
-Summary
--------
-
-The ChipFlow annotation architecture provides:
-
-1. **Type-safe metadata** - Pydantic validates all annotations
-2. **JSON schema compatibility** - External tools can parse RTLIL annotations
-3. **Extensibility** - New annotation types via ``@amaranth_annotate``
-4. **Platform independence** - Same metadata consumed by silicon, simulation, software platforms
-5. **Compile-time validation** - Errors caught during elaboration, not during synthesis
-
-Key files to study:
+Key Files
+---------
 
 - ``chipflow_lib/platform/io/annotate.py`` - Core annotation infrastructure
 - ``chipflow_lib/platform/io/iosignature.py`` - I/O signature base classes
 - ``chipflow_lib/platform/io/signatures.py`` - Concrete signatures and decorators
-- ``chipflow_lib/platform/silicon.py`` - Silicon platform port creation
-- ``chipflow_lib/platform/software.py`` - Software platform extraction
+- ``chipflow_lib/platform/silicon.py`` - Silicon platform consumption
+- ``chipflow_lib/platform/software.py`` - Software platform consumption
 - ``chipflow_lib/software/soft_gen.py`` - Code generation
 
 See Also
