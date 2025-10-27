@@ -644,6 +644,25 @@ Config dataclass
         <span class="p">})</span>
 </pre></div>
 </div>
+<p>To attach a simulation model to your custom signature:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_lib.platform</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimModel</span><span class="p">,</span> <span class="n">BasicCxxBuilder</span>
+
+<span class="c1"># Define the C++ model</span>
+<span class="n">MY_BUILDER</span> <span class="o">=</span> <span class="n">BasicCxxBuilder</span><span class="p">(</span>
+    <span class="n">models</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">SimModel</span><span class="p">(</span><span class="s1">&#39;my_custom&#39;</span><span class="p">,</span> <span class="s1">&#39;my_namespace&#39;</span><span class="p">,</span> <span class="n">MyCustomSignature</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="n">hpp_files</span><span class="o">=</span><span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="s1">&#39;design/sim/my_custom_model.h&#39;</span><span class="p">)],</span>
+<span class="p">)</span>
+
+<span class="c1"># In your custom SimStep</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MySimPlatform</span><span class="p">(</span><span class="n">SimPlatform</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_builders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MY_BUILDER</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="simulation-guide.html"><span class="doc">Simulation Guide</span></a> for complete examples of creating custom simulation models.</p>
 </section>
 <section id="custom-steps">
 <h3>Custom Steps<a class="headerlink" href="#custom-steps" title="Link to this heading">¶</a></h3>

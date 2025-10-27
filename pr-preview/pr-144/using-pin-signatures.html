@@ -356,11 +356,11 @@
 <p>For Sky130 chips, you can configure the I/O cell drive mode:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_lib.platforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sky130DriveMode</span><span class="p">,</span> <span class="n">GPIOSignature</span>
 
-<span class="c1"># Use open-drain with strong pull-up for I2C</span>
+<span class="c1"># Use open-drain with strong pull-down for I2C</span>
 <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">({</span>
     <span class="s2">&quot;i2c_gpio&quot;</span><span class="p">:</span> <span class="n">Out</span><span class="p">(</span><span class="n">GPIOSignature</span><span class="p">(</span>
         <span class="n">pin_count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-        <span class="n">sky130_drive_mode</span><span class="o">=</span><span class="n">Sky130DriveMode</span><span class="o">.</span><span class="n">OPEN_DRAIN_STRONG_UP</span>
+        <span class="n">sky130_drive_mode</span><span class="o">=</span><span class="n">Sky130DriveMode</span><span class="o">.</span><span class="n">OPEN_DRAIN_STRONG_DOWN</span>
     <span class="p">))</span>
 <span class="p">})</span>
 </pre></div>
@@ -625,12 +625,14 @@
         <span class="k">return</span> <span class="n">m</span>
 </pre></div>
 </div>
+<p><strong>Note:</strong> For more advanced examples including CPU cores and Wishbone bus integration, see the <a class="reference external" href="https://github.com/ChipFlow/chipflow-examples">chipflow-examples repository</a>, which contains tested and working SoC designs.</p>
 </section>
 <section id="see-also">
 <h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="chipflow-toml-guide.html"><span class="doc">Intro to chipflow.toml</span></a> - Configuring your ChipFlow project</p></li>
 <li><p><a class="reference internal" href="platform-api.html"><span class="doc">Platform API Reference</span></a> - Complete platform API including SimPlatform and attach_data</p></li>
+<li><p><a class="reference external" href="https://github.com/ChipFlow/chipflow-examples">ChipFlow Examples</a> - Complete working examples with CPU and Wishbone bus</p></li>
 </ul>
 </section>
 </section>

@@ -941,23 +941,14 @@
 <li><p>Serialization to JSON-compatible Python dicts</p></li>
 </ul>
 </section>
-<section id="summary">
-<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading">¶</a></h2>
-<p>The ChipFlow annotation architecture provides:</p>
-<ol class="arabic simple">
-<li><p><strong>Type-safe metadata</strong> - Pydantic validates all annotations</p></li>
-<li><p><strong>JSON schema compatibility</strong> - External tools can parse RTLIL annotations</p></li>
-<li><p><strong>Extensibility</strong> - New annotation types via <code class="docutils literal notranslate"><span class="pre">&#64;amaranth_annotate</span></code></p></li>
-<li><p><strong>Platform independence</strong> - Same metadata consumed by silicon, simulation, software platforms</p></li>
-<li><p><strong>Compile-time validation</strong> - Errors caught during elaboration, not during synthesis</p></li>
-</ol>
-<p>Key files to study:</p>
+<section id="key-files">
+<h2>Key Files<a class="headerlink" href="#key-files" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">chipflow_lib/platform/io/annotate.py</span></code> - Core annotation infrastructure</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">chipflow_lib/platform/io/iosignature.py</span></code> - I/O signature base classes</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">chipflow_lib/platform/io/signatures.py</span></code> - Concrete signatures and decorators</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">chipflow_lib/platform/silicon.py</span></code> - Silicon platform port creation</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">chipflow_lib/platform/software.py</span></code> - Software platform extraction</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chipflow_lib/platform/silicon.py</span></code> - Silicon platform consumption</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chipflow_lib/platform/software.py</span></code> - Software platform consumption</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">chipflow_lib/software/soft_gen.py</span></code> - Code generation</p></li>
 </ul>
 </section>
@@ -1054,7 +1045,7 @@
 <li><a class="reference internal" href="#adding-new-pin-signatures">Adding New Pin Signatures</a></li>
 <li><a class="reference internal" href="#adding-custom-platform-backends">Adding Custom Platform Backends</a></li>
 <li><a class="reference internal" href="#json-schema-integration">JSON Schema Integration</a></li>
-<li><a class="reference internal" href="#summary">Summary</a></li>
+<li><a class="reference internal" href="#key-files">Key Files</a></li>
 <li><a class="reference internal" href="#see-also">See Also</a></li>
 </ul>
 </li>

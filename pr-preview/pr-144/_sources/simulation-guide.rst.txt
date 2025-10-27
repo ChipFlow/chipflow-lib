@@ -345,17 +345,16 @@ Creating Reference
 Input Commands (Optional)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can provide input commands via ``design/tests/input.json``:
+You can provide input commands via ``design/tests/input.json``. To reduce test churn from timing changes, input files use output events as triggers rather than timestamps:
 
 .. code-block:: json
 
     [
-      {"timestamp": 1000, "type": "gpio_set", "pin": 0, "value": 1},
-      {"timestamp": 2000, "type": "uart_tx", "data": "test"},
-      {"timestamp": 3000, "type": "gpio_set", "pin": 0, "value": 0}
+      {"wait_for": {"type": "uart_rx", "data": ">"}, "action": {"type": "uart_tx", "data": "help\n"}},
+      {"wait_for": {"type": "uart_rx", "data": "Ready"}, "action": {"type": "gpio_set", "pin": 0, "value": 1}}
     ]
 
-Models process these commands at the specified timestamps.
+See the `mcu_soc example <https://github.com/ChipFlow/chipflow-examples/blob/main/mcu_soc/design/tests/input.json>`_ for a working input.json file.
 
 Customizing Simulation
 ----------------------
@@ -378,18 +377,18 @@ To add a custom peripheral model:
 
        template<size_t WIDTH>
        class my_peripheral_model {
-           cxxrtl::wire<WIDTH>& output;
-           cxxrtl::wire<WIDTH>& input;
+           cxxrtl::value<WIDTH>& output;
+           cxxrtl::value<WIDTH>& input;
 
        public:
            my_peripheral_model(const char* name,
-                             cxxrtl::wire<WIDTH>& o,
-                             cxxrtl::wire<WIDTH>& i)
+                             cxxrtl::value<WIDTH>& o,
+                             cxxrtl::value<WIDTH>& i)
                : output(o), input(i) {}
 
            void step(unsigned timestamp) {
-               // Model behavior
-               input.next = output.curr;
+               // Model behavior - use .get() for reading, .set() for writing
+               input.set(output.get());
            }
        };
 
@@ -441,19 +440,23 @@ Performance Tips
 Common Issues
 -------------
 
-Simulation Hangs
-~~~~~~~~~~~~~~~~
+Incomplete Simulation Output
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Symptom**: Simulation runs but never finishes
+**Symptom**: Simulation completes but expected operations are incomplete
+
+**Note**: The simulation will always stop after ``num_steps`` clock cycles, regardless of what the design or software is doing. If your firmware hasn't completed by then, you'll see incomplete output.
 
 **Causes**:
+- ``num_steps`` too low for the operations being performed
 - Firmware stuck in infinite loop
 - Waiting for peripheral that never responds
 
 **Solutions**:
-- Reduce ``num_steps`` to see how far it gets
-- Enable ``DEBUG=1`` and attach debugger
-- Add timeout checks in your firmware
+- Increase ``num_steps`` in chipflow.toml if legitimate operations need more time
+- Enable ``DEBUG=1`` and attach debugger to see where execution is stuck
+- Add timeout checks in your firmware to detect hangs
+- Use event logging to see how far the simulation progressed
 
 No UART Output
 ~~~~~~~~~~~~~~

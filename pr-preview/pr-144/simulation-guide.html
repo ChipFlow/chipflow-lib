@@ -556,15 +556,14 @@ cp<span class="w"> </span>build/sim/events.json<span class="w"> </span>design/te
 </section>
 <section id="input-commands-optional">
 <h3>Input Commands (Optional)<a class="headerlink" href="#input-commands-optional" title="Link to this heading">¶</a></h3>
-<p>You can provide input commands via <code class="docutils literal notranslate"><span class="pre">design/tests/input.json</span></code>:</p>
+<p>You can provide input commands via <code class="docutils literal notranslate"><span class="pre">design/tests/input.json</span></code>. To reduce test churn from timing changes, input files use output events as triggers rather than timestamps:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
-<span class="w">  </span><span class="p">{</span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gpio_set&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;pin&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
-<span class="w">  </span><span class="p">{</span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2000</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uart_tx&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test&quot;</span><span class="p">},</span>
-<span class="w">  </span><span class="p">{</span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3000</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gpio_set&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;pin&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">}</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">&quot;wait_for&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uart_rx&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&gt;&quot;</span><span class="p">},</span><span class="w"> </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uart_tx&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;help\n&quot;</span><span class="p">}},</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">&quot;wait_for&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uart_rx&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ready&quot;</span><span class="p">},</span><span class="w"> </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gpio_set&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;pin&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">}}</span>
 <span class="p">]</span>
 </pre></div>
 </div>
-<p>Models process these commands at the specified timestamps.</p>
+<p>See the <a class="reference external" href="https://github.com/ChipFlow/chipflow-examples/blob/main/mcu_soc/design/tests/input.json">mcu_soc example</a> for a working input.json file.</p>
 </section>
 </section>
 <section id="customizing-simulation">
@@ -582,18 +581,18 @@ cp<span class="w"> </span>build/sim/events.json<span class="w"> </span>design/te
 
 <span class="k">template</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">WIDTH</span><span class="o">&gt;</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">my_peripheral_model</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">cxxrtl</span><span class="o">::</span><span class="n">wire</span><span class="o">&lt;</span><span class="n">WIDTH</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">output</span><span class="p">;</span>
-<span class="w">    </span><span class="n">cxxrtl</span><span class="o">::</span><span class="n">wire</span><span class="o">&lt;</span><span class="n">WIDTH</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">input</span><span class="p">;</span>
+<span class="w">    </span><span class="n">cxxrtl</span><span class="o">::</span><span class="n">value</span><span class="o">&lt;</span><span class="n">WIDTH</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">output</span><span class="p">;</span>
+<span class="w">    </span><span class="n">cxxrtl</span><span class="o">::</span><span class="n">value</span><span class="o">&lt;</span><span class="n">WIDTH</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">input</span><span class="p">;</span>
 
 <span class="k">public</span><span class="o">:</span>
 <span class="w">    </span><span class="n">my_peripheral_model</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">name</span><span class="p">,</span>
-<span class="w">                      </span><span class="n">cxxrtl</span><span class="o">::</span><span class="n">wire</span><span class="o">&lt;</span><span class="n">WIDTH</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">o</span><span class="p">,</span>
-<span class="w">                      </span><span class="n">cxxrtl</span><span class="o">::</span><span class="n">wire</span><span class="o">&lt;</span><span class="n">WIDTH</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">i</span><span class="p">)</span>
+<span class="w">                      </span><span class="n">cxxrtl</span><span class="o">::</span><span class="n">value</span><span class="o">&lt;</span><span class="n">WIDTH</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">o</span><span class="p">,</span>
+<span class="w">                      </span><span class="n">cxxrtl</span><span class="o">::</span><span class="n">value</span><span class="o">&lt;</span><span class="n">WIDTH</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">i</span><span class="p">)</span>
 <span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">output</span><span class="p">(</span><span class="n">o</span><span class="p">),</span><span class="w"> </span><span class="n">input</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
 
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">step</span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="n">timestamp</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="c1">// Model behavior</span>
-<span class="w">        </span><span class="n">input</span><span class="p">.</span><span class="n">next</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">output</span><span class="p">.</span><span class="n">curr</span><span class="p">;</span>
+<span class="w">        </span><span class="c1">// Model behavior - use .get() for reading, .set() for writing</span>
+<span class="w">        </span><span class="n">input</span><span class="p">.</span><span class="n">set</span><span class="p">(</span><span class="n">output</span><span class="p">.</span><span class="n">get</span><span class="p">());</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">};</span>
 
@@ -644,16 +643,19 @@ cp<span class="w"> </span>build/sim/events.json<span class="w"> </span>design/te
 </section>
 <section id="common-issues">
 <h2>Common Issues<a class="headerlink" href="#common-issues" title="Link to this heading">¶</a></h2>
-<section id="simulation-hangs">
-<h3>Simulation Hangs<a class="headerlink" href="#simulation-hangs" title="Link to this heading">¶</a></h3>
-<p><strong>Symptom</strong>: Simulation runs but never finishes</p>
+<section id="incomplete-simulation-output">
+<h3>Incomplete Simulation Output<a class="headerlink" href="#incomplete-simulation-output" title="Link to this heading">¶</a></h3>
+<p><strong>Symptom</strong>: Simulation completes but expected operations are incomplete</p>
+<p><strong>Note</strong>: The simulation will always stop after <code class="docutils literal notranslate"><span class="pre">num_steps</span></code> clock cycles, regardless of what the design or software is doing. If your firmware hasn’t completed by then, you’ll see incomplete output.</p>
 <p><strong>Causes</strong>:
+- <code class="docutils literal notranslate"><span class="pre">num_steps</span></code> too low for the operations being performed
 - Firmware stuck in infinite loop
 - Waiting for peripheral that never responds</p>
 <p><strong>Solutions</strong>:
-- Reduce <code class="docutils literal notranslate"><span class="pre">num_steps</span></code> to see how far it gets
-- Enable <code class="docutils literal notranslate"><span class="pre">DEBUG=1</span></code> and attach debugger
-- Add timeout checks in your firmware</p>
+- Increase <code class="docutils literal notranslate"><span class="pre">num_steps</span></code> in chipflow.toml if legitimate operations need more time
+- Enable <code class="docutils literal notranslate"><span class="pre">DEBUG=1</span></code> and attach debugger to see where execution is stuck
+- Add timeout checks in your firmware to detect hangs
+- Use event logging to see how far the simulation progressed</p>
 </section>
 <section id="no-uart-output">
 <h3>No UART Output<a class="headerlink" href="#no-uart-output" title="Link to this heading">¶</a></h3>
@@ -900,7 +902,7 @@ Hello from ChipFlow simulation!
 </li>
 <li><a class="reference internal" href="#performance-tips">Performance Tips</a></li>
 <li><a class="reference internal" href="#common-issues">Common Issues</a><ul>
-<li><a class="reference internal" href="#simulation-hangs">Simulation Hangs</a></li>
+<li><a class="reference internal" href="#incomplete-simulation-output">Incomplete Simulation Output</a></li>
 <li><a class="reference internal" href="#no-uart-output">No UART Output</a></li>
 <li><a class="reference internal" href="#model-not-found">Model Not Found</a></li>
 </ul>

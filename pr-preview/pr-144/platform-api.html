@@ -1138,29 +1138,38 @@ These are both statically configurable and can be set at runtime on the <cite>:p
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="chipflow_lib.platform.utils.top_components">
-<span class="sig-prename descclassname"><span class="pre">chipflow_lib.platform.utils.</span></span><span class="sig-name descname"><span class="pre">top_components</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platform.utils.top_components" title="Link to this definition">¶</a></dt>
-<dd><p>Return the top level components for the design, as configured in <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></p>
+<dt class="sig sig-object py" id="chipflow_lib.utils.top_components">
+<span class="sig-prename descclassname"><span class="pre">chipflow_lib.utils.</span></span><span class="sig-name descname"><span class="pre">top_components</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.utils.top_components" title="Link to this definition">¶</a></dt>
+<dd><p>Return the top level components for the design, as configured in <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>config</strong> (<em>Config</em>)</p>
+<dd class="field-odd"><p><strong>config</strong> (<em>Config</em>) – The parsed chipflow configuration</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary mapping component names to instantiated Component objects</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ChipFlowError</strong> – If component references are invalid or instantiation fails</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Component" title="(in Amaranth language &amp; toolchain v0.5.4)"><em>Component</em></a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, wiring.Component]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="chipflow_lib.platform.utils.get_software_builds">
-<span class="sig-prename descclassname"><span class="pre">chipflow_lib.platform.utils.</span></span><span class="sig-name descname"><span class="pre">get_software_builds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.platform.utils.get_software_builds" title="Link to this definition">¶</a></dt>
-<dd><p>Extract software build information from a module’s component metadata.</p>
+<dt class="sig sig-object py" id="chipflow_lib.utils.get_software_builds">
+<span class="sig-prename descclassname"><span class="pre">chipflow_lib.utils.</span></span><span class="sig-name descname"><span class="pre">get_software_builds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow_lib.utils.get_software_builds" title="Link to this definition">¶</a></dt>
+<dd><p>Extract software build information from a component’s interfaces.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>m</strong> (<em>Module</em>)</p></li>
-<li><p><strong>component</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+<li><p><strong>m</strong> – Module containing the component</p></li>
+<li><p><strong>component</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name of the component</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary of interface names to SoftwareBuild objects</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1423,8 +1432,8 @@ errors defaults to ‘strict’.</p>
 </li>
 <li><a class="reference internal" href="#utility-functions">Utility Functions</a><ul>
 <li><a class="reference internal" href="#chipflow_lib.platform.base.setup_amaranth_tools"><code class="docutils literal notranslate"><span class="pre">setup_amaranth_tools()</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.platform.utils.top_components"><code class="docutils literal notranslate"><span class="pre">top_components()</span></code></a></li>
-<li><a class="reference internal" href="#chipflow_lib.platform.utils.get_software_builds"><code class="docutils literal notranslate"><span class="pre">get_software_builds()</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.utils.top_components"><code class="docutils literal notranslate"><span class="pre">top_components()</span></code></a></li>
+<li><a class="reference internal" href="#chipflow_lib.utils.get_software_builds"><code class="docutils literal notranslate"><span class="pre">get_software_builds()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#constants">Constants</a><ul>
