@@ -218,8 +218,9 @@ def _linear_allocate_components(interfaces: dict, lockfile: LockFile | None, all
                 old_width = sum([len(p.pins) for p in old_ports.values() if p.pins is not None])
                 if old_width != width:
                     raise ChipFlowError(
-                        f"top level interface has changed size. "
-                        f"Old size = {old_width}, new size = {width}"
+                        f"Interface '{component}.{interface}' has changed size. "
+                        f"Old size = {old_width}, new size = {width}. "
+                        f"Delete pins.lock to force reallocation, or verify your design matches the locked pin configuration."
                     )
                 port_map._add_ports(component, interface, old_ports)
             else:
