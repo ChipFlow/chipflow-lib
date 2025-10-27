@@ -156,9 +156,9 @@ Utility Functions
 
 .. autofunction:: chipflow_lib.platform.base.setup_amaranth_tools
 
-.. autofunction:: chipflow_lib.platform.utils.top_components
+.. autofunction:: chipflow_lib.utils.top_components
 
-.. autofunction:: chipflow_lib.platform.utils.get_software_builds
+.. autofunction:: chipflow_lib.utils.get_software_builds
 
 Constants
 ---------

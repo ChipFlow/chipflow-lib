@@ -428,6 +428,28 @@ Create new interface types:
                 "custom": Out(BidirIOSignature(4, **kwargs))
             })
 
+To attach a simulation model to your custom signature:
+
+.. code-block:: python
+
+    from chipflow_lib.platform import SimModel, BasicCxxBuilder
+
+    # Define the C++ model
+    MY_BUILDER = BasicCxxBuilder(
+        models=[
+            SimModel('my_custom', 'my_namespace', MyCustomSignature),
+        ],
+        hpp_files=[Path('design/sim/my_custom_model.h')],
+    )
+
+    # In your custom SimStep
+    class MySimPlatform(SimPlatform):
+        def __init__(self, config):
+            super().__init__(config)
+            self._builders.append(MY_BUILDER)
+
+See :doc:`simulation-guide` for complete examples of creating custom simulation models.
+
 Custom Steps
 ~~~~~~~~~~~~
 
