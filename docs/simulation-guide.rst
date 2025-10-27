@@ -370,64 +370,56 @@ Customizing Simulation
 Adding Custom Models
 ~~~~~~~~~~~~~~~~~~~~
 
-To add a custom peripheral model:
+ChipFlow's built-in simulation models cover common peripherals (UART, SPI, I2C, GPIO, QSPI Flash). For custom peripherals, you'll need to write C++ models that interact with the CXXRTL-generated design.
 
-1. **Write the C++ Model**
+**Learning Resources:**
 
-   Create ``design/sim/my_model.h``:
+1. **Study existing models**: The best way to learn is to examine ChipFlow's built-in implementations:
 
-   .. code-block:: cpp
+   - ``chipflow_lib/common/sim/models.h`` - Model interfaces and helper functions
+   - ``chipflow_lib/common/sim/models.cc`` - Complete implementations for:
 
-       #pragma once
-       #include <cxxrtl/cxxrtl.h>
+     - ``uart`` - UART transceiver with baud rate control
+     - ``spiflash`` - QSPI flash memory with command processing
+     - ``spi`` - Generic SPI peripheral
+     - ``i2c`` - I2C bus controller with start/stop detection
 
-       namespace my_design {
+2. **CXXRTL Runtime API**: Models interact with the generated design using CXXRTL's API:
 
-       template<size_t WIDTH>
-       class my_peripheral_model {
-           cxxrtl::value<WIDTH>& output;
-           cxxrtl::value<WIDTH>& input;
+   - `CXXRTL Documentation <https://yosyshq.readthedocs.io/projects/yosys/en/latest/cmd/write_cxxrtl.html>`_ - Command reference
+   - CXXRTL runtime source: ``yosys/backends/cxxrtl/runtime/`` (in Yosys repository)
+   - Key types: ``cxxrtl::value<WIDTH>`` for signal access, ``.get()`` to read, ``.set()`` to write
 
-       public:
-           my_peripheral_model(const char* name,
-                             cxxrtl::value<WIDTH>& o,
-                             cxxrtl::value<WIDTH>& i)
-               : output(o), input(i) {}
+**Model Registration:**
 
-           void step(unsigned timestamp) {
-               // Model behavior - use .get() for reading, .set() for writing
-               input.set(output.get());
-           }
-       };
+Once you've written a model (e.g., ``design/sim/my_model.h``), register it with ChipFlow:
 
-       }  // namespace my_design
+.. code-block:: python
 
-2. **Create a SimModel**
+    from chipflow_lib.platform import SimPlatform, SimModel, BasicCxxBuilder
+    from pathlib import Path
 
-   In your custom SimStep:
+    MY_BUILDER = BasicCxxBuilder(
+        models=[
+            SimModel('my_peripheral', 'my_design', MyPeripheralSignature),
+        ],
+        hpp_files=[Path('design/sim/my_model.h')],
+    )
 
-   .. code-block:: python
+    class MySimStep(SimStep):
+        def __init__(self, config):
+            super().__init__(config)
+            self.platform._builders.append(MY_BUILDER)
 
-       from chipflow_lib.platform import SimPlatform, SimModel, BasicCxxBuilder
+Then reference your custom step in ``chipflow.toml``:
 
-       MY_BUILDER = BasicCxxBuilder(
-           models=[
-               SimModel('my_peripheral', 'my_design', MyPeripheralSignature),
-           ],
-           hpp_files=[Path('design/sim/my_model.h')],
-       )
+.. code-block:: toml
 
-       class MySimPlatform(SimPlatform):
-           def __init__(self, config):
-               super().__init__(config)
-               self._builders.append(MY_BUILDER)
+    [chipflow.steps]
+    sim = "my_design.steps.sim:MySimStep"
 
-3. **Reference in chipflow.toml**
-
-   .. code-block:: toml
-
-       [chipflow.steps]
-       sim = "my_design.steps.sim:MySimStep"
+.. note::
+   Comprehensive CXXRTL runtime documentation is planned for a future release. For now, refer to existing model implementations and the Yosys CXXRTL source code.
 
 Performance Tips
 ----------------
