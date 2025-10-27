@@ -9,15 +9,10 @@ like BGA (Ball Grid Array) and PGA (Pin Grid Array) types.
 import logging
 from enum import StrEnum, auto
 from math import ceil, floor
-from typing import Dict, List, Literal, NamedTuple, Optional, Set, Tuple, TYPE_CHECKING
+from typing import Dict, List, Literal, NamedTuple, Optional, Set, Tuple
 
 from .base import BasePackageDef
 from .pins import PowerPins, JTAGPins, BringupPins
-from .lockfile import LockFile
-from .allocation import _linear_allocate_components
-
-if TYPE_CHECKING:
-    from ..config_models import Config, Process
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +36,7 @@ class GALayout(StrEnum):
     ISLAND = auto()  # Perimeter + center island
 
 
-class GAPackageDef(BasePackageDef):
+class GAPackageDef(BasePackageDef[GAPin]):
     """
     Definition of a grid array package.
 
@@ -186,19 +181,6 @@ class GAPackageDef(BasePackageDef):
         self._ordered_pins = sort_by_quadrant(pins)
 
         return super().model_post_init(__context)
-
-    def allocate_pins(self, config: 'Config', process: 'Process', lockfile: LockFile | None) -> LockFile:
-        """Allocate pins from the grid array"""
-        portmap = _linear_allocate_components(
-            self._interfaces,
-            lockfile,
-            self._allocate,
-            set(self._ordered_pins)
-        )
-        bringup_pins = self._allocate_bringup(config)
-        portmap.ports['_core'] = bringup_pins
-        package = self._get_package()
-        return LockFile(package=package, process=process, metadata=self._interfaces, port_map=portmap)
 
     def _allocate(self, available: Set[GAPin], width: int) -> List[GAPin]:
         """Allocate pins from available grid array pins"""

@@ -372,6 +372,9 @@ Adding Custom Models
 
 ChipFlow's built-in simulation models cover common peripherals (UART, SPI, I2C, GPIO, QSPI Flash). For custom peripherals, you'll need to write C++ models that interact with the CXXRTL-generated design.
 
+.. warning::
+   The custom simulation model interface is subject to change. Model APIs may be updated in future ChipFlow releases. Built-in models (UART, SPI, etc.) are stable, but custom model registration and integration mechanisms may evolve.
+
 **Learning Resources:**
 
 1. **Study existing models**: The best way to learn is to examine ChipFlow's built-in implementations:
