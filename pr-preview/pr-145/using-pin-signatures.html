@@ -1,0 +1,743 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Platform API Reference" href="platform-api.html"><link rel="prev" title="The chipflow command" href="chipflow-commands.html">
+        <link rel="prefetch" href="_static/chipflow-logo.svg" as="image">
+
+    <!-- Generated with Sphinx 7.4.7 and Furo 2025.09.25 -->
+        <title>Using Pin Signatures and Software Drivers - ChipFlow Platform Documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=580074bf" />
+    <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --admonition-font-size: 0.9 rem;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --admonition-font-size: 0.9 rem;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --admonition-font-size: 0.9 rem;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">ChipFlow Platform Documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/chipflow-logo.svg" alt="Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">ChipFlow Platform Documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started with ChipFlow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">ChipFlow Architecture Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation-guide.html">Simulation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#project-name">project_name</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#clock-domains">clock_domains</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#process">process</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#package">package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chipflow-commands.html">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Using Pin Signatures and Software Drivers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="platform-api.html">Platform API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributor Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributor-pin-signature-internals.html">Pin Signature Architecture (Contributor Guide)</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/using-pin-signatures.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="using-pin-signatures-and-software-drivers">
+<h1>Using Pin Signatures and Software Drivers<a class="headerlink" href="#using-pin-signatures-and-software-drivers" title="Link to this heading">¶</a></h1>
+<p>This guide explains how to use ChipFlow’s pin signature system and attach software drivers to your hardware designs.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p>ChipFlow provides a standardized way to:</p>
+<ol class="arabic simple">
+<li><p>Define external pin interfaces for your design using <strong>Pin Signatures</strong> (UARTSignature, GPIOSignature, etc.)</p></li>
+<li><p>Attach software driver code to peripherals using <strong>SoftwareDriverSignature</strong></p></li>
+<li><p>Connect pre-built software binaries to flash memory using <strong>attach_data()</strong></p></li>
+</ol>
+</section>
+<section id="pin-signatures">
+<h2>Pin Signatures<a class="headerlink" href="#pin-signatures" title="Link to this heading">¶</a></h2>
+<p>Pin signatures define the external interface of your design. ChipFlow provides several built-in signatures for common peripherals:</p>
+<section id="available-pin-signatures">
+<h3>Available Pin Signatures<a class="headerlink" href="#available-pin-signatures" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">UARTSignature()</span></code> - Serial UART interface (TX, RX)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GPIOSignature(pin_count)</span></code> - General purpose I/O pins</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SPISignature()</span></code> - SPI master interface (SCK, COPI, CIPO, CSN)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">I2CSignature()</span></code> - I2C bus interface (SCL, SDA)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">QSPIFlashSignature()</span></code> - Quad SPI flash interface</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">JTAGSignature()</span></code> - JTAG debug interface</p></li>
+</ul>
+<p>All pin signatures accept <code class="docutils literal notranslate"><span class="pre">IOModelOptions</span></code> to customize their electrical and behavioral properties (see below).</p>
+</section>
+<section id="using-pin-signatures-in-your-top-level-design">
+<h3>Using Pin Signatures in Your Top-Level Design<a class="headerlink" href="#using-pin-signatures-in-your-top-level-design" title="Link to this heading">¶</a></h3>
+<p>Pin signatures are used when defining your top-level component’s interface:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define a simple SoC with external interfaces</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MySoC</span><span class="p">(</span><span class="n">wiring</span><span class="o">.</span><span class="n">Component</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">({</span>
+            <span class="s2">&quot;uart&quot;</span><span class="p">:</span> <span class="n">Out</span><span class="p">(</span><span class="n">UARTSignature</span><span class="p">()),</span>
+            <span class="s2">&quot;gpio&quot;</span><span class="p">:</span> <span class="n">Out</span><span class="p">(</span><span class="n">GPIOSignature</span><span class="p">(</span><span class="n">pin_count</span><span class="o">=</span><span class="mi">8</span><span class="p">)),</span>
+            <span class="s2">&quot;flash&quot;</span><span class="p">:</span> <span class="n">Out</span><span class="p">(</span><span class="n">QSPIFlashSignature</span><span class="p">()),</span>
+        <span class="p">})</span>
+
+<span class="c1"># Verify the component can be instantiated</span>
+<span class="n">soc</span> <span class="o">=</span> <span class="n">MySoC</span><span class="p">()</span>
+<span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">soc</span><span class="p">,</span> <span class="s1">&#39;uart&#39;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">soc</span><span class="p">,</span> <span class="s1">&#39;gpio&#39;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">soc</span><span class="p">,</span> <span class="s1">&#39;flash&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>These signatures tell ChipFlow:</p>
+<ul class="simple">
+<li><p>How to connect your design to the physical pins of your chip</p></li>
+<li><p>How to select appropriate simulation models for each external interface type</p></li>
+<li><p>How to simulate signals and test the interface in a virtual environment</p></li>
+<li><p>Requirements for pad and package pin allocation (power domains, drive strength, etc.)</p></li>
+</ul>
+<p>Pin signatures are generic and independent of any particular IP implementation, allowing ChipFlow to match the interface type (UART, GPIO, SPI) to appropriate simulation models and test infrastructure.</p>
+</section>
+<section id="io-model-options">
+<h3>IO Model Options<a class="headerlink" href="#io-model-options" title="Link to this heading">¶</a></h3>
+<p>All pin signatures accept <code class="docutils literal notranslate"><span class="pre">IOModelOptions</span></code> to configure the electrical and behavioral properties of the I/O pins:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_lib.platforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">GPIOSignature</span><span class="p">,</span> <span class="n">IOTripPoint</span>
+
+<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">({</span>
+    <span class="c1"># Basic GPIO</span>
+    <span class="s2">&quot;gpio_basic&quot;</span><span class="p">:</span> <span class="n">Out</span><span class="p">(</span><span class="n">GPIOSignature</span><span class="p">(</span><span class="n">pin_count</span><span class="o">=</span><span class="mi">4</span><span class="p">)),</span>
+
+    <span class="c1"># GPIO with custom options</span>
+    <span class="s2">&quot;gpio_custom&quot;</span><span class="p">:</span> <span class="n">Out</span><span class="p">(</span><span class="n">GPIOSignature</span><span class="p">(</span>
+        <span class="n">pin_count</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+        <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>              <span class="c1"># Invert all pins</span>
+        <span class="n">individual_oe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>       <span class="c1"># Separate OE for each pin</span>
+        <span class="n">clock_domain</span><span class="o">=</span><span class="s1">&#39;io_clk&#39;</span><span class="p">,</span>    <span class="c1"># Use IO clock domain</span>
+        <span class="n">trip_point</span><span class="o">=</span><span class="n">IOTripPoint</span><span class="o">.</span><span class="n">TTL</span><span class="p">,</span>  <span class="c1"># TTL input thresholds</span>
+        <span class="n">init</span><span class="o">=</span><span class="mh">0x00</span><span class="p">,</span>                <span class="c1"># Initial output values</span>
+        <span class="n">init_oe</span><span class="o">=</span><span class="mh">0xFF</span>              <span class="c1"># Initial OE values (all enabled)</span>
+    <span class="p">))</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+<section id="available-iomodeloptions">
+<h4>Available IOModelOptions<a class="headerlink" href="#available-iomodeloptions" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>invert</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code> or <code class="docutils literal notranslate"><span class="pre">Tuple[bool,</span> <span class="pre">...]</span></code>) - Polarity inversion for pins. Can be a single bool for all pins or a tuple specifying inversion per pin.</p></li>
+<li><p><strong>individual_oe</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) - If <code class="docutils literal notranslate"><span class="pre">True</span></code>, each output wire has its own Output Enable bit. If <code class="docutils literal notranslate"><span class="pre">False</span></code> (default), a single OE bit controls the entire port.</p></li>
+<li><p><strong>power_domain</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) - Name of the I/O power domain. Pins with different power domains must be in separate signatures.</p></li>
+<li><p><strong>clock_domain</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) - Name of the I/O’s clock domain (default: <code class="docutils literal notranslate"><span class="pre">'sync'</span></code>). Pins with different clock domains must be in separate signatures.</p></li>
+<li><p><strong>buffer_in</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) - Enable input buffer on the I/O pad.</p></li>
+<li><p><strong>buffer_out</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) - Enable output buffer on the I/O pad.</p></li>
+<li><p><strong>sky130_drive_mode</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sky130DriveMode</span></code>) - Drive mode for Sky130 output buffers (see below).</p></li>
+<li><p><strong>trip_point</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">IOTripPoint</span></code>) - Input buffer trip point configuration:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">IOTripPoint.CMOS</span></code> - CMOS switching levels (30%/70%) referenced to I/O power domain</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IOTripPoint.TTL</span></code> - TTL levels (low &lt; 0.8V, high &gt; 2.0V)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IOTripPoint.VCORE</span></code> - CMOS levels referenced to core power domain</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IOTripPoint.VREF</span></code> - CMOS levels referenced to external reference voltage</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IOTripPoint.SCHMITT_TRIGGER</span></code> - Schmitt trigger for noise immunity</p></li>
+</ul>
+</li>
+<li><p><strong>init</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code> or <code class="docutils literal notranslate"><span class="pre">bool</span></code>) - Initial values for output signals.</p></li>
+<li><p><strong>init_oe</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code> or <code class="docutils literal notranslate"><span class="pre">bool</span></code>) - Initial values for output enable signals.</p></li>
+</ul>
+</section>
+</section>
+<section id="sky130-specific-pin-configuration">
+<h3>Sky130-Specific Pin Configuration<a class="headerlink" href="#sky130-specific-pin-configuration" title="Link to this heading">¶</a></h3>
+<p>For Sky130 chips, you can configure the I/O cell drive mode:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_lib.platforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sky130DriveMode</span><span class="p">,</span> <span class="n">GPIOSignature</span>
+
+<span class="c1"># Use open-drain with strong pull-down for I2C</span>
+<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">({</span>
+    <span class="s2">&quot;i2c_gpio&quot;</span><span class="p">:</span> <span class="n">Out</span><span class="p">(</span><span class="n">GPIOSignature</span><span class="p">(</span>
+        <span class="n">pin_count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">sky130_drive_mode</span><span class="o">=</span><span class="n">Sky130DriveMode</span><span class="o">.</span><span class="n">OPEN_DRAIN_STRONG_DOWN</span>
+    <span class="p">))</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="software-driver-signatures">
+<h2>Software Driver Signatures<a class="headerlink" href="#software-driver-signatures" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">SoftwareDriverSignature</span></code> allows you to attach C/C++ driver code to your hardware peripherals. This is useful for providing software APIs that match your hardware registers.</p>
+<section id="creating-a-peripheral-with-driver-code">
+<h3>Creating a Peripheral with Driver Code<a class="headerlink" href="#creating-a-peripheral-with-driver-code" title="Link to this heading">¶</a></h3>
+<p>Here’s how to create a peripheral that includes software driver code:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">amaranth.lib.wiring</span><span class="w"> </span><span class="kn">import</span> <span class="n">In</span><span class="p">,</span> <span class="n">Out</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">amaranth_soc</span><span class="w"> </span><span class="kn">import</span> <span class="n">csr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_lib.platforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">UARTSignature</span><span class="p">,</span> <span class="n">SoftwareDriverSignature</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">UARTPeripheral</span><span class="p">(</span><span class="n">wiring</span><span class="o">.</span><span class="n">Component</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">addr_width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">data_width</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">init_divisor</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="c1"># Your peripheral implementation here...</span>
+
+        <span class="c1"># Define the signature with driver code attached</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">SoftwareDriverSignature</span><span class="p">(</span>
+                <span class="n">members</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s2">&quot;bus&quot;</span><span class="p">:</span> <span class="n">In</span><span class="p">(</span><span class="n">csr</span><span class="o">.</span><span class="n">Signature</span><span class="p">(</span><span class="n">addr_width</span><span class="o">=</span><span class="n">addr_width</span><span class="p">,</span> <span class="n">data_width</span><span class="o">=</span><span class="n">data_width</span><span class="p">)),</span>
+                    <span class="s2">&quot;pins&quot;</span><span class="p">:</span> <span class="n">Out</span><span class="p">(</span><span class="n">UARTSignature</span><span class="p">()),</span>
+                <span class="p">},</span>
+                <span class="n">component</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">regs_struct</span><span class="o">=</span><span class="s1">&#39;uart_regs_t&#39;</span><span class="p">,</span>      <span class="c1"># Name of register struct in C</span>
+                <span class="n">c_files</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;drivers/uart.c&#39;</span><span class="p">],</span>     <span class="c1"># C implementation files</span>
+                <span class="n">h_files</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;drivers/uart.h&#39;</span><span class="p">]</span>      <span class="c1"># Header files</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="driver-file-organization">
+<h3>Driver File Organization<a class="headerlink" href="#driver-file-organization" title="Link to this heading">¶</a></h3>
+<p>Driver files should be placed relative to your peripheral’s Python file:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>chipflow_digital_ip/io/
+├── _uart.py                  # Peripheral definition
+└── drivers/
+    ├── uart.h                # Header with register struct and API
+    └── uart.c                # Implementation
+</pre></div>
+</div>
+</section>
+<section id="example-header-file-uart-h">
+<h3>Example Header File (uart.h)<a class="headerlink" href="#example-header-file-uart-h" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifndef UART_H</span>
+<span class="cp">#define UART_H</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdint.h&gt;</span>
+
+<span class="c1">// Register structure matching your hardware</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">__attribute__</span><span class="p">((</span><span class="n">packed</span><span class="p">,</span><span class="w"> </span><span class="n">aligned</span><span class="p">(</span><span class="mi">4</span><span class="p">)))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">config</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">padding_0</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">phy_config</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">status</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">data</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">padding_1</span><span class="p">[</span><span class="mi">6</span><span class="p">];</span>
+<span class="p">}</span><span class="w"> </span><span class="n">uart_mod_regs_t</span><span class="p">;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">__attribute__</span><span class="p">((</span><span class="n">packed</span><span class="p">,</span><span class="w"> </span><span class="n">aligned</span><span class="p">(</span><span class="mi">4</span><span class="p">)))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">uart_mod_regs_t</span><span class="w"> </span><span class="n">rx</span><span class="p">;</span>
+<span class="w">    </span><span class="n">uart_mod_regs_t</span><span class="w"> </span><span class="n">tx</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">uart_regs_t</span><span class="p">;</span>
+
+<span class="c1">// Driver API</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">uart_init</span><span class="p">(</span><span class="k">volatile</span><span class="w"> </span><span class="n">uart_regs_t</span><span class="w"> </span><span class="o">*</span><span class="n">uart</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">divisor</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">uart_putc</span><span class="p">(</span><span class="k">volatile</span><span class="w"> </span><span class="n">uart_regs_t</span><span class="w"> </span><span class="o">*</span><span class="n">uart</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">c</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">uart_puts</span><span class="p">(</span><span class="k">volatile</span><span class="w"> </span><span class="n">uart_regs_t</span><span class="w"> </span><span class="o">*</span><span class="n">uart</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">s</span><span class="p">);</span>
+
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+<p>The register structure must use <code class="docutils literal notranslate"><span class="pre">__attribute__((packed,</span> <span class="pre">aligned(4)))</span></code> to match the hardware layout.</p>
+</section>
+<section id="example-implementation-file-uart-c">
+<h3>Example Implementation File (uart.c)<a class="headerlink" href="#example-implementation-file-uart-c" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;uart.h&quot;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">uart_init</span><span class="p">(</span><span class="k">volatile</span><span class="w"> </span><span class="n">uart_regs_t</span><span class="w"> </span><span class="o">*</span><span class="n">uart</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">divisor</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">uart</span><span class="o">-&gt;</span><span class="n">tx</span><span class="p">.</span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">uart</span><span class="o">-&gt;</span><span class="n">tx</span><span class="p">.</span><span class="n">phy_config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">divisor</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="mh">0x00FFFFFF</span><span class="p">;</span>
+<span class="w">    </span><span class="n">uart</span><span class="o">-&gt;</span><span class="n">tx</span><span class="p">.</span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="n">uart</span><span class="o">-&gt;</span><span class="n">rx</span><span class="p">.</span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">uart</span><span class="o">-&gt;</span><span class="n">rx</span><span class="p">.</span><span class="n">phy_config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">divisor</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="mh">0x00FFFFFF</span><span class="p">;</span>
+<span class="w">    </span><span class="n">uart</span><span class="o">-&gt;</span><span class="n">rx</span><span class="p">.</span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">uart_putc</span><span class="p">(</span><span class="k">volatile</span><span class="w"> </span><span class="n">uart_regs_t</span><span class="w"> </span><span class="o">*</span><span class="n">uart</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="sc">&#39;\n&#39;</span><span class="p">)</span>
+<span class="w">        </span><span class="n">uart_putc</span><span class="p">(</span><span class="n">uart</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;\r&#39;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">uart</span><span class="o">-&gt;</span><span class="n">tx</span><span class="p">.</span><span class="n">status</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="mh">0x1</span><span class="p">))</span>
+<span class="w">        </span><span class="p">;</span>
+<span class="w">    </span><span class="n">uart</span><span class="o">-&gt;</span><span class="n">tx</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">c</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="using-peripherals-in-your-soc">
+<h2>Using Peripherals in Your SoC<a class="headerlink" href="#using-peripherals-in-your-soc" title="Link to this heading">¶</a></h2>
+<p>Here’s a complete example of using peripherals with driver code in your top-level design:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">amaranth</span><span class="w"> </span><span class="kn">import</span> <span class="n">Module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">amaranth.lib.wiring</span><span class="w"> </span><span class="kn">import</span> <span class="n">Out</span><span class="p">,</span> <span class="n">flipped</span><span class="p">,</span> <span class="n">connect</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">amaranth_soc</span><span class="w"> </span><span class="kn">import</span> <span class="n">csr</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_digital_ip.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">UARTPeripheral</span><span class="p">,</span> <span class="n">GPIOPeripheral</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_lib.platforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">UARTSignature</span><span class="p">,</span> <span class="n">GPIOSignature</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MySoC</span><span class="p">(</span><span class="n">wiring</span><span class="o">.</span><span class="n">Component</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">({</span>
+            <span class="s2">&quot;uart_0&quot;</span><span class="p">:</span> <span class="n">Out</span><span class="p">(</span><span class="n">UARTSignature</span><span class="p">()),</span>
+            <span class="s2">&quot;gpio_0&quot;</span><span class="p">:</span> <span class="n">Out</span><span class="p">(</span><span class="n">GPIOSignature</span><span class="p">(</span><span class="n">pin_count</span><span class="o">=</span><span class="mi">8</span><span class="p">)),</span>
+        <span class="p">})</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">elaborate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">platform</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">Module</span><span class="p">()</span>
+
+        <span class="c1"># Create CSR decoder for peripheral access</span>
+        <span class="n">csr_decoder</span> <span class="o">=</span> <span class="n">csr</span><span class="o">.</span><span class="n">Decoder</span><span class="p">(</span><span class="n">addr_width</span><span class="o">=</span><span class="mi">28</span><span class="p">,</span> <span class="n">data_width</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">submodules</span><span class="o">.</span><span class="n">csr_decoder</span> <span class="o">=</span> <span class="n">csr_decoder</span>
+
+        <span class="c1"># Instantiate UART peripheral</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">submodules</span><span class="o">.</span><span class="n">uart_0</span> <span class="o">=</span> <span class="n">uart_0</span> <span class="o">=</span> <span class="n">UARTPeripheral</span><span class="p">(</span>
+            <span class="n">init_divisor</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">25e6</span><span class="o">//</span><span class="mi">115200</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">csr_decoder</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">uart_0</span><span class="o">.</span><span class="n">bus</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;uart_0&quot;</span><span class="p">,</span> <span class="n">addr</span><span class="o">=</span><span class="mh">0x02000000</span><span class="p">)</span>
+
+        <span class="c1"># Connect to top-level pins</span>
+        <span class="n">connect</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">flipped</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uart_0</span><span class="p">),</span> <span class="n">uart_0</span><span class="o">.</span><span class="n">pins</span><span class="p">)</span>
+
+        <span class="c1"># Instantiate GPIO peripheral</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">submodules</span><span class="o">.</span><span class="n">gpio_0</span> <span class="o">=</span> <span class="n">gpio_0</span> <span class="o">=</span> <span class="n">GPIOPeripheral</span><span class="p">(</span><span class="n">pin_count</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+        <span class="n">csr_decoder</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gpio_0</span><span class="o">.</span><span class="n">bus</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;gpio_0&quot;</span><span class="p">,</span> <span class="n">addr</span><span class="o">=</span><span class="mh">0x01000000</span><span class="p">)</span>
+
+        <span class="c1"># Connect to top-level pins</span>
+        <span class="n">connect</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">flipped</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gpio_0</span><span class="p">),</span> <span class="n">gpio_0</span><span class="o">.</span><span class="n">pins</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">m</span>
+</pre></div>
+</div>
+<p>The driver code is automatically collected during the ChipFlow build process and made available to your software.</p>
+</section>
+<section id="attaching-software-binaries">
+<h2>Attaching Software Binaries<a class="headerlink" href="#attaching-software-binaries" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">attach_data()</span></code> function allows you to attach pre-built software binaries (like bootloaders) to flash memory interfaces.</p>
+<section id="basic-usage">
+<h3>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_lib.platforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">attach_data</span><span class="p">,</span> <span class="n">SoftwareBuild</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">elaborate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">platform</span><span class="p">):</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">Module</span><span class="p">()</span>
+
+    <span class="c1"># ... create your flash peripheral (spiflash) ...</span>
+
+    <span class="c1"># Build software from source files</span>
+    <span class="n">sw</span> <span class="o">=</span> <span class="n">SoftwareBuild</span><span class="p">(</span>
+        <span class="n">sources</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s1">&#39;design/software&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.c&#39;</span><span class="p">),</span>
+        <span class="n">offset</span><span class="o">=</span><span class="mh">0x100000</span>  <span class="c1"># Start at 1MB offset in flash</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Attach to both internal and external interfaces</span>
+    <span class="n">attach_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flash</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">submodules</span><span class="o">.</span><span class="n">spiflash</span><span class="p">,</span> <span class="n">sw</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">m</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">attach_data()</span></code> function:</p>
+<ol class="arabic simple">
+<li><p>Takes the <strong>external interface</strong> (<code class="docutils literal notranslate"><span class="pre">self.flash</span></code>) from your top-level component</p></li>
+<li><p>Takes the <strong>internal component</strong> (<code class="docutils literal notranslate"><span class="pre">m.submodules.spiflash</span></code>) that implements the flash controller</p></li>
+<li><p>Takes the <strong>SoftwareBuild</strong> object describing the software to build and load</p></li>
+</ol>
+<p>The software is automatically compiled, linked, and loaded into the simulation or silicon design.</p>
+</section>
+<section id="softwarebuild-parameters">
+<h3>SoftwareBuild Parameters<a class="headerlink" href="#softwarebuild-parameters" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">SoftwareBuild</span><span class="p">(</span>
+    <span class="n">sources</span><span class="p">,</span>           <span class="c1"># List or glob of .c source files</span>
+    <span class="n">includes</span><span class="o">=</span><span class="p">[],</span>       <span class="c1"># List of .h include files to copy</span>
+    <span class="n">include_dirs</span><span class="o">=</span><span class="p">[],</span>   <span class="c1"># Additional include directories</span>
+    <span class="n">offset</span><span class="o">=</span><span class="mi">0</span>           <span class="c1"># Offset in flash memory (in bytes)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="complete-example">
+<h2>Complete Example<a class="headerlink" href="#complete-example" title="Link to this heading">¶</a></h2>
+<p>Here’s a complete working example combining all concepts:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">amaranth</span><span class="w"> </span><span class="kn">import</span> <span class="n">Module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">amaranth.lib</span><span class="w"> </span><span class="kn">import</span> <span class="n">wiring</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">amaranth.lib.wiring</span><span class="w"> </span><span class="kn">import</span> <span class="n">Out</span><span class="p">,</span> <span class="n">flipped</span><span class="p">,</span> <span class="n">connect</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">amaranth_soc</span><span class="w"> </span><span class="kn">import</span> <span class="n">csr</span><span class="p">,</span> <span class="n">wishbone</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_digital_ip.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">UARTPeripheral</span><span class="p">,</span> <span class="n">GPIOPeripheral</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_digital_ip.memory</span><span class="w"> </span><span class="kn">import</span> <span class="n">QSPIFlash</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_lib.platforms</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">UARTSignature</span><span class="p">,</span> <span class="n">GPIOSignature</span><span class="p">,</span> <span class="n">QSPIFlashSignature</span><span class="p">,</span>
+    <span class="n">Sky130DriveMode</span><span class="p">,</span> <span class="n">attach_data</span><span class="p">,</span> <span class="n">SoftwareBuild</span>
+<span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MySoC</span><span class="p">(</span><span class="n">wiring</span><span class="o">.</span><span class="n">Component</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Define top-level pin interfaces</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">({</span>
+            <span class="s2">&quot;flash&quot;</span><span class="p">:</span> <span class="n">Out</span><span class="p">(</span><span class="n">QSPIFlashSignature</span><span class="p">()),</span>
+            <span class="s2">&quot;uart&quot;</span><span class="p">:</span> <span class="n">Out</span><span class="p">(</span><span class="n">UARTSignature</span><span class="p">()),</span>
+            <span class="s2">&quot;gpio&quot;</span><span class="p">:</span> <span class="n">Out</span><span class="p">(</span><span class="n">GPIOSignature</span><span class="p">(</span><span class="n">pin_count</span><span class="o">=</span><span class="mi">8</span><span class="p">)),</span>
+            <span class="s2">&quot;i2c_pins&quot;</span><span class="p">:</span> <span class="n">Out</span><span class="p">(</span><span class="n">GPIOSignature</span><span class="p">(</span>
+                <span class="n">pin_count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="n">sky130_drive_mode</span><span class="o">=</span><span class="n">Sky130DriveMode</span><span class="o">.</span><span class="n">OPEN_DRAIN_STRONG_UP</span>
+            <span class="p">))</span>
+        <span class="p">})</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">csr_base</span> <span class="o">=</span> <span class="mh">0xb0000000</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bios_offset</span> <span class="o">=</span> <span class="mh">0x100000</span>  <span class="c1"># 1MB</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">elaborate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">platform</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">Module</span><span class="p">()</span>
+
+        <span class="c1"># Create bus infrastructure</span>
+        <span class="n">csr_decoder</span> <span class="o">=</span> <span class="n">csr</span><span class="o">.</span><span class="n">Decoder</span><span class="p">(</span><span class="n">addr_width</span><span class="o">=</span><span class="mi">28</span><span class="p">,</span> <span class="n">data_width</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">submodules</span><span class="o">.</span><span class="n">csr_decoder</span> <span class="o">=</span> <span class="n">csr_decoder</span>
+
+        <span class="c1"># QSPI Flash with driver</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">submodules</span><span class="o">.</span><span class="n">flash</span> <span class="o">=</span> <span class="n">flash</span> <span class="o">=</span> <span class="n">QSPIFlash</span><span class="p">(</span><span class="n">addr_width</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span> <span class="n">data_width</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+        <span class="n">csr_decoder</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">flash</span><span class="o">.</span><span class="n">csr_bus</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;flash&quot;</span><span class="p">,</span> <span class="n">addr</span><span class="o">=</span><span class="mh">0x00000000</span><span class="p">)</span>
+        <span class="n">connect</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">flipped</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flash</span><span class="p">),</span> <span class="n">flash</span><span class="o">.</span><span class="n">pins</span><span class="p">)</span>
+
+        <span class="c1"># UART with driver (115200 baud at 25MHz clock)</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">submodules</span><span class="o">.</span><span class="n">uart</span> <span class="o">=</span> <span class="n">uart</span> <span class="o">=</span> <span class="n">UARTPeripheral</span><span class="p">(</span>
+            <span class="n">init_divisor</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">25e6</span><span class="o">//</span><span class="mi">115200</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">csr_decoder</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">uart</span><span class="o">.</span><span class="n">bus</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;uart&quot;</span><span class="p">,</span> <span class="n">addr</span><span class="o">=</span><span class="mh">0x02000000</span><span class="p">)</span>
+        <span class="n">connect</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">flipped</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uart</span><span class="p">),</span> <span class="n">uart</span><span class="o">.</span><span class="n">pins</span><span class="p">)</span>
+
+        <span class="c1"># GPIO with driver</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">submodules</span><span class="o">.</span><span class="n">gpio</span> <span class="o">=</span> <span class="n">gpio</span> <span class="o">=</span> <span class="n">GPIOPeripheral</span><span class="p">(</span><span class="n">pin_count</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+        <span class="n">csr_decoder</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gpio</span><span class="o">.</span><span class="n">bus</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;gpio&quot;</span><span class="p">,</span> <span class="n">addr</span><span class="o">=</span><span class="mh">0x01000000</span><span class="p">)</span>
+        <span class="n">connect</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">flipped</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gpio</span><span class="p">),</span> <span class="n">gpio</span><span class="o">.</span><span class="n">pins</span><span class="p">)</span>
+
+        <span class="c1"># I2C pins (using GPIO with open-drain)</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">submodules</span><span class="o">.</span><span class="n">i2c</span> <span class="o">=</span> <span class="n">i2c_gpio</span> <span class="o">=</span> <span class="n">GPIOPeripheral</span><span class="p">(</span><span class="n">pin_count</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">csr_decoder</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">i2c_gpio</span><span class="o">.</span><span class="n">bus</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;i2c&quot;</span><span class="p">,</span> <span class="n">addr</span><span class="o">=</span><span class="mh">0x01100000</span><span class="p">)</span>
+        <span class="n">connect</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">flipped</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">i2c_pins</span><span class="p">),</span> <span class="n">i2c_gpio</span><span class="o">.</span><span class="n">pins</span><span class="p">)</span>
+
+        <span class="c1"># Build and attach BIOS software</span>
+        <span class="n">sw</span> <span class="o">=</span> <span class="n">SoftwareBuild</span><span class="p">(</span>
+            <span class="n">sources</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s1">&#39;design/software&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.c&#39;</span><span class="p">),</span>
+            <span class="n">offset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bios_offset</span>
+        <span class="p">)</span>
+        <span class="n">attach_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flash</span><span class="p">,</span> <span class="n">flash</span><span class="p">,</span> <span class="n">sw</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">m</span>
+</pre></div>
+</div>
+<p><strong>Note:</strong> For more advanced examples including CPU cores and Wishbone bus integration, see the <a class="reference external" href="https://github.com/ChipFlow/chipflow-examples">chipflow-examples repository</a>, which contains tested and working SoC designs.</p>
+</section>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="chipflow-toml-guide.html"><span class="doc">Intro to chipflow.toml</span></a> - Configuring your ChipFlow project</p></li>
+<li><p><a class="reference internal" href="platform-api.html"><span class="doc">Platform API Reference</span></a> - Complete platform API including SimPlatform and attach_data</p></li>
+<li><p><a class="reference external" href="https://github.com/ChipFlow/chipflow-examples">ChipFlow Examples</a> - Complete working examples with CPU and Wishbone bus</p></li>
+</ul>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="platform-api.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Platform API Reference</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="chipflow-commands.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; ChipFlow Limited, 2021-2025
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Using Pin Signatures and Software Drivers</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#pin-signatures">Pin Signatures</a><ul>
+<li><a class="reference internal" href="#available-pin-signatures">Available Pin Signatures</a></li>
+<li><a class="reference internal" href="#using-pin-signatures-in-your-top-level-design">Using Pin Signatures in Your Top-Level Design</a></li>
+<li><a class="reference internal" href="#io-model-options">IO Model Options</a><ul>
+<li><a class="reference internal" href="#available-iomodeloptions">Available IOModelOptions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sky130-specific-pin-configuration">Sky130-Specific Pin Configuration</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#software-driver-signatures">Software Driver Signatures</a><ul>
+<li><a class="reference internal" href="#creating-a-peripheral-with-driver-code">Creating a Peripheral with Driver Code</a></li>
+<li><a class="reference internal" href="#driver-file-organization">Driver File Organization</a></li>
+<li><a class="reference internal" href="#example-header-file-uart-h">Example Header File (uart.h)</a></li>
+<li><a class="reference internal" href="#example-implementation-file-uart-c">Example Implementation File (uart.c)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#using-peripherals-in-your-soc">Using Peripherals in Your SoC</a></li>
+<li><a class="reference internal" href="#attaching-software-binaries">Attaching Software Binaries</a><ul>
+<li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li><a class="reference internal" href="#softwarebuild-parameters">SoftwareBuild Parameters</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#complete-example">Complete Example</a></li>
+<li><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=1f169f65"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    </body>
+</html>
