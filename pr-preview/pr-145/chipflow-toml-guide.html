@@ -312,8 +312,8 @@ It consists of a module’s <a class="reference external" href="https://docs.pyt
 <section id="chipflow-steps-table">
 <span id="chipflow-toml-steps"></span><h2><code class="docutils literal notranslate"><span class="pre">[chipflow.steps]</span></code> table<a class="headerlink" href="#chipflow-steps-table" title="Link to this heading">¶</a></h2>
 <p><span class="sd-sphinx-override sd-badge sd-outline-secondary sd-text-secondary">Optional</span></p>
-<p>The <code class="docutils literal notranslate"><span class="pre">steps</span></code> section allows overriding or addition to the standard steps available from <cite>chipflow_lib</cite>.</p>
-<p>For example, if you want to override the standard silicon preparation step, you could derive from <code class="xref py py-class docutils literal notranslate"><span class="pre">chipflow_lib.steps.silicon.SiliconStep</span></code>, add your custom functionality
+<p>The <code class="docutils literal notranslate"><span class="pre">steps</span></code> section allows overriding or addition to the standard steps available from <cite>chipflow</cite>.</p>
+<p>For example, if you want to override the standard silicon preparation step, you could derive from <code class="xref py py-class docutils literal notranslate"><span class="pre">chipflow.steps.silicon.SiliconStep</span></code>, add your custom functionality
 and add the following to your <cite>chipflow.toml</cite>, with the appropriate <a class="reference internal" href="#term-module-class-path"><span class="xref std std-term">module class path</span></a>:</p>
 <div class="highlight-TOML notranslate"><div class="highlight"><pre><span></span><span class="k">[chipflow.steps]</span>
 <span class="n">silicon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;my_design.steps.silicon:SiliconStep&quot;</span>
