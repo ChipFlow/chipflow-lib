@@ -3,7 +3,7 @@ from amaranth import Module
 from amaranth.lib import wiring
 from amaranth.lib.wiring import In, Out
 
-from chipflow_lib.platforms import InputIOSignature, OutputIOSignature, BidirIOSignature
+from chipflow.platforms import InputIOSignature, OutputIOSignature, BidirIOSignature
 
 __all__ = ["MockTop"]
 

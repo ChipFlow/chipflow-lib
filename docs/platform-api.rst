@@ -1,29 +1,29 @@
 Platform API Reference
 ======================
 
-This page documents the complete public API of the ``chipflow_lib.platform`` module.
+This page documents the complete public API of the ``chipflow.platform`` module.
 
-All symbols listed here are re-exported from submodules for convenience and can be imported directly from ``chipflow_lib.platform``.
+All symbols listed here are re-exported from submodules for convenience and can be imported directly from ``chipflow.platform``.
 
 Platforms
 ---------
 
-.. autoclass:: chipflow_lib.platform.sim.SimPlatform
+.. autoclass:: chipflow.platform.sim.SimPlatform
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: chipflow_lib.platform.silicon.SiliconPlatform
+.. autoclass:: chipflow.platform.silicon.SiliconPlatform
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: chipflow_lib.platform.silicon.SiliconPlatformPort
+.. autoclass:: chipflow.platform.silicon.SiliconPlatformPort
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: chipflow_lib.platform.software.SoftwarePlatform
+.. autoclass:: chipflow.platform.software.SoftwarePlatform
    :members:
    :undoc-members:
    :show-inheritance:
@@ -31,27 +31,27 @@ Platforms
 Build Steps
 -----------
 
-.. autoclass:: chipflow_lib.platform.base.StepBase
+.. autoclass:: chipflow.platform.base.StepBase
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: chipflow_lib.platform.sim_step.SimStep
+.. autoclass:: chipflow.platform.sim_step.SimStep
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: chipflow_lib.platform.silicon_step.SiliconStep
+.. autoclass:: chipflow.platform.silicon_step.SiliconStep
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: chipflow_lib.platform.software_step.SoftwareStep
+.. autoclass:: chipflow.platform.software_step.SoftwareStep
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: chipflow_lib.platform.board_step.BoardStep
+.. autoclass:: chipflow.platform.board_step.BoardStep
    :members:
    :undoc-members:
    :show-inheritance:
@@ -62,22 +62,22 @@ IO Signatures
 Base IO Signatures
 ~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: chipflow_lib.platform.io.iosignature.IOSignature
+.. autoclass:: chipflow.platform.io.iosignature.IOSignature
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: chipflow_lib.platform.io.iosignature.OutputIOSignature
+.. autoclass:: chipflow.platform.io.iosignature.OutputIOSignature
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: chipflow_lib.platform.io.iosignature.InputIOSignature
+.. autoclass:: chipflow.platform.io.iosignature.InputIOSignature
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: chipflow_lib.platform.io.iosignature.BidirIOSignature
+.. autoclass:: chipflow.platform.io.iosignature.BidirIOSignature
    :members:
    :undoc-members:
    :show-inheritance:
@@ -85,32 +85,32 @@ Base IO Signatures
 Protocol-Specific Signatures
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: chipflow_lib.platform.io.signatures.UARTSignature
+.. autoclass:: chipflow.platform.io.signatures.UARTSignature
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: chipflow_lib.platform.io.signatures.GPIOSignature
+.. autoclass:: chipflow.platform.io.signatures.GPIOSignature
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: chipflow_lib.platform.io.signatures.SPISignature
+.. autoclass:: chipflow.platform.io.signatures.SPISignature
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: chipflow_lib.platform.io.signatures.I2CSignature
+.. autoclass:: chipflow.platform.io.signatures.I2CSignature
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: chipflow_lib.platform.io.signatures.QSPIFlashSignature
+.. autoclass:: chipflow.platform.io.signatures.QSPIFlashSignature
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: chipflow_lib.platform.io.signatures.JTAGSignature
+.. autoclass:: chipflow.platform.io.signatures.JTAGSignature
    :members:
    :undoc-members:
    :show-inheritance:
@@ -118,35 +118,35 @@ Protocol-Specific Signatures
 Software Integration
 ~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: chipflow_lib.platform.io.signatures.SoftwareDriverSignature
+.. autoclass:: chipflow.platform.io.signatures.SoftwareDriverSignature
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: chipflow_lib.platform.io.signatures.SoftwareBuild
+.. autoclass:: chipflow.platform.io.signatures.SoftwareBuild
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autofunction:: chipflow_lib.platform.io.signatures.attach_data
+.. autofunction:: chipflow.platform.io.signatures.attach_data
 
 IO Configuration
 ----------------
 
-.. autoclass:: chipflow_lib.platform.io.iosignature.IOModel
+.. autoclass:: chipflow.platform.io.iosignature.IOModel
    :members:
    :undoc-members:
 
-.. autoclass:: chipflow_lib.platform.io.iosignature.IOModelOptions
+.. autoclass:: chipflow.platform.io.iosignature.IOModelOptions
    :members:
    :undoc-members:
 
-.. autoclass:: chipflow_lib.platform.io.iosignature.IOTripPoint
+.. autoclass:: chipflow.platform.io.iosignature.IOTripPoint
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: chipflow_lib.platform.io.sky130.Sky130DriveMode
+.. autoclass:: chipflow.platform.io.sky130.Sky130DriveMode
    :members:
    :undoc-members:
    :show-inheritance:
@@ -154,14 +154,14 @@ IO Configuration
 Utility Functions
 -----------------
 
-.. autofunction:: chipflow_lib.platform.base.setup_amaranth_tools
+.. autofunction:: chipflow.platform.base.setup_amaranth_tools
 
-.. autofunction:: chipflow_lib.utils.top_components
+.. autofunction:: chipflow.utils.top_components
 
-.. autofunction:: chipflow_lib.utils.get_software_builds
+.. autofunction:: chipflow.utils.get_software_builds
 
 Constants
 ---------
 
-.. autodata:: chipflow_lib.platform.io.iosignature.IO_ANNOTATION_SCHEMA
+.. autodata:: chipflow.platform.io.iosignature.IO_ANNOTATION_SCHEMA
    :annotation:

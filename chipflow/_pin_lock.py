@@ -3,7 +3,7 @@
 Backward compatibility shim for pin lock functionality.
 
 This module re-exports pin lock functionality from the packaging module.
-New code should import directly from chipflow_lib.packaging instead.
+New code should import directly from chipflow.packaging instead.
 """
 
 # Re-export from packaging module for backward compatibility

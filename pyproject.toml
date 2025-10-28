@@ -3,7 +3,7 @@
 # Project metadata
 
 [project]
-name = "chipflow-lib"
+name = "chipflow"
 dynamic = ["version"]
 description = "ChipFlow common tools."
 authors = [
@@ -32,7 +32,7 @@ dependencies = [
 ]
 
 [project.scripts]
-chipflow = "chipflow_lib.cli:run"
+chipflow = "chipflow.cli:run"
 
 # Build system configuration
 
@@ -48,6 +48,7 @@ typeCheckingMode = "standard"
 
 [tool.ruff]
 include = [
+    "chipflow/**/*.py",
     "chipflow_lib/**/*.py",
     "tests/**.py",
     "chipflow.toml",
@@ -64,10 +65,10 @@ source = "scm"
 
 [tool.pdm.scripts]
 test.cmd = "pytest"
-test-cov.cmd = "pytest --cov=chipflow_lib --cov-report=term"
-test-cov-html.cmd = "pytest --cov=chipflow_lib --cov-report=html"
+test-cov.cmd = "pytest --cov=chipflow --cov-report=term"
+test-cov-html.cmd = "pytest --cov=chipflow --cov-report=html"
 test-docs.cmd = "sphinx-build -b doctest docs/ docs/_build"
-lint.composite = [ "./tools/license_check.sh", "ruff check {args}", "pyright chipflow_lib"]
+lint.composite = [ "./tools/license_check.sh", "ruff check {args}", "pyright chipflow"]
 docs.cmd = "sphinx-build docs/ docs/_build/ -W --keep-going"
 _check-project.call = "tools.check_project:main"
 chipflow.shell = "cd $PDM_RUN_CWD && chipflow"

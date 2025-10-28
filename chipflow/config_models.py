@@ -3,7 +3,7 @@
 Backward compatibility shim for config models.
 
 This module re-exports configuration models from the config module.
-New code should import directly from chipflow_lib.config instead.
+New code should import directly from chipflow.config instead.
 """
 
 # Re-export from config module for backward compatibility

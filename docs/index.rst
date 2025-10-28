@@ -1,7 +1,7 @@
 ChipFlow Library Documentation
 ==============================
 
-``chipflow_lib`` is a Python library and tools for working with the `ChipFlow Platform <https://doc.chipflow.io>`__
+``chipflow`` is a Python library and tools for working with the `ChipFlow Platform <https://doc.chipflow.io>`__
 
 It is developed at https://github.com/chipFlow/chipflow-lib/ and licensed `BSD 2-Clause <https://github.com/chipFlow/chipflow-lib/?tab=BSD-2-Clause-1-ov-file>`__
 

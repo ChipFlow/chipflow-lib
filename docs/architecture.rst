@@ -433,7 +433,7 @@ To attach a simulation model to your custom signature:
 
 .. code-block:: python
 
-    from chipflow_lib.platform import SimModel, BasicCxxBuilder
+    from chipflow.platform import SimModel, BasicCxxBuilder
 
     # Define the C++ model
     MY_BUILDER = BasicCxxBuilder(
@@ -458,7 +458,7 @@ Override default behavior:
 
 .. code-block:: python
 
-    from chipflow_lib.platform import SiliconStep
+    from chipflow.platform import SiliconStep
 
     class MySiliconStep(SiliconStep):
         def prepare(self):
@@ -481,7 +481,7 @@ Define new package types:
 
 .. code-block:: python
 
-    from chipflow_lib.packaging import BasePackageDef
+    from chipflow.packaging import BasePackageDef
 
     class MyPackageDef(BasePackageDef):
         def __init__(self):
@@ -499,7 +499,7 @@ Add new target platforms:
 
 .. code-block:: python
 
-    from chipflow_lib.platform import StepBase
+    from chipflow.platform import StepBase
 
     class MyPlatformStep(StepBase):
         def build(self, m, top):

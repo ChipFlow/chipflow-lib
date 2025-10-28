@@ -8,8 +8,8 @@ from io import StringIO
 from unittest import mock
 
 from chipflow_lib import ChipFlowError
-from chipflow_lib.cli import run
-from chipflow_lib.config_models import Config, ChipFlowConfig
+from chipflow.cli import run
+from chipflow.config_models import Config, ChipFlowConfig
 
 class MockCommand:
     """Mock command for testing CLI"""
@@ -30,9 +30,9 @@ MOCK_CONFIG = Config(chipflow=ChipFlowConfig(project_name="test",
                                              ))
 
 class TestCLI(unittest.TestCase):
-    @mock.patch("chipflow_lib.cli._parse_config")
-    @mock.patch("chipflow_lib.cli.PinCommand")
-    @mock.patch("chipflow_lib.cli._get_cls_by_reference")
+    @mock.patch("chipflow.cli._parse_config")
+    @mock.patch("chipflow.cli.PinCommand")
+    @mock.patch("chipflow.cli._get_cls_by_reference")
     def test_run_success(self, mock_get_cls, mock_pin_command, mock_parse_config):
         """Test CLI run with successful command execution"""
         # Setup mocks
@@ -52,9 +52,9 @@ class TestCLI(unittest.TestCase):
             # No error message should be printed
             mock_stdout.write.assert_not_called()
 
-    @mock.patch("chipflow_lib.cli._parse_config")
-    @mock.patch("chipflow_lib.cli.PinCommand")
-    @mock.patch("chipflow_lib.cli._get_cls_by_reference")
+    @mock.patch("chipflow.cli._parse_config")
+    @mock.patch("chipflow.cli.PinCommand")
+    @mock.patch("chipflow.cli._get_cls_by_reference")
     def test_run_command_error(self, mock_get_cls, mock_pin_command, mock_parse_config):
         """Test CLI run with command raising ChipFlowError"""
         # Setup mocks
@@ -77,9 +77,9 @@ class TestCLI(unittest.TestCase):
 
         self.assertIn("Error while executing `test error`", buffer.getvalue())
 
-    @mock.patch("chipflow_lib.cli._parse_config")
-    @mock.patch("chipflow_lib.cli.PinCommand")
-    @mock.patch("chipflow_lib.cli._get_cls_by_reference")
+    @mock.patch("chipflow.cli._parse_config")
+    @mock.patch("chipflow.cli.PinCommand")
+    @mock.patch("chipflow.cli._get_cls_by_reference")
     def test_run_unexpected_error(self, mock_get_cls, mock_pin_command, mock_parse_config):
         """Test CLI run with command raising unexpected exception"""
         # Setup mocks
@@ -104,8 +104,8 @@ class TestCLI(unittest.TestCase):
             self.assertIn("Error while executing `test unexpected`", buffer.getvalue())
             self.assertIn("Unexpected error", buffer.getvalue())
 
-    @mock.patch("chipflow_lib.cli._parse_config")
-    @mock.patch("chipflow_lib.cli.PinCommand")
+    @mock.patch("chipflow.cli._parse_config")
+    @mock.patch("chipflow.cli.PinCommand")
     def test_step_init_error(self, mock_pin_command, mock_parse_config):
         """Test CLI run with error initializing step"""
         # Setup mocks
@@ -115,7 +115,7 @@ class TestCLI(unittest.TestCase):
         mock_pin_command.return_value = mock_pin_cmd
 
         # Make _get_cls_by_reference raise an exception during step initialization
-        with mock.patch("chipflow_lib.cli._get_cls_by_reference") as mock_get_cls:
+        with mock.patch("chipflow.cli._get_cls_by_reference") as mock_get_cls:
             mock_get_cls.return_value = mock.Mock(side_effect=Exception("Init error"))
 
             with self.assertRaises(ChipFlowError) as cm:
@@ -123,9 +123,9 @@ class TestCLI(unittest.TestCase):
 
             self.assertIn("Encountered error while initializing step", str(cm.exception))
 
-    @mock.patch("chipflow_lib.cli._parse_config")
-    @mock.patch("chipflow_lib.cli.PinCommand")
-    @mock.patch("chipflow_lib.cli._get_cls_by_reference")
+    @mock.patch("chipflow.cli._parse_config")
+    @mock.patch("chipflow.cli.PinCommand")
+    @mock.patch("chipflow.cli._get_cls_by_reference")
     def test_build_parser_error(self, mock_get_cls, mock_pin_command, mock_parse_config):
         """Test CLI run with error building CLI parser"""
         # Setup mocks
@@ -145,9 +145,9 @@ class TestCLI(unittest.TestCase):
 
         self.assertIn("Encountered error while building CLI argument parser", str(cm.exception))
 
-#     @mock.patch("chipflow_lib.cli._parse_config")
-#     @mock.patch("chipflow_lib.cli.PinCommand")
-#     @mock.patch("chipflow_lib.cli._get_cls_by_reference")
+#     @mock.patch("chipflow.cli._parse_config")
+#     @mock.patch("chipflow.cli.PinCommand")
+#     @mock.patch("chipflow.cli._get_cls_by_reference")
 #     def test_verbosity_flags(self, mock_get_cls, mock_pin_command, mock_parse_config):
 #         """Test CLI verbosity flags"""
 #         # Setup mocks
