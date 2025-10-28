@@ -1,42 +1,29 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """
-Chipflow library
+Backward compatibility module for chipflow_lib.
 
-This is the main entry point for the ChipFlow library, providing tools for
-building ASIC designs using the Amaranth HDL framework.
+This module has been renamed to 'chipflow'. This compatibility layer
+will be maintained for some time but is deprecated. Please update your
+imports to use 'chipflow' instead of 'chipflow_lib'.
+
+All functionality is re-exported from the chipflow module.
 """
 
-import importlib.metadata
-from typing import TYPE_CHECKING
+import warnings
 
-# Import core utilities
-from .utils import (
-    ChipFlowError,
-    ensure_chipflow_root,
-    get_cls_by_reference,
-    get_src_loc,
+# Issue deprecation warning
+warnings.warn(
+    "The 'chipflow_lib' package has been renamed to 'chipflow'. "
+    "Please update your imports to use 'chipflow' instead of 'chipflow_lib'. "
+    "This compatibility shim will be removed in a future version.",
+    DeprecationWarning,
+    stacklevel=2
 )
 
-if TYPE_CHECKING:
-    from .config import Config
+# Re-export everything from chipflow
+from chipflow import *  # noqa: F401, F403
+from chipflow import __version__, _parse_config, _get_cls_by_reference, _ensure_chipflow_root, _get_src_loc  # noqa: F401
 
-__version__ = importlib.metadata.version("chipflow_lib")
-
-
-# Maintain backward compatibility with underscore-prefixed names
-_get_cls_by_reference = get_cls_by_reference
-_ensure_chipflow_root = ensure_chipflow_root
-_get_src_loc = get_src_loc
-
-
-def _parse_config() -> 'Config':
-    """Parse the chipflow.toml configuration file."""
-    from .config.parser import _parse_config as config_parse
-    return config_parse()
-
-
-__all__ = [
-    '__version__',
-    'ChipFlowError',
-    'ensure_chipflow_root',
-]
+# Maintain backward compatibility for submodules by making this a namespace package
+# When someone imports chipflow_lib.something, Python will look for chipflow.something
+__path__ = __import__('chipflow').__path__

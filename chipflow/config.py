@@ -3,7 +3,7 @@
 Backward compatibility shim for config parsing.
 
 This module re-exports config parsing utilities from the config module.
-New code should import directly from chipflow_lib.config instead.
+New code should import directly from chipflow.config instead.
 """
 
 # Re-export from config.parser module for backward compatibility

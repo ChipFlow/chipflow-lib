@@ -131,7 +131,7 @@ Attributes:
         It is expected that a model that takes parameters is implmemted as a template, with the parameters in the order
         given.
 """
-def simulatable_interface(base="com.chipflow.chipflow_lib"):
+def simulatable_interface(base="com.chipflow.chipflow"):
     def decorate(klass):
         assert _VALID_UID(base)
         dec = amaranth_annotate(SimInterface, SIM_ANNOTATION_SCHEMA)

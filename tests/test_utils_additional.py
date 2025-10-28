@@ -3,7 +3,7 @@ import unittest
 
 from amaranth.lib import io
 
-from chipflow_lib.platforms import (
+from chipflow.platforms import (
     IOSignature,
     IOModel,
     PACKAGE_DEFINITIONS

@@ -23,8 +23,8 @@ logger = logging.getLogger(__name__)
 
 @contextmanager
 def common():
-    chipflow_lib = importlib.resources.files('chipflow_lib')
-    common = chipflow_lib.joinpath('common', 'sim')
+    chipflow = importlib.resources.files('chipflow')
+    common = chipflow.joinpath('common', 'sim')
     with importlib.resources.as_file(common) as f:
         yield f
 

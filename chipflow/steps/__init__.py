@@ -2,7 +2,7 @@
 Backward compatibility shim for steps module.
 
 This module re-exports step functionality from the platform module.
-New code should import directly from chipflow_lib.platform instead.
+New code should import directly from chipflow.platform instead.
 
 Steps provide an extensible way to modify the `chipflow` command behavior for a given design
 """

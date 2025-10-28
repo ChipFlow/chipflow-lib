@@ -35,7 +35,7 @@ from .base import StepBase, setup_amaranth_tools
 from ..utils import top_components, get_software_builds
 
 __all__ = [
-    # Steps (primarily accessed via chipflow_lib.steps.*)
+    # Steps (primarily accessed via chipflow.steps.*)
     'SiliconStep',
     'SimStep',
     'SoftwareStep',

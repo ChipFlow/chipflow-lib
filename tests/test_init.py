@@ -13,8 +13,8 @@ from chipflow_lib import (
     _ensure_chipflow_root,
     _parse_config
 )
-from chipflow_lib.config.parser import _parse_config_file
-from chipflow_lib.config_models import Config, ChipFlowConfig
+from chipflow.config.parser import _parse_config_file
+from chipflow.config_models import Config, ChipFlowConfig
 # Process is not part of the public API, so we won't test it here
 
 
@@ -118,8 +118,8 @@ package = "caravel"
         # Process enum is not part of the public API, so we just check that process has a string value
         self.assertEqual(str(config.chipflow.silicon.process), "sky130")
 
-    @mock.patch("chipflow_lib.config.parser.ensure_chipflow_root")
-    @mock.patch("chipflow_lib.config.parser._parse_config_file")
+    @mock.patch("chipflow.config.parser.ensure_chipflow_root")
+    @mock.patch("chipflow.config.parser._parse_config_file")
     def test_parse_config(self, mock_parse_config_file, mock_ensure_chipflow_root):
         """Test _parse_config which uses ensure_chipflow_root and _parse_config_file"""
         mock_ensure_chipflow_root.return_value = Path("/mock/chipflow/root")

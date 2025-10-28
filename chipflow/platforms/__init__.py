@@ -2,7 +2,7 @@
 Backward compatibility shim for platforms module.
 
 This module re-exports platform functionality from the platform module.
-New code should import directly from chipflow_lib.platform instead.
+New code should import directly from chipflow.platform instead.
 
 Platform definitions
 --------------------

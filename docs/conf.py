@@ -6,9 +6,9 @@ import os
 import sys
 from pprint import pformat
 
-sys.path.insert(0, os.path.abspath('../../chipflow_lib'))
+sys.path.insert(0, os.path.abspath('../../chipflow'))
 
-from chipflow_lib import __version__
+from chipflow import __version__
 
 doctest_path = [os.path.abspath('..')]
 
@@ -70,7 +70,7 @@ autodoc_typehints = 'description'
 # TODO: Re-enable AutoAPI once import issues are resolved
 #
 # autoapi_dirs = [
-#         "../chipflow_lib",
+#         "../chipflow",
 #         ]
 # autoapi_generate_api_docs = False
 # autoapi_template_dir = "_templates/autoapi"
@@ -137,7 +137,7 @@ from amaranth import Module
 from amaranth.lib import wiring
 from amaranth.lib.wiring import In, Out, connect, flipped
 from amaranth_soc import csr, wishbone
-from chipflow_lib.platforms import (
+from chipflow.platforms import (
     UARTSignature, GPIOSignature, SPISignature, I2CSignature,
     QSPIFlashSignature, JTAGSignature,
     IOTripPoint, Sky130DriveMode,

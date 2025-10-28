@@ -236,7 +236,7 @@ class SimPlatform:
 
 
         env = Environment(
-            loader=PackageLoader("chipflow_lib", "common/sim"),
+            loader=PackageLoader("chipflow", "common/sim"),
             autoescape=select_autoescape()
         )
         template = env.get_template("main.cc.jinja")
