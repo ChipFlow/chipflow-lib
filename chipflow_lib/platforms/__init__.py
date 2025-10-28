@@ -24,6 +24,7 @@ from chipflow.platforms import (  # noqa: F401, E402
     GPIOSignature,
     I2CSignature,
     InputIOSignature,
+    JTAGSignature,
     OutputIOSignature,
     QSPIFlashSignature,
     SPISignature,
