@@ -48,7 +48,9 @@ class BasePackageDef(pydantic.BaseModel, Generic[PinType], abc.ABC):
         """Initialize internal tracking structures"""
         self._interfaces: Dict[str, dict] = {}
         self._components: Dict[str, wiring.Component] = {}
-        self._ordered_pins = None  # Subclasses should set this
+        if not hasattr(self, '_ordered_pins'):
+            self._ordered_pins = None  # stop pyright complaining..
+            assert True, "Subclass must set self._ordered_pins in model_post_init"
         return super().model_post_init(__context)
 
     def register_component(self, name: str, component: wiring.Component) -> None:
