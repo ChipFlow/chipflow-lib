@@ -2,9 +2,9 @@
 project_name = "proj-name"
 
 [chipflow.steps]
-silicon = "chipflow_lib.platform.silicon_step:SiliconStep"
-sim = "chipflow_lib.platform.sim_step:SimStep"
-software = "chipflow_lib.platform.software_step:SoftwareStep"
+silicon = "chipflow.platform.silicon_step:SiliconStep"
+sim = "chipflow.platform.sim_step:SimStep"
+software = "chipflow.platform.software_step:SoftwareStep"
 
 [chipflow.silicon]
 process = "ihp_sg13g2"

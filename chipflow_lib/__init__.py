@@ -20,10 +20,13 @@ warnings.warn(
     stacklevel=2
 )
 
-# Re-export everything from chipflow
-from chipflow import *  # noqa: F401, F403
-from chipflow import __version__, _parse_config, _get_cls_by_reference, _ensure_chipflow_root, _get_src_loc  # noqa: F401
+# Re-export only the symbols actually used by chipflow-digital-ip and chipflow-examples
+# Top-level exports (used by chipflow-examples)
+from chipflow import ChipFlowError  # noqa: F401
+from chipflow import __version__  # noqa: F401
 
-# Maintain backward compatibility for submodules by making this a namespace package
-# When someone imports chipflow_lib.something, Python will look for chipflow.something
-__path__ = __import__('chipflow').__path__
+# Internal API (used by tests and CLI)
+from chipflow import _parse_config, _get_cls_by_reference, _ensure_chipflow_root, _get_src_loc  # noqa: F401
+
+# Note: Submodule imports (chipflow_lib.platforms, chipflow_lib.steps, chipflow_lib.config)
+# are handled by stub modules in their respective subdirectories
