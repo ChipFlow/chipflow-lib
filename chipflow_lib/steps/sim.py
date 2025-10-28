@@ -18,4 +18,4 @@ warnings.warn(
 )
 
 # Re-export SimStep (used by chipflow-examples)
-from chipflow.steps.sim import SimStep  # noqa: F401
+from chipflow.steps.sim import SimStep  # noqa: F401, E402

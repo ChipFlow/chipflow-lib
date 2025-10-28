@@ -18,7 +18,7 @@ warnings.warn(
 )
 
 # Re-export symbols used by chipflow-digital-ip and chipflow-examples
-from chipflow.platforms import (  # noqa: F401
+from chipflow.platforms import (  # noqa: F401, E402
     # Pin signatures (used by both repos)
     BidirIOSignature,
     GPIOSignature,
