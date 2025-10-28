@@ -18,7 +18,7 @@ This metadata is preserved through the entire flow from Python design → RTLIL 
 Annotation Infrastructure
 --------------------------
 
-Core Module: ``chipflow/platform/io/annotate.py``
+Core Module: ``chipflow_lib/platform/io/annotate.py``
 
 The annotation system uses Amaranth's ``meta.Annotation`` framework combined with Pydantic for type-safe JSON schema generation.
 
@@ -49,7 +49,7 @@ The core function is ``amaranth_annotate()``:
 .. code-block:: python
 
     from typing_extensions import TypedDict, NotRequired
-    from chipflow.platform.io.annotate import amaranth_annotate
+    from chipflow_lib.platform.io.annotate import amaranth_annotate
 
     # Define schema as TypedDict
     class MyModel(TypedDict):
@@ -92,7 +92,7 @@ Platforms extract annotations from the design using ``submodule_metadata()``:
 
 .. code-block:: python
 
-    from chipflow.platform.io.annotate import submodule_metadata
+    from chipflow_lib.platform.io.annotate import submodule_metadata
 
     frag = Fragment.get(m, None)
     for component, name, meta in submodule_metadata(frag, "top"):
@@ -106,7 +106,7 @@ Platforms extract annotations from the design using ``submodule_metadata()``:
 I/O Signature Base Classes
 ---------------------------
 
-Core Module: ``chipflow/platform/io/iosignature.py``
+Core Module: ``chipflow_lib/platform/io/iosignature.py``
 
 IOModelOptions TypedDict
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -194,7 +194,7 @@ The base class for all I/O signatures, decorated with ``@amaranth_annotate``:
 Concrete Pin Signatures
 ------------------------
 
-Core Module: ``chipflow/platform/io/signatures.py``
+Core Module: ``chipflow_lib/platform/io/signatures.py``
 
 Concrete pin signatures (UART, GPIO, SPI, etc.) combine I/O signatures with simulation metadata.
 
@@ -207,7 +207,7 @@ This decorator adds simulation model metadata for interface type identification:
 
 .. code-block:: python
 
-    def simulatable_interface(base="com.chipflow.chipflow"):
+    def simulatable_interface(base="com.chipflow.chipflow_lib"):
         def decorate(klass):
             # Apply amaranth_annotate for SimInterface
             dec = amaranth_annotate(SimInterface, SIM_ANNOTATION_SCHEMA)
@@ -233,7 +233,7 @@ This decorator adds simulation model metadata for interface type identification:
 **What it does:**
 
 1. Applies ``amaranth_annotate(SimInterface, ...)`` to the class
-2. Assigns a unique identifier (UID) like ``"com.chipflow.chipflow.UARTSignature"``
+2. Assigns a unique identifier (UID) like ``"com.chipflow.chipflow_lib.UARTSignature"``
 3. Wraps ``__init__`` to populate ``__chipflow_annotation__`` with UID and parameters
 4. Allows signatures to specify parameters via ``__chipflow_parameters__()`` method
 
@@ -252,7 +252,7 @@ Example: UARTSignature
 
 **Annotations on this signature:**
 
-1. ``SIM_ANNOTATION_SCHEMA``: ``{"uid": "com.chipflow.chipflow.UARTSignature", "parameters": []}``
+1. ``SIM_ANNOTATION_SCHEMA``: ``{"uid": "com.chipflow.chipflow_lib.UARTSignature", "parameters": []}``
 2. Nested ``IO_ANNOTATION_SCHEMA`` on ``tx`` and ``rx`` sub-signatures
 
 Example: GPIOSignature with Parameters
@@ -326,7 +326,7 @@ This signature wrapper attaches driver files to peripherals:
 
 .. code-block:: python
 
-    from chipflow.platforms import UARTSignature, SoftwareDriverSignature
+    from chipflow_lib.platforms import UARTSignature, SoftwareDriverSignature
     from amaranth_soc import csr
 
     class UARTPeripheral(wiring.Component):
@@ -375,7 +375,7 @@ Platform Consumption
 Silicon Platform
 ~~~~~~~~~~~~~~~~
 
-Core Module: ``chipflow/platform/silicon.py``
+Core Module: ``chipflow_lib/platform/silicon.py``
 
 The silicon platform creates actual I/O ports from pin signatures.
 
@@ -416,7 +416,7 @@ The platform reads the top-level signature and creates ports:
 
 .. code-block:: python
 
-    # chipflow/platform/silicon.py (in SiliconPlatform.create_ports)
+    # chipflow_lib/platform/silicon.py (in SiliconPlatform.create_ports)
     for key in top.signature.members.keys():
         member = getattr(top, key)
         port_desc = self._get_port_desc(member)  # Extracts IOModel from annotations
@@ -456,7 +456,7 @@ The platform reads the top-level signature and creates ports:
 Software Platform
 ~~~~~~~~~~~~~~~~~
 
-Core Module: ``chipflow/platform/software.py``
+Core Module: ``chipflow_lib/platform/software.py``
 
 The software platform extracts driver models and builds software.
 
@@ -505,7 +505,7 @@ The software platform extracts driver models and builds software.
 
 **SoftwareGenerator - Code Generation:**
 
-Located in ``chipflow/software/soft_gen.py``:
+Located in ``chipflow_lib/software/soft_gen.py``:
 
 .. code-block:: python
 
@@ -561,7 +561,7 @@ Step 1: Define a Peripheral with Driver
 .. code-block:: python
 
     # chipflow_digital_ip/io/_uart.py
-    from chipflow.platforms import UARTSignature, SoftwareDriverSignature
+    from chipflow_lib.platforms import UARTSignature, SoftwareDriverSignature
 
     class UARTPeripheral(wiring.Component):
         def __init__(self, *, init_divisor=0):
@@ -607,7 +607,7 @@ Step 3: Annotations Applied
 
 **On ``self.uart`` (top-level):**
 
-- ``SIM_ANNOTATION_SCHEMA``: ``{"uid": "com.chipflow.chipflow.UARTSignature", "parameters": []}``
+- ``SIM_ANNOTATION_SCHEMA``: ``{"uid": "com.chipflow.chipflow_lib.UARTSignature", "parameters": []}``
 - ``IO_ANNOTATION_SCHEMA`` on ``tx``: ``{"direction": "output", "width": 1, ...}``
 - ``IO_ANNOTATION_SCHEMA`` on ``rx``: ``{"direction": "input", "width": 1, ...}``
 
@@ -695,8 +695,8 @@ To add a new pin signature type:
            def __chipflow_parameters__(self):
                return [('param1', self._param1), ('param2', self._param2)]
 
-2. **Add to exports in** ``chipflow/platform/__init__.py``
-3. **Add to re-export in** ``chipflow/platforms/__init__.py`` (for backward compatibility)
+2. **Add to exports in** ``chipflow_lib/platform/__init__.py``
+3. **Add to re-export in** ``chipflow_lib/platforms/__init__.py`` (for backward compatibility)
 4. **Create simulation model** (if needed) matching the UID
 5. **Update documentation** in ``docs/using-pin-signatures.rst``
 
@@ -709,8 +709,8 @@ To add a new platform that consumes annotations:
 
    .. code-block:: python
 
-       from chipflow.platform.io.annotate import submodule_metadata
-       from chipflow.platform.io.signatures import DRIVER_MODEL_SCHEMA, SIM_ANNOTATION_SCHEMA
+       from chipflow_lib.platform.io.annotate import submodule_metadata
+       from chipflow_lib.platform.io.signatures import DRIVER_MODEL_SCHEMA, SIM_ANNOTATION_SCHEMA
        from pydantic import TypeAdapter
 
 2. **Walk the design and extract annotations:**
@@ -741,7 +741,7 @@ All annotations generate JSON schemas that are:
 
 .. code-block:: python
 
-    from chipflow.platform.io.iosignature import _chipflow_schema_uri
+    from chipflow_lib.platform.io.iosignature import _chipflow_schema_uri
 
     # Generates: "https://chipflow.com/schemas/my-thing/v0"
     MY_SCHEMA = str(_chipflow_schema_uri("my-thing", 0))
@@ -758,12 +758,12 @@ Pydantic's ``TypeAdapter`` provides:
 Key Files
 ---------
 
-- ``chipflow/platform/io/annotate.py`` - Core annotation infrastructure
-- ``chipflow/platform/io/iosignature.py`` - I/O signature base classes
-- ``chipflow/platform/io/signatures.py`` - Concrete signatures and decorators
-- ``chipflow/platform/silicon.py`` - Silicon platform consumption
-- ``chipflow/platform/software.py`` - Software platform consumption
-- ``chipflow/software/soft_gen.py`` - Code generation
+- ``chipflow_lib/platform/io/annotate.py`` - Core annotation infrastructure
+- ``chipflow_lib/platform/io/iosignature.py`` - I/O signature base classes
+- ``chipflow_lib/platform/io/signatures.py`` - Concrete signatures and decorators
+- ``chipflow_lib/platform/silicon.py`` - Silicon platform consumption
+- ``chipflow_lib/platform/software.py`` - Software platform consumption
+- ``chipflow_lib/software/soft_gen.py`` - Code generation
 
 See Also
 --------

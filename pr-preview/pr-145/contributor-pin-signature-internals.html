@@ -270,7 +270,7 @@
 </section>
 <section id="annotation-infrastructure">
 <h2>Annotation Infrastructure<a class="headerlink" href="#annotation-infrastructure" title="Link to this heading">¶</a></h2>
-<p>Core Module: <code class="docutils literal notranslate"><span class="pre">chipflow/platform/io/annotate.py</span></code></p>
+<p>Core Module: <code class="docutils literal notranslate"><span class="pre">chipflow_lib/platform/io/annotate.py</span></code></p>
 <p>The annotation system uses Amaranth’s <code class="docutils literal notranslate"><span class="pre">meta.Annotation</span></code> framework combined with Pydantic for type-safe JSON schema generation.</p>
 <section id="amaranth-annotate-decorator">
 <h3>amaranth_annotate() Decorator<a class="headerlink" href="#amaranth-annotate-decorator" title="Link to this heading">¶</a></h3>
@@ -293,7 +293,7 @@
 </ol>
 <p><strong>Example Usage:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypedDict</span><span class="p">,</span> <span class="n">NotRequired</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">chipflow.platform.io.annotate</span><span class="w"> </span><span class="kn">import</span> <span class="n">amaranth_annotate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_lib.platform.io.annotate</span><span class="w"> </span><span class="kn">import</span> <span class="n">amaranth_annotate</span>
 
 <span class="c1"># Define schema as TypedDict</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MyModel</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
@@ -332,7 +332,7 @@
 </pre></div>
 </div>
 <p><strong>Usage in Platforms:</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chipflow.platform.io.annotate</span><span class="w"> </span><span class="kn">import</span> <span class="n">submodule_metadata</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_lib.platform.io.annotate</span><span class="w"> </span><span class="kn">import</span> <span class="n">submodule_metadata</span>
 
 <span class="n">frag</span> <span class="o">=</span> <span class="n">Fragment</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">component</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">meta</span> <span class="ow">in</span> <span class="n">submodule_metadata</span><span class="p">(</span><span class="n">frag</span><span class="p">,</span> <span class="s2">&quot;top&quot;</span><span class="p">):</span>
@@ -348,7 +348,7 @@
 </section>
 <section id="i-o-signature-base-classes">
 <h2>I/O Signature Base Classes<a class="headerlink" href="#i-o-signature-base-classes" title="Link to this heading">¶</a></h2>
-<p>Core Module: <code class="docutils literal notranslate"><span class="pre">chipflow/platform/io/iosignature.py</span></code></p>
+<p>Core Module: <code class="docutils literal notranslate"><span class="pre">chipflow_lib/platform/io/iosignature.py</span></code></p>
 <section id="iomodeloptions-typeddict">
 <h3>IOModelOptions TypedDict<a class="headerlink" href="#iomodeloptions-typeddict" title="Link to this heading">¶</a></h3>
 <p>Defines all options for configuring I/O pins:</p>
@@ -425,13 +425,13 @@
 </section>
 <section id="concrete-pin-signatures">
 <h2>Concrete Pin Signatures<a class="headerlink" href="#concrete-pin-signatures" title="Link to this heading">¶</a></h2>
-<p>Core Module: <code class="docutils literal notranslate"><span class="pre">chipflow/platform/io/signatures.py</span></code></p>
+<p>Core Module: <code class="docutils literal notranslate"><span class="pre">chipflow_lib/platform/io/signatures.py</span></code></p>
 <p>Concrete pin signatures (UART, GPIO, SPI, etc.) combine I/O signatures with simulation metadata.</p>
 <p>These signatures are annotations of the <strong>type</strong> of the external interface (UART, GPIO, SPI), allowing ChipFlow to select and typecheck suitable simulation models that match that interface type. The annotations are independent of any particular IP implementation - they describe the interface protocol, not the internal logic of peripherals.</p>
 <section id="simulatable-interface-decorator">
 <h3>simulatable_interface() Decorator<a class="headerlink" href="#simulatable-interface-decorator" title="Link to this heading">¶</a></h3>
 <p>This decorator adds simulation model metadata for interface type identification:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">simulatable_interface</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="s2">&quot;com.chipflow.chipflow&quot;</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">simulatable_interface</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="s2">&quot;com.chipflow.chipflow_lib&quot;</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">decorate</span><span class="p">(</span><span class="n">klass</span><span class="p">):</span>
         <span class="c1"># Apply amaranth_annotate for SimInterface</span>
         <span class="n">dec</span> <span class="o">=</span> <span class="n">amaranth_annotate</span><span class="p">(</span><span class="n">SimInterface</span><span class="p">,</span> <span class="n">SIM_ANNOTATION_SCHEMA</span><span class="p">)</span>
@@ -458,7 +458,7 @@
 <p><strong>What it does:</strong></p>
 <ol class="arabic simple">
 <li><p>Applies <code class="docutils literal notranslate"><span class="pre">amaranth_annotate(SimInterface,</span> <span class="pre">...)</span></code> to the class</p></li>
-<li><p>Assigns a unique identifier (UID) like <code class="docutils literal notranslate"><span class="pre">&quot;com.chipflow.chipflow.UARTSignature&quot;</span></code></p></li>
+<li><p>Assigns a unique identifier (UID) like <code class="docutils literal notranslate"><span class="pre">&quot;com.chipflow.chipflow_lib.UARTSignature&quot;</span></code></p></li>
 <li><p>Wraps <code class="docutils literal notranslate"><span class="pre">__init__</span></code> to populate <code class="docutils literal notranslate"><span class="pre">__chipflow_annotation__</span></code> with UID and parameters</p></li>
 <li><p>Allows signatures to specify parameters via <code class="docutils literal notranslate"><span class="pre">__chipflow_parameters__()</span></code> method</p></li>
 </ol>
@@ -476,7 +476,7 @@
 </div>
 <p><strong>Annotations on this signature:</strong></p>
 <ol class="arabic simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">SIM_ANNOTATION_SCHEMA</span></code>: <code class="docutils literal notranslate"><span class="pre">{&quot;uid&quot;:</span> <span class="pre">&quot;com.chipflow.chipflow.UARTSignature&quot;,</span> <span class="pre">&quot;parameters&quot;:</span> <span class="pre">[]}</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SIM_ANNOTATION_SCHEMA</span></code>: <code class="docutils literal notranslate"><span class="pre">{&quot;uid&quot;:</span> <span class="pre">&quot;com.chipflow.chipflow_lib.UARTSignature&quot;,</span> <span class="pre">&quot;parameters&quot;:</span> <span class="pre">[]}</span></code></p></li>
 <li><p>Nested <code class="docutils literal notranslate"><span class="pre">IO_ANNOTATION_SCHEMA</span></code> on <code class="docutils literal notranslate"><span class="pre">tx</span></code> and <code class="docutils literal notranslate"><span class="pre">rx</span></code> sub-signatures</p></li>
 </ol>
 </section>
@@ -542,7 +542,7 @@
 </pre></div>
 </div>
 <p><strong>Example Usage in a Peripheral:</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chipflow.platforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">UARTSignature</span><span class="p">,</span> <span class="n">SoftwareDriverSignature</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_lib.platforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">UARTSignature</span><span class="p">,</span> <span class="n">SoftwareDriverSignature</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">amaranth_soc</span><span class="w"> </span><span class="kn">import</span> <span class="n">csr</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">UARTPeripheral</span><span class="p">(</span><span class="n">wiring</span><span class="o">.</span><span class="n">Component</span><span class="p">):</span>
@@ -590,7 +590,7 @@
 <h2>Platform Consumption<a class="headerlink" href="#platform-consumption" title="Link to this heading">¶</a></h2>
 <section id="silicon-platform">
 <h3>Silicon Platform<a class="headerlink" href="#silicon-platform" title="Link to this heading">¶</a></h3>
-<p>Core Module: <code class="docutils literal notranslate"><span class="pre">chipflow/platform/silicon.py</span></code></p>
+<p>Core Module: <code class="docutils literal notranslate"><span class="pre">chipflow_lib/platform/silicon.py</span></code></p>
 <p>The silicon platform creates actual I/O ports from pin signatures.</p>
 <p><strong>SiliconPlatformPort Class:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">SiliconPlatformPort</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">PortLike</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">Pin</span><span class="p">]):</span>
@@ -623,7 +623,7 @@
 </div>
 <p><strong>Port Creation from Pinlock:</strong></p>
 <p>The platform reads the top-level signature and creates ports:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># chipflow/platform/silicon.py (in SiliconPlatform.create_ports)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># chipflow_lib/platform/silicon.py (in SiliconPlatform.create_ports)</span>
 <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">top</span><span class="o">.</span><span class="n">signature</span><span class="o">.</span><span class="n">members</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
     <span class="n">member</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
     <span class="n">port_desc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_port_desc</span><span class="p">(</span><span class="n">member</span><span class="p">)</span>  <span class="c1"># Extracts IOModel from annotations</span>
@@ -662,7 +662,7 @@
 </section>
 <section id="software-platform">
 <h3>Software Platform<a class="headerlink" href="#software-platform" title="Link to this heading">¶</a></h3>
-<p>Core Module: <code class="docutils literal notranslate"><span class="pre">chipflow/platform/software.py</span></code></p>
+<p>Core Module: <code class="docutils literal notranslate"><span class="pre">chipflow_lib/platform/software.py</span></code></p>
 <p>The software platform extracts driver models and builds software.</p>
 <p><strong>SoftwarePlatform.build():</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">SoftwarePlatform</span><span class="p">:</span>
@@ -706,7 +706,7 @@
 </pre></div>
 </div>
 <p><strong>SoftwareGenerator - Code Generation:</strong></p>
-<p>Located in <code class="docutils literal notranslate"><span class="pre">chipflow/software/soft_gen.py</span></code>:</p>
+<p>Located in <code class="docutils literal notranslate"><span class="pre">chipflow_lib/software/soft_gen.py</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">SoftwareGenerator</span><span class="p">:</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_periph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">DriverModel</span><span class="p">):</span>
         <span class="c1"># Resolve driver file paths relative to peripheral&#39;s directory</span>
@@ -755,7 +755,7 @@
 <section id="step-1-define-a-peripheral-with-driver">
 <h3>Step 1: Define a Peripheral with Driver<a class="headerlink" href="#step-1-define-a-peripheral-with-driver" title="Link to this heading">¶</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># chipflow_digital_ip/io/_uart.py</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">chipflow.platforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">UARTSignature</span><span class="p">,</span> <span class="n">SoftwareDriverSignature</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_lib.platforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">UARTSignature</span><span class="p">,</span> <span class="n">SoftwareDriverSignature</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">UARTPeripheral</span><span class="p">(</span><span class="n">wiring</span><span class="o">.</span><span class="n">Component</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">init_divisor</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
@@ -801,7 +801,7 @@
 <h3>Step 3: Annotations Applied<a class="headerlink" href="#step-3-annotations-applied" title="Link to this heading">¶</a></h3>
 <p><strong>On ``self.uart`` (top-level):</strong></p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">SIM_ANNOTATION_SCHEMA</span></code>: <code class="docutils literal notranslate"><span class="pre">{&quot;uid&quot;:</span> <span class="pre">&quot;com.chipflow.chipflow.UARTSignature&quot;,</span> <span class="pre">&quot;parameters&quot;:</span> <span class="pre">[]}</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SIM_ANNOTATION_SCHEMA</span></code>: <code class="docutils literal notranslate"><span class="pre">{&quot;uid&quot;:</span> <span class="pre">&quot;com.chipflow.chipflow_lib.UARTSignature&quot;,</span> <span class="pre">&quot;parameters&quot;:</span> <span class="pre">[]}</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">IO_ANNOTATION_SCHEMA</span></code> on <code class="docutils literal notranslate"><span class="pre">tx</span></code>: <code class="docutils literal notranslate"><span class="pre">{&quot;direction&quot;:</span> <span class="pre">&quot;output&quot;,</span> <span class="pre">&quot;width&quot;:</span> <span class="pre">1,</span> <span class="pre">...}</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">IO_ANNOTATION_SCHEMA</span></code> on <code class="docutils literal notranslate"><span class="pre">rx</span></code>: <code class="docutils literal notranslate"><span class="pre">{&quot;direction&quot;:</span> <span class="pre">&quot;input&quot;,</span> <span class="pre">&quot;width&quot;:</span> <span class="pre">1,</span> <span class="pre">...}</span></code></p></li>
 </ul>
@@ -885,8 +885,8 @@
 </pre></div>
 </div>
 </li>
-<li><p><strong>Add to exports in</strong> <code class="docutils literal notranslate"><span class="pre">chipflow/platform/__init__.py</span></code></p></li>
-<li><p><strong>Add to re-export in</strong> <code class="docutils literal notranslate"><span class="pre">chipflow/platforms/__init__.py</span></code> (for backward compatibility)</p></li>
+<li><p><strong>Add to exports in</strong> <code class="docutils literal notranslate"><span class="pre">chipflow_lib/platform/__init__.py</span></code></p></li>
+<li><p><strong>Add to re-export in</strong> <code class="docutils literal notranslate"><span class="pre">chipflow_lib/platforms/__init__.py</span></code> (for backward compatibility)</p></li>
 <li><p><strong>Create simulation model</strong> (if needed) matching the UID</p></li>
 <li><p><strong>Update documentation</strong> in <code class="docutils literal notranslate"><span class="pre">docs/using-pin-signatures.rst</span></code></p></li>
 </ol>
@@ -896,8 +896,8 @@
 <p>To add a new platform that consumes annotations:</p>
 <ol class="arabic">
 <li><p><strong>Import annotation infrastructure:</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chipflow.platform.io.annotate</span><span class="w"> </span><span class="kn">import</span> <span class="n">submodule_metadata</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">chipflow.platform.io.signatures</span><span class="w"> </span><span class="kn">import</span> <span class="n">DRIVER_MODEL_SCHEMA</span><span class="p">,</span> <span class="n">SIM_ANNOTATION_SCHEMA</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_lib.platform.io.annotate</span><span class="w"> </span><span class="kn">import</span> <span class="n">submodule_metadata</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_lib.platform.io.signatures</span><span class="w"> </span><span class="kn">import</span> <span class="n">DRIVER_MODEL_SCHEMA</span><span class="p">,</span> <span class="n">SIM_ANNOTATION_SCHEMA</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeAdapter</span>
 </pre></div>
 </div>
@@ -926,7 +926,7 @@
 <li><p>Accessible to external tools via RTLIL parsing</p></li>
 </ul>
 <p><strong>Schema URI Convention:</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chipflow.platform.io.iosignature</span><span class="w"> </span><span class="kn">import</span> <span class="n">_chipflow_schema_uri</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_lib.platform.io.iosignature</span><span class="w"> </span><span class="kn">import</span> <span class="n">_chipflow_schema_uri</span>
 
 <span class="c1"># Generates: &quot;https://chipflow.com/schemas/my-thing/v0&quot;</span>
 <span class="n">MY_SCHEMA</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">_chipflow_schema_uri</span><span class="p">(</span><span class="s2">&quot;my-thing&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
@@ -944,12 +944,12 @@
 <section id="key-files">
 <h2>Key Files<a class="headerlink" href="#key-files" title="Link to this heading">¶</a></h2>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">chipflow/platform/io/annotate.py</span></code> - Core annotation infrastructure</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">chipflow/platform/io/iosignature.py</span></code> - I/O signature base classes</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">chipflow/platform/io/signatures.py</span></code> - Concrete signatures and decorators</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">chipflow/platform/silicon.py</span></code> - Silicon platform consumption</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">chipflow/platform/software.py</span></code> - Software platform consumption</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">chipflow/software/soft_gen.py</span></code> - Code generation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chipflow_lib/platform/io/annotate.py</span></code> - Core annotation infrastructure</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chipflow_lib/platform/io/iosignature.py</span></code> - I/O signature base classes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chipflow_lib/platform/io/signatures.py</span></code> - Concrete signatures and decorators</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chipflow_lib/platform/silicon.py</span></code> - Silicon platform consumption</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chipflow_lib/platform/software.py</span></code> - Software platform consumption</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chipflow_lib/software/soft_gen.py</span></code> - Code generation</p></li>
 </ul>
 </section>
 <section id="see-also">

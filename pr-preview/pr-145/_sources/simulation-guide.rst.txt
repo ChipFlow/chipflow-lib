@@ -98,7 +98,7 @@ ChipFlow includes built-in models for common peripherals:
 
 .. code-block:: python
 
-    # From chipflow/platform/sim.py
+    # From chipflow_lib/platform/sim.py
     _COMMON_BUILDER = BasicCxxBuilder(
         models=[
             SimModel('spi', 'chipflow::models', SPISignature),
@@ -112,7 +112,7 @@ ChipFlow includes built-in models for common peripherals:
 
 When you use ``UARTSignature()`` in your design, SimPlatform automatically:
 
-1. Extracts the ``SimInterface`` annotation with UID ``"com.chipflow.chipflow.UARTSignature"``
+1. Extracts the ``SimInterface`` annotation with UID ``"com.chipflow.chipflow_lib.UARTSignature"``
 2. Looks up the model in ``_COMMON_BUILDER._table``
 3. Generates: ``chipflow::models::uart uart_0("uart_0", top.p_uart__0____tx____o, top.p_uart__0____rx____i)``
 
@@ -379,8 +379,8 @@ ChipFlow's built-in simulation models cover common peripherals (UART, SPI, I2C, 
 
 1. **Study existing models**: The best way to learn is to examine ChipFlow's built-in implementations:
 
-   - ``chipflow/common/sim/models.h`` - Model interfaces and helper functions
-   - ``chipflow/common/sim/models.cc`` - Complete implementations for:
+   - ``chipflow_lib/common/sim/models.h`` - Model interfaces and helper functions
+   - ``chipflow_lib/common/sim/models.cc`` - Complete implementations for:
 
      - ``uart`` - UART transceiver with baud rate control
      - ``spiflash`` - QSPI flash memory with command processing
@@ -399,7 +399,7 @@ Once you've written a model (e.g., ``design/sim/my_model.h``), register it with 
 
 .. code-block:: python
 
-    from chipflow.platform import SimPlatform, SimModel, BasicCxxBuilder
+    from chipflow_lib.platform import SimPlatform, SimModel, BasicCxxBuilder
     from pathlib import Path
 
     MY_BUILDER = BasicCxxBuilder(
@@ -479,7 +479,7 @@ No UART Output
 Model Not Found
 ~~~~~~~~~~~~~~~
 
-**Symptom**: ``Unable to find a simulation model for 'com.chipflow.chipflow.XXX'``
+**Symptom**: ``Unable to find a simulation model for 'com.chipflow.chipflow_lib.XXX'``
 
 **Causes**:
 - Using a signature without a corresponding model
@@ -505,7 +505,7 @@ Design (design/design.py)
 
     from chipflow_digital_ip.io import UARTPeripheral, GPIOPeripheral
     from chipflow_digital_ip.memory import QSPIFlash
-    from chipflow.platforms import (
+    from chipflow_lib.platforms import (
         UARTSignature, GPIOSignature, QSPIFlashSignature,
         attach_data, SoftwareBuild
     )
