@@ -18,4 +18,4 @@ warnings.warn(
 )
 
 # Re-export SoftwareStep (used by chipflow-examples)
-from chipflow.steps.software import SoftwareStep  # noqa: F401
+from chipflow.steps.software import SoftwareStep  # noqa: F401, E402

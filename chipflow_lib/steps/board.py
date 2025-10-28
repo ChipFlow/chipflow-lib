@@ -18,4 +18,4 @@ warnings.warn(
 )
 
 # Re-export BoardStep (used by chipflow-examples)
-from chipflow.steps.board import BoardStep  # noqa: F401
+from chipflow.steps.board import BoardStep  # noqa: F401, E402

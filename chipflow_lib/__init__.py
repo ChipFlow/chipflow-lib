@@ -22,11 +22,11 @@ warnings.warn(
 
 # Re-export only the symbols actually used by chipflow-digital-ip and chipflow-examples
 # Top-level exports (used by chipflow-examples)
-from chipflow import ChipFlowError  # noqa: F401
-from chipflow import __version__  # noqa: F401
+from chipflow import ChipFlowError  # noqa: F401, E402
+from chipflow import __version__  # noqa: F401, E402
 
 # Internal API (used by tests and CLI)
-from chipflow import _parse_config, _get_cls_by_reference, _ensure_chipflow_root, _get_src_loc  # noqa: F401
+from chipflow import _parse_config, _get_cls_by_reference, _ensure_chipflow_root, _get_src_loc  # noqa: F401, E402
 
 # Note: Submodule imports (chipflow_lib.platforms, chipflow_lib.steps, chipflow_lib.config)
 # are handled by stub modules in their respective subdirectories

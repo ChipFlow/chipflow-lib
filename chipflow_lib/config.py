@@ -18,8 +18,8 @@ warnings.warn(
 )
 
 # Re-export the entire config module (used by chipflow-examples via 'import chipflow_lib.config')
-from chipflow import config as _config
-import sys
+from chipflow import config as _config  # noqa: E402
+import sys  # noqa: E402
 
 # Make this module act as a proxy for chipflow.config
 sys.modules[__name__] = _config
