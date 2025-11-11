@@ -267,6 +267,38 @@
 <h1>The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command<a class="headerlink" href="#the-chipflow-command" title="Link to this heading">¶</a></h1>
 <p>The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> tool enables you to simulate your design or submit it to the ChipFlow cloud build service.
 It implements several subcommands, which can be customised or added to in the <code class="docutils literal notranslate"><span class="pre">steps</span></code> section of <a class="reference internal" href="chipflow-toml-guide.html#chipflow-toml-steps"><span class="std std-ref">chipflow.toml</span></a>.</p>
+<section id="chipflow-auth">
+<h2><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">auth</span></code><a class="headerlink" href="#chipflow-auth" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">auth</span></code> command manages authentication with the ChipFlow API.</p>
+<section id="chipflow-auth-login">
+<h3><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">auth</span> <span class="pre">login</span></code><a class="headerlink" href="#chipflow-auth-login" title="Link to this heading">¶</a></h3>
+<p>Authenticate with the ChipFlow API using one of the following methods (tried in order):</p>
+<ol class="arabic simple">
+<li><p><strong>GitHub CLI token</strong> (recommended) - If you have <code class="docutils literal notranslate"><span class="pre">gh</span></code> installed and authenticated, this method is instant</p></li>
+<li><p><strong>Device flow</strong> - Opens your browser to authorize via GitHub OAuth</p></li>
+</ol>
+<p>Your API key will be saved locally in <code class="docutils literal notranslate"><span class="pre">~/.config/chipflow/credentials</span></code> for future use.</p>
+<p>Options:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--force</span></code>: Force re-authentication even if already logged in</p></li>
+</ul>
+<p>Examples:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Authenticate (will auto-detect best method)</span>
+<span class="n">chipflow</span> <span class="n">auth</span> <span class="n">login</span>
+
+<span class="c1"># Force re-authentication</span>
+<span class="n">chipflow</span> <span class="n">auth</span> <span class="n">login</span> <span class="o">--</span><span class="n">force</span>
+</pre></div>
+</div>
+</section>
+<section id="chipflow-auth-logout">
+<h3><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">auth</span> <span class="pre">logout</span></code><a class="headerlink" href="#chipflow-auth-logout" title="Link to this heading">¶</a></h3>
+<p>Remove saved credentials from your system:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">chipflow</span> <span class="n">auth</span> <span class="n">logout</span>
+</pre></div>
+</div>
+</section>
+</section>
 <section id="chipflow-pin-lock">
 <h2><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">pin</span> <span class="pre">lock</span></code><a class="headerlink" href="#chipflow-pin-lock" title="Link to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">pin</span> <span class="pre">lock</span></code> command performs pin locking for the current design.
@@ -282,7 +314,14 @@ This means that, unless the <code class="docutils literal notranslate"><span cla
 <li><p><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">silicon</span> <span class="pre">submit</span></code> sends the linked design along with the <code class="docutils literal notranslate"><span class="pre">pins.lock</span></code> file containing pinout information to the ChipFlow cloud service for the build. With the <code class="docutils literal notranslate"><span class="pre">--dry-run</span></code> argument, it can be used for a local test that the design is ready to be submitted.</p></li>
 </ul>
 </div></blockquote>
-<p>Submitting the design to the cloud requires the <code class="docutils literal notranslate"><span class="pre">CHIPFLOW_API_KEY</span></code> environment variable to be set with a valid API key obtained from the cloud interface.</p>
+<p>Authentication for submission:</p>
+<ol class="arabic simple">
+<li><p>If you’ve run <code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">auth</span> <span class="pre">login</span></code>, your saved credentials will be used automatically</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">CHIPFLOW_API_KEY</span></code> environment variable is set, it will be used</p></li>
+<li><p>Otherwise, if <code class="docutils literal notranslate"><span class="pre">gh</span></code> (GitHub CLI) is installed and authenticated, it will authenticate automatically</p></li>
+<li><p>As a last resort, you’ll be prompted to complete device flow authentication</p></li>
+</ol>
+<p>Most users should simply run <code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">auth</span> <span class="pre">login</span></code> once and authentication will be automatic for all future submissions.</p>
 </section>
 <section id="chipflow-sim">
 <h2><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">sim</span></code><a class="headerlink" href="#chipflow-sim" title="Link to this heading">¶</a></h2>
@@ -360,6 +399,11 @@ This means that, unless the <code class="docutils literal notranslate"><span cla
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a><ul>
+<li><a class="reference internal" href="#chipflow-auth"><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">auth</span></code></a><ul>
+<li><a class="reference internal" href="#chipflow-auth-login"><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">auth</span> <span class="pre">login</span></code></a></li>
+<li><a class="reference internal" href="#chipflow-auth-logout"><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">auth</span> <span class="pre">logout</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#chipflow-pin-lock"><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">pin</span> <span class="pre">lock</span></code></a></li>
 <li><a class="reference internal" href="#chipflow-silicon"><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">silicon</span></code></a></li>
 <li><a class="reference internal" href="#chipflow-sim"><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">sim</span></code></a></li>
