@@ -10,7 +10,6 @@
         <title>ChipFlow Platform Documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=25af2a20" />
-    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -210,20 +209,20 @@
   <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started with ChipFlow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">ChipFlow Architecture Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation-guide.html">Simulation Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#project-name">project_name</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#clock-domains">clock_domains</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#process">process</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#package">package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-commands.html">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="autoapi/index.html">API Reference</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="autoapi/chipflow_lib/index.html">chipflow_lib</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of chipflow_lib</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="autoapi/chipflow_lib/platforms/index.html">chipflow_lib.platforms</a></li>
-<li class="toctree-l3"><a class="reference internal" href="autoapi/chipflow_lib/steps/index.html">chipflow_lib.steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using-pin-signatures.html">Using Pin Signatures and Software Drivers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="platform-api.html">Platform API Reference</a></li>
 </ul>
-</li>
-</ul>
-</li>
+<p class="caption" role="heading"><span class="caption-text">Contributor Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributor-pin-signature-internals.html">Pin Signature Architecture (Contributor Guide)</a></li>
 </ul>
 
 </div>
@@ -280,6 +279,33 @@
 <li class="toctree-l2"><a class="reference internal" href="getting-started.html#running-a-chip-build">Running a chip build</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">ChipFlow Architecture Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#high-level-overview">High-Level Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#core-components">Core Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#design-flow-in-detail">Design Flow in Detail</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#annotation-system-architecture">Annotation System Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#package-system-architecture">Package System Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#configuration-system">Configuration System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#extending-chipflow">Extending ChipFlow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="simulation-guide.html">Simulation Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="simulation-guide.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation-guide.html#basic-workflow">Basic Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation-guide.html#what-happens-during-simulation">What Happens During Simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation-guide.html#simplatform-internals">SimPlatform Internals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation-guide.html#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation-guide.html#simulation-commands">Simulation Commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation-guide.html#debugging-with-rtl-debugger">Debugging with RTL Debugger</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation-guide.html#event-logging-for-testing">Event Logging for Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation-guide.html#customizing-simulation">Customizing Simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation-guide.html#performance-tips">Performance Tips</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation-guide.html#common-issues">Common Issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation-guide.html#example-complete-simulation-setup">Example: Complete Simulation Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation-guide.html#see-also">See Also</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></a><ul>
 <li class="toctree-l2"><a class="reference internal" href="chipflow-toml-guide.html#chipflow-table"><code class="docutils literal notranslate"><span class="pre">[chipflow]</span></code> table</a></li>
 </ul>
@@ -303,8 +329,42 @@
 <li class="toctree-l2"><a class="reference internal" href="chipflow-commands.html#chipflow-software"><code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">software</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="autoapi/chipflow_lib/index.html">chipflow_lib</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using-pin-signatures.html">Using Pin Signatures and Software Drivers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="using-pin-signatures.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="using-pin-signatures.html#pin-signatures">Pin Signatures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="using-pin-signatures.html#software-driver-signatures">Software Driver Signatures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="using-pin-signatures.html#using-peripherals-in-your-soc">Using Peripherals in Your SoC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="using-pin-signatures.html#attaching-software-binaries">Attaching Software Binaries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="using-pin-signatures.html#complete-example">Complete Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="using-pin-signatures.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="platform-api.html">Platform API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="platform-api.html#platforms">Platforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="platform-api.html#build-steps">Build Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="platform-api.html#io-signatures">IO Signatures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="platform-api.html#io-configuration">IO Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="platform-api.html#utility-functions">Utility Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="platform-api.html#constants">Constants</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contributor Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributor-pin-signature-internals.html">Pin Signature Architecture (Contributor Guide)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributor-pin-signature-internals.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributor-pin-signature-internals.html#annotation-infrastructure">Annotation Infrastructure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributor-pin-signature-internals.html#i-o-signature-base-classes">I/O Signature Base Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributor-pin-signature-internals.html#concrete-pin-signatures">Concrete Pin Signatures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributor-pin-signature-internals.html#platform-consumption">Platform Consumption</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributor-pin-signature-internals.html#complete-flow-example">Complete Flow Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributor-pin-signature-internals.html#adding-new-pin-signatures">Adding New Pin Signatures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributor-pin-signature-internals.html#adding-custom-platform-backends">Adding Custom Platform Backends</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributor-pin-signature-internals.html#json-schema-integration">JSON Schema Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributor-pin-signature-internals.html#key-files">Key Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributor-pin-signature-internals.html#see-also">See Also</a></li>
 </ul>
 </li>
 </ul>
