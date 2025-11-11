@@ -73,29 +73,57 @@ directory and then run:
    pdm lock -d
    pdm install
 
-Set up the environment
-----------------------
+Set up authentication
+---------------------
 
-Generate your API key by going to https://build.chipflow.org/ and logging in with your GitHub account.
+ChipFlow supports multiple authentication methods. Choose the one that works best for you:
 
-Click on the 'User' menu, then on ‘Create/Refresh API Key’ Your new API key will appear at the
-top.
+Method 1: Using the CLI (Recommended)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The easiest way to authenticate is using the ``chipflow auth login`` command:
+
+::
+
+   pdm run chipflow auth login
+
+This will automatically:
+
+1. Check if you have the GitHub CLI (``gh``) installed and authenticated
+2. If yes, instantly authenticate using your GitHub token
+3. If no, guide you through the device flow where you'll authorize via your browser
+
+Your API key will be saved locally for future use.
+
+Method 2: Manual API key (Alternative)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you prefer to manually manage your API key:
+
+1. Go to https://build.chipflow.org/ and log in with your GitHub account
+2. Click on the 'User' menu, then on 'Create/Refresh API Key'
+3. Your new API key will appear at the top
 
 .. figure:: _assets/api-key.png
    :alt: Image showing a newly generated API Key
 
    Image showing a newly generated API Key
 
-.. warning:
+.. warning::
     Copy it now, as you will not see it again!
 
-Next, create a file called ``.env`` at the top level in the
-``chipflow-examples`` directory, containing the line below, substituting
-your key from the page above:
+4. Create a file called ``.env`` at the top level in the
+   ``chipflow-examples`` directory, containing:
 
 ::
 
    CHIPFLOW_API_KEY=<Paste your key here>
+
+To log out and remove saved credentials:
+
+::
+
+   pdm run chipflow auth logout
 
 Running a chip build
 --------------------

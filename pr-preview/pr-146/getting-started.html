@@ -316,23 +316,53 @@ directory and then run:</p>
 </pre></div>
 </div>
 </section>
-<section id="set-up-the-environment">
-<h2>Set up the environment<a class="headerlink" href="#set-up-the-environment" title="Link to this heading">¶</a></h2>
-<p>Generate your API key by going to <a class="reference external" href="https://build.chipflow.org/">https://build.chipflow.org/</a> and logging in with your GitHub account.</p>
-<p>Click on the ‘User’ menu, then on ‘Create/Refresh API Key’ Your new API key will appear at the
-top.</p>
+<section id="set-up-authentication">
+<h2>Set up authentication<a class="headerlink" href="#set-up-authentication" title="Link to this heading">¶</a></h2>
+<p>ChipFlow supports multiple authentication methods. Choose the one that works best for you:</p>
+<section id="method-1-using-the-cli-recommended">
+<h3>Method 1: Using the CLI (Recommended)<a class="headerlink" href="#method-1-using-the-cli-recommended" title="Link to this heading">¶</a></h3>
+<p>The easiest way to authenticate is using the <code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">auth</span> <span class="pre">login</span></code> command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pdm</span> <span class="n">run</span> <span class="n">chipflow</span> <span class="n">auth</span> <span class="n">login</span>
+</pre></div>
+</div>
+<p>This will automatically:</p>
+<ol class="arabic simple">
+<li><p>Check if you have the GitHub CLI (<code class="docutils literal notranslate"><span class="pre">gh</span></code>) installed and authenticated</p></li>
+<li><p>If yes, instantly authenticate using your GitHub token</p></li>
+<li><p>If no, guide you through the device flow where you’ll authorize via your browser</p></li>
+</ol>
+<p>Your API key will be saved locally for future use.</p>
+</section>
+<section id="method-2-manual-api-key-alternative">
+<h3>Method 2: Manual API key (Alternative)<a class="headerlink" href="#method-2-manual-api-key-alternative" title="Link to this heading">¶</a></h3>
+<p>If you prefer to manually manage your API key:</p>
+<ol class="arabic simple">
+<li><p>Go to <a class="reference external" href="https://build.chipflow.org/">https://build.chipflow.org/</a> and log in with your GitHub account</p></li>
+<li><p>Click on the ‘User’ menu, then on ‘Create/Refresh API Key’</p></li>
+<li><p>Your new API key will appear at the top</p></li>
+</ol>
 <figure class="align-default" id="id1">
 <img alt="Image showing a newly generated API Key" src="_images/api-key.png" />
 <figcaption>
 <p><span class="caption-text">Image showing a newly generated API Key</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
-<p>Next, create a file called <code class="docutils literal notranslate"><span class="pre">.env</span></code> at the top level in the
-<code class="docutils literal notranslate"><span class="pre">chipflow-examples</span></code> directory, containing the line below, substituting
-your key from the page above:</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Copy it now, as you will not see it again!</p>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Create a file called <code class="docutils literal notranslate"><span class="pre">.env</span></code> at the top level in the
+<code class="docutils literal notranslate"><span class="pre">chipflow-examples</span></code> directory, containing:</p></li>
+</ol>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CHIPFLOW_API_KEY</span><span class="o">=&lt;</span><span class="n">Paste</span> <span class="n">your</span> <span class="n">key</span> <span class="n">here</span><span class="o">&gt;</span>
 </pre></div>
 </div>
+<p>To log out and remove saved credentials:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pdm</span> <span class="n">run</span> <span class="n">chipflow</span> <span class="n">auth</span> <span class="n">logout</span>
+</pre></div>
+</div>
+</section>
 </section>
 <section id="running-a-chip-build">
 <h2>Running a chip build<a class="headerlink" href="#running-a-chip-build" title="Link to this heading">¶</a></h2>
@@ -448,7 +478,11 @@ you can instead call:</p>
 <li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
 <li><a class="reference internal" href="#clone-chipflow-examples">Clone chipflow-examples</a></li>
 <li><a class="reference internal" href="#install-the-dependencies">Install the dependencies</a></li>
-<li><a class="reference internal" href="#set-up-the-environment">Set up the environment</a></li>
+<li><a class="reference internal" href="#set-up-authentication">Set up authentication</a><ul>
+<li><a class="reference internal" href="#method-1-using-the-cli-recommended">Method 1: Using the CLI (Recommended)</a></li>
+<li><a class="reference internal" href="#method-2-manual-api-key-alternative">Method 2: Manual API key (Alternative)</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#running-a-chip-build">Running a chip build</a></li>
 </ul>
 </li>
