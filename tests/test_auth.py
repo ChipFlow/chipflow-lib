@@ -179,7 +179,8 @@ class TestDeviceFlowAuth(unittest.TestCase):
     @mock.patch('chipflow.auth.time.sleep')
     @mock.patch('chipflow.auth.requests.post')
     @mock.patch('builtins.print')
-    def test_device_flow_success(self, mock_print, mock_post, mock_sleep, mock_save):
+    @mock.patch('webbrowser.open')
+    def test_device_flow_success(self, mock_browser, mock_print, mock_post, mock_sleep, mock_save):
         """Test successful device flow authentication"""
         # Mock init response
         init_response = mock.Mock()
@@ -207,7 +208,8 @@ class TestDeviceFlowAuth(unittest.TestCase):
     @mock.patch('chipflow.auth.time.sleep')
     @mock.patch('chipflow.auth.requests.post')
     @mock.patch('builtins.print')
-    def test_device_flow_pending_then_success(self, mock_print, mock_post, mock_sleep):
+    @mock.patch('webbrowser.open')
+    def test_device_flow_pending_then_success(self, mock_browser, mock_print, mock_post, mock_sleep):
         """Test device flow with pending state then success"""
         # Mock init response
         init_response = mock.Mock()
@@ -241,7 +243,8 @@ class TestDeviceFlowAuth(unittest.TestCase):
     @mock.patch('chipflow.auth.time.sleep')
     @mock.patch('chipflow.auth.requests.post')
     @mock.patch('builtins.print')
-    def test_device_flow_timeout(self, mock_print, mock_post, mock_sleep):
+    @mock.patch('webbrowser.open')
+    def test_device_flow_timeout(self, mock_browser, mock_print, mock_post, mock_sleep):
         """Test device flow timeout"""
         # Mock init response
         init_response = mock.Mock()
