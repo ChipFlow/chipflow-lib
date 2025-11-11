@@ -36,11 +36,11 @@ def load_pinlock() -> LockFile:
         try:
             json = lockfile.read_text()
             return LockFile.model_validate_json(json)
-        except (pydantic.ValidationError, pydantic.PydanticUserError):
+        except (pydantic.ValidationError, pydantic.PydanticUserError) as e:
             raise ChipFlowError(
                 "Lockfile `pins.lock` is misformed. "
                 "Please remove and rerun `chipflow pin lock`"
-            )
+            ) from e
 
     raise ChipFlowError("Lockfile `pins.lock` not found. Run `chipflow pin lock`")
 
