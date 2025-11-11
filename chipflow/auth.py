@@ -223,7 +223,7 @@ def authenticate_with_device_flow(api_origin: str, interactive: bool = True):
         raise AuthenticationError(f"Network error during device flow: {e}")
 
 
-def get_api_key(api_origin: str = None, interactive: bool = True, force_login: bool = False):
+def get_api_key(api_origin: str | None = None, interactive: bool = True, force_login: bool = False):
     """
     Get API key using the following priority:
     1. CHIPFLOW_API_KEY environment variable
