@@ -20,7 +20,7 @@ from .utils import (
 if TYPE_CHECKING:
     from .config import Config
 
-__version__ = importlib.metadata.version("chipflow")
+__version__ = importlib.metadata.version("chipflow-lib")
 
 
 # Maintain backward compatibility with underscore-prefixed names

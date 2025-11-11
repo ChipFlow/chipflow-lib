@@ -3,7 +3,7 @@
 # Project metadata
 
 [project]
-name = "chipflow"
+name = "chipflow-lib"
 dynamic = ["version"]
 description = "ChipFlow common tools."
 authors = [
