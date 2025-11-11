@@ -123,13 +123,24 @@ def authenticate_with_github_token(api_origin: str, interactive: bool = True):
         )
 
         if response.status_code == 200:
-            api_key = response.json()["api_key"]
-            save_api_key(api_key)
-            if interactive:
-                print("✅ Authenticated using GitHub CLI!")
-            return api_key
+            try:
+                api_key = response.json()["api_key"]
+                save_api_key(api_key)
+                if interactive:
+                    print("✅ Authenticated using GitHub CLI!")
+                return api_key
+            except (KeyError, ValueError) as e:
+                if interactive:
+                    print("⚠️  Invalid response from authentication server")
+                logger.debug(f"Invalid JSON response on success: {e}, body: {response.text[:200]}")
+                return None
         else:
-            error_msg = response.json().get("error_description", "Unknown error")
+            try:
+                error_msg = response.json().get("error_description", "Unknown error")
+            except ValueError:
+                error_msg = f"HTTP {response.status_code}"
+                logger.debug(f"Non-JSON error response: {response.text[:200]}")
+
             if interactive:
                 print(f"⚠️  GitHub token authentication failed: {error_msg}")
             logger.debug(f"GitHub token auth failed: {response.status_code} - {error_msg}")
