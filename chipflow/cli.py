@@ -15,6 +15,7 @@ from . import (
     _parse_config,
 )
 from .packaging import PinCommand
+from .auth_command import AuthCommand
 
 class UnexpectedError(ChipFlowError):
     pass
@@ -34,6 +35,7 @@ def run(argv=sys.argv[1:]):
 
     commands = {}
     commands["pin"] = PinCommand(config)
+    commands["auth"] = AuthCommand(config)
 
     if config.chipflow.steps:
         steps = DEFAULT_STEPS |config.chipflow.steps

@@ -23,6 +23,7 @@ from .base import StepBase, _wire_up_ports
 from ..utils import top_components
 from .silicon import SiliconPlatform
 from ..utils import ChipFlowError
+from ..auth import get_api_key, AuthenticationError
 
 
 logger = logging.getLogger(__name__)
@@ -114,23 +115,19 @@ class SiliconStep:
             --wait: Wait until build has completed. Use '-v' to increase level of verbosity
             --log-file <file>: Log full debug output to file
         """
+        chipflow_api_origin = os.environ.get("CHIPFLOW_API_ORIGIN", "https://build.chipflow.org")
+
         if not args.dry_run:
-            # Check for CHIPFLOW_API_KEY_SECRET or CHIPFLOW_API_KEY
-            if not os.environ.get("CHIPFLOW_API_KEY") and not os.environ.get("CHIPFLOW_API_KEY_SECRET"):
-                raise ChipFlowError(
-                    "Environment variable `CHIPFLOW_API_KEY` must be set to submit a design."
+            # Get API key using the new authentication helper
+            # This will try env var first, then saved credentials, then gh token, then device flow
+            try:
+                interactive = sys.stdout.isatty()
+                self._chipflow_api_key = get_api_key(
+                    api_origin=chipflow_api_origin,
+                    interactive=interactive
                 )
-            # Log a deprecation warning if CHIPFLOW_API_KEY_SECRET is used
-            if os.environ.get("CHIPFLOW_API_KEY_SECRET"):
-                logger.warning(
-                    "Environment variable `CHIPFLOW_API_KEY_SECRET` is deprecated. "
-                    "Please migrate to using `CHIPFLOW_API_KEY` instead."
-                )
-            self._chipflow_api_key = os.environ.get("CHIPFLOW_API_KEY") or os.environ.get("CHIPFLOW_API_KEY_SECRET")
-            if self._chipflow_api_key is None:
-                raise ChipFlowError(
-                    "Environment variable `CHIPFLOW_API_KEY` is empty."
-                )
+            except AuthenticationError as e:
+                raise ChipFlowError(str(e))
         if not sys.stdout.isatty():
             interval = 5000  # lets not animate..
         else:
@@ -193,7 +190,6 @@ class SiliconStep:
                     fh.close()
                 exit(1)
 
-            chipflow_api_origin = os.environ.get("CHIPFLOW_API_ORIGIN", "https://build.chipflow.org")
             build_submit_url = f"{chipflow_api_origin}/build/submit"
 
             sp.info(f"> Submitting {submission_name} for project {self.config.chipflow.project_name} to ChipFlow Cloud {chipflow_api_origin}")
