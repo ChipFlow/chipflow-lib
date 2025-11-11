@@ -14,7 +14,7 @@ Let's start with a typical example:
    # Assert that example-chipflow.toml matches the current config schema. If
    # this test fails, then its likely that the content in this file will need
    # to be updated.
-   from chipflow_lib.config.parser import _parse_config_file
+   from chipflow.config.parser import _parse_config_file
    _parse_config_file("docs/example-chipflow.toml")
 
 ``[chipflow]`` table
@@ -79,9 +79,9 @@ The instance name is the name the python object will be given in your design, an
 
 |optional|
 
-The ``steps`` section allows overriding or addition to the standard steps available from `chipflow_lib`.
+The ``steps`` section allows overriding or addition to the standard steps available from `chipflow`.
 
-For example, if you want to override the standard silicon preparation step, you could derive from :class:`chipflow_lib.steps.silicon.SiliconStep`, add your custom functionality
+For example, if you want to override the standard silicon preparation step, you could derive from :class:`chipflow.steps.silicon.SiliconStep`, add your custom functionality
 and add the following to your `chipflow.toml`, with the appropriate :term:`module class path`:
 
 .. code-block:: TOML
@@ -92,7 +92,7 @@ and add the following to your `chipflow.toml`, with the appropriate :term:`modul
 
 You probably won't need to change these if you're starting from an example repository.
 
-.. _chipflow_lib: https://github.com/ChipFlow/chipflow-lib
+.. _chipflow: https://github.com/ChipFlow/chipflow-lib
 
 
 ``[chipflow.silicon]``

@@ -349,7 +349,7 @@ pdm<span class="w"> </span>run<span class="w"> </span>chipflow<span class="w"> <
 <section id="automatic-model-matching">
 <h3>Automatic Model Matching<a class="headerlink" href="#automatic-model-matching" title="Link to this heading">¶</a></h3>
 <p>ChipFlow includes built-in models for common peripherals:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># From chipflow_lib/platform/sim.py</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># From chipflow/platform/sim.py</span>
 <span class="n">_COMMON_BUILDER</span> <span class="o">=</span> <span class="n">BasicCxxBuilder</span><span class="p">(</span>
     <span class="n">models</span><span class="o">=</span><span class="p">[</span>
         <span class="n">SimModel</span><span class="p">(</span><span class="s1">&#39;spi&#39;</span><span class="p">,</span> <span class="s1">&#39;chipflow::models&#39;</span><span class="p">,</span> <span class="n">SPISignature</span><span class="p">),</span>
@@ -364,7 +364,7 @@ pdm<span class="w"> </span>run<span class="w"> </span>chipflow<span class="w"> <
 </div>
 <p>When you use <code class="docutils literal notranslate"><span class="pre">UARTSignature()</span></code> in your design, SimPlatform automatically:</p>
 <ol class="arabic simple">
-<li><p>Extracts the <code class="docutils literal notranslate"><span class="pre">SimInterface</span></code> annotation with UID <code class="docutils literal notranslate"><span class="pre">&quot;com.chipflow.chipflow_lib.UARTSignature&quot;</span></code></p></li>
+<li><p>Extracts the <code class="docutils literal notranslate"><span class="pre">SimInterface</span></code> annotation with UID <code class="docutils literal notranslate"><span class="pre">&quot;com.chipflow.chipflow.UARTSignature&quot;</span></code></p></li>
 <li><p>Looks up the model in <code class="docutils literal notranslate"><span class="pre">_COMMON_BUILDER._table</span></code></p></li>
 <li><p>Generates: <code class="docutils literal notranslate"><span class="pre">chipflow::models::uart</span> <span class="pre">uart_0(&quot;uart_0&quot;,</span> <span class="pre">top.p_uart__0____tx____o,</span> <span class="pre">top.p_uart__0____rx____i)</span></code></p></li>
 </ol>
@@ -596,8 +596,8 @@ cp<span class="w"> </span>build/sim/events.json<span class="w"> </span>design/te
 <ol class="arabic simple">
 <li><p><strong>Study existing models</strong>: The best way to learn is to examine ChipFlow’s built-in implementations:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">chipflow_lib/common/sim/models.h</span></code> - Model interfaces and helper functions</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">chipflow_lib/common/sim/models.cc</span></code> - Complete implementations for:</p>
+<li><p><code class="docutils literal notranslate"><span class="pre">chipflow/common/sim/models.h</span></code> - Model interfaces and helper functions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chipflow/common/sim/models.cc</span></code> - Complete implementations for:</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">uart</span></code> - UART transceiver with baud rate control</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">spiflash</span></code> - QSPI flash memory with command processing</p></li>
@@ -617,7 +617,7 @@ cp<span class="w"> </span>build/sim/events.json<span class="w"> </span>design/te
 </ol>
 <p><strong>Model Registration:</strong></p>
 <p>Once you’ve written a model (e.g., <code class="docutils literal notranslate"><span class="pre">design/sim/my_model.h</span></code>), register it with ChipFlow:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_lib.platform</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimPlatform</span><span class="p">,</span> <span class="n">SimModel</span><span class="p">,</span> <span class="n">BasicCxxBuilder</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chipflow.platform</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimPlatform</span><span class="p">,</span> <span class="n">SimModel</span><span class="p">,</span> <span class="n">BasicCxxBuilder</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="n">MY_BUILDER</span> <span class="o">=</span> <span class="n">BasicCxxBuilder</span><span class="p">(</span>
@@ -688,7 +688,7 @@ cp<span class="w"> </span>build/sim/events.json<span class="w"> </span>design/te
 </section>
 <section id="model-not-found">
 <h3>Model Not Found<a class="headerlink" href="#model-not-found" title="Link to this heading">¶</a></h3>
-<p><strong>Symptom</strong>: <code class="docutils literal notranslate"><span class="pre">Unable</span> <span class="pre">to</span> <span class="pre">find</span> <span class="pre">a</span> <span class="pre">simulation</span> <span class="pre">model</span> <span class="pre">for</span> <span class="pre">'com.chipflow.chipflow_lib.XXX'</span></code></p>
+<p><strong>Symptom</strong>: <code class="docutils literal notranslate"><span class="pre">Unable</span> <span class="pre">to</span> <span class="pre">find</span> <span class="pre">a</span> <span class="pre">simulation</span> <span class="pre">model</span> <span class="pre">for</span> <span class="pre">'com.chipflow.chipflow.XXX'</span></code></p>
 <p><strong>Causes</strong>:
 - Using a signature without a corresponding model
 - Custom signature not registered in a builder</p>
@@ -708,7 +708,7 @@ cp<span class="w"> </span>build/sim/events.json<span class="w"> </span>design/te
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_digital_ip.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">UARTPeripheral</span><span class="p">,</span> <span class="n">GPIOPeripheral</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_digital_ip.memory</span><span class="w"> </span><span class="kn">import</span> <span class="n">QSPIFlash</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_lib.platforms</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">chipflow.platforms</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">UARTSignature</span><span class="p">,</span> <span class="n">GPIOSignature</span><span class="p">,</span> <span class="n">QSPIFlashSignature</span><span class="p">,</span>
     <span class="n">attach_data</span><span class="p">,</span> <span class="n">SoftwareBuild</span>
 <span class="p">)</span>

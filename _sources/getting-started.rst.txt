@@ -149,8 +149,8 @@ This should return something like:
 
 ::
 
-   INFO:chipflow_lib.steps.silicon:Submitting c23dab6-dirty for project chipflow-examples-minimal
-   INFO:chipflow_lib.steps.silicon:Submitted design: {'build_id': '3f51a69c-b3e3-4fd3-88fd-52826ac5e5dd'}
+   INFO:chipflow.steps.silicon:Submitting c23dab6-dirty for project chipflow-examples-minimal
+   INFO:chipflow.steps.silicon:Submitted design: {'build_id': '3f51a69c-b3e3-4fd3-88fd-52826ac5e5dd'}
    Design submitted successfully! Build URL: https://build-staging.chipflow.org//build/3f51a69c-b3e3-4fd3-88fd-52826ac5e5dd
 
 Your design will now start building: pictures and logs of the build are
