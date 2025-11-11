@@ -81,6 +81,11 @@ from .commands import (
     PinCommand,
 )
 
+# Rebuild Pydantic models now that all package types are imported
+# This resolves forward references in the lockfile models
+Package.model_rebuild()
+LockFile.model_rebuild()
+
 # NOTE: This module is currently internal to the chipflow CLI.
 # The public API will be designed in a future PR after working through
 # real-world custom package examples.
