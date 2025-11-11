@@ -34,11 +34,9 @@ Using Pin Signatures in Your Top-Level Design
 
 Pin signatures are used when defining your top-level component's interface:
 
-.. code-block:: python
+.. testcode::
 
-    from amaranth.lib.wiring import Out
-    from chipflow_lib.platforms import UARTSignature, GPIOSignature, QSPIFlashSignature
-
+    # Define a simple SoC with external interfaces
     class MySoC(wiring.Component):
         def __init__(self):
             super().__init__({
@@ -46,6 +44,12 @@ Pin signatures are used when defining your top-level component's interface:
                 "gpio": Out(GPIOSignature(pin_count=8)),
                 "flash": Out(QSPIFlashSignature()),
             })
+
+    # Verify the component can be instantiated
+    soc = MySoC()
+    assert hasattr(soc, 'uart')
+    assert hasattr(soc, 'gpio')
+    assert hasattr(soc, 'flash')
 
 These signatures tell ChipFlow:
 

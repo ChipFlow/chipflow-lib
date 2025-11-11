@@ -293,9 +293,7 @@
 <section id="using-pin-signatures-in-your-top-level-design">
 <h3>Using Pin Signatures in Your Top-Level Design<a class="headerlink" href="#using-pin-signatures-in-your-top-level-design" title="Link to this heading">¶</a></h3>
 <p>Pin signatures are used when defining your top-level component’s interface:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">amaranth.lib.wiring</span><span class="w"> </span><span class="kn">import</span> <span class="n">Out</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_lib.platforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">UARTSignature</span><span class="p">,</span> <span class="n">GPIOSignature</span><span class="p">,</span> <span class="n">QSPIFlashSignature</span>
-
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define a simple SoC with external interfaces</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MySoC</span><span class="p">(</span><span class="n">wiring</span><span class="o">.</span><span class="n">Component</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">({</span>
@@ -303,6 +301,12 @@
             <span class="s2">&quot;gpio&quot;</span><span class="p">:</span> <span class="n">Out</span><span class="p">(</span><span class="n">GPIOSignature</span><span class="p">(</span><span class="n">pin_count</span><span class="o">=</span><span class="mi">8</span><span class="p">)),</span>
             <span class="s2">&quot;flash&quot;</span><span class="p">:</span> <span class="n">Out</span><span class="p">(</span><span class="n">QSPIFlashSignature</span><span class="p">()),</span>
         <span class="p">})</span>
+
+<span class="c1"># Verify the component can be instantiated</span>
+<span class="n">soc</span> <span class="o">=</span> <span class="n">MySoC</span><span class="p">()</span>
+<span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">soc</span><span class="p">,</span> <span class="s1">&#39;uart&#39;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">soc</span><span class="p">,</span> <span class="s1">&#39;gpio&#39;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">soc</span><span class="p">,</span> <span class="s1">&#39;flash&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>These signatures tell ChipFlow:</p>
