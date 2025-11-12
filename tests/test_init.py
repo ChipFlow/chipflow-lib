@@ -7,12 +7,11 @@ import tempfile
 from pathlib import Path
 from unittest import mock
 
-from chipflow_lib import (
-    ChipFlowError,
+from chipflow import ChipFlowError, ensure_chipflow_root
+from chipflow.cli import (
     _get_cls_by_reference,
-    _ensure_chipflow_root,
-    _parse_config
-)
+    _parse_config)
+
 from chipflow.config.parser import _parse_config_file
 from chipflow.config_models import Config, ChipFlowConfig
 # Process is not part of the public API, so we won't test it here
@@ -75,8 +74,8 @@ class TestCoreUtilities(unittest.TestCase):
         os.environ["CHIPFLOW_ROOT"] = "/test/path"
         sys.path = ["/some/other/path"]
 
-        _ensure_chipflow_root.root = None  #type: ignore
-        result = _ensure_chipflow_root()
+        ensure_chipflow_root.root = None  #type: ignore
+        result = ensure_chipflow_root()
 
         self.assertEqual(result, Path("/test/path"))
         self.assertIn("/test/path", sys.path)
@@ -85,10 +84,10 @@ class TestCoreUtilities(unittest.TestCase):
         """Test _ensure_chipflow_root when CHIPFLOW_ROOT is not set"""
         if "CHIPFLOW_ROOT" in os.environ:
             del os.environ["CHIPFLOW_ROOT"]
-        _ensure_chipflow_root.root = None  #type: ignore
+        ensure_chipflow_root.root = None  #type: ignore
 
         with mock.patch("os.getcwd", return_value="/mock/cwd"):
-            result = _ensure_chipflow_root()
+            result = ensure_chipflow_root()
 
             self.assertEqual(result, Path("/mock/cwd"))
             self.assertEqual(os.environ["CHIPFLOW_ROOT"], "/mock/cwd")

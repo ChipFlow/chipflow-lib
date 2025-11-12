@@ -7,7 +7,7 @@ from contextlib import redirect_stdout
 from io import StringIO
 from unittest import mock
 
-from chipflow_lib import ChipFlowError
+from chipflow import ChipFlowError
 from chipflow.cli import run
 from chipflow.config_models import Config, ChipFlowConfig
 
