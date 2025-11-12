@@ -136,7 +136,13 @@ class SimStep(StepBase):
         from ..cli import run
         run(["software"])
         self.build(args)
+
+        print("Running simulation...")
+        print("-----------------------------------------")
+        print("")
         result = subprocess.run([self.sim_dir / "sim_soc"], cwd=self.sim_dir)
+        print("")
+        print("-----------------------------------------")
 
         if result.returncode != 0:
             raise ChipFlowError("Simulation failed")
