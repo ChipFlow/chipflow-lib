@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import sys
 import urllib3
+import webbrowser
 from pprint import pformat
 
 
@@ -234,6 +235,17 @@ class SiliconStep:
                 exit_code = 0
                 if args.wait:
                     exit_code = self._stream_logs(sp, network_err)
+
+                # Ask user if they want to open the build URL
+                if sys.stdout.isatty():
+                    try:
+                        response = input("Would you like to open the build URL in your browser? [y/N]: ").strip().lower()
+                        if response in ('y', 'yes'):
+                            webbrowser.open(self._build_url)
+                            print("Opening build URL in your browser...")
+                    except (EOFError, KeyboardInterrupt):
+                        print()  # New line after interrupt
+
                 if fh:
                     fh.close()
                 exit(exit_code)
