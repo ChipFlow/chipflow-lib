@@ -18,6 +18,8 @@ import requests
 from pathlib import Path
 import json
 
+from . import ChipFlowError
+
 logger = logging.getLogger(__name__)
 
 
@@ -30,6 +32,10 @@ def get_credentials_file():
     """Get path to credentials file."""
     config_dir = Path.home() / ".config" / "chipflow"
     return config_dir / "credentials"
+
+
+def clear_credentials_file():
+    get_credentials_file().unlink()
 
 
 def save_api_key(api_key: str):
@@ -256,6 +262,8 @@ def get_api_key(api_origin: str | None = None, interactive: bool = True, force_l
     if api_origin is None:
         api_origin = os.environ.get("CHIPFLOW_API_ORIGIN", "https://build.chipflow.org")
 
+    logging.debug(f"Using ChipFlow API origin: {api_origin}")
+
     # Method 1: Check environment variable
     api_key = os.environ.get("CHIPFLOW_API_KEY")
     if api_key:
@@ -274,10 +282,26 @@ def get_api_key(api_origin: str | None = None, interactive: bool = True, force_l
     if not force_login:
         api_key = load_saved_api_key()
         if api_key:
-            logger.debug("Using saved API key from credentials file")
-            return api_key
+            logger.debug("Testing if stored credentials are still valid")
+            try:
+                response = requests.get(
+                      f"{api_origin}/user/me",
+                      auth=(api_key, ""),
+                      timeout=5
+                  )
+                if response.status_code == 200:
+                    return api_key  # Valid!
+                elif response.status_code == 401:
+                    # Invalid/expired, clear cache and re-authenticate
+                    clear_credentials_file()
+                    pass
+            except requests.RequestException as e:
+                # Network error, just error up to the user
+                raise ChipFlowError("Network Error: Unable to access API") from e
 
     # Method 3: Try GitHub CLI token authentication
+    logging.debug(f"Fetching API key using GitHub credentials: {api_origin}")
+
     api_key = authenticate_with_github_token(api_origin, interactive=interactive)
     if api_key:
         return api_key
