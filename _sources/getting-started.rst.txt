@@ -100,7 +100,7 @@ Method 2: Manual API key (Alternative)
 
 If you prefer to manually manage your API key:
 
-1. Go to https://build.chipflow.org/ and log in with your GitHub account
+1. Go to https://build.chipflow.com/ and log in with your GitHub account
 2. Click on the 'User' menu, then on 'Create/Refresh API Key'
 3. Your new API key will appear at the top
 
@@ -179,7 +179,7 @@ This should return something like:
 
    INFO:chipflow.steps.silicon:Submitting c23dab6-dirty for project chipflow-examples-minimal
    INFO:chipflow.steps.silicon:Submitted design: {'build_id': '3f51a69c-b3e3-4fd3-88fd-52826ac5e5dd'}
-   Design submitted successfully! Build URL: https://build-staging.chipflow.org//build/3f51a69c-b3e3-4fd3-88fd-52826ac5e5dd
+   Design submitted successfully! Build URL: https://build.chipflow.com/build/3f51a69c-b3e3-4fd3-88fd-52826ac5e5dd
 
 Your design will now start building: pictures and logs of the build are
 available at build URL that is returned, once it is complete.
