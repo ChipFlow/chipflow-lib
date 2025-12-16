@@ -8,7 +8,7 @@ These may be implemented in the future or serve as inspiration for documentation
 ### Environment Variables (REAL - should be documented)
 - `CHIPFLOW_ROOT`: Root directory of your project (must contain chipflow.toml)
 - `CHIPFLOW_API_KEY`: API key for ChipFlow cloud services
-- `CHIPFLOW_API_ENDPOINT`: Custom API endpoint (defaults to https://build.chipflow.org)
+- `CHIPFLOW_API_ENDPOINT`: Custom API endpoint (defaults to https://build.chipflow.com)
 - `CHIPFLOW_DEBUG`: Enable debug logging (set to "1")
 
 **Action**: Add environment variable reference to chipflow-commands.rst or chipflow-toml-guide.rst

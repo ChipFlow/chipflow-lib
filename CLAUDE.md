@@ -136,6 +136,6 @@ chipflow-lib is a Python library for working with the ChipFlow platform, enablin
 - `CHIPFLOW_ROOT`: Project root directory (auto-detected if not set)
 - `CHIPFLOW_API_KEY`: API key for cloud builder authentication
 - `CHIPFLOW_API_KEY_SECRET`: Deprecated, use `CHIPFLOW_API_KEY` instead
-- `CHIPFLOW_API_ORIGIN`: Cloud builder URL (default: https://build.chipflow.org)
+- `CHIPFLOW_API_ORIGIN`: Cloud builder URL (default: https://build.chipflow.com)
 - `CHIPFLOW_BACKEND_VERSION`: Developer override for backend version
 - `CHIPFLOW_SUBMISSION_NAME`: Override submission name (default: git commit hash)

@@ -121,7 +121,7 @@ class SiliconStep:
             --wait: Wait until build has completed. Use '-v' to increase level of verbosity
             --log-file <file>: Log full debug output to file
         """
-        chipflow_api_origin = os.environ.get("CHIPFLOW_API_ORIGIN", "https://build.chipflow.org")
+        chipflow_api_origin = os.environ.get("CHIPFLOW_API_ORIGIN", "https://build.chipflow.com")
 
         if not args.dry_run:
             # Get API key using the new authentication helper

@@ -84,15 +84,15 @@ class Data(TypedDict, Generic[_T_DataClass]):
 
 class DriverModel(TypedDict):
     """
-    Options for `SoftwareDriverSignature`
+    Options for :class:`SoftwareDriverSignature`.
 
     Attributes:
-        component: The `wiring.Component` that this is the signature for.
-        regs_struct: The name of the C struct that represents the registers of this component
-        h_files: Header files for the driver
-        c_files: C files for the driver
-        regs_bus: The bus of this `Component` which contains its control registers
-        include_dirs: any extra include directories needed by the driver
+        component: The ``wiring.Component`` that this is the signature for.
+        regs_struct: The name of the C struct that represents the registers of this component.
+        h_files: Header files for the driver.
+        c_files: C files for the driver.
+        regs_bus: The bus of this ``Component`` which contains its control registers.
+        include_dirs: Any extra include directories needed by the driver.
     """
     # we just extrat the info we need, don't actually serialise a `wiring.Component`...
     component: Annotated[
@@ -125,13 +125,21 @@ def _unpack_dict(d: dict) -> str:
     params = [ f"{k}={repr(v)}" for k,v in d.items()]
     return ', '.join(params)
 
-"""
-Attributes:
-    __chipflow_parameters__: list of tuples (name, value).
-        It is expected that a model that takes parameters is implmemted as a template, with the parameters in the order
-        given.
-"""
+
 def simulatable_interface(base="com.chipflow.chipflow"):
+    """
+    Decorator for creating simulatable interface signatures.
+
+    The decorated class will have a ``__chipflow_parameters__`` method that returns
+    a list of tuples (name, value). It is expected that a model that takes parameters
+    is implemented as a template, with the parameters in the order given.
+
+    Args:
+        base: Base UID string for the interface (default: "com.chipflow.chipflow").
+
+    Returns:
+        A decorator function that adds chipflow annotation support to a class.
+    """
     def decorate(klass):
         assert _VALID_UID(base)
         dec = amaranth_annotate(SimInterface, SIM_ANNOTATION_SCHEMA)
