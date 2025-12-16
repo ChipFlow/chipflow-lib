@@ -89,6 +89,11 @@ class SiliconStep:
             "--wait",
             help="Maintain connection to cloud and trace build messages. Filtering is based on the log level (see `verbose` option).",
             default=False, action="store_true")
+        submit_subparser.add_argument(
+            "--build-mode",
+            help="Build mode: 'full' (default) runs complete build with P&R, GDS, LVS; 'synth_only' runs synthesis only.",
+            choices=["full", "synth_only"],
+            default=None)
 
     def run_cli(self, args):
         # Import here to avoid circular dependency
@@ -147,6 +152,12 @@ class SiliconStep:
             chipflow_backend_version = os.environ.get("CHIPFLOW_BACKEND_VERSION")
             if chipflow_backend_version:
                 data["chipflow_backend_version"] = chipflow_backend_version
+
+            # Build mode: "full" (default) or "synth_only"
+            # Can be set via CLI argument or CHIPFLOW_BUILD_MODE environment variable
+            build_mode = getattr(args, 'build_mode', None) or os.environ.get("CHIPFLOW_BUILD_MODE")
+            if build_mode:
+                data["build_mode"] = build_mode
 
             pads = {}
             for iface, port in self.platform._ports.items():
