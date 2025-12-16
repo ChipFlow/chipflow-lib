@@ -56,19 +56,20 @@ class IOModelOptions(TypedDict):
     Attributes:
         invert: Polarity inversion. If the value is a simple :class:`bool`, it specifies inversion for
             the entire port. If the value is an iterable of :class:`bool`, the iterable must have the
-            same length as the width of :py:`io`, and the inversion is specified for individual wires.
+            same length as the width of ``io``, and the inversion is specified for individual wires.
         individual_oe: controls whether each output wire is associated with an individual Output Enable bit
             or if a single OE bit will be used for entire port. The default value is False (indicating that a
             single OE bit controls the entire port).
-        power_domain: The name of the I/O power domain. NB there is only one of these, so IO with multiple power domains must be split up.
-
-        clock_domain: the name of the I/O's clock domain (see `Amaranth.ClockDomain`). NB there is only one of these, so IO with multiple clocks must be split up.
+        power_domain: The name of the I/O power domain. NB there is only one of these, so IO with
+            multiple power domains must be split up.
+        clock_domain: the name of the I/O's clock domain (see ``amaranth.hdl.ClockDomain``). NB there
+            is only one of these, so IO with multiple clocks must be split up.
         buffer_in: Should the IO pad have an input buffer?
         buffer_out: Should the IO pad have an output buffer?
-        sky130_drive_mode: Drive mode for output buffer on sky130
-        trip_point: Trip Point configutation for input buffer
-        init: The value for the initial values of the port
-        init_oe: The value for the initial values of the output enable(s) of the port
+        sky130_drive_mode: Drive mode for output buffer on sky130.
+        trip_point: Trip Point configuration for input buffer.
+        init: The value for the initial values of the port.
+        init_oe: The value for the initial values of the output enable(s) of the port.
     """
 
     invert: NotRequired[bool|Tuple[bool, ...]]
@@ -85,11 +86,11 @@ class IOModelOptions(TypedDict):
 @pydantic.config.with_config(ConfigDict(arbitrary_types_allowed=True))  # type: ignore[reportCallIssue]
 class IOModel(IOModelOptions):
     """
-    Setting for IO Ports (see also base class `IOModelOptions`)
+    Setting for IO Ports (see also base class :class:`IOModelOptions`).
 
     Attributes:
-        direction: `io.Direction.Input`, `io.Direction.Output` or `io.Direction.Bidir`
-        width: width of port, default is 1
+        direction: ``io.Direction.Input``, ``io.Direction.Output`` or ``io.Direction.Bidir``.
+        width: Width of port, default is 1.
     """
 
     width: int

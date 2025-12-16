@@ -56,7 +56,7 @@ class AuthCommand:
         """Perform login/authentication."""
         import os
 
-        api_origin = os.environ.get("CHIPFLOW_API_ORIGIN", "https://build.chipflow.org")
+        api_origin = os.environ.get("CHIPFLOW_API_ORIGIN", "https://build.chipflow.com")
 
         print(f"🔐 Authenticating with ChipFlow API ({api_origin})...")
 

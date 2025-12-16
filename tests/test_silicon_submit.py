@@ -50,7 +50,7 @@ class TestSiliconSubmitBrowserPrompt(unittest.TestCase):
             config.chipflow.silicon = True
             config.chipflow.project_name = 'test_project'
             step = SiliconStep(config)
-            step._build_url = "https://build.chipflow.org/build/test123"
+            step._build_url = "https://build.chipflow.com/build/test123"
             step.platform._ports = {}
 
             # Mock the submit method dependencies
@@ -74,7 +74,7 @@ class TestSiliconSubmitBrowserPrompt(unittest.TestCase):
                                 step.submit('/tmp/test.il', args)
 
                                 # Verify webbrowser.open was called
-                                mock_webbrowser.assert_called_once_with("https://build.chipflow.org/build/test123")
+                                mock_webbrowser.assert_called_once_with("https://build.chipflow.com/build/test123")
                                 mock_exit.assert_called_once_with(0)
 
     @mock.patch('chipflow.packaging.load_pinlock')
@@ -99,7 +99,7 @@ class TestSiliconSubmitBrowserPrompt(unittest.TestCase):
             config.chipflow.silicon = True
             config.chipflow.project_name = 'test_project'
             step = SiliconStep(config)
-            step._build_url = "https://build.chipflow.org/build/test123"
+            step._build_url = "https://build.chipflow.com/build/test123"
             step.platform._ports = {}
 
             # Mock the submit method dependencies
@@ -146,7 +146,7 @@ class TestSiliconSubmitBrowserPrompt(unittest.TestCase):
             config.chipflow.silicon = True
             config.chipflow.project_name = 'test_project'
             step = SiliconStep(config)
-            step._build_url = "https://build.chipflow.org/build/test123"
+            step._build_url = "https://build.chipflow.com/build/test123"
             step.platform._ports = {}
 
             # Mock the submit method dependencies

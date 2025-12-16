@@ -254,7 +254,7 @@ def get_api_key(api_origin: str | None = None, interactive: bool = True, force_l
         AuthenticationError: If all authentication methods fail
     """
     if api_origin is None:
-        api_origin = os.environ.get("CHIPFLOW_API_ORIGIN", "https://build.chipflow.org")
+        api_origin = os.environ.get("CHIPFLOW_API_ORIGIN", "https://build.chipflow.com")
 
     # Method 1: Check environment variable
     api_key = os.environ.get("CHIPFLOW_API_KEY")
