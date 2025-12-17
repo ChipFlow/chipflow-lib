@@ -28,6 +28,13 @@ DATA_SCHEMA = str(_chipflow_schema_uri("simulatable-data", 0))
 DRIVER_MODEL_SCHEMA = str(_chipflow_schema_uri("driver-model", 0))
 
 class SimInterface(TypedDict):
+    """Simulation interface metadata for ChipFlow components.
+
+    Attributes:
+        uid: Unique identifier for the interface.
+        parameters: List of (name, value) tuples for interface parameters.
+    """
+
     uid: str
     parameters: List[Tuple[str, Any]]
 
@@ -78,7 +85,15 @@ class BinaryData:
         self.offset = offset
 
 _T_DataClass = TypeVar('_T_DataClass', bound=DataclassProtocol)
+
+
 class Data(TypedDict, Generic[_T_DataClass]):
+    """Container for data associated with a ChipFlow component.
+
+    Attributes:
+        data: The dataclass instance containing component data.
+    """
+
     data: _T_DataClass
 
 
