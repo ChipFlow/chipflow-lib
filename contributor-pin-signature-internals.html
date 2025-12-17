@@ -3,13 +3,14 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="Platform API Reference" href="platform-api.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="chipflow.utils" href="chipflow-lib/autoapi/chipflow/utils/index.html" />
         <link rel="prefetch" href="_static/chipflow-logo.svg" as="image" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2025.07.19 -->
         <title>Pin Signature Architecture (Contributor Guide) - ChipFlow Platform Documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -218,7 +219,45 @@
 <li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#package">package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-commands.html">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a></li>
 <li class="toctree-l1"><a class="reference internal" href="using-pin-signatures.html">Using Pin Signatures and Software Drivers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="platform-api.html">Platform API Reference</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="platform-api.html">Platform API Reference</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Platform API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/index.html">chipflow</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of chipflow</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/auth/index.html">chipflow.auth</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/auth_command/index.html">chipflow.auth_command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/common/index.html">chipflow.common</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/config/index.html">chipflow.config</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of chipflow.config</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/config/parser/index.html">chipflow.config.parser</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packages/index.html">chipflow.packages</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/index.html">chipflow.packaging</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of chipflow.packaging</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/allocation/index.html">chipflow.packaging.allocation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/base/index.html">chipflow.packaging.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/commands/index.html">chipflow.packaging.commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/grid_array/index.html">chipflow.packaging.grid_array</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/lockfile/index.html">chipflow.packaging.lockfile</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/openframe/index.html">chipflow.packaging.openframe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/pins/index.html">chipflow.packaging.pins</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/port_desc/index.html">chipflow.packaging.port_desc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/standard/index.html">chipflow.packaging.standard</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/utils/index.html">chipflow.packaging.utils</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/platform/index.html">chipflow.platform</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of chipflow.platform</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/platform/base/index.html">chipflow.platform.base</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/platform/io/index.html">chipflow.platform.io</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of chipflow.platform.io</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/platform/io/annotate/index.html">chipflow.platform.io.annotate</a></li>
+<li class="toctree-l5"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/platform/io/iosignature/index.html">chipflow.platform.io.iosignature</a></li>
+<li class="toctree-l5"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/platform/io/signatures/index.html">chipflow.platform.io.signatures</a></li>
+<li class="toctree-l5"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/platform/io/sky130/index.html">chipflow.platform.io.sky130</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/utils/index.html">chipflow.utils</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contributor Guide</span></p>
 <ul class="current">
@@ -551,7 +590,7 @@
 </pre></div>
 </div>
 <p><strong>Example Usage in a Peripheral:</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chipflow.platforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">UARTSignature</span><span class="p">,</span> <span class="n">SoftwareDriverSignature</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chipflow.platform</span><span class="w"> </span><span class="kn">import</span> <span class="n">UARTSignature</span><span class="p">,</span> <span class="n">SoftwareDriverSignature</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">amaranth_soc</span><span class="w"> </span><span class="kn">import</span> <span class="n">csr</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">UARTPeripheral</span><span class="p">(</span><span class="n">wiring</span><span class="o">.</span><span class="n">Component</span><span class="p">):</span>
@@ -764,7 +803,7 @@
 <section id="step-1-define-a-peripheral-with-driver">
 <h3>Step 1: Define a Peripheral with Driver<a class="headerlink" href="#step-1-define-a-peripheral-with-driver" title="Link to this heading">¶</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># chipflow_digital_ip/io/_uart.py</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">chipflow.platforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">UARTSignature</span><span class="p">,</span> <span class="n">SoftwareDriverSignature</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">chipflow.platform</span><span class="w"> </span><span class="kn">import</span> <span class="n">UARTSignature</span><span class="p">,</span> <span class="n">SoftwareDriverSignature</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">UARTPeripheral</span><span class="p">(</span><span class="n">wiring</span><span class="o">.</span><span class="n">Component</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">init_divisor</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
@@ -975,14 +1014,14 @@
         
         <div class="related-pages">
           
-          <a class="prev-page" href="platform-api.html">
+          <a class="prev-page" href="chipflow-lib/autoapi/chipflow/utils/index.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Platform API Reference</div>
+                <div class="title">chipflow.utils</div>
                 
               </div>
             </a>

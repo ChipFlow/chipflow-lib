@@ -10,6 +10,7 @@
         <title>Simulation Guide - ChipFlow Platform Documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -218,7 +219,45 @@
 <li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#package">package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-commands.html">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a></li>
 <li class="toctree-l1"><a class="reference internal" href="using-pin-signatures.html">Using Pin Signatures and Software Drivers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="platform-api.html">Platform API Reference</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="platform-api.html">Platform API Reference</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Platform API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/index.html">chipflow</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of chipflow</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/auth/index.html">chipflow.auth</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/auth_command/index.html">chipflow.auth_command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/common/index.html">chipflow.common</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/config/index.html">chipflow.config</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of chipflow.config</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/config/parser/index.html">chipflow.config.parser</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packages/index.html">chipflow.packages</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/index.html">chipflow.packaging</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of chipflow.packaging</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/allocation/index.html">chipflow.packaging.allocation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/base/index.html">chipflow.packaging.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/commands/index.html">chipflow.packaging.commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/grid_array/index.html">chipflow.packaging.grid_array</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/lockfile/index.html">chipflow.packaging.lockfile</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/openframe/index.html">chipflow.packaging.openframe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/pins/index.html">chipflow.packaging.pins</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/port_desc/index.html">chipflow.packaging.port_desc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/standard/index.html">chipflow.packaging.standard</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/packaging/utils/index.html">chipflow.packaging.utils</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/platform/index.html">chipflow.platform</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of chipflow.platform</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/platform/base/index.html">chipflow.platform.base</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/platform/io/index.html">chipflow.platform.io</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of chipflow.platform.io</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/platform/io/annotate/index.html">chipflow.platform.io.annotate</a></li>
+<li class="toctree-l5"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/platform/io/iosignature/index.html">chipflow.platform.io.iosignature</a></li>
+<li class="toctree-l5"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/platform/io/signatures/index.html">chipflow.platform.io.signatures</a></li>
+<li class="toctree-l5"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/platform/io/sky130/index.html">chipflow.platform.io.sky130</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/utils/index.html">chipflow.utils</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contributor Guide</span></p>
 <ul>
@@ -708,7 +747,7 @@ cp<span class="w"> </span>build/sim/events.json<span class="w"> </span>design/te
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_digital_ip.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">UARTPeripheral</span><span class="p">,</span> <span class="n">GPIOPeripheral</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">chipflow_digital_ip.memory</span><span class="w"> </span><span class="kn">import</span> <span class="n">QSPIFlash</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">chipflow.platforms</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">chipflow.platform</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">UARTSignature</span><span class="p">,</span> <span class="n">GPIOSignature</span><span class="p">,</span> <span class="n">QSPIFlashSignature</span><span class="p">,</span>
     <span class="n">attach_data</span><span class="p">,</span> <span class="n">SoftwareBuild</span>
 <span class="p">)</span>

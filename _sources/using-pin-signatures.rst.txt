@@ -67,7 +67,7 @@ All pin signatures accept ``IOModelOptions`` to configure the electrical and beh
 
 .. code-block:: python
 
-    from chipflow.platforms import GPIOSignature, IOTripPoint
+    from chipflow.platform import GPIOSignature, IOTripPoint
 
     super().__init__({
         # Basic GPIO
@@ -113,7 +113,7 @@ For Sky130 chips, you can configure the I/O cell drive mode:
 
 .. code-block:: python
 
-    from chipflow.platforms import Sky130DriveMode, GPIOSignature
+    from chipflow.platform import Sky130DriveMode, GPIOSignature
 
     # Use open-drain with strong pull-down for I2C
     super().__init__({
@@ -137,7 +137,7 @@ Here's how to create a peripheral that includes software driver code:
 
     from amaranth.lib.wiring import In, Out
     from amaranth_soc import csr
-    from chipflow.platforms import UARTSignature, SoftwareDriverSignature
+    from chipflow.platform import UARTSignature, SoftwareDriverSignature
 
     class UARTPeripheral(wiring.Component):
         def __init__(self, *, addr_width=5, data_width=8, init_divisor=0):
@@ -240,7 +240,7 @@ Here's a complete example of using peripherals with driver code in your top-leve
     from amaranth_soc import csr
 
     from chipflow_digital_ip.io import UARTPeripheral, GPIOPeripheral
-    from chipflow.platforms import UARTSignature, GPIOSignature
+    from chipflow.platform import UARTSignature, GPIOSignature
 
     class MySoC(wiring.Component):
         def __init__(self):
@@ -287,7 +287,7 @@ Basic Usage
 .. code-block:: python
 
     from pathlib import Path
-    from chipflow.platforms import attach_data, SoftwareBuild
+    from chipflow.platform import attach_data, SoftwareBuild
 
     def elaborate(self, platform):
         m = Module()
@@ -340,7 +340,7 @@ Here's a complete working example combining all concepts:
 
     from chipflow_digital_ip.io import UARTPeripheral, GPIOPeripheral
     from chipflow_digital_ip.memory import QSPIFlash
-    from chipflow.platforms import (
+    from chipflow.platform import (
         UARTSignature, GPIOSignature, QSPIFlashSignature,
         Sky130DriveMode, attach_data, SoftwareBuild
     )
