@@ -1001,16 +1001,19 @@ a corresponding interface object. The default implementation provides none.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Attributes<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>invert</strong> – Polarity inversion. If the value is a simple <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, it specifies inversion for
-the entire port. If the value is an iterable of <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, the iterable must have the
-same length as the width of <code class="docutils literal notranslate"><span class="pre">io</span></code>, and the inversion is specified for individual wires.</p></li>
-<li><p><strong>individual_oe</strong> – controls whether each output wire is associated with an individual Output Enable bit
-or if a single OE bit will be used for entire port. The default value is False (indicating that a
-single OE bit controls the entire port).</p></li>
-<li><p><strong>power_domain</strong> – The name of the I/O power domain. NB there is only one of these, so IO with
-multiple power domains must be split up.</p></li>
-<li><p><strong>clock_domain</strong> – the name of the I/O’s clock domain (see <code class="docutils literal notranslate"><span class="pre">amaranth.hdl.ClockDomain</span></code>). NB there
-is only one of these, so IO with multiple clocks must be split up.</p></li>
+<li><p><strong>invert</strong> – Polarity inversion. If the value is a simple <code class="docutils literal notranslate"><span class="pre">bool</span></code>, it specifies
+inversion for the entire port. If the value is an iterable of <code class="docutils literal notranslate"><span class="pre">bool</span></code>,
+the iterable must have the same length as the width of <code class="docutils literal notranslate"><span class="pre">io</span></code>, and the
+inversion is specified for individual wires.</p></li>
+<li><p><strong>individual_oe</strong> – Controls whether each output wire is associated with an
+individual Output Enable bit or if a single OE bit will be used for
+entire port. The default value is False (indicating that a single OE
+bit controls the entire port).</p></li>
+<li><p><strong>power_domain</strong> – The name of the I/O power domain. NB there is only one of
+these, so IO with multiple power domains must be split up.</p></li>
+<li><p><strong>clock_domain</strong> – The name of the I/O’s clock domain (see
+<code class="docutils literal notranslate"><span class="pre">amaranth.hdl.ClockDomain</span></code>). NB there is only one of these, so IO
+with multiple clocks must be split up.</p></li>
 <li><p><strong>buffer_in</strong> – Should the IO pad have an input buffer?</p></li>
 <li><p><strong>buffer_out</strong> – Should the IO pad have an output buffer?</p></li>
 <li><p><strong>sky130_drive_mode</strong> – Drive mode for output buffer on sky130.</p></li>
