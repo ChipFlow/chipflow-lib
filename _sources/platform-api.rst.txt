@@ -5,13 +5,8 @@ This page provides the API reference for the ``chipflow.platform`` module.
 
 All symbols listed here are re-exported from submodules for convenience and can be imported directly from ``chipflow.platform``.
 
-.. note::
-
-   For detailed auto-generated API documentation, see the full API reference linked below.
-
 .. toctree::
-   :maxdepth: 2
-   :caption: API Reference
+   :maxdepth: 3
 
    /chipflow-lib/autoapi/chipflow/index
 
