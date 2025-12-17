@@ -66,12 +66,18 @@ class IOModelOptions(TypedDict):
         clock_domain: The name of the I/O's clock domain (see
             ``amaranth.hdl.ClockDomain``). NB there is only one of these, so IO
             with multiple clocks must be split up.
-        buffer_in: Should the IO pad have an input buffer?
-        buffer_out: Should the IO pad have an output buffer?
-        sky130_drive_mode: Drive mode for output buffer on sky130.
-        trip_point: Trip Point configuration for input buffer.
-        init: The value for the initial values of the port.
-        init_oe: The value for the initial values of the output enable(s) of the port.
+        buffer_in: Should the IO pad have an input buffer? Defaults to True for
+            ports with input direction.
+        buffer_out: Should the IO pad have an output buffer? Defaults to True for
+            ports with output direction.
+        sky130_drive_mode: Drive mode for output buffer on sky130. See
+            :class:`Sky130DriveMode` for available options.
+        trip_point: Trip Point configuration for input buffer. See
+            :class:`IOTripPoint` for available options.
+        init: The value for the initial values of the port. Can be an integer or
+            boolean.
+        init_oe: The value for the initial values of the output enable(s) of the
+            port. Can be an integer or boolean.
     """
 
     invert: NotRequired[bool|Tuple[bool, ...]]

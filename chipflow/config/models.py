@@ -56,16 +56,23 @@ class SiliconConfig(BaseModel):
     # This is still kept around to allow forcing pad locations.
 
 class SimulationConfig(BaseModel):
+    """Configuration for simulation settings."""
     num_steps: int = 3000000
 
+
 class CompilerConfig(BaseModel):
+    """Configuration for compiler toolchain."""
     cpu: str
     abi: str
 
+
 class SoftwareConfig(BaseModel):
+    """Configuration for software build settings."""
     riscv: CompilerConfig = CompilerConfig(cpu="baseline_rv32-a-c-d", abi="ilp32")
 
+
 class TestConfig(BaseModel):
+    """Configuration for test settings."""
     event_reference: Path
 
 class ChipFlowConfig(BaseModel):
