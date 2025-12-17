@@ -33,7 +33,7 @@ extensions = [
     'sphinx.ext.duration',
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
-    # 'autoapi.extension',  # Temporarily disabled due to CI import issues
+    'autoapi.extension',
     'sphinxcontrib.autoprogram',
     'sphinxcontrib.autodoc_pydantic',
     'sphinx_design',
@@ -55,33 +55,22 @@ html_theme_options = {
 
 autodoc_typehints = 'description'
 
-# AutoAPI configuration - temporarily disabled due to CI import issues
-#
-# AutoAPI is encountering "Unable to read file" errors for ALL Python modules
-# in the CI environment, preventing it from generating any API documentation.
-# This appears to be related to import-time issues during the refactoring work.
-#
-# Root cause investigation needed:
-# - Possible circular imports preventing module loading
-# - Import-time side effects that fail in CI but not locally
-# - Python path or module resolution differences in CI
-#
-# Workaround: Using manual sphinx.ext.autodoc directives in platform-api.rst
-# TODO: Re-enable AutoAPI once import issues are resolved
-#
-# autoapi_dirs = [
-#         "../chipflow",
-#         ]
-# autoapi_generate_api_docs = False
-# autoapi_template_dir = "_templates/autoapi"
-# # autoapi_verbose_visibility = 2
-# autoapi_keep_files = True
-# autoapi_options = [
-#     'members',
-#     'show-inheritance',
-#     'show-module-summary',
-#     'imported-members',
-# ]
+# AutoAPI configuration
+autoapi_dirs = ["../chipflow"]
+autoapi_generate_api_docs = True
+autoapi_template_dir = "_templates/autoapi"
+autoapi_keep_files = True
+autoapi_options = [
+    'members',
+    'show-inheritance',
+    'show-module-summary',
+    'imported-members',
+]
+autoapi_root = "chipflow-lib/autoapi"
+autoapi_add_toctree_entry = False  # Don't auto-add to toctree (we link manually)
+autoapi_ignore = [
+    "*/chipflow_lib/*",  # Backward compatibility shim
+]
 
 # Exclude in-progress stuff and template files
 exclude_patterns = [
@@ -154,6 +143,16 @@ rst_epilog = """
 .. |required| replace:: :bdg-primary-line:`Required`
 .. |optional| replace:: :bdg-secondary-line:`Optional`
 """
+
+# Suppress warnings from autoapi-generated docs due to re-exports
+# - ref.python: "more than one target found for cross-reference" (re-exported symbols)
+# - toc.not_readable: documents not in toctree (autoapi index pages we don't link directly)
+# - autodoc.duplicate_object: duplicate object descriptions (re-exports)
+suppress_warnings = [
+    "ref.python",
+    "toc.not_readable",
+    "autodoc.duplicate_object",
+]
 
 # -- Options for EPUB output
 epub_show_urls = 'footnote'

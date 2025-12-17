@@ -13,7 +13,7 @@ All symbols listed here are re-exported from submodules for convenience and can 
    :maxdepth: 2
    :caption: API Reference
 
-   /chipflow-lib/autoapi/chipflow/platform/index
+   /chipflow-lib/autoapi/chipflow/index
 
 Quick Links
 -----------
