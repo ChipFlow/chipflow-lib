@@ -158,7 +158,7 @@ class SimStep(StepBase):
 
         self.run(args)
         # Import here to avoid circular import
-        from ..steps._json_compare import compare_events
+        from ..common._json_compare import compare_events
         compare_events(self._config.chipflow.test.event_reference, self.sim_dir / "events.json")
         print("Integration test passed sucessfully")
 

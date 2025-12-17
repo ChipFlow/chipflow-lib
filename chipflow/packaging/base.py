@@ -22,7 +22,7 @@ from .lockfile import Package, LockFile
 from .allocation import _linear_allocate_components
 
 if TYPE_CHECKING:
-    from ..config_models import Config, Process
+    from ..config import Config, Process
 
 # Type variable for pin types (int for linear allocation, GAPin for grid arrays, etc.)
 PinType = TypeVar('PinType')

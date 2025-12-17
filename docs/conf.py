@@ -137,7 +137,7 @@ from amaranth import Module
 from amaranth.lib import wiring
 from amaranth.lib.wiring import In, Out, connect, flipped
 from amaranth_soc import csr, wishbone
-from chipflow.platforms import (
+from chipflow.platform import (
     UARTSignature, GPIOSignature, SPISignature, I2CSignature,
     QSPIFlashSignature, JTAGSignature,
     IOTripPoint, Sky130DriveMode,

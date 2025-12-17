@@ -1,4 +1,11 @@
-from ..packaging import QuadPackageDef, BareDiePackageDef, GAPackageDef, Package, OpenframePackageDef
+# SPDX-License-Identifier: BSD-2-Clause
+"""
+Package definitions for ChipFlow platforms.
+
+This module contains package type definitions for supported IC packages.
+"""
+
+from .packaging import QuadPackageDef, BareDiePackageDef, GAPackageDef, Package, OpenframePackageDef
 
 # Add any new package types to both PACKAGE_DEFINITIONS and the PackageDef union
 PACKAGE_DEFINITIONS = {

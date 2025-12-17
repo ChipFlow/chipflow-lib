@@ -326,7 +326,7 @@ This signature wrapper attaches driver files to peripherals:
 
 .. code-block:: python
 
-    from chipflow.platforms import UARTSignature, SoftwareDriverSignature
+    from chipflow.platform import UARTSignature, SoftwareDriverSignature
     from amaranth_soc import csr
 
     class UARTPeripheral(wiring.Component):
@@ -561,7 +561,7 @@ Step 1: Define a Peripheral with Driver
 .. code-block:: python
 
     # chipflow_digital_ip/io/_uart.py
-    from chipflow.platforms import UARTSignature, SoftwareDriverSignature
+    from chipflow.platform import UARTSignature, SoftwareDriverSignature
 
     class UARTPeripheral(wiring.Component):
         def __init__(self, *, init_divisor=0):

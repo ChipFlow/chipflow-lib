@@ -2,7 +2,7 @@
 """
 Backward compatibility module for chipflow_lib.steps.
 
-This module has been renamed to 'chipflow.steps'. This compatibility layer
+This module has been renamed to 'chipflow.platform'. This compatibility layer
 will be maintained for some time but is deprecated. Please update your imports.
 """
 

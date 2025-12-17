@@ -10,7 +10,7 @@ from typing import List, NamedTuple, Optional, Literal
 
 from .base import LinearAllocPackageDef
 from .pins import PowerPins, BringupPins
-from ..config_models import Voltage
+from ..config import Voltage
 
 
 class OFPin(NamedTuple):

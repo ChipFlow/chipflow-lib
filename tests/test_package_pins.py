@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 import unittest
 
-from chipflow.platforms import PACKAGE_DEFINITIONS
+from chipflow.packages import PACKAGE_DEFINITIONS
 
 
 class TestPackageDefinitions(unittest.TestCase):

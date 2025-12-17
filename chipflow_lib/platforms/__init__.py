@@ -2,7 +2,7 @@
 """
 Backward compatibility module for chipflow_lib.platforms.
 
-This module has been renamed to 'chipflow.platforms'. This compatibility layer
+This module has been renamed to 'chipflow.platform'. This compatibility layer
 will be maintained for some time but is deprecated. Please update your imports.
 """
 
@@ -10,15 +10,15 @@ import warnings
 
 # Issue deprecation warning
 warnings.warn(
-    "The 'chipflow_lib.platforms' module has been renamed to 'chipflow.platforms'. "
-    "Please update your imports to use 'chipflow.platforms' instead. "
+    "The 'chipflow_lib.platforms' module has been renamed to 'chipflow.platform'. "
+    "Please update your imports to use 'chipflow.platform' instead. "
     "This compatibility shim will be removed in a future version.",
     DeprecationWarning,
     stacklevel=2
 )
 
 # Re-export symbols used by chipflow-digital-ip and chipflow-examples
-from chipflow.platforms import (  # noqa: F401, E402
+from chipflow.platform import (  # noqa: F401, E402
     # Pin signatures (used by both repos)
     BidirIOSignature,
     GPIOSignature,
@@ -40,3 +40,6 @@ from chipflow.platforms import (  # noqa: F401, E402
     attach_data,
     SoftwareBuild,
 )
+
+# Package definitions
+from chipflow.packages import PACKAGE_DEFINITIONS  # noqa: F401, E402

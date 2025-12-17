@@ -13,7 +13,7 @@ from chipflow.cli import (
     _parse_config)
 
 from chipflow.config.parser import _parse_config_file
-from chipflow.config_models import Config, ChipFlowConfig
+from chipflow.config import Config, ChipFlowConfig
 # Process is not part of the public API, so we won't test it here
 
 

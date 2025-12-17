@@ -10,7 +10,7 @@ from dataclasses import dataclass, asdict
 from enum import StrEnum, auto
 from typing import Set, List, Union, Optional, TypeVar, Generic
 
-from ..config_models import Voltage, VoltageRange
+from ..config import Voltage, VoltageRange
 
 
 # Type aliases for pin collections
