@@ -1,0 +1,828 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Simulation Guide" href="simulation-guide.html"><link rel="prev" title="Getting Started with ChipFlow" href="getting-started.html">
+        <link rel="prefetch" href="_static/chipflow-logo.svg" as="image">
+
+    <!-- Generated with Sphinx 7.4.7 and Furo 2025.09.25 -->
+        <title>ChipFlow Architecture Overview - ChipFlow Platform Documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=580074bf" />
+    <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --admonition-font-size: 0.9 rem;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --admonition-font-size: 0.9 rem;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --admonition-font-size: 0.9 rem;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">ChipFlow Platform Documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/chipflow-logo.svg" alt="Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">ChipFlow Platform Documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started with ChipFlow</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">ChipFlow Architecture Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation-guide.html">Simulation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html">Intro to <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#project-name">project_name</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#clock-domains">clock_domains</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#process">process</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#package">package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chipflow-commands.html">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using-pin-signatures.html">Using Pin Signatures and Software Drivers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="platform-api.html">Platform API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributor Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributor-pin-signature-internals.html">Pin Signature Architecture (Contributor Guide)</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/architecture.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="chipflow-architecture-overview">
+<h1>ChipFlow Architecture Overview<a class="headerlink" href="#chipflow-architecture-overview" title="Link to this heading">¶</a></h1>
+<p>This guide explains the overall architecture of ChipFlow and how different components work together to transform your Python hardware design into manufacturable silicon.</p>
+<section id="high-level-overview">
+<h2>High-Level Overview<a class="headerlink" href="#high-level-overview" title="Link to this heading">¶</a></h2>
+<p>ChipFlow follows a multi-stage flow from Python design to silicon:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────┐
+│  Python Design  │  Your Amaranth HDL design with ChipFlow signatures
+│  (design.py)    │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│   Elaboration   │  Amaranth converts to Fragment tree
+│                 │  ChipFlow annotations attached
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│     RTLIL       │  Intermediate representation with annotations
+│  (design.rtlil) │  JSON schemas embedded as attributes
+└────────┬────────┘
+         │
+         ├─────────────┬────────────────┬──────────────┐
+         │             │                │              │
+         ▼             ▼                ▼              ▼
+┌────────────┐  ┌──────────────┐  ┌──────────┐  ┌──────────┐
+│  Silicon   │  │  Simulation  │  │ Software │  │  Board   │
+│  Platform  │  │   Platform   │  │ Platform │  │ Platform │
+└────────────┘  └──────────────┘  └──────────┘  └──────────┘
+     │                │                 │             │
+     ▼                ▼                 ▼             ▼
+ GDS-II          CXXRTL C++        soc.h + .elf    Bitstream
+</pre></div>
+</div>
+</section>
+<section id="core-components">
+<h2>Core Components<a class="headerlink" href="#core-components" title="Link to this heading">¶</a></h2>
+<p>ChipFlow consists of several key subsystems that work together:</p>
+<ol class="arabic simple">
+<li><p><strong>Pin Signatures</strong> - Define external interfaces (UART, GPIO, SPI, etc.)</p></li>
+<li><p><strong>Annotation System</strong> - Attach metadata to designs for platform consumption</p></li>
+<li><p><strong>Package Definitions</strong> - Map abstract ports to physical pins</p></li>
+<li><p><strong>Platforms</strong> - Transform RTLIL to target-specific outputs</p></li>
+<li><p><strong>Steps</strong> - Orchestrate the build process via CLI commands</p></li>
+<li><p><strong>Configuration</strong> - TOML-based project configuration</p></li>
+</ol>
+</section>
+<section id="design-flow-in-detail">
+<h2>Design Flow in Detail<a class="headerlink" href="#design-flow-in-detail" title="Link to this heading">¶</a></h2>
+<section id="user-defines-design">
+<h3>1. User Defines Design<a class="headerlink" href="#user-defines-design" title="Link to this heading">¶</a></h3>
+<p>You write your design in Python using Amaranth HDL and ChipFlow signatures:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MySoC</span><span class="p">(</span><span class="n">wiring</span><span class="o">.</span><span class="n">Component</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">({</span>
+            <span class="s2">&quot;uart&quot;</span><span class="p">:</span> <span class="n">Out</span><span class="p">(</span><span class="n">UARTSignature</span><span class="p">()),</span>
+            <span class="s2">&quot;gpio&quot;</span><span class="p">:</span> <span class="n">Out</span><span class="p">(</span><span class="n">GPIOSignature</span><span class="p">(</span><span class="n">pin_count</span><span class="o">=</span><span class="mi">8</span><span class="p">)),</span>
+        <span class="p">})</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">elaborate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">platform</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">Module</span><span class="p">()</span>
+        <span class="c1"># Your design logic here</span>
+        <span class="k">return</span> <span class="n">m</span>
+
+<span class="c1"># Verify the design can be instantiated</span>
+<span class="n">design</span> <span class="o">=</span> <span class="n">MySoC</span><span class="p">()</span>
+<span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s1">&#39;uart&#39;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="s1">&#39;gpio&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="signatures-add-metadata">
+<h3>2. Signatures Add Metadata<a class="headerlink" href="#signatures-add-metadata" title="Link to this heading">¶</a></h3>
+<p>ChipFlow signatures are decorated with <code class="docutils literal notranslate"><span class="pre">&#64;amaranth_annotate</span></code> which adds JSON schema metadata:</p>
+<ul class="simple">
+<li><p><strong>IOModel</strong>: I/O configuration for external interfaces of the IC (direction, width, drive modes, trip points)</p></li>
+<li><p><strong>SimInterface</strong>: Interface type identification for matching simulation models (UID, parameters)</p></li>
+<li><p><strong>DriverModel</strong>: Software drivers for the IP block (C/H files, register structures)</p></li>
+<li><p><strong>Data</strong>: Software binaries to load into memory (flash images, bootloaders)</p></li>
+</ul>
+<p>This metadata is preserved through the entire flow.</p>
+</section>
+<section id="pin-allocation">
+<h3>3. Pin Allocation<a class="headerlink" href="#pin-allocation" title="Link to this heading">¶</a></h3>
+<p>When you run <code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">pin</span> <span class="pre">lock</span></code>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Top-level Interface
+(MySoC.uart, MySoC.gpio)
+       │
+       ▼
+Extract IOSignatures
+(UARTSignature, GPIOSignature)
+       │
+       ▼
+Calculate Pin Requirements
+(UART: 2 pins, GPIO: 8 pins)
+       │
+       ▼
+Package Allocator
+(Selects pins from package definition)
+       │
+       ▼
+pins.lock File
+(Persists allocation)
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">pins.lock</span></code> file maps abstract interface names to concrete package pin locations:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="s2">&quot;uart.tx&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="s2">&quot;pin&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;42&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;loc&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;A12&quot;</span><span class="p">},</span>
+<span class="w">  </span><span class="s2">&quot;uart.rx&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="s2">&quot;pin&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;43&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;loc&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;A13&quot;</span><span class="p">},</span>
+<span class="w">  </span><span class="s2">&quot;gpio.gpio[0]&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="s2">&quot;pin&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;44&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;loc&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;B12&quot;</span><span class="p">},</span>
+<span class="w">  </span><span class="p">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="elaboration-rtlil-generation">
+<h3>4. Elaboration &amp; RTLIL Generation<a class="headerlink" href="#elaboration-rtlil-generation" title="Link to this heading">¶</a></h3>
+<p>Amaranth elaborates your design into a <code class="docutils literal notranslate"><span class="pre">Fragment</span></code> tree, then converts to RTLIL:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Fragment Tree                RTLIL
+┌──────────┐                ┌────────────────────────┐
+│   Top    │                │ module \MySoC          │
+│          │                │   (* chipflow.io = ... │
+├──────────┤   ────────&gt;    │   wire \uart$tx$o      │
+│ MySoC    │                │   ...                  │
+│  - uart  │                │ endmodule              │
+│  - gpio  │                │                        │
+└──────────┘                └────────────────────────┘
+</pre></div>
+</div>
+<p>Annotations from signatures are embedded in RTLIL as attributes:</p>
+<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="o">*</span><span class="w"> </span><span class="n">chipflow</span><span class="p">.</span><span class="n">annotation</span><span class="p">.</span><span class="n">io</span><span class="o">-</span><span class="n">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;{</span><span class="se">\&quot;</span><span class="s">direction</span><span class="se">\&quot;</span><span class="s">: </span><span class="se">\&quot;</span><span class="s">output</span><span class="se">\&quot;</span><span class="s">, </span><span class="se">\&quot;</span><span class="s">width</span><span class="se">\&quot;</span><span class="s">: 1}&quot;</span><span class="w"> </span><span class="o">*</span><span class="p">)</span>
+<span class="kt">wire</span><span class="w"> </span><span class="n">\uart$tx$o;</span>
+</pre></div>
+</div>
+</section>
+<section id="platform-consumption">
+<h3>5. Platform Consumption<a class="headerlink" href="#platform-consumption" title="Link to this heading">¶</a></h3>
+<p>Different platforms consume the RTLIL + annotations:</p>
+<section id="silicon-platform">
+<h4>Silicon Platform<a class="headerlink" href="#silicon-platform" title="Link to this heading">¶</a></h4>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>RTLIL + pins.lock
+      │
+      ▼
+Read IOModel annotations
+(drive mode, trip point, etc.)
+      │
+      ▼
+Create SiliconPlatformPort
+(Sky130Port, etc.)
+      │
+      ▼
+Generate I/O cell configuration
+(PAD instances with controls)
+      │
+      ▼
+Synthesis → Place &amp; Route → GDS-II
+</pre></div>
+</div>
+</section>
+<section id="simulation-platform">
+<h4>Simulation Platform<a class="headerlink" href="#simulation-platform" title="Link to this heading">¶</a></h4>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>RTLIL
+  │
+  ▼
+Read SimInterface annotations
+(UID, parameters)
+  │
+  ▼
+Match to C++ models
+(UART model, SPI flash model)
+  │
+  ▼
+Generate CXXRTL C++
+  │
+  ▼
+Compile with models → Executable simulator
+</pre></div>
+</div>
+</section>
+<section id="software-platform">
+<h4>Software Platform<a class="headerlink" href="#software-platform" title="Link to this heading">¶</a></h4>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Design Fragment
+      │
+      ▼
+Read DriverModel annotations
+(C/H files, regs_struct)
+      │
+      ▼
+Extract memory map from Wishbone decoder
+      │
+      ▼
+Generate soc.h with peripheral pointers
+      │
+      ▼
+Compile user code + drivers → ELF binary
+</pre></div>
+</div>
+</section>
+</section>
+<section id="step-orchestration">
+<h3>6. Step Orchestration<a class="headerlink" href="#step-orchestration" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> CLI uses “Steps” to orchestrate the flow:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$ chipflow silicon prepare
+       │
+       ▼
+┌─────────────┐
+│ SiliconStep │
+│  .prepare() │
+└─────────────┘
+       │
+       ├─&gt; Load config (chipflow.toml)
+       ├─&gt; Instantiate top components
+       ├─&gt; Load pins.lock
+       ├─&gt; Create SiliconPlatform
+       ├─&gt; Elaborate design
+       └─&gt; Convert to RTLIL → build/silicon/design.rtlil
+
+$ chipflow silicon submit
+       │
+       ▼
+┌─────────────┐
+│ SiliconStep │
+│  .submit()  │
+└─────────────┘
+       │
+       ├─&gt; Package RTLIL + pins.lock
+       ├─&gt; Authenticate with API
+       └─&gt; Upload to ChipFlow cloud
+</pre></div>
+</div>
+</section>
+</section>
+<section id="annotation-system-architecture">
+<h2>Annotation System Architecture<a class="headerlink" href="#annotation-system-architecture" title="Link to this heading">¶</a></h2>
+<p>The annotation system is central to how ChipFlow propagates metadata:</p>
+<ol class="arabic">
+<li><p><strong>Decorator Application</strong> (Design time)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@amaranth_annotate</span><span class="p">(</span><span class="n">IOModel</span><span class="p">,</span> <span class="s2">&quot;https://chipflow.com/schemas/io-model/v0&quot;</span><span class="p">,</span> <span class="s2">&quot;_model&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IOSignature</span><span class="p">(</span><span class="n">wiring</span><span class="o">.</span><span class="n">Signature</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">IOModel</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="n">direction</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># Decorator will extract self._model when serializing</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>JSON Schema Generation</strong> (Elaboration time)</p>
+<p>Pydantic TypeAdapter generates JSON schema from TypedDict:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="s2">&quot;$schema&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https://json-schema.org/draft/2020-12/schema&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;$id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https://chipflow.com/schemas/io-model/v0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;properties&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="s2">&quot;direction&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;enum&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;bidir&quot;</span><span class="p">]},</span>
+<span class="w">    </span><span class="s2">&quot;width&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="s2">&quot;invert&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;boolean&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>RTLIL Embedding</strong> (Conversion time)</p>
+<p>Amaranth calls <code class="docutils literal notranslate"><span class="pre">Annotation.as_json()</span></code> and embeds in RTLIL:</p>
+<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="o">*</span><span class="w"> </span><span class="n">chipflow</span><span class="p">.</span><span class="n">annotation</span><span class="p">.</span><span class="n">io</span><span class="o">-</span><span class="n">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;{</span><span class="se">\&quot;</span><span class="s">direction</span><span class="se">\&quot;</span><span class="s">: </span><span class="se">\&quot;</span><span class="s">output</span><span class="se">\&quot;</span><span class="s">, </span><span class="se">\&quot;</span><span class="s">width</span><span class="se">\&quot;</span><span class="s">: 1}&quot;</span><span class="w"> </span><span class="o">*</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Platform Extraction</strong> (Build time)</p>
+<p>Platform uses <code class="docutils literal notranslate"><span class="pre">submodule_metadata()</span></code> to walk Fragment and extract:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">component</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">meta</span> <span class="ow">in</span> <span class="n">submodule_metadata</span><span class="p">(</span><span class="n">frag</span><span class="p">,</span> <span class="s2">&quot;top&quot;</span><span class="p">):</span>
+    <span class="n">annotations</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;annotations&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">IO_ANNOTATION_SCHEMA</span> <span class="ow">in</span> <span class="n">annotations</span><span class="p">:</span>
+        <span class="n">io_model</span> <span class="o">=</span> <span class="n">TypeAdapter</span><span class="p">(</span><span class="n">IOModel</span><span class="p">)</span><span class="o">.</span><span class="n">validate_python</span><span class="p">(</span><span class="n">annotations</span><span class="p">[</span><span class="n">IO_ANNOTATION_SCHEMA</span><span class="p">])</span>
+        <span class="c1"># Use io_model to configure platform</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="package-system-architecture">
+<h2>Package System Architecture<a class="headerlink" href="#package-system-architecture" title="Link to this heading">¶</a></h2>
+<p>Packages define the physical constraints of your chip:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>BasePackageDef
+     ├── bringup_pins() → PowerPins, JTAGPins, etc.
+     ├── allocate() → Assigns ports to pins
+     └── instantiate() → Creates PortDesc for each allocation
+
+LinearAllocPackageDef (extends BasePackageDef)
+     └── Sequential allocation strategy
+
+QuadPackageDef (extends LinearAllocPackageDef)
+     └── PGA-style packages (pga144)
+
+GAPackageDef (extends BasePackageDef)
+     └── Grid array packages with row/col addressing
+
+OpenframePackageDef (extends BasePackageDef)
+     └── Open-frame packages with custom layouts
+</pre></div>
+</div>
+<p>Allocation Flow:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>User runs: chipflow pin lock
+       │
+       ▼
+┌──────────────────────┐
+│ Load chipflow.toml   │
+│ - process: sky130    │
+│ - package: pga144    │
+└──────────┬───────────┘
+           │
+           ▼
+┌──────────────────────┐
+│ Instantiate package  │
+│ PACKAGE_DEFS[pkg]    │
+└──────────┬───────────┘
+           │
+           ▼
+┌──────────────────────┐
+│ Elaborate top design │
+│ Extract interfaces   │
+└──────────┬───────────┘
+           │
+           ▼
+┌──────────────────────┐
+│ For each interface:  │
+│ - Get IOModel        │
+│ - Create PortDesc    │
+└──────────┬───────────┘
+           │
+           ▼
+┌──────────────────────┐
+│ package.allocate()   │
+│ - Assign pins        │
+│ - Check constraints  │
+└──────────┬───────────┘
+           │
+           ▼
+┌──────────────────────┐
+│ Write pins.lock      │
+│ - Persist mapping    │
+└──────────────────────┘
+</pre></div>
+</div>
+</section>
+<section id="configuration-system">
+<h2>Configuration System<a class="headerlink" href="#configuration-system" title="Link to this heading">¶</a></h2>
+<p>ChipFlow uses Pydantic models for configuration:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>chipflow.toml
+     │ (parsed by tomllib)
+     ▼
+dict[str, Any]
+     │ (validated by Pydantic)
+     ▼
+Config dataclass
+├── chipflow: ChipFlowConfig
+│   ├── project_name: str
+│   ├── top: dict[str, str]
+│   ├── clock_domains: list[str]
+│   ├── silicon: SiliconConfig
+│   │   ├── process: Process
+│   │   └── package: str
+│   ├── software: SoftwareConfig
+│   │   └── riscv: CompilerConfig
+│   └── simulation: SimulationConfig
+└── tool: dict[str, Any]
+</pre></div>
+</div>
+<p>Steps access config during execution:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">SiliconStep</span><span class="p">(</span><span class="n">StepBase</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">process</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">chipflow</span><span class="o">.</span><span class="n">silicon</span><span class="o">.</span><span class="n">process</span>
+        <span class="n">package</span> <span class="o">=</span> <span class="n">PACKAGE_DEFS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">chipflow</span><span class="o">.</span><span class="n">silicon</span><span class="o">.</span><span class="n">package</span><span class="p">]</span>
+        <span class="c1"># Use process and package to build...</span>
+</pre></div>
+</div>
+</section>
+<section id="extending-chipflow">
+<h2>Extending ChipFlow<a class="headerlink" href="#extending-chipflow" title="Link to this heading">¶</a></h2>
+<p>ChipFlow is designed to be extensible at multiple levels:</p>
+<section id="custom-pin-signatures">
+<h3>Custom Pin Signatures<a class="headerlink" href="#custom-pin-signatures" title="Link to this heading">¶</a></h3>
+<p>Create new interface types:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@simulatable_interface</span><span class="p">()</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyCustomSignature</span><span class="p">(</span><span class="n">wiring</span><span class="o">.</span><span class="n">Signature</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">({</span>
+            <span class="s2">&quot;custom&quot;</span><span class="p">:</span> <span class="n">Out</span><span class="p">(</span><span class="n">BidirIOSignature</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="p">})</span>
+</pre></div>
+</div>
+<p>To attach a simulation model to your custom signature:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chipflow.platform</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimModel</span><span class="p">,</span> <span class="n">BasicCxxBuilder</span>
+
+<span class="c1"># Define the C++ model</span>
+<span class="n">MY_BUILDER</span> <span class="o">=</span> <span class="n">BasicCxxBuilder</span><span class="p">(</span>
+    <span class="n">models</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">SimModel</span><span class="p">(</span><span class="s1">&#39;my_custom&#39;</span><span class="p">,</span> <span class="s1">&#39;my_namespace&#39;</span><span class="p">,</span> <span class="n">MyCustomSignature</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="n">hpp_files</span><span class="o">=</span><span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="s1">&#39;design/sim/my_custom_model.h&#39;</span><span class="p">)],</span>
+<span class="p">)</span>
+
+<span class="c1"># In your custom SimStep</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MySimPlatform</span><span class="p">(</span><span class="n">SimPlatform</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_builders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MY_BUILDER</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="simulation-guide.html"><span class="doc">Simulation Guide</span></a> for complete examples of creating custom simulation models.</p>
+</section>
+<section id="custom-steps">
+<h3>Custom Steps<a class="headerlink" href="#custom-steps" title="Link to this heading">¶</a></h3>
+<p>Override default behavior:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chipflow.platform</span><span class="w"> </span><span class="kn">import</span> <span class="n">SiliconStep</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MySiliconStep</span><span class="p">(</span><span class="n">SiliconStep</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Custom pre-processing</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">prepare</span><span class="p">()</span>
+        <span class="c1"># Custom post-processing</span>
+        <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+</div>
+<p>Reference in <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code>:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[chipflow.steps]</span>
+<span class="n">silicon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;my_project.steps:MySiliconStep&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-packages">
+<h3>Custom Packages<a class="headerlink" href="#custom-packages" title="Link to this heading">¶</a></h3>
+<p>Define new package types:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chipflow.packaging</span><span class="w"> </span><span class="kn">import</span> <span class="n">BasePackageDef</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyPackageDef</span><span class="p">(</span><span class="n">BasePackageDef</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Define pin layout</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">allocate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ports</span><span class="p">):</span>
+        <span class="c1"># Custom allocation algorithm</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-platforms">
+<h3>Custom Platforms<a class="headerlink" href="#custom-platforms" title="Link to this heading">¶</a></h3>
+<p>Add new target platforms:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chipflow.platform</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepBase</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyPlatformStep</span><span class="p">(</span><span class="n">StepBase</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">top</span><span class="p">):</span>
+        <span class="c1"># Extract annotations</span>
+        <span class="c1"># Generate output for custom platform</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="using-pin-signatures.html"><span class="doc">Using Pin Signatures and Software Drivers</span></a> - User guide for pin signatures</p></li>
+<li><p><a class="reference internal" href="contributor-pin-signature-internals.html"><span class="doc">Pin Signature Architecture (Contributor Guide)</span></a> - Deep dive into annotation system</p></li>
+<li><p><a class="reference internal" href="chipflow-toml-guide.html"><span class="doc">Intro to chipflow.toml</span></a> - Configuration reference</p></li>
+<li><p><a class="reference internal" href="chipflow-commands.html"><span class="doc">The chipflow command</span></a> - CLI command reference</p></li>
+</ul>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="simulation-guide.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Simulation Guide</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="getting-started.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Getting Started with ChipFlow</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; ChipFlow Limited, 2021-2025
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">ChipFlow Architecture Overview</a><ul>
+<li><a class="reference internal" href="#high-level-overview">High-Level Overview</a></li>
+<li><a class="reference internal" href="#core-components">Core Components</a></li>
+<li><a class="reference internal" href="#design-flow-in-detail">Design Flow in Detail</a><ul>
+<li><a class="reference internal" href="#user-defines-design">1. User Defines Design</a></li>
+<li><a class="reference internal" href="#signatures-add-metadata">2. Signatures Add Metadata</a></li>
+<li><a class="reference internal" href="#pin-allocation">3. Pin Allocation</a></li>
+<li><a class="reference internal" href="#elaboration-rtlil-generation">4. Elaboration &amp; RTLIL Generation</a></li>
+<li><a class="reference internal" href="#platform-consumption">5. Platform Consumption</a><ul>
+<li><a class="reference internal" href="#silicon-platform">Silicon Platform</a></li>
+<li><a class="reference internal" href="#simulation-platform">Simulation Platform</a></li>
+<li><a class="reference internal" href="#software-platform">Software Platform</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#step-orchestration">6. Step Orchestration</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#annotation-system-architecture">Annotation System Architecture</a></li>
+<li><a class="reference internal" href="#package-system-architecture">Package System Architecture</a></li>
+<li><a class="reference internal" href="#configuration-system">Configuration System</a></li>
+<li><a class="reference internal" href="#extending-chipflow">Extending ChipFlow</a><ul>
+<li><a class="reference internal" href="#custom-pin-signatures">Custom Pin Signatures</a></li>
+<li><a class="reference internal" href="#custom-steps">Custom Steps</a></li>
+<li><a class="reference internal" href="#custom-packages">Custom Packages</a></li>
+<li><a class="reference internal" href="#custom-platforms">Custom Platforms</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=1f169f65"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    </body>
+</html>
