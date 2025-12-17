@@ -1,0 +1,41 @@
+chipflow.auth_command
+=====================
+
+.. py:module:: chipflow.auth_command
+
+.. autoapi-nested-parse::
+
+   ChipFlow authentication command for CLI.
+
+   Provides `chipflow login` and `chipflow logout` commands.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   chipflow.auth_command.AuthCommand
+
+
+Module Contents
+---------------
+
+.. py:class:: AuthCommand(config)
+
+   Authentication management for ChipFlow.
+
+
+   .. py:method:: build_cli_parser(parser)
+
+      Build CLI argument parser for auth command.
+
+
+
+   .. py:method:: run_cli(args)
+
+      Execute the auth command based on parsed arguments.
+
+
+

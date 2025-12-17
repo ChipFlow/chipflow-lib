@@ -1,0 +1,34 @@
+chipflow.packaging.allocation
+=============================
+
+.. py:module:: chipflow.packaging.allocation
+
+.. autoapi-nested-parse::
+
+   Pin allocation algorithms for package definitions.
+
+   This module provides algorithms for allocating pins from available
+   package pads to component interfaces, including intelligent grouping
+   and contiguous allocation strategies.
+
+
+
+Exceptions
+----------
+
+.. autoapisummary::
+
+   chipflow.packaging.allocation.UnableToAllocate
+
+
+Module Contents
+---------------
+
+.. py:exception:: UnableToAllocate
+
+   Bases: :py:obj:`chipflow.ChipFlowError`
+
+
+   Raised when pin allocation fails
+
+
