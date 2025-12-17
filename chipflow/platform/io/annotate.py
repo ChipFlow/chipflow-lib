@@ -97,14 +97,21 @@ def amaranth_annotate(modeltype: type[_T_TypedDict], schema_id: str, member: str
 
 
 def submodule_metadata(fragment: Fragment, component_name: str, recursive=False) -> Generator[Tuple[wiring.Component, str| tuple, dict]]:
-    """
-    Generator that finds `component_name` in `fragment` and
-    then yields the ``wiring.Component``s of that component's submodule, along with their names and metadata
+    """Generator that finds ``component_name`` in ``fragment`` and yields metadata.
 
-    Can only be run once for a given component (or its children)
+    Yields the ``wiring.Component`` instances of that component's submodule, along
+    with their names and metadata.
 
-    If recursive = True, then name is a tuple of the heirarchy of names
-    otherwise, name is the string name of the first level component
+    Can only be run once for a given component (or its children).
+
+    Args:
+        fragment: The fragment to search in.
+        component_name: The name of the component to find.
+        recursive: If True, name is a tuple of the hierarchy of names. Otherwise,
+            name is the string name of the first level component.
+
+    Yields:
+        Tuple of (component, name, metadata) for each submodule.
     """
 
     subfrag = fragment.find_subfragment(component_name)

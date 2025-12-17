@@ -208,10 +208,14 @@ class SiliconPlatformPort(io.PortLike, Generic[Pin]):
 
 
 class Sky130Port(SiliconPlatformPort):
-    """
-    Specialisation of `SiliconPlatformPort` for the `Skywater sky130_fd_io__gpiov2 IO cell <https://skywater-pdk.readthedocs.io/en/main/contents/libraries/sky130_fd_io/docs/user_guide.html>`_
+    """Specialisation of ``SiliconPlatformPort`` for the Skywater sky130_fd_io__gpiov2 IO cell.
 
-    Includes wires and configuration for `Drive Modes <IODriveMode>`, `Input buffer trip point <IOTripPoint>`and buffer control
+    See the `Skywater PDK documentation
+    <https://skywater-pdk.readthedocs.io/en/main/contents/libraries/sky130_fd_io/docs/user_guide.html>`_
+    for more details.
+
+    Includes wires and configuration for drive modes (see ``Sky130DriveMode``),
+    input buffer trip point (see ``IOTripPoint``), and buffer control.
     """
 
     _DriveMode_map = {

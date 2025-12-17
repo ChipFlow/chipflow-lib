@@ -50,20 +50,22 @@ IO_ANNOTATION_SCHEMA = str(_chipflow_schema_uri("pin-annotation", 0))
 
 
 class IOModelOptions(TypedDict):
-    """
-    Options for an IO pad/pin.
+    """Options for an IO pad/pin.
 
     Attributes:
-        invert: Polarity inversion. If the value is a simple :class:`bool`, it specifies inversion for
-            the entire port. If the value is an iterable of :class:`bool`, the iterable must have the
-            same length as the width of ``io``, and the inversion is specified for individual wires.
-        individual_oe: controls whether each output wire is associated with an individual Output Enable bit
-            or if a single OE bit will be used for entire port. The default value is False (indicating that a
-            single OE bit controls the entire port).
-        power_domain: The name of the I/O power domain. NB there is only one of these, so IO with
-            multiple power domains must be split up.
-        clock_domain: the name of the I/O's clock domain (see ``amaranth.hdl.ClockDomain``). NB there
-            is only one of these, so IO with multiple clocks must be split up.
+        invert: Polarity inversion. If the value is a simple ``bool``, it specifies
+            inversion for the entire port. If the value is an iterable of ``bool``,
+            the iterable must have the same length as the width of ``io``, and the
+            inversion is specified for individual wires.
+        individual_oe: Controls whether each output wire is associated with an
+            individual Output Enable bit or if a single OE bit will be used for
+            entire port. The default value is False (indicating that a single OE
+            bit controls the entire port).
+        power_domain: The name of the I/O power domain. NB there is only one of
+            these, so IO with multiple power domains must be split up.
+        clock_domain: The name of the I/O's clock domain (see
+            ``amaranth.hdl.ClockDomain``). NB there is only one of these, so IO
+            with multiple clocks must be split up.
         buffer_in: Should the IO pad have an input buffer?
         buffer_out: Should the IO pad have an output buffer?
         sky130_drive_mode: Drive mode for output buffer on sky130.
