@@ -13,7 +13,7 @@ authors = [
 ]
 license = {file = "LICENSE.md"}
 
-requires-python = ">=3.11,<3.14"
+requires-python = ">=3.12,<3.14"
 dependencies = [
     "amaranth[builtin-yosys]>=0.5,<0.7",
     "amaranth-soc @ git+https://github.com/amaranth-lang/amaranth-soc",
@@ -79,7 +79,7 @@ dev = [
     "ruff>=0.9.2",
     "pytest>=7.2.0",
     "pytest-cov>=6.0.0",
-    "sphinx-autoapi>=3.5.0",
+    "sphinx-autoapi>=3.6.1",
     "sphinx~=7.4.7",
     "furo>=2024.04.27",
     "tomli-w>=1.2.0",
