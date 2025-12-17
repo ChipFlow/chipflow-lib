@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from .openframe import OpenframePackageDef
 
 # Import Process directly for pydantic to work properly
-from ..config_models import Process
+from ..config import Process
 
 
 # Union of all package definition types

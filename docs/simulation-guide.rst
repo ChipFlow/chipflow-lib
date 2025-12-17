@@ -505,7 +505,7 @@ Design (design/design.py)
 
     from chipflow_digital_ip.io import UARTPeripheral, GPIOPeripheral
     from chipflow_digital_ip.memory import QSPIFlash
-    from chipflow.platforms import (
+    from chipflow.platform import (
         UARTSignature, GPIOSignature, QSPIFlashSignature,
         attach_data, SoftwareBuild
     )

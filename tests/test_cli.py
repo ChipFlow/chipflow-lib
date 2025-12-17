@@ -9,7 +9,7 @@ from unittest import mock
 
 from chipflow import ChipFlowError
 from chipflow.cli import run
-from chipflow.config_models import Config, ChipFlowConfig
+from chipflow.config import Config, ChipFlowConfig
 
 class MockCommand:
     """Mock command for testing CLI"""

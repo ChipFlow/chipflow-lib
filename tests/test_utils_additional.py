@@ -3,11 +3,8 @@ import unittest
 
 from amaranth.lib import io
 
-from chipflow.platforms import (
-    IOSignature,
-    IOModel,
-    PACKAGE_DEFINITIONS
-)
+from chipflow.platform import IOSignature, IOModel
+from chipflow.packages import PACKAGE_DEFINITIONS
 
 
 class TestIOSignature(unittest.TestCase):

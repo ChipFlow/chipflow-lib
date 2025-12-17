@@ -5,7 +5,7 @@ import pytest  #noqa
 from amaranth import Const
 from amaranth.lib import io
 
-from chipflow.platforms import IOSignature, OutputIOSignature, InputIOSignature, BidirIOSignature
+from chipflow.platform import IOSignature, OutputIOSignature, InputIOSignature, BidirIOSignature
 
 
 logger = logging.getLogger(__name__)

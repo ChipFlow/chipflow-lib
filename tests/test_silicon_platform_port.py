@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 import unittest
 
-from chipflow.platforms.silicon import SiliconPlatformPort
+from chipflow.platform import SiliconPlatformPort
 
 
 class TestSiliconPlatformPort(unittest.TestCase):

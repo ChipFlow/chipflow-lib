@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from chipflow.platforms import PACKAGE_DEFINITIONS
+from chipflow.packages import PACKAGE_DEFINITIONS
 from chipflow.packaging import load_pinlock
 from chipflow.packaging.lockfile import LockFile
 from chipflow import ChipFlowError

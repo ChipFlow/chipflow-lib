@@ -60,7 +60,7 @@ def lock_pins(config: Optional['Config'] = None) -> None:
         ChipFlowError: If configuration is invalid or pin allocation fails
     """
     # Import here to avoid circular dependency
-    from ..platforms._packages import PACKAGE_DEFINITIONS
+    from ..packages import PACKAGE_DEFINITIONS
     from ..utils import top_components
 
     if config is None:
