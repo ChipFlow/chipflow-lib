@@ -1,0 +1,90 @@
+chipflow.packaging.port_desc
+============================
+
+.. py:module:: chipflow.packaging.port_desc
+
+.. autoapi-nested-parse::
+
+   Port description models for pin allocation.
+
+   This module provides models for describing port-to-pin mappings
+   and managing the overall port map for an IC package.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   chipflow.packaging.port_desc.PortDesc
+   chipflow.packaging.port_desc.PortMap
+
+
+Module Contents
+---------------
+
+.. py:class:: PortDesc(/, **data)
+
+   Bases: :py:obj:`pydantic.BaseModel`, :py:obj:`Generic`\ [\ :py:obj:`chipflow.packaging.pins.Pin`\ ]
+
+
+   Description of a port and its pin assignment.
+
+   :Attributes: * **type** -- Type of port (e.g., 'io', 'clock', 'reset', 'power', 'heartbeat')
+                * **pins** -- List of pins assigned to this port, or None if not yet allocated
+                * **port_name** -- Name of the port
+                * **iomodel** -- IO model configuration for this port
+
+
+   .. py:property:: width
+
+      Width of the port (number of pins)
+
+
+   .. py:property:: direction
+
+      Direction of the port
+
+
+   .. py:property:: invert
+      :type: collections.abc.Iterable[bool] | None
+
+
+      Inversion settings for port wires
+
+
+.. py:class:: PortMap(/, **data)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   Mapping of components to interfaces to ports.
+
+   This represents the complete pin allocation for an IC package,
+   organized hierarchically by component and interface.
+
+
+   .. py:method:: get_ports(component, interface)
+
+      Get ports for a specific component and interface.
+
+      :param component: Component name
+      :param interface: Interface name
+
+      :returns: Dictionary of port names to PortDesc, or None if not found
+
+
+
+   .. py:method:: get_clocks()
+
+      Get all clock ports in the port map
+
+
+
+   .. py:method:: get_resets()
+
+      Get all reset ports in the port map
+
+
+
