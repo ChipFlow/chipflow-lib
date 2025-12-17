@@ -330,16 +330,16 @@ for chipflow.toml configuration files.</p>
 <td><p>Configuration for silicon in chipflow.toml.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#chipflow.config.SimulationConfig" title="chipflow.config.SimulationConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SimulationConfig</span></code></a></p></td>
-<td><p>!!! abstract &quot;Usage Documentation&quot;</p></td>
+<td><p>Configuration for simulation settings.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#chipflow.config.CompilerConfig" title="chipflow.config.CompilerConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CompilerConfig</span></code></a></p></td>
-<td><p>!!! abstract &quot;Usage Documentation&quot;</p></td>
+<td><p>Configuration for compiler toolchain.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#chipflow.config.SoftwareConfig" title="chipflow.config.SoftwareConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SoftwareConfig</span></code></a></p></td>
-<td><p>!!! abstract &quot;Usage Documentation&quot;</p></td>
+<td><p>Configuration for software build settings.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#chipflow.config.TestConfig" title="chipflow.config.TestConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestConfig</span></code></a></p></td>
-<td><p>!!! abstract &quot;Usage Documentation&quot;</p></td>
+<td><p>Configuration for test settings.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#chipflow.config.ChipFlowConfig" title="chipflow.config.ChipFlowConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ChipFlowConfig</span></code></a></p></td>
 <td><p>Root configuration for chipflow.toml.</p></td>
@@ -389,39 +389,10 @@ for chipflow.toml configuration files.</p>
 <dt class="sig sig-object py" id="chipflow.config.SimulationConfig">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow.config.</span></span><span class="sig-name descname"><span class="pre">SimulationConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.config.SimulationConfig" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
-<dl class="simple">
-<dt>!!! abstract “Usage Documentation”</dt><dd><p>[Models](../concepts/models.md)</p>
-</dd>
-</dl>
-<p>A base class for creating Pydantic models.</p>
+<p>Configuration for simulation settings.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Attributes<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>__class_vars__</strong> – The names of the class variables defined on the model.</p></li>
-<li><p><strong>__private_attributes__</strong> – Metadata about the private attributes of the model.</p></li>
-<li><p><strong>__signature__</strong> – The synthesized <cite>__init__</cite> [<cite>Signature</cite>][inspect.Signature] of the model.</p></li>
-<li><p><strong>__pydantic_complete__</strong> – Whether model building is completed, or if there are still undefined fields.</p></li>
-<li><p><strong>__pydantic_core_schema__</strong> – The core schema of the model.</p></li>
-<li><p><strong>__pydantic_custom_init__</strong> – Whether the model has a custom <cite>__init__</cite> function.</p></li>
-<li><p><strong>__pydantic_decorators__</strong> – Metadata containing the decorators defined on the model.
-This replaces <cite>Model.__validators__</cite> and <cite>Model.__root_validators__</cite> from Pydantic V1.</p></li>
-<li><p><strong>__pydantic_generic_metadata__</strong> – Metadata for generic models; contains data used for a similar purpose to
-__args__, __origin__, __parameters__ in typing-module generics. May eventually be replaced by these.</p></li>
-<li><p><strong>__pydantic_parent_namespace__</strong> – Parent namespace of the model, used for automatic rebuilding of models.</p></li>
-<li><p><strong>__pydantic_post_init__</strong> – The name of the post-init method for the model, if defined.</p></li>
-<li><p><strong>__pydantic_root_model__</strong> – Whether the model is a [<cite>RootModel</cite>][pydantic.root_model.RootModel].</p></li>
-<li><p><strong>__pydantic_serializer__</strong> – The <cite>pydantic-core</cite> <cite>SchemaSerializer</cite> used to dump instances of the model.</p></li>
-<li><p><strong>__pydantic_validator__</strong> – The <cite>pydantic-core</cite> <cite>SchemaValidator</cite> used to validate instances of the model.</p></li>
-<li><p><strong>__pydantic_fields__</strong> – A dictionary of field names and their corresponding [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo] objects.</p></li>
-<li><p><strong>__pydantic_computed_fields__</strong> – A dictionary of computed field names and their corresponding [<cite>ComputedFieldInfo</cite>][pydantic.fields.ComputedFieldInfo] objects.</p></li>
-<li><p><strong>__pydantic_extra__</strong> – A dictionary containing extra values, if [<cite>extra</cite>][pydantic.config.ConfigDict.extra]
-is set to <cite>‘allow’</cite>.</p></li>
-<li><p><strong>__pydantic_fields_set__</strong> – The names of fields explicitly set during instantiation.</p></li>
-<li><p><strong>__pydantic_private__</strong> – Values of private attributes set on the model instance.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>data</strong> (<em>Any</em>)</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>Any</em>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -430,39 +401,10 @@ is set to <cite>‘allow’</cite>.</p></li>
 <dt class="sig sig-object py" id="chipflow.config.CompilerConfig">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow.config.</span></span><span class="sig-name descname"><span class="pre">CompilerConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.config.CompilerConfig" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
-<dl class="simple">
-<dt>!!! abstract “Usage Documentation”</dt><dd><p>[Models](../concepts/models.md)</p>
-</dd>
-</dl>
-<p>A base class for creating Pydantic models.</p>
+<p>Configuration for compiler toolchain.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Attributes<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>__class_vars__</strong> – The names of the class variables defined on the model.</p></li>
-<li><p><strong>__private_attributes__</strong> – Metadata about the private attributes of the model.</p></li>
-<li><p><strong>__signature__</strong> – The synthesized <cite>__init__</cite> [<cite>Signature</cite>][inspect.Signature] of the model.</p></li>
-<li><p><strong>__pydantic_complete__</strong> – Whether model building is completed, or if there are still undefined fields.</p></li>
-<li><p><strong>__pydantic_core_schema__</strong> – The core schema of the model.</p></li>
-<li><p><strong>__pydantic_custom_init__</strong> – Whether the model has a custom <cite>__init__</cite> function.</p></li>
-<li><p><strong>__pydantic_decorators__</strong> – Metadata containing the decorators defined on the model.
-This replaces <cite>Model.__validators__</cite> and <cite>Model.__root_validators__</cite> from Pydantic V1.</p></li>
-<li><p><strong>__pydantic_generic_metadata__</strong> – Metadata for generic models; contains data used for a similar purpose to
-__args__, __origin__, __parameters__ in typing-module generics. May eventually be replaced by these.</p></li>
-<li><p><strong>__pydantic_parent_namespace__</strong> – Parent namespace of the model, used for automatic rebuilding of models.</p></li>
-<li><p><strong>__pydantic_post_init__</strong> – The name of the post-init method for the model, if defined.</p></li>
-<li><p><strong>__pydantic_root_model__</strong> – Whether the model is a [<cite>RootModel</cite>][pydantic.root_model.RootModel].</p></li>
-<li><p><strong>__pydantic_serializer__</strong> – The <cite>pydantic-core</cite> <cite>SchemaSerializer</cite> used to dump instances of the model.</p></li>
-<li><p><strong>__pydantic_validator__</strong> – The <cite>pydantic-core</cite> <cite>SchemaValidator</cite> used to validate instances of the model.</p></li>
-<li><p><strong>__pydantic_fields__</strong> – A dictionary of field names and their corresponding [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo] objects.</p></li>
-<li><p><strong>__pydantic_computed_fields__</strong> – A dictionary of computed field names and their corresponding [<cite>ComputedFieldInfo</cite>][pydantic.fields.ComputedFieldInfo] objects.</p></li>
-<li><p><strong>__pydantic_extra__</strong> – A dictionary containing extra values, if [<cite>extra</cite>][pydantic.config.ConfigDict.extra]
-is set to <cite>‘allow’</cite>.</p></li>
-<li><p><strong>__pydantic_fields_set__</strong> – The names of fields explicitly set during instantiation.</p></li>
-<li><p><strong>__pydantic_private__</strong> – Values of private attributes set on the model instance.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>data</strong> (<em>Any</em>)</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>Any</em>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -471,39 +413,10 @@ is set to <cite>‘allow’</cite>.</p></li>
 <dt class="sig sig-object py" id="chipflow.config.SoftwareConfig">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow.config.</span></span><span class="sig-name descname"><span class="pre">SoftwareConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.config.SoftwareConfig" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
-<dl class="simple">
-<dt>!!! abstract “Usage Documentation”</dt><dd><p>[Models](../concepts/models.md)</p>
-</dd>
-</dl>
-<p>A base class for creating Pydantic models.</p>
+<p>Configuration for software build settings.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Attributes<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>__class_vars__</strong> – The names of the class variables defined on the model.</p></li>
-<li><p><strong>__private_attributes__</strong> – Metadata about the private attributes of the model.</p></li>
-<li><p><strong>__signature__</strong> – The synthesized <cite>__init__</cite> [<cite>Signature</cite>][inspect.Signature] of the model.</p></li>
-<li><p><strong>__pydantic_complete__</strong> – Whether model building is completed, or if there are still undefined fields.</p></li>
-<li><p><strong>__pydantic_core_schema__</strong> – The core schema of the model.</p></li>
-<li><p><strong>__pydantic_custom_init__</strong> – Whether the model has a custom <cite>__init__</cite> function.</p></li>
-<li><p><strong>__pydantic_decorators__</strong> – Metadata containing the decorators defined on the model.
-This replaces <cite>Model.__validators__</cite> and <cite>Model.__root_validators__</cite> from Pydantic V1.</p></li>
-<li><p><strong>__pydantic_generic_metadata__</strong> – Metadata for generic models; contains data used for a similar purpose to
-__args__, __origin__, __parameters__ in typing-module generics. May eventually be replaced by these.</p></li>
-<li><p><strong>__pydantic_parent_namespace__</strong> – Parent namespace of the model, used for automatic rebuilding of models.</p></li>
-<li><p><strong>__pydantic_post_init__</strong> – The name of the post-init method for the model, if defined.</p></li>
-<li><p><strong>__pydantic_root_model__</strong> – Whether the model is a [<cite>RootModel</cite>][pydantic.root_model.RootModel].</p></li>
-<li><p><strong>__pydantic_serializer__</strong> – The <cite>pydantic-core</cite> <cite>SchemaSerializer</cite> used to dump instances of the model.</p></li>
-<li><p><strong>__pydantic_validator__</strong> – The <cite>pydantic-core</cite> <cite>SchemaValidator</cite> used to validate instances of the model.</p></li>
-<li><p><strong>__pydantic_fields__</strong> – A dictionary of field names and their corresponding [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo] objects.</p></li>
-<li><p><strong>__pydantic_computed_fields__</strong> – A dictionary of computed field names and their corresponding [<cite>ComputedFieldInfo</cite>][pydantic.fields.ComputedFieldInfo] objects.</p></li>
-<li><p><strong>__pydantic_extra__</strong> – A dictionary containing extra values, if [<cite>extra</cite>][pydantic.config.ConfigDict.extra]
-is set to <cite>‘allow’</cite>.</p></li>
-<li><p><strong>__pydantic_fields_set__</strong> – The names of fields explicitly set during instantiation.</p></li>
-<li><p><strong>__pydantic_private__</strong> – Values of private attributes set on the model instance.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>data</strong> (<em>Any</em>)</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>Any</em>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -512,39 +425,10 @@ is set to <cite>‘allow’</cite>.</p></li>
 <dt class="sig sig-object py" id="chipflow.config.TestConfig">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow.config.</span></span><span class="sig-name descname"><span class="pre">TestConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.config.TestConfig" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
-<dl class="simple">
-<dt>!!! abstract “Usage Documentation”</dt><dd><p>[Models](../concepts/models.md)</p>
-</dd>
-</dl>
-<p>A base class for creating Pydantic models.</p>
+<p>Configuration for test settings.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Attributes<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>__class_vars__</strong> – The names of the class variables defined on the model.</p></li>
-<li><p><strong>__private_attributes__</strong> – Metadata about the private attributes of the model.</p></li>
-<li><p><strong>__signature__</strong> – The synthesized <cite>__init__</cite> [<cite>Signature</cite>][inspect.Signature] of the model.</p></li>
-<li><p><strong>__pydantic_complete__</strong> – Whether model building is completed, or if there are still undefined fields.</p></li>
-<li><p><strong>__pydantic_core_schema__</strong> – The core schema of the model.</p></li>
-<li><p><strong>__pydantic_custom_init__</strong> – Whether the model has a custom <cite>__init__</cite> function.</p></li>
-<li><p><strong>__pydantic_decorators__</strong> – Metadata containing the decorators defined on the model.
-This replaces <cite>Model.__validators__</cite> and <cite>Model.__root_validators__</cite> from Pydantic V1.</p></li>
-<li><p><strong>__pydantic_generic_metadata__</strong> – Metadata for generic models; contains data used for a similar purpose to
-__args__, __origin__, __parameters__ in typing-module generics. May eventually be replaced by these.</p></li>
-<li><p><strong>__pydantic_parent_namespace__</strong> – Parent namespace of the model, used for automatic rebuilding of models.</p></li>
-<li><p><strong>__pydantic_post_init__</strong> – The name of the post-init method for the model, if defined.</p></li>
-<li><p><strong>__pydantic_root_model__</strong> – Whether the model is a [<cite>RootModel</cite>][pydantic.root_model.RootModel].</p></li>
-<li><p><strong>__pydantic_serializer__</strong> – The <cite>pydantic-core</cite> <cite>SchemaSerializer</cite> used to dump instances of the model.</p></li>
-<li><p><strong>__pydantic_validator__</strong> – The <cite>pydantic-core</cite> <cite>SchemaValidator</cite> used to validate instances of the model.</p></li>
-<li><p><strong>__pydantic_fields__</strong> – A dictionary of field names and their corresponding [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo] objects.</p></li>
-<li><p><strong>__pydantic_computed_fields__</strong> – A dictionary of computed field names and their corresponding [<cite>ComputedFieldInfo</cite>][pydantic.fields.ComputedFieldInfo] objects.</p></li>
-<li><p><strong>__pydantic_extra__</strong> – A dictionary containing extra values, if [<cite>extra</cite>][pydantic.config.ConfigDict.extra]
-is set to <cite>‘allow’</cite>.</p></li>
-<li><p><strong>__pydantic_fields_set__</strong> – The names of fields explicitly set during instantiation.</p></li>
-<li><p><strong>__pydantic_private__</strong> – Values of private attributes set on the model instance.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>data</strong> (<em>Any</em>)</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>Any</em>)</p>
 </dd>
 </dl>
 </dd></dl>

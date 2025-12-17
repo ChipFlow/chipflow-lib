@@ -376,12 +376,18 @@ these, so IO with multiple power domains must be split up.</p></li>
 <li><p><strong>clock_domain</strong> – The name of the I/O’s clock domain (see
 <code class="docutils literal notranslate"><span class="pre">amaranth.hdl.ClockDomain</span></code>). NB there is only one of these, so IO
 with multiple clocks must be split up.</p></li>
-<li><p><strong>buffer_in</strong> – Should the IO pad have an input buffer?</p></li>
-<li><p><strong>buffer_out</strong> – Should the IO pad have an output buffer?</p></li>
-<li><p><strong>sky130_drive_mode</strong> – Drive mode for output buffer on sky130.</p></li>
-<li><p><strong>trip_point</strong> – Trip Point configuration for input buffer.</p></li>
-<li><p><strong>init</strong> – The value for the initial values of the port.</p></li>
-<li><p><strong>init_oe</strong> – The value for the initial values of the output enable(s) of the port.</p></li>
+<li><p><strong>buffer_in</strong> – Should the IO pad have an input buffer? Defaults to True for
+ports with input direction.</p></li>
+<li><p><strong>buffer_out</strong> – Should the IO pad have an output buffer? Defaults to True for
+ports with output direction.</p></li>
+<li><p><strong>sky130_drive_mode</strong> – Drive mode for output buffer on sky130. See
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Sky130DriveMode</span></code> for available options.</p></li>
+<li><p><strong>trip_point</strong> – Trip Point configuration for input buffer. See
+<a class="reference internal" href="#chipflow.platform.io.iosignature.IOTripPoint" title="chipflow.platform.io.iosignature.IOTripPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">IOTripPoint</span></code></a> for available options.</p></li>
+<li><p><strong>init</strong> – The value for the initial values of the port. Can be an integer or
+boolean.</p></li>
+<li><p><strong>init_oe</strong> – The value for the initial values of the output enable(s) of the
+port. Can be an integer or boolean.</p></li>
 </ul>
 </dd>
 </dl>
