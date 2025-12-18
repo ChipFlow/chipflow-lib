@@ -86,6 +86,9 @@ void open_input_commands(const std::string &filename) {
 
 static std::ofstream event_log;
 
+// UART log file for VS Code extension
+static FILE *uart_log = nullptr;
+
 void open_event_log(const std::string &filename) {
     event_log.open(filename);
     if (!event_log) {
@@ -132,6 +135,22 @@ void close_event_log() {
     if (input_ptr != input_cmds.size()) {
         fprintf(stderr, "WARNING: not all input actions were executed (%d/%d remain)!\n",
              int(input_cmds.size()) - int(input_ptr), int(input_cmds.size()));
+    }
+}
+
+void open_uart_log(const std::string &filename) {
+    uart_log = fopen(filename.c_str(), "w");
+    if (!uart_log) {
+        fprintf(stderr, "WARNING: failed to open UART log file: %s\n", filename.c_str());
+    } else {
+        fprintf(stderr, "Logging UART to file: %s\n", filename.c_str());
+    }
+}
+
+void close_uart_log() {
+    if (uart_log) {
+        fclose(uart_log);
+        uart_log = nullptr;
     }
 }
 
@@ -246,10 +265,15 @@ void uart::step(unsigned timestamp) {
                 s.rx_sr = (tx ? 0x80U : 0x00U) | (s.rx_sr >> 1U);
             }
             if (bit == 8) {
-                // print to console
+                // print to console and log file
                 log_event(timestamp, name, "tx", json(s.rx_sr));
-                if (name == "uart_0")
+                if (name == "uart_0") {
                     fprintf(stderr, "%c", char(s.rx_sr));
+                    if (uart_log) {
+                        fprintf(uart_log, "%c", char(s.rx_sr));
+                        fflush(uart_log);  // Flush for real-time watching
+                    }
+                }
             }
             if (bit == 9) {
                 // end
