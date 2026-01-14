@@ -17,7 +17,7 @@ from ctypes import (
     c_void_p,
 )
 from pathlib import Path
-from typing import Dict, Iterator, Optional, Tuple, Union
+from typing import Dict, Iterator, Tuple, Union
 
 
 # CXXRTL object types
@@ -91,8 +91,8 @@ class CxxrtlSimulator:
         """
         self._lib_path = Path(library_path)
         self._top_module = top_module
-        self._lib: Optional[ctypes.CDLL] = None
-        self._handle: Optional[c_void_p] = None
+        self._lib: ctypes.CDLL
+        self._handle: c_void_p
         self._objects: Dict[str, CxxrtlObject] = {}
 
         self._load_library()
@@ -297,9 +297,9 @@ class CxxrtlSimulator:
 
     def close(self) -> None:
         """Release simulation resources."""
-        if self._handle and self._lib:
+        if hasattr(self, "_handle") and hasattr(self, "_lib"):
             self._lib.cxxrtl_destroy(self._handle)
-            self._handle = None
+            del self._handle
 
     def __enter__(self) -> "CxxrtlSimulator":
         return self

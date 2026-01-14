@@ -258,7 +258,7 @@ def build_cxxrtl_from_amaranth(
     Returns:
         Path to the compiled shared library
     """
-    from amaranth.back import rtlil
+    from amaranth.back import rtlil  # type: ignore[attr-defined]
 
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -271,9 +271,9 @@ def build_cxxrtl_from_amaranth(
     rtlil_path.write_text(rtlil_text)
 
     # Build Yosys commands - read RTLIL first, then extra sources
-    sources = [rtlil_path]
+    sources: list[Path] = [rtlil_path]
     if extra_sources:
-        sources.extend(extra_sources)
+        sources.extend(Path(s) for s in extra_sources)
 
     # For RTLIL, we need special handling in Yosys
     yosys_cmds = [f"read_rtlil {rtlil_path}"]
