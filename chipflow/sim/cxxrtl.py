@@ -14,11 +14,10 @@ from ctypes import (
     c_int,
     c_size_t,
     c_uint32,
-    c_uint64,
     c_void_p,
 )
 from pathlib import Path
-from typing import Callable, Dict, Iterator, Optional, Tuple, Union
+from typing import Dict, Iterator, Optional, Tuple, Union
 
 
 # CXXRTL object types

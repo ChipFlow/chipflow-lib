@@ -9,9 +9,8 @@ import logging
 import platform
 import shutil
 import subprocess
-import tempfile
 from pathlib import Path
-from typing import List, Optional, Sequence, Union
+from typing import Optional, Sequence, Union
 
 logger = logging.getLogger(__name__)
 
