@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-2-Clause
 """Build CXXRTL shared libraries from HDL sources.
 
 This module provides functions to compile Amaranth, Verilog, and SystemVerilog

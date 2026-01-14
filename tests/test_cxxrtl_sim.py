@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-2-Clause
 """Tests for CXXRTL simulation infrastructure."""
 
 import shutil

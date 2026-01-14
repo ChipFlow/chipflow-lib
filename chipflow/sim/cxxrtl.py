@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-2-Clause
 """CXXRTL C API bindings via ctypes.
 
 This module provides Python bindings for the CXXRTL simulation engine,

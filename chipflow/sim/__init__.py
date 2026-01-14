@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-2-Clause
 """CXXRTL-based simulation infrastructure for ChipFlow.
 
 This module provides Python bindings for CXXRTL simulation, enabling fast
