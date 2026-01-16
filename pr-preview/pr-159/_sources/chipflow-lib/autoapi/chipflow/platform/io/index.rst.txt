@@ -1,0 +1,370 @@
+chipflow.platform.io
+====================
+
+.. py:module:: chipflow.platform.io
+
+.. autoapi-nested-parse::
+
+   IO signatures and utilities for ChipFlow platforms.
+
+   This module provides IO signature definitions, annotations, and
+   platform-specific IO utilities.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /chipflow-lib/autoapi/chipflow/platform/io/annotate/index
+   /chipflow-lib/autoapi/chipflow/platform/io/iosignature/index
+   /chipflow-lib/autoapi/chipflow/platform/io/signatures/index
+   /chipflow-lib/autoapi/chipflow/platform/io/sky130/index
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   chipflow.platform.io.IOTripPoint
+   chipflow.platform.io.IOModelOptions
+   chipflow.platform.io.IOModel
+   chipflow.platform.io.IOSignature
+   chipflow.platform.io.JTAGSignature
+   chipflow.platform.io.SPISignature
+   chipflow.platform.io.I2CSignature
+   chipflow.platform.io.UARTSignature
+   chipflow.platform.io.GPIOSignature
+   chipflow.platform.io.QSPIFlashSignature
+   chipflow.platform.io.SoftwareDriverSignature
+   chipflow.platform.io.SoftwareBuild
+   chipflow.platform.io.Sky130DriveMode
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   chipflow.platform.io.InputIOSignature
+   chipflow.platform.io.OutputIOSignature
+   chipflow.platform.io.BidirIOSignature
+   chipflow.platform.io.submodule_metadata
+
+
+Package Contents
+----------------
+
+.. py:class:: IOTripPoint
+
+   Bases: :py:obj:`enum.StrEnum`
+
+
+   Models various options for trip points for inputs.
+   Depending on process and cell library, these may be statically or dynamically configurable.
+
+   You will get an error if the option is not available with the chosen process and cell library
+
+
+.. py:class:: IOModelOptions
+
+   Bases: :py:obj:`typing_extensions.TypedDict`
+
+
+   Options for an IO pad/pin.
+
+   :Attributes: * **invert** -- Polarity inversion. If the value is a simple ``bool``, it specifies
+                  inversion for the entire port. If the value is an iterable of ``bool``,
+                  the iterable must have the same length as the width of ``io``, and the
+                  inversion is specified for individual wires.
+                * **individual_oe** -- Controls whether each output wire is associated with an
+                  individual Output Enable bit or if a single OE bit will be used for
+                  entire port. The default value is False (indicating that a single OE
+                  bit controls the entire port).
+                * **power_domain** -- The name of the I/O power domain. NB there is only one of
+                  these, so IO with multiple power domains must be split up.
+                * **clock_domain** -- The name of the I/O's clock domain (see
+                  ``amaranth.hdl.ClockDomain``). NB there is only one of these, so IO
+                  with multiple clocks must be split up.
+                * **buffer_in** -- Should the IO pad have an input buffer? Defaults to True for
+                  ports with input direction.
+                * **buffer_out** -- Should the IO pad have an output buffer? Defaults to True for
+                  ports with output direction.
+                * **sky130_drive_mode** -- Drive mode for output buffer on sky130. See
+                  :class:`Sky130DriveMode` for available options.
+                * **trip_point** -- Trip Point configuration for input buffer. See
+                  :class:`IOTripPoint` for available options.
+                * **init** -- The value for the initial values of the port. Can be an integer or
+                  boolean.
+                * **init_oe** -- The value for the initial values of the output enable(s) of the
+                  port. Can be an integer or boolean.
+
+
+.. py:class:: IOModel
+
+   Bases: :py:obj:`IOModelOptions`
+
+
+   Setting for IO Ports (see also base class :class:`IOModelOptions`).
+
+   :Attributes: * **direction** -- ``io.Direction.Input``, ``io.Direction.Output`` or ``io.Direction.Bidir``.
+                * **width** -- Width of port, default is 1.
+
+
+.. py:class:: IOSignature(**kwargs)
+
+   Bases: :py:obj:`amaranth.lib.wiring.Signature`
+
+
+   An :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` used to decorate wires that would usually be brought out onto a port on the package.
+   This class is generally not directly used.  Instead, you would typically utilize the more specific
+   :py:obj:`InputIOSignature`, :py:obj:`OutputIOSignature`, or :py:obj:`BidirIOSignature` for defining pin interfaces.
+
+
+   .. py:property:: direction
+      :type: amaranth.lib.io.Direction
+
+
+      The direction of the IO port
+
+
+   .. py:property:: width
+      :type: int
+
+
+      The width of the IO port, in wires
+
+
+   .. py:property:: invert
+      :type: collections.abc.Iterable[bool]
+
+
+      A tuple as wide as the IO port, with a bool for the polarity inversion for each wire
+
+
+   .. py:property:: options
+      :type: IOModelOptions
+
+
+      Options set on the io port at construction
+
+
+.. py:function:: InputIOSignature(width, **kwargs)
+
+   This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package input signals
+   intended for connection to the physical pads of the integrated circuit package.
+
+   :param width: specifies the number of individual input wires within this port, each of which will correspond to a separate physical pad on the integrated circuit package.
+
+
+.. py:function:: OutputIOSignature(width, **kwargs)
+
+   This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package output signals
+   intended for connection to the physical pads of the integrated circuit package.
+
+   :param width: specifies the number of individual output wires within this port, each of which will correspond to a separate physical pad on the integrated circuit package.
+
+
+.. py:function:: BidirIOSignature(width, **kwargs)
+
+   This creates an :py:obj:`Amaranth Signature <amaranth.lib.wiring.Signature>` which is then used to decorate package bi-directional signals
+   intended for connection to the physical pads of the integrated circuit package.
+
+   :param width: specifies the number of individual input/output wires within this port. Each pair of input/output wires will correspond to a separate physical pad on the integrated circuit package.
+
+
+.. py:class:: JTAGSignature(**kwargs)
+
+   Bases: :py:obj:`amaranth.lib.wiring.Signature`
+
+
+   Description of an interface object.
+
+   An interface object is a Python object that has a :py:`signature` attribute containing
+   a :class:`Signature` object, as well as an attribute for every member of its signature.
+   Signatures and interface objects are tightly linked: an interface object can be created out
+   of a signature, and the signature is used when :func:`connect`\ ing two interface objects
+   together. See the :ref:`introduction to interfaces <wiring-intro1>` for a more detailed
+   explanation of why this is useful.
+
+   :class:`Signature` can be used as a base class to define :ref:`customized <wiring-customizing>`
+   signatures and interface objects.
+
+   .. warning::
+
+       :class:`Signature` objects are immutable. Classes inheriting from :class:`Signature` must
+       ensure this remains the case when additional functionality is added.
+
+
+.. py:class:: SPISignature(**kwargs)
+
+   Bases: :py:obj:`amaranth.lib.wiring.Signature`
+
+
+   Description of an interface object.
+
+   An interface object is a Python object that has a :py:`signature` attribute containing
+   a :class:`Signature` object, as well as an attribute for every member of its signature.
+   Signatures and interface objects are tightly linked: an interface object can be created out
+   of a signature, and the signature is used when :func:`connect`\ ing two interface objects
+   together. See the :ref:`introduction to interfaces <wiring-intro1>` for a more detailed
+   explanation of why this is useful.
+
+   :class:`Signature` can be used as a base class to define :ref:`customized <wiring-customizing>`
+   signatures and interface objects.
+
+   .. warning::
+
+       :class:`Signature` objects are immutable. Classes inheriting from :class:`Signature` must
+       ensure this remains the case when additional functionality is added.
+
+
+.. py:class:: I2CSignature(**kwargs)
+
+   Bases: :py:obj:`amaranth.lib.wiring.Signature`
+
+
+   Description of an interface object.
+
+   An interface object is a Python object that has a :py:`signature` attribute containing
+   a :class:`Signature` object, as well as an attribute for every member of its signature.
+   Signatures and interface objects are tightly linked: an interface object can be created out
+   of a signature, and the signature is used when :func:`connect`\ ing two interface objects
+   together. See the :ref:`introduction to interfaces <wiring-intro1>` for a more detailed
+   explanation of why this is useful.
+
+   :class:`Signature` can be used as a base class to define :ref:`customized <wiring-customizing>`
+   signatures and interface objects.
+
+   .. warning::
+
+       :class:`Signature` objects are immutable. Classes inheriting from :class:`Signature` must
+       ensure this remains the case when additional functionality is added.
+
+
+.. py:class:: UARTSignature(**kwargs)
+
+   Bases: :py:obj:`amaranth.lib.wiring.Signature`
+
+
+   Description of an interface object.
+
+   An interface object is a Python object that has a :py:`signature` attribute containing
+   a :class:`Signature` object, as well as an attribute for every member of its signature.
+   Signatures and interface objects are tightly linked: an interface object can be created out
+   of a signature, and the signature is used when :func:`connect`\ ing two interface objects
+   together. See the :ref:`introduction to interfaces <wiring-intro1>` for a more detailed
+   explanation of why this is useful.
+
+   :class:`Signature` can be used as a base class to define :ref:`customized <wiring-customizing>`
+   signatures and interface objects.
+
+   .. warning::
+
+       :class:`Signature` objects are immutable. Classes inheriting from :class:`Signature` must
+       ensure this remains the case when additional functionality is added.
+
+
+.. py:class:: GPIOSignature(pin_count=1, **kwargs)
+
+   Bases: :py:obj:`amaranth.lib.wiring.Signature`
+
+
+   Description of an interface object.
+
+   An interface object is a Python object that has a :py:`signature` attribute containing
+   a :class:`Signature` object, as well as an attribute for every member of its signature.
+   Signatures and interface objects are tightly linked: an interface object can be created out
+   of a signature, and the signature is used when :func:`connect`\ ing two interface objects
+   together. See the :ref:`introduction to interfaces <wiring-intro1>` for a more detailed
+   explanation of why this is useful.
+
+   :class:`Signature` can be used as a base class to define :ref:`customized <wiring-customizing>`
+   signatures and interface objects.
+
+   .. warning::
+
+       :class:`Signature` objects are immutable. Classes inheriting from :class:`Signature` must
+       ensure this remains the case when additional functionality is added.
+
+
+.. py:class:: QSPIFlashSignature(**kwargs)
+
+   Bases: :py:obj:`amaranth.lib.wiring.Signature`
+
+
+   Description of an interface object.
+
+   An interface object is a Python object that has a :py:`signature` attribute containing
+   a :class:`Signature` object, as well as an attribute for every member of its signature.
+   Signatures and interface objects are tightly linked: an interface object can be created out
+   of a signature, and the signature is used when :func:`connect`\ ing two interface objects
+   together. See the :ref:`introduction to interfaces <wiring-intro1>` for a more detailed
+   explanation of why this is useful.
+
+   :class:`Signature` can be used as a base class to define :ref:`customized <wiring-customizing>`
+   signatures and interface objects.
+
+   .. warning::
+
+       :class:`Signature` objects are immutable. Classes inheriting from :class:`Signature` must
+       ensure this remains the case when additional functionality is added.
+
+
+.. py:class:: SoftwareDriverSignature(members, **kwargs)
+
+   Bases: :py:obj:`amaranth.lib.wiring.Signature`
+
+
+   Description of an interface object.
+
+   An interface object is a Python object that has a :py:`signature` attribute containing
+   a :class:`Signature` object, as well as an attribute for every member of its signature.
+   Signatures and interface objects are tightly linked: an interface object can be created out
+   of a signature, and the signature is used when :func:`connect`\ ing two interface objects
+   together. See the :ref:`introduction to interfaces <wiring-intro1>` for a more detailed
+   explanation of why this is useful.
+
+   :class:`Signature` can be used as a base class to define :ref:`customized <wiring-customizing>`
+   signatures and interface objects.
+
+   .. warning::
+
+       :class:`Signature` objects are immutable. Classes inheriting from :class:`Signature` must
+       ensure this remains the case when additional functionality is added.
+
+
+.. py:class:: SoftwareBuild(*, sources, includes = [], include_dirs=[], offset=0)
+
+   This holds the information needed for building software and providing the built outcome
+
+
+.. py:class:: Sky130DriveMode
+
+   Bases: :py:obj:`enum.StrEnum`
+
+
+   Models the potential drive modes of an SkyWater 130 IO cell [sky130_fd_io__gpiov2](https://skywater-pdk.readthedocs.io/en/main/contents/libraries/sky130_fd_io/docs/user_guide.html)
+   These are both statically configurable and can be set at runtime on the `:py:mod:drive_mode.Sky130Port` lines on the port.
+
+
+.. py:function:: submodule_metadata(fragment, component_name, recursive=False)
+
+   Generator that finds ``component_name`` in ``fragment`` and yields metadata.
+
+   Yields the ``wiring.Component`` instances of that component's submodule, along
+   with their names and metadata.
+
+   Can only be run once for a given component (or its children).
+
+   :param fragment: The fragment to search in.
+   :param component_name: The name of the component to find.
+   :param recursive: If True, name is a tuple of the hierarchy of names. Otherwise,
+                     name is the string name of the first level component.
+
+   :Yields: Tuple of (component, name, metadata) for each submodule.
+
+

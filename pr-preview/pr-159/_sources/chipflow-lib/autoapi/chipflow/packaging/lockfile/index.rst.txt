@@ -1,0 +1,52 @@
+chipflow.packaging.lockfile
+===========================
+
+.. py:module:: chipflow.packaging.lockfile
+
+.. autoapi-nested-parse::
+
+   Lock file models for pin assignments.
+
+   The lock file captures the complete pin allocation for a design,
+   allowing pins to be locked and reused across design iterations.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   chipflow.packaging.lockfile.Package
+   chipflow.packaging.lockfile.LockFile
+
+
+Module Contents
+---------------
+
+.. py:class:: Package(/, **data)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   Serializable identifier for a defined packaging option.
+
+   :Attributes: **package_type** -- Package type (discriminated union of all PackageDef types)
+
+
+.. py:class:: LockFile(/, **data)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   Representation of a pin lock file.
+
+   The lock file stores the complete pin allocation for a design,
+   allowing pins to remain consistent across design iterations.
+
+   :Attributes: * **process** -- Semiconductor process being used
+                * **package** -- Information about the physical package
+                * **port_map** -- Mapping of components to interfaces to ports
+                * **metadata** -- Amaranth metadata, for reference
+
+

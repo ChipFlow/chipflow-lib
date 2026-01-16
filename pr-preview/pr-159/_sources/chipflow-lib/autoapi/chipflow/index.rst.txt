@@ -1,0 +1,68 @@
+chipflow
+========
+
+.. py:module:: chipflow
+
+.. autoapi-nested-parse::
+
+   Chipflow library
+
+   This is the main entry point for the ChipFlow library, providing tools for
+   building ASIC designs using the Amaranth HDL framework.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /chipflow-lib/autoapi/chipflow/auth/index
+   /chipflow-lib/autoapi/chipflow/auth_command/index
+   /chipflow-lib/autoapi/chipflow/common/index
+   /chipflow-lib/autoapi/chipflow/config/index
+   /chipflow-lib/autoapi/chipflow/packages/index
+   /chipflow-lib/autoapi/chipflow/packaging/index
+   /chipflow-lib/autoapi/chipflow/platform/index
+   /chipflow-lib/autoapi/chipflow/sim/index
+   /chipflow-lib/autoapi/chipflow/utils/index
+
+
+Exceptions
+----------
+
+.. autoapisummary::
+
+   chipflow.ChipFlowError
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   chipflow.ensure_chipflow_root
+
+
+Package Contents
+----------------
+
+.. py:exception:: ChipFlowError
+
+   Bases: :py:obj:`Exception`
+
+
+   Base exception for ChipFlow errors
+
+
+.. py:function:: ensure_chipflow_root()
+
+   Ensure CHIPFLOW_ROOT environment variable is set and return its path.
+
+   If CHIPFLOW_ROOT is not set, sets it to the current working directory.
+   Also ensures the root is in sys.path.
+
+   :returns: Path to the chipflow root directory
+
+
