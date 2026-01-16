@@ -30,7 +30,7 @@ jobs:
           cache: true
 
       - name: Install dependencies with multirepo
-        uses: chipflow/pdm-multirepo@v3
+        uses: chipflow/pdm-multirepo@v4
 
       - name: Run tests
         run: pdm run test

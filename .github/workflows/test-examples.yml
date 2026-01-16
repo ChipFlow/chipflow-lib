@@ -85,7 +85,7 @@ jobs:
           cache-dependency-path: './**/pyproject.toml'
 
       - name: Install dependencies with multirepo
-        uses: chipflow/pdm-multirepo@v3
+        uses: chipflow/pdm-multirepo@v4
         with:
           working-directory: ${{ env.test_repo_path }}
 
