@@ -21,3 +21,9 @@ docs/_build
 docs/autoapi
 docs/chipflow-lib
 .cache
+
+# Build artifacts
+/build/
+
+# Claude Code
+.claude/
