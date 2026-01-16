@@ -9,18 +9,39 @@ import logging
 import platform
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 from typing import Optional, Sequence, Union
 
 logger = logging.getLogger(__name__)
 
 
-def _find_cxx_compiler() -> str:
-    """Find a C++ compiler."""
-    for compiler in ["c++", "g++", "clang++"]:
-        if shutil.which(compiler):
-            return compiler
-    raise RuntimeError("No C++ compiler found. Install g++ or clang++.")
+def _find_zig_cxx() -> Optional[list[str]]:
+    """Find zig C++ compiler.
+
+    Returns command list for zig c++, or None if not available.
+    """
+    # Prefer zig via ziglang package (consistent cross-platform builds)
+    try:
+        import ziglang  # noqa: F401
+
+        return [sys.executable, "-m", "ziglang", "c++"]
+    except ImportError:
+        pass
+
+    # Fall back to system zig
+    if shutil.which("zig"):
+        return ["zig", "c++"]
+
+    return None
+
+
+def _find_system_linker() -> list[str]:
+    """Find a system linker for creating shared libraries."""
+    for linker in ["c++", "g++", "clang++"]:
+        if shutil.which(linker):
+            return [linker]
+    raise RuntimeError("No C++ linker found. Install g++ or clang++.")
 
 
 def _get_shared_lib_extension() -> str:
@@ -199,36 +220,76 @@ def build_cxxrtl(
     cxxrtl_include = _get_cxxrtl_include_path()
     logger.debug(f"Using CXXRTL headers from {cxxrtl_include}")
 
-    # Compile to shared library
-    compiler = _find_cxx_compiler()
-    compile_cmd = [
-        compiler,
-        "-std=c++17",
-        optimization,
-        "-shared",
-        "-fPIC",
-        f"-I{cxxrtl_include}",
-        f"-I{output_dir}",  # For finding the generated CXXRTL code
-        "-DCXXRTL_INCLUDE_CAPI_IMPL",  # Include C API implementation
-        "-o", str(lib_path),
-        str(wrapper_path),  # Compile wrapper which includes the generated code
-    ]
+    # Compile to shared library using zig for compilation, system linker for linking
+    # (zig 0.11.0 has issues with -shared on some platforms)
+    zig_cxx = _find_zig_cxx()
+    obj_path = output_dir / f"{output_name}_capi_wrapper.o"
 
-    # Platform-specific flags
-    if platform.system() == "Darwin":
-        compile_cmd.extend(["-undefined", "dynamic_lookup"])
+    if zig_cxx:
+        # Step 1: Compile to object file with zig
+        compile_cmd = [
+            *zig_cxx,
+            "-std=c++17",
+            optimization,
+            "-fPIC",
+            "-c",
+            f"-I{cxxrtl_include}",
+            f"-I{output_dir}",
+            "-DCXXRTL_INCLUDE_CAPI_IMPL",
+            "-o", str(obj_path),
+            str(wrapper_path),
+        ]
 
-    logger.info(f"Compiling CXXRTL library: {lib_path}")
-    logger.debug(f"Compile command: {' '.join(compile_cmd)}")
+        logger.info(f"Compiling CXXRTL with zig: {obj_path}")
+        logger.debug(f"Compile command: {' '.join(compile_cmd)}")
 
-    result = subprocess.run(
-        compile_cmd,
-        capture_output=True,
-        text=True,
-    )
+        result = subprocess.run(compile_cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise RuntimeError(f"C++ compilation failed: {result.stderr}")
 
-    if result.returncode != 0:
-        raise RuntimeError(f"C++ compilation failed: {result.stderr}")
+        # Step 2: Link with system linker
+        linker = _find_system_linker()
+        link_cmd = [
+            *linker,
+            "-shared",
+            "-o", str(lib_path),
+            str(obj_path),
+        ]
+
+        if platform.system() == "Darwin":
+            link_cmd.extend(["-undefined", "dynamic_lookup"])
+
+        logger.info(f"Linking CXXRTL library: {lib_path}")
+        logger.debug(f"Link command: {' '.join(link_cmd)}")
+
+        result = subprocess.run(link_cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise RuntimeError(f"Linking failed: {result.stderr}")
+    else:
+        # Fall back to system compiler for everything
+        linker = _find_system_linker()
+        compile_cmd = [
+            *linker,
+            "-std=c++17",
+            optimization,
+            "-shared",
+            "-fPIC",
+            f"-I{cxxrtl_include}",
+            f"-I{output_dir}",
+            "-DCXXRTL_INCLUDE_CAPI_IMPL",
+            "-o", str(lib_path),
+            str(wrapper_path),
+        ]
+
+        if platform.system() == "Darwin":
+            compile_cmd.extend(["-undefined", "dynamic_lookup"])
+
+        logger.info(f"Compiling CXXRTL library: {lib_path}")
+        logger.debug(f"Compile command: {' '.join(compile_cmd)}")
+
+        result = subprocess.run(compile_cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise RuntimeError(f"C++ compilation failed: {result.stderr}")
 
     logger.info(f"Built CXXRTL library: {lib_path}")
     return lib_path
@@ -308,29 +369,70 @@ def build_cxxrtl_from_amaranth(
 
     # Find CXXRTL headers and compile
     cxxrtl_include = _get_cxxrtl_include_path()
-    compiler = _find_cxx_compiler()
     optimization = kwargs.pop("optimization", "-O2")
 
-    compile_cmd = [
-        compiler,
-        "-std=c++17",
-        optimization,
-        "-shared",
-        "-fPIC",
-        f"-I{cxxrtl_include}",
-        "-DCXXRTL_INCLUDE_CAPI_IMPL",
-        "-o", str(lib_path),
-        str(cc_path),
-    ]
+    # Compile using zig for compilation, system linker for linking
+    # (zig 0.11.0 has issues with -shared on some platforms)
+    zig_cxx = _find_zig_cxx()
+    obj_path = output_dir / f"{output_name}_cxxrtl.o"
 
-    if platform.system() == "Darwin":
-        compile_cmd.extend(["-undefined", "dynamic_lookup"])
+    if zig_cxx:
+        # Step 1: Compile to object file with zig
+        compile_cmd = [
+            *zig_cxx,
+            "-std=c++17",
+            optimization,
+            "-fPIC",
+            "-c",
+            f"-I{cxxrtl_include}",
+            "-DCXXRTL_INCLUDE_CAPI_IMPL",
+            "-o", str(obj_path),
+            str(cc_path),
+        ]
 
-    logger.info(f"Compiling CXXRTL library: {lib_path}")
-    result = subprocess.run(compile_cmd, capture_output=True, text=True)
+        logger.info(f"Compiling CXXRTL with zig: {obj_path}")
+        result = subprocess.run(compile_cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise RuntimeError(f"C++ compilation failed: {result.stderr}")
 
-    if result.returncode != 0:
-        raise RuntimeError(f"C++ compilation failed: {result.stderr}")
+        # Step 2: Link with system linker
+        linker = _find_system_linker()
+        link_cmd = [
+            *linker,
+            "-shared",
+            "-o", str(lib_path),
+            str(obj_path),
+        ]
+
+        if platform.system() == "Darwin":
+            link_cmd.extend(["-undefined", "dynamic_lookup"])
+
+        logger.info(f"Linking CXXRTL library: {lib_path}")
+        result = subprocess.run(link_cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise RuntimeError(f"Linking failed: {result.stderr}")
+    else:
+        # Fall back to system compiler for everything
+        linker = _find_system_linker()
+        compile_cmd = [
+            *linker,
+            "-std=c++17",
+            optimization,
+            "-shared",
+            "-fPIC",
+            f"-I{cxxrtl_include}",
+            "-DCXXRTL_INCLUDE_CAPI_IMPL",
+            "-o", str(lib_path),
+            str(cc_path),
+        ]
+
+        if platform.system() == "Darwin":
+            compile_cmd.extend(["-undefined", "dynamic_lookup"])
+
+        logger.info(f"Compiling CXXRTL library: {lib_path}")
+        result = subprocess.run(compile_cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise RuntimeError(f"C++ compilation failed: {result.stderr}")
 
     logger.info(f"Built CXXRTL library: {lib_path}")
     return lib_path
