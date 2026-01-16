@@ -68,18 +68,19 @@ class CxxrtlSimulator:
     This class provides a Pythonic interface to CXXRTL compiled simulations,
     supporting signal access, stepping, and VCD tracing.
 
-    Example:
+    Example::
+
         sim = CxxrtlSimulator("build/design.so", "design")
         sim.reset()
 
         # Clock cycle
-        sim.set("\\clk", 0)
+        sim.set("clk", 0)
         sim.step()
-        sim.set("\\clk", 1)
+        sim.set("clk", 1)
         sim.step()
 
         # Read output
-        value = sim.get("\\data_out")
+        value = sim.get("data_out")
     """
 
     def __init__(self, library_path: Union[str, Path], top_module: str):
@@ -214,7 +215,7 @@ class CxxrtlSimulator:
         """Get the current value of a signal.
 
         Args:
-            name: Hierarchical signal name (e.g., "\\clk" or "\\top \\sub \\sig")
+            name: Signal name (e.g., "i_clk" or "o_data")
 
         Returns:
             Current value as an integer

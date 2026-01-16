@@ -4,7 +4,8 @@
 This module provides Python bindings for CXXRTL simulation, enabling fast
 compiled simulation of mixed Amaranth/Verilog/SystemVerilog designs.
 
-Example usage:
+Example usage::
+
     from chipflow.sim import CxxrtlSimulator, build_cxxrtl
 
     # Build CXXRTL shared library from sources
@@ -19,9 +20,9 @@ Example usage:
     sim.reset()
 
     # Access signals
-    sim.set("\\clk", 1)
+    sim.set("clk", 1)
     sim.step()
-    value = sim.get("\\data_out")
+    value = sim.get("data_out")
 """
 
 from chipflow.sim.cxxrtl import CxxrtlSimulator
