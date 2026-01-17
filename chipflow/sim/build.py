@@ -240,6 +240,10 @@ def build_cxxrtl(
             str(wrapper_path),
         ]
 
+        # On Linux, use libstdc++ instead of libc++ for better compatibility
+        if platform.system() == "Linux":
+            compile_cmd.insert(3, "-stdlib=libstdc++")
+
         logger.info(f"Compiling CXXRTL with zig: {obj_path}")
         logger.debug(f"Compile command: {' '.join(compile_cmd)}")
 
@@ -258,6 +262,9 @@ def build_cxxrtl(
 
         if platform.system() == "Darwin":
             link_cmd.extend(["-undefined", "dynamic_lookup"])
+        elif platform.system() == "Linux":
+            # Link against libstdc++ which is available on most Linux systems
+            link_cmd.append("-lstdc++")
 
         logger.info(f"Linking CXXRTL library: {lib_path}")
         logger.debug(f"Link command: {' '.join(link_cmd)}")
@@ -390,6 +397,10 @@ def build_cxxrtl_from_amaranth(
             str(cc_path),
         ]
 
+        # On Linux, use libstdc++ instead of libc++ for better compatibility
+        if platform.system() == "Linux":
+            compile_cmd.insert(3, "-stdlib=libstdc++")
+
         logger.info(f"Compiling CXXRTL with zig: {obj_path}")
         result = subprocess.run(compile_cmd, capture_output=True, text=True)
         if result.returncode != 0:
@@ -406,6 +417,9 @@ def build_cxxrtl_from_amaranth(
 
         if platform.system() == "Darwin":
             link_cmd.extend(["-undefined", "dynamic_lookup"])
+        elif platform.system() == "Linux":
+            # Link against libstdc++ which is available on most Linux systems
+            link_cmd.append("-lstdc++")
 
         logger.info(f"Linking CXXRTL library: {lib_path}")
         result = subprocess.run(link_cmd, capture_output=True, text=True)
