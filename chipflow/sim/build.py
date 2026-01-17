@@ -220,13 +220,14 @@ def build_cxxrtl(
     cxxrtl_include = _get_cxxrtl_include_path()
     logger.debug(f"Using CXXRTL headers from {cxxrtl_include}")
 
-    # Compile to shared library using zig for compilation, system linker for linking
-    # (zig 0.11.0 has issues with -shared on some platforms)
-    zig_cxx = _find_zig_cxx()
+    # Compile to shared library
+    # On macOS: use zig for compilation (consistent builds), system linker for linking
+    # On Linux: use system compiler directly (zig uses libc++ which isn't always available)
+    zig_cxx = _find_zig_cxx() if platform.system() == "Darwin" else None
     obj_path = output_dir / f"{output_name}_capi_wrapper.o"
 
     if zig_cxx:
-        # Step 1: Compile to object file with zig
+        # macOS: Compile to object file with zig, link with system linker
         compile_cmd = [
             *zig_cxx,
             "-std=c++17",
@@ -240,10 +241,6 @@ def build_cxxrtl(
             str(wrapper_path),
         ]
 
-        # On Linux, use libstdc++ instead of libc++ for better compatibility
-        if platform.system() == "Linux":
-            compile_cmd.insert(3, "-stdlib=libstdc++")
-
         logger.info(f"Compiling CXXRTL with zig: {obj_path}")
         logger.debug(f"Compile command: {' '.join(compile_cmd)}")
 
@@ -251,20 +248,15 @@ def build_cxxrtl(
         if result.returncode != 0:
             raise RuntimeError(f"C++ compilation failed: {result.stderr}")
 
-        # Step 2: Link with system linker
+        # Link with system linker
         linker = _find_system_linker()
         link_cmd = [
             *linker,
             "-shared",
             "-o", str(lib_path),
             str(obj_path),
+            "-undefined", "dynamic_lookup",
         ]
-
-        if platform.system() == "Darwin":
-            link_cmd.extend(["-undefined", "dynamic_lookup"])
-        elif platform.system() == "Linux":
-            # Link against libstdc++ which is available on most Linux systems
-            link_cmd.append("-lstdc++")
 
         logger.info(f"Linking CXXRTL library: {lib_path}")
         logger.debug(f"Link command: {' '.join(link_cmd)}")
@@ -378,13 +370,14 @@ def build_cxxrtl_from_amaranth(
     cxxrtl_include = _get_cxxrtl_include_path()
     optimization = kwargs.pop("optimization", "-O2")
 
-    # Compile using zig for compilation, system linker for linking
-    # (zig 0.11.0 has issues with -shared on some platforms)
-    zig_cxx = _find_zig_cxx()
+    # Compile to shared library
+    # On macOS: use zig for compilation (consistent builds), system linker for linking
+    # On Linux: use system compiler directly (zig uses libc++ which isn't always available)
+    zig_cxx = _find_zig_cxx() if platform.system() == "Darwin" else None
     obj_path = output_dir / f"{output_name}_cxxrtl.o"
 
     if zig_cxx:
-        # Step 1: Compile to object file with zig
+        # macOS: Compile to object file with zig, link with system linker
         compile_cmd = [
             *zig_cxx,
             "-std=c++17",
@@ -397,29 +390,20 @@ def build_cxxrtl_from_amaranth(
             str(cc_path),
         ]
 
-        # On Linux, use libstdc++ instead of libc++ for better compatibility
-        if platform.system() == "Linux":
-            compile_cmd.insert(3, "-stdlib=libstdc++")
-
         logger.info(f"Compiling CXXRTL with zig: {obj_path}")
         result = subprocess.run(compile_cmd, capture_output=True, text=True)
         if result.returncode != 0:
             raise RuntimeError(f"C++ compilation failed: {result.stderr}")
 
-        # Step 2: Link with system linker
+        # Link with system linker
         linker = _find_system_linker()
         link_cmd = [
             *linker,
             "-shared",
             "-o", str(lib_path),
             str(obj_path),
+            "-undefined", "dynamic_lookup",
         ]
-
-        if platform.system() == "Darwin":
-            link_cmd.extend(["-undefined", "dynamic_lookup"])
-        elif platform.system() == "Linux":
-            # Link against libstdc++ which is available on most Linux systems
-            link_cmd.append("-lstdc++")
 
         logger.info(f"Linking CXXRTL library: {lib_path}")
         result = subprocess.run(link_cmd, capture_output=True, text=True)
