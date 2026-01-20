@@ -25,6 +25,7 @@ Submodules
    /chipflow-lib/autoapi/chipflow/packages/index
    /chipflow-lib/autoapi/chipflow/packaging/index
    /chipflow-lib/autoapi/chipflow/platform/index
+   /chipflow-lib/autoapi/chipflow/rtl/index
    /chipflow-lib/autoapi/chipflow/sim/index
    /chipflow-lib/autoapi/chipflow/utils/index
 
