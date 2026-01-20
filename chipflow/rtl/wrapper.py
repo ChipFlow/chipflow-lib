@@ -71,8 +71,10 @@ class Files(BaseModel):
                     return Path(mod.data_location)
                 elif hasattr(mod, "__path__"):
                     return Path(mod.__path__[0])
-                else:
+                elif mod.__file__ is not None:
                     return Path(mod.__file__).parent
+                else:
+                    raise ChipFlowError(f"Module '{self.module}' has no file path")
             except ImportError as e:
                 raise ChipFlowError(f"Could not import module '{self.module}': {e}")
         raise ChipFlowError("No source path available")
@@ -811,19 +813,23 @@ class RTLWrapper(wiring.Component):
                 wishbone_ports[port_name] = port_config
 
         # Use SoftwareDriverSignature if driver config is provided
-        if config.driver:
+        if config.driver and config.driver.regs_struct:
             try:
                 from chipflow.platform import SoftwareDriverSignature
 
-                super().__init__(
-                    SoftwareDriverSignature(
-                        members=signature_members,
-                        component=self,
-                        regs_struct=config.driver.regs_struct,
-                        c_files=config.driver.c_files,
-                        h_files=config.driver.h_files,
-                    )
-                )
+                # Build kwargs with proper types
+                driver_kwargs: dict = {
+                    "members": signature_members,
+                    "component": self,
+                    "regs_struct": config.driver.regs_struct,
+                }
+                # Convert string paths to Path objects
+                if config.driver.c_files:
+                    driver_kwargs["c_files"] = [Path(f) for f in config.driver.c_files]
+                if config.driver.h_files:
+                    driver_kwargs["h_files"] = [Path(f) for f in config.driver.h_files]
+
+                super().__init__(SoftwareDriverSignature(**driver_kwargs))
             except ImportError:
                 # Fallback if chipflow.platform not available
                 super().__init__(signature_members)
@@ -835,9 +841,9 @@ class RTLWrapper(wiring.Component):
         for port_name, port_config in wishbone_ports.items():
             port = getattr(self, port_name)
             params = port_config.params or {}
-            addr_width = params.get("addr_width", 4)
-            data_width = params.get("data_width", 32)
-            granularity = params.get("granularity", 8)
+            addr_width = int(params.get("addr_width", 4))  # type: ignore[arg-type]
+            data_width = int(params.get("data_width", 32))  # type: ignore[arg-type]
+            granularity = int(params.get("granularity", 8))  # type: ignore[arg-type]
 
             # Memory map addr_width includes byte addressing
             # = interface addr_width + log2(data_width/granularity)
