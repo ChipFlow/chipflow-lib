@@ -114,11 +114,11 @@ jobs:
             ${{ env.test_repo_path }}/${{ matrix.repo.design }}/rtlil
             ${{ env.test_repo_path }}/${{ matrix.repo.design }}/config
 
-      - name: Submit build ${{ env.is_dry }}
+      - name: Submit build (Dry - backend submit currently disabled)
         working-directory: ${{ env.test_repo_path }}/${{ matrix.repo.design }}
         run: |
           set -o pipefail
-          pdm run chipflow silicon submit --wait $DRY | cat
+          pdm run chipflow silicon submit --wait --dry-run | cat
         env:
           CHIPFLOW_API_KEY: ${{ secrets.CHIPFLOW_API_KEY}}
           CHIPFLOW_API_ORIGIN: ${{ inputs.CHIPFLOW_API_ORIGIN }}
