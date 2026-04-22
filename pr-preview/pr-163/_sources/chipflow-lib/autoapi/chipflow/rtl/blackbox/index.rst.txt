@@ -1,0 +1,94 @@
+chipflow.rtl.blackbox
+=====================
+
+.. py:module:: chipflow.rtl.blackbox
+
+.. autoapi-nested-parse::
+
+   Blackbox macro wrapper.
+
+   ``load_blackbox_wrapper`` reads a ``*.blackbox.json`` produced by
+   `macrostrip <https://github.com/ChipFlow/macrostrip>`_ (or any conformant
+   tool) and returns an :class:`RTLWrapper` subclass that:
+
+   - synthesizes an :class:`ExternalWrapConfig` from the JSON's pin list,
+   - uses the companion Verilog stub so Yosys sees the macro's port
+     signature during synthesis,
+   - registers the macro with the platform at elaborate time so the submit
+     step can bundle its LEF / Liberty / frame-view GDS into the upload.
+
+   The macro is declared in ``chipflow.toml``::
+
+       [chipflow.silicon.macros.sram_64x64]
+       blackbox = "vendor/ihp/sram_64x64.blackbox.json"
+
+   and instantiated from Python by logical name::
+
+       sram = load_blackbox_wrapper("sram_64x64",
+                                    clocks={"sys": "CLK"},
+                                    resets={"sys": "RST_N"})
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   chipflow.rtl.blackbox.BlackboxWrapper
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   chipflow.rtl.blackbox.load_blackbox_wrapper
+
+
+Module Contents
+---------------
+
+.. py:class:: BlackboxWrapper(config, verilog_files, logical_name)
+
+   Bases: :py:obj:`chipflow.rtl.wrapper.RTLWrapper`
+
+
+   RTLWrapper subclass that also registers the macro with the platform.
+
+   Shares all wrapper behaviour with :class:`RTLWrapper`; the only
+   difference is that :meth:`elaborate` informs the platform about the
+   macro's physical artifacts (LEF / Liberty / frame-view GDS) so the
+   submit step can bundle them.
+
+
+   .. py:method:: elaborate(platform)
+
+      Generate the Amaranth module with Verilog instance.
+
+      Creates an Instance() of the wrapped Verilog module with all
+      port mappings configured from the TOML specification.
+
+
+
+.. py:function:: load_blackbox_wrapper(logical_name, *, clocks = None, resets = None)
+
+   Load a hard macro by logical name declared in ``chipflow.toml``.
+
+   :param logical_name: Key under ``[chipflow.silicon.macros]``.
+   :param clocks: Amaranth clock-domain → macro pin name. e.g.
+                  ``{"sys": "CLK"}`` wires the ``sys`` domain's clock to the
+                  macro's LEF pin ``CLK``.
+   :param resets: Amaranth clock-domain → macro reset pin name (active-low
+                  convention, matching :class:`RTLWrapper`).
+
+   :returns: A :class:`BlackboxWrapper` (a :class:`wiring.Component`) whose
+             signature mirrors the macro's signal pins. Power/ground pins
+             are omitted; clock/reset pins are omitted from the signature
+             and wired at elaborate time.
+
+   :raises ChipFlowError: if the macro isn't declared in ``chipflow.toml``,
+       its blackbox JSON is missing/malformed, or a referenced
+       clock/reset pin isn't in the macro's pin list.
+
+

@@ -1,0 +1,61 @@
+chipflow.platform.base
+======================
+
+.. py:module:: chipflow.platform.base
+
+.. autoapi-nested-parse::
+
+   Base classes and utilities for ChipFlow platform steps.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   chipflow.platform.base.StepBase
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   chipflow.platform.base.setup_amaranth_tools
+
+
+Module Contents
+---------------
+
+.. py:function:: setup_amaranth_tools()
+
+   Configure environment for Amaranth/WASM tools.
+
+
+.. py:class:: StepBase(config={})
+
+   Bases: :py:obj:`abc.ABC`
+
+
+   Base class for ChipFlow build steps.
+
+
+   .. py:method:: build_cli_parser(parser)
+
+      Build the cli parser for this step
+
+
+
+   .. py:method:: run_cli(args)
+
+      Called when this step's is used from `chipflow` command
+
+
+
+   .. py:method:: build(*args)
+
+      builds the design
+
+
+
