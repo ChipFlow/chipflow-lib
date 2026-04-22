@@ -58,6 +58,18 @@ class BlockConfig(BaseModel):
     height: int
 
 
+class MacroDecl(BaseModel):
+    """Declaration of an NDA / third-party hard macro packaged by
+    `macrostrip` (or a conformant tool).
+
+    Minimum: a path to a ``*.blackbox.json`` describing the macro. The
+    JSON itself carries the companion artifact paths (LEF, Liberty,
+    frame-view GDS, Verilog stub). Paths inside the JSON are interpreted
+    relative to the JSON's own directory.
+    """
+    blackbox: Path
+
+
 class SiliconConfig(BaseModel):
     """Configuration for silicon in chipflow.toml."""
     process: 'Process'
@@ -66,6 +78,8 @@ class SiliconConfig(BaseModel):
     debug: Optional[Dict[str, bool]] = None
     # Required only when package = "block".
     block: Optional[BlockConfig] = None
+    # NDA / third-party hard macros packaged by macrostrip.
+    macros: Dict[str, MacroDecl] = {}
 
 class SimulationConfig(BaseModel):
     """Configuration for simulation settings."""

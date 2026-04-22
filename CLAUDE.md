@@ -47,7 +47,7 @@ chipflow-lib is a Python library for working with the ChipFlow platform, enablin
    - `chipflow.toml`: User project configuration file (must exist in `CHIPFLOW_ROOT`)
    - `config_models.py`: Pydantic models defining configuration schema
    - `config.py`: Configuration file parsing logic
-   - Key configuration sections: `[chipflow]`, `[chipflow.silicon]`, `[chipflow.simulation]`, `[chipflow.software]`, `[chipflow.test]`
+   - Key configuration sections: `[chipflow]`, `[chipflow.silicon]`, `[chipflow.silicon.macros]`, `[chipflow.simulation]`, `[chipflow.software]`, `[chipflow.test]`
 
 3. **Platform Abstraction** (`platforms/`):
    - `SiliconPlatform`: Targets ASIC fabrication (supports SKY130, GF180, GF130BCD, IHP_SG13G2, HELVELLYN2)
@@ -76,6 +76,11 @@ chipflow-lib is a Python library for working with the ChipFlow platform, enablin
    - IO signatures define standard interfaces (JTAG, SPI, I2C, UART, GPIO, QSPI)
    - `IOModel` configures electrical characteristics (drive mode, trip point, inversion)
    - Annotations attach metadata to Amaranth components for automatic pin allocation
+
+7. **RTL Wrapping** (`chipflow/rtl/`):
+   - `load_wrapper_from_toml()` wraps external Verilog/SystemVerilog/SpinalHDL modules as Amaranth components from a TOML description
+   - `load_blackbox_wrapper()` wraps NDA / third-party hard macros declared in `[chipflow.silicon.macros]`, consuming a `*.blackbox.json` produced by the sibling [macrostrip](https://github.com/ChipFlow/macrostrip) tool
+   - At submit time, `SiliconPlatform._macros` is bundled into `macros.tar.gz` (manifest.json + per-macro LEF / Liberty / GDS / stub) and sent as a third multipart field alongside RTLIL and config
 
 ### Key Design Patterns
 

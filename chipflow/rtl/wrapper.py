@@ -903,14 +903,24 @@ class RTLWrapper(wiring.Component):
         # Track which Verilog ports are mapped
         mapped_ports: set[str] = set()
 
+        # Accept either the ``i_<name>`` / ``o_<name>`` form (the
+        # convention hand-written chipflow wrappers use, where the
+        # Verilog source itself declares ``input i_clk`` etc.) OR the
+        # bare ``<name>`` form (used by e.g. LEF-derived hard-macro
+        # stubs, where ports match the LEF pin names verbatim).
+        def _present(expected_prefixed: str, bare: str) -> bool:
+            return expected_prefixed in verilog_ports or bare in verilog_ports
+
         # Validate clock signals
         for clock_name, verilog_signal in self._config.clocks.items():
             expected_port = f"i_{verilog_signal}"
             mapped_ports.add(expected_port)
-            if expected_port not in verilog_ports:
+            mapped_ports.add(verilog_signal)
+            if not _present(expected_port, verilog_signal):
                 raise ChipFlowError(
                     f"[{self._config.name}] Clock signal '{verilog_signal}' "
-                    f"(expecting port '{expected_port}') not found in Verilog module. "
+                    f"(expecting port '{expected_port}' or '{verilog_signal}') "
+                    f"not found in Verilog module. "
                     f"Available ports: {sorted(verilog_ports.keys())}"
                 )
 
@@ -918,16 +928,24 @@ class RTLWrapper(wiring.Component):
         for reset_name, verilog_signal in self._config.resets.items():
             expected_port = f"i_{verilog_signal}"
             mapped_ports.add(expected_port)
-            if expected_port not in verilog_ports:
+            mapped_ports.add(verilog_signal)
+            if not _present(expected_port, verilog_signal):
                 raise ChipFlowError(
                     f"[{self._config.name}] Reset signal '{verilog_signal}' "
-                    f"(expecting port '{expected_port}') not found in Verilog module. "
+                    f"(expecting port '{expected_port}' or '{verilog_signal}') "
+                    f"not found in Verilog module. "
                     f"Available ports: {sorted(verilog_ports.keys())}"
                 )
 
-        # Collect all mapped port signals from the actual port mappings
+        # Collect all mapped port signals from the actual port mappings.
+        # Port-map values are Instance-kwarg names (``i_<name>``/``o_<name>``);
+        # record the bare names too so the unmapped-ports warning below
+        # doesn't false-positive on modules with bare port declarations.
         for port_name, port_map in self._port_mappings.items():
-            mapped_ports.update(port_map.values())
+            for mapped in port_map.values():
+                mapped_ports.add(mapped)
+                if mapped.startswith(("i_", "o_")):
+                    mapped_ports.add(mapped[2:])
 
         # Warn about unmapped Verilog ports (excluding clk/rst which are handled specially)
         unmapped = set(verilog_ports.keys()) - mapped_ports
