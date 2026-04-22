@@ -38,7 +38,7 @@ Functions
 Module Contents
 ---------------
 
-.. py:class:: RTLWrapper(config, verilog_files = None)
+.. py:class:: RTLWrapper(config, verilog_files = None, parameters = None)
 
    Bases: :py:obj:`amaranth.lib.wiring.Component`
 
@@ -127,12 +127,16 @@ Module Contents
 
 
 
-.. py:function:: load_wrapper_from_toml(toml_path, generate_dest = None)
+.. py:function:: load_wrapper_from_toml(toml_path, generate_dest = None, parameters = None)
 
    Load an RTLWrapper from a TOML configuration file.
 
    :param toml_path: Path to the TOML configuration file
    :param generate_dest: Destination directory for generated Verilog (if using SpinalHDL)
+   :param parameters: Verilog module parameter overrides. Merged on top of the TOML's
+                      ``parameters`` table and applied both to code generation (so generators
+                      see the final values when templating their command-line) and to the
+                      ``Instance()`` of the wrapped module at elaboration.
 
    :returns: Configured RTLWrapper component
 

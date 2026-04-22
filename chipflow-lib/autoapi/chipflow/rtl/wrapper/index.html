@@ -219,6 +219,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../chipflow-toml-guide.html#package">package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../chipflow-commands.html">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../using-pin-signatures.html">Using Pin Signatures and Software Drivers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../rtl-wrapper.html">Wrapping External RTL</a></li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../../../../../platform-api.html">Platform API Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Platform API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../../index.html">chipflow</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of chipflow</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../../auth/index.html">chipflow.auth</a></li>
@@ -341,7 +342,7 @@ modules as Amaranth wiring.Component classes. It supports:</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow.rtl.wrapper.load_wrapper_from_toml" title="chipflow.rtl.wrapper.load_wrapper_from_toml"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_wrapper_from_toml</span></code></a>(toml_path[, generate_dest])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow.rtl.wrapper.load_wrapper_from_toml" title="chipflow.rtl.wrapper.load_wrapper_from_toml"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_wrapper_from_toml</span></code></a>(toml_path[, generate_dest, ...])</p></td>
 <td><p>Load an RTLWrapper from a TOML configuration file.</p></td>
 </tr>
 </tbody>
@@ -352,7 +353,7 @@ modules as Amaranth wiring.Component classes. It supports:</p>
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="chipflow.rtl.wrapper.RTLWrapper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow.rtl.wrapper.</span></span><span class="sig-name descname"><span class="pre">RTLWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verilog_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.rtl.wrapper.RTLWrapper" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow.rtl.wrapper.</span></span><span class="sig-name descname"><span class="pre">RTLWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verilog_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.rtl.wrapper.RTLWrapper" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Component" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">amaranth.lib.wiring.Component</span></code></a></p>
 <p>Dynamic Amaranth Component that wraps an external RTL module.</p>
 <p>This component is generated from TOML configuration and creates the appropriate
@@ -366,6 +367,7 @@ then matching patterns to identify which signals correspond to interface members
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>config</strong> (<em>ExternalWrapConfig</em>)</p></li>
 <li><p><strong>verilog_files</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><em>pathlib.Path</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>parameters</strong> (<em>Dict</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>pydantic.JsonValue</em><em>] </em><em>| </em><em>None</em>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -470,13 +472,17 @@ library and returns a simulator instance ready for use.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="chipflow.rtl.wrapper.load_wrapper_from_toml">
-<span class="sig-prename descclassname"><span class="pre">chipflow.rtl.wrapper.</span></span><span class="sig-name descname"><span class="pre">load_wrapper_from_toml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">toml_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generate_dest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.rtl.wrapper.load_wrapper_from_toml" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">chipflow.rtl.wrapper.</span></span><span class="sig-name descname"><span class="pre">load_wrapper_from_toml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">toml_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generate_dest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.rtl.wrapper.load_wrapper_from_toml" title="Link to this definition">¶</a></dt>
 <dd><p>Load an RTLWrapper from a TOML configuration file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>toml_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><em>pathlib.Path</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to the TOML configuration file</p></li>
 <li><p><strong>generate_dest</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><em>pathlib.Path</em></a><em> | </em><em>None</em>) – Destination directory for generated Verilog (if using SpinalHDL)</p></li>
+<li><p><strong>parameters</strong> (<em>Dict</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>pydantic.JsonValue</em><em>] </em><em>| </em><em>None</em>) – Verilog module parameter overrides. Merged on top of the TOML’s
+<code class="docutils literal notranslate"><span class="pre">parameters</span></code> table and applied both to code generation (so generators
+see the final values when templating their command-line) and to the
+<code class="docutils literal notranslate"><span class="pre">Instance()</span></code> of the wrapped module at elaboration.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
