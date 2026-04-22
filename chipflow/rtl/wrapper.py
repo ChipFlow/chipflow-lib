@@ -371,6 +371,7 @@ class ExternalWrapConfig(BaseModel):
     ports: Dict[str, Port] = {}
     pins: Dict[str, Port] = {}
     driver: Optional[DriverConfig] = None
+    parameters: Dict[str, JsonValue] = {}
 
 
 def _resolve_interface_type(interface_str: str) -> type | tuple:
@@ -768,16 +769,29 @@ class RTLWrapper(wiring.Component):
     then matching patterns to identify which signals correspond to interface members.
     """
 
-    def __init__(self, config: ExternalWrapConfig, verilog_files: List[Path] | None = None):
+    def __init__(
+        self,
+        config: ExternalWrapConfig,
+        verilog_files: List[Path] | None = None,
+        parameters: Dict[str, JsonValue] | None = None,
+    ):
         """Initialize the RTL wrapper.
 
         Args:
             config: Parsed TOML configuration
             verilog_files: List of Verilog file paths to include
+            parameters: Verilog module parameter overrides. Merged on top of
+                ``config.parameters`` (TOML defaults), then emitted as
+                ``p_<NAME>=<value>`` kwargs on the ``Instance()`` at elaboration.
         """
         self._config = config
         self._verilog_files = verilog_files or []
         self._port_mappings: Dict[str, Dict[str, str]] = {}
+
+        # Effective Verilog module parameters: TOML defaults + caller overrides.
+        self._parameters: Dict[str, JsonValue] = dict(config.parameters)
+        if parameters:
+            self._parameters.update(parameters)
 
         # Parse Verilog to get port information for auto-mapping
         verilog_ports = self._parse_verilog_ports()
@@ -994,13 +1008,17 @@ class RTLWrapper(wiring.Component):
 
         # Complex interface class - instantiate with params
         params = port_config.params or {}
-        # Resolve parameter references from generate.parameters
+        # Resolve "{name}" references against the merged module parameters,
+        # falling back to legacy ``generate.parameters`` for back-compat.
         resolved_params = {}
         for k, v in params.items():
             if isinstance(v, str) and v.startswith("{") and v.endswith("}"):
                 param_name = v[1:-1]
-                if config.generate and config.generate.parameters:
-                    resolved_params[k] = config.generate.parameters.get(param_name, v)
+                if param_name in self._parameters:
+                    resolved_params[k] = self._parameters[param_name]
+                elif config.generate and config.generate.parameters \
+                        and param_name in config.generate.parameters:
+                    resolved_params[k] = config.generate.parameters[param_name]
                 else:
                     resolved_params[k] = v
             else:
@@ -1073,8 +1091,11 @@ class RTLWrapper(wiring.Component):
                 # Use it directly for the Instance parameter
                 instance_ports[verilog_signal] = amaranth_signal
 
+        # Verilog module parameter overrides (`parameter`/`localparam`).
+        instance_params = {f"p_{name}": value for name, value in self._parameters.items()}
+
         # Create the Verilog instance
-        m.submodules.wrapped = Instance(self._config.name, **instance_ports)
+        m.submodules.wrapped = Instance(self._config.name, **instance_params, **instance_ports)
 
         # Add Verilog files to the platform
         if platform is not None:
@@ -1176,13 +1197,19 @@ VerilogWrapper = RTLWrapper
 
 
 def load_wrapper_from_toml(
-    toml_path: Path | str, generate_dest: Path | None = None
+    toml_path: Path | str,
+    generate_dest: Path | None = None,
+    parameters: Dict[str, JsonValue] | None = None,
 ) -> RTLWrapper:
     """Load an RTLWrapper from a TOML configuration file.
 
     Args:
         toml_path: Path to the TOML configuration file
         generate_dest: Destination directory for generated Verilog (if using SpinalHDL)
+        parameters: Verilog module parameter overrides. Merged on top of the TOML's
+            ``parameters`` table and applied both to code generation (so generators
+            see the final values when templating their command-line) and to the
+            ``Instance()`` of the wrapped module at elaboration.
 
     Returns:
         Configured RTLWrapper component
@@ -1206,6 +1233,11 @@ def load_wrapper_from_toml(
         error_str = "\n".join(error_messages)
         raise ChipFlowError(f"Validation error in {toml_path}:\n{error_str}")
 
+    # Final Verilog module parameters: TOML defaults + caller overrides.
+    effective_parameters: Dict[str, JsonValue] = dict(config.parameters)
+    if parameters:
+        effective_parameters.update(parameters)
+
     verilog_files = []
 
     # Get source path, resolving relative paths against the TOML file's directory
@@ -1219,7 +1251,10 @@ def load_wrapper_from_toml(
             generate_dest = Path("./build/verilog")
         generate_dest.mkdir(parents=True, exist_ok=True)
 
-        parameters = config.generate.parameters or {}
+        # Generator template params: existing generate.parameters plus module params.
+        # Module parameter names win on collision so overrides propagate.
+        gen_parameters: Dict[str, JsonValue] = dict(config.generate.parameters or {})
+        gen_parameters.update(effective_parameters)
 
         if config.generate.generator == Generators.SPINALHDL:
             if config.generate.spinalhdl is None:
@@ -1228,7 +1263,7 @@ def load_wrapper_from_toml(
                 )
 
             generated = config.generate.spinalhdl.generate(
-                source_path, generate_dest, config.name, parameters
+                source_path, generate_dest, config.name, gen_parameters
             )
             verilog_files.extend(generate_dest / f for f in generated)
 
@@ -1236,7 +1271,7 @@ def load_wrapper_from_toml(
             # Convert SystemVerilog to Verilog using sv2v
             sv2v_config = config.generate.sv2v or GenerateSV2V()
             generated = sv2v_config.generate(
-                source_path, generate_dest, config.name, parameters
+                source_path, generate_dest, config.name, gen_parameters
             )
             verilog_files.extend(generated)
 
@@ -1244,7 +1279,7 @@ def load_wrapper_from_toml(
             # Convert SystemVerilog to Verilog using yosys-slang
             yosys_slang_config = config.generate.yosys_slang or GenerateYosysSlang()
             generated = yosys_slang_config.generate(
-                source_path, generate_dest, config.name, parameters
+                source_path, generate_dest, config.name, gen_parameters
             )
             verilog_files.extend(generated)
 
@@ -1277,7 +1312,7 @@ def load_wrapper_from_toml(
             resolved_c_files.append(str(c_path))
         config.driver.c_files = resolved_c_files
 
-    return RTLWrapper(config, verilog_files)
+    return RTLWrapper(config, verilog_files, parameters=parameters)
 
 
 # CLI entry point for testing
