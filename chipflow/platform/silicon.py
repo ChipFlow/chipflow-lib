@@ -405,6 +405,7 @@ class SiliconPlatform:
         self._config = config
         self._ports = {}
         self._files = {}
+        self._macros: dict[str, dict] = {}
         self._pinlock = None
 
     @property
@@ -475,6 +476,67 @@ class SiliconPlatform:
             content = content.encode("utf-8")
         assert isinstance(content, bytes)
         self._files[str(filename)] = content
+
+    def add_macro(self, logical_name: str) -> dict:
+        """Register an NDA / third-party hard macro with the platform.
+
+        Looks up ``logical_name`` in ``[chipflow.silicon.macros]``, loads
+        the referenced ``*.blackbox.json``, resolves its companion file
+        paths relative to the JSON directory, and stores the resulting
+        entry in ``self._macros`` for later bundling by the submit step.
+
+        Returns the stored entry. Idempotent when called repeatedly with
+        the same logical name (the same entry is returned).
+        """
+        assert self._config.chipflow.silicon is not None
+        macros_cfg = self._config.chipflow.silicon.macros
+        if logical_name not in macros_cfg:
+            raise ChipFlowError(
+                f"Macro '{logical_name}' is not declared in "
+                f"[chipflow.silicon.macros]. Known macros: "
+                f"{sorted(macros_cfg.keys()) or '(none)'}"
+            )
+
+        if logical_name in self._macros:
+            return self._macros[logical_name]
+
+        from ..utils import ensure_chipflow_root
+        root = ensure_chipflow_root()
+        bb_path = Path(macros_cfg[logical_name].blackbox)
+        if not bb_path.is_absolute():
+            bb_path = (root / bb_path).resolve()
+        if not bb_path.exists():
+            raise ChipFlowError(
+                f"Macro '{logical_name}': blackbox JSON not found at {bb_path}"
+            )
+
+        import json as _json
+        bb = _json.loads(bb_path.read_text())
+        if bb.get("version") != "1":
+            raise ChipFlowError(
+                f"Macro '{logical_name}': unsupported blackbox JSON version "
+                f"{bb.get('version')!r} (expected '1')"
+            )
+
+        files: dict[str, Path] = {}
+        for key, rel in (bb.get("files") or {}).items():
+            resolved = (bb_path.parent / rel).resolve()
+            if not resolved.exists():
+                raise ChipFlowError(
+                    f"Macro '{logical_name}': companion file '{key}' "
+                    f"referenced by {bb_path} not found at {resolved}"
+                )
+            files[key] = resolved
+
+        entry = {
+            "logical_name": logical_name,
+            "name": bb["name"],
+            "blackbox_json": bb_path,
+            "blackbox": bb,
+            "files": files,
+        }
+        self._macros[logical_name] = entry
+        return entry
 
     def _check_clock_domains(self, fragment, sync_domain=None):
         for clock_domain in fragment.domains.values():

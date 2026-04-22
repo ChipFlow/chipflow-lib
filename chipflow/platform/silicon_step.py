@@ -33,15 +33,21 @@ logger = logging.getLogger(__name__)
 
 
 def _build_bundle_zip(
-    rtlil_path, config: str, project_name: str, process: str, package: str
+    rtlil_path,
+    config: str,
+    project_name: str,
+    process: str,
+    package: str,
+    macros: dict | None = None,
 ) -> bytes:
     """Pack the submission into a single zip with a manifest.
 
     Layout::
 
         manifest.json
-        <rtlil filename>     # e.g. "top.il", taken from rtlil_path
-        pins.lock            # the pinlock JSON
+        <rtlil filename>                       # e.g. "top.il"
+        pins.lock                              # the pinlock JSON
+        macros/<logical_name>/<filename> ...   # only when macros are registered
 
     ``project_name`` / ``process`` / ``package`` come from chipflow.toml
     (``[chipflow] project_name``, ``[chipflow.silicon] process``,
@@ -49,20 +55,22 @@ def _build_bundle_zip(
     backend's working directory naming and PDK / package selection) use
     these to identify and route the design without re-parsing the pinlock.
 
-    The manifest is the only contract: consumers locate the design and
-    pinlock payloads via ``manifest["design_file"]`` and
-    ``manifest["pins_lock_file"]``. Keys naming a file inside the
-    archive carry a ``_file`` suffix so they're distinguishable from
-    plain value keys (``version``, ``project``, ``process``,
-    ``package``); the value is a zip-relative path. ``design_file`` is
-    named in terms of role rather than format so the same key can carry
-    rtlil today, or another intermediate (Verilog, FIRRTL) tomorrow,
-    without renaming. Future additions (e.g. macro folders) extend the
-    manifest without changing this function's signature on the wire.
+    ``macros`` is the dict produced by ``SiliconPlatform._macros`` (logical
+    name → entry with ``name``, ``blackbox_json``, ``files``). Each macro's
+    companion files are written under ``macros/<logical_name>/`` and surface
+    in the manifest as ``manifest["macros"][<logical_name>]`` with
+    ``_file``-suffixed paths so the backend's recursive
+    ``_bundle_files_from_manifest`` extractor picks them up.
+
+    The manifest is the only contract: consumers locate every payload via
+    ``_file``-suffixed keys at any nesting depth. ``design_file`` is named
+    in terms of role rather than format so the same key can carry rtlil
+    today, or another intermediate (Verilog, FIRRTL) tomorrow, without
+    renaming.
     """
     design_arc = Path(rtlil_path).name
     pins_lock_arc = "pins.lock"
-    manifest = {
+    manifest: dict = {
         "version": "1",
         "project": project_name,
         "process": process,
@@ -70,6 +78,28 @@ def _build_bundle_zip(
         "design_file": design_arc,
         "pins_lock_file": pins_lock_arc,
     }
+
+    file_entries: list[tuple[str, Path]] = []  # (archive_path, real_path)
+    if macros:
+        manifest_macros: dict = {}
+        for logical_name, entry in macros.items():
+            subdir = f"macros/{logical_name}"
+            macro_dict: dict = {"name": entry["name"]}
+            for role, src in entry["files"].items():
+                arc = f"{subdir}/{Path(src).name}"
+                # Suffix `_file` so the backend's recursive extractor finds it.
+                macro_dict[f"{role}_file"] = arc
+                file_entries.append((arc, Path(src)))
+
+            # Emit the blackbox JSON alongside its companions for completeness.
+            bb_arc = f"{subdir}/{Path(entry['blackbox_json']).name}"
+            macro_dict.setdefault("blackbox_json_file", bb_arc)
+            file_entries.append((bb_arc, Path(entry["blackbox_json"])))
+
+            manifest_macros[logical_name] = macro_dict
+
+        manifest["macros"] = manifest_macros
+
     manifest_bytes = (json.dumps(manifest, indent=2) + "\n").encode("utf-8")
 
     buf = io.BytesIO()
@@ -77,6 +107,8 @@ def _build_bundle_zip(
         zf.writestr("manifest.json", manifest_bytes)
         zf.writestr(pins_lock_arc, config)
         zf.write(str(rtlil_path), arcname=design_arc)
+        for arc, src in file_entries:
+            zf.write(str(src), arcname=arc)
     return buf.getvalue()
 
 
@@ -235,7 +267,8 @@ class SiliconStep:
                 rtlil_path, config,
                 self.config.chipflow.project_name,
                 self.config.chipflow.silicon.process.value,
-                self.config.chipflow.silicon.package)
+                self.config.chipflow.silicon.package,
+                self.platform._macros)
 
             if args.dry_run:
                 sp.succeed(f"✅ Design `{data['projectId']}:{data['name']}` ready for submission to ChipFlow cloud!")
@@ -243,7 +276,7 @@ class SiliconStep:
                 logger.debug(f"files['config']=\n{config}")
                 bundle_path = Path(rtlil_path).parent / "bundle.zip"
                 bundle_path.write_bytes(bundle_bytes)
-                sp.info(f"Compiled submission written to `{bundle_path}` (manifest.json + rtlil + pins.lock)")
+                sp.info(f"Compiled submission written to `{bundle_path}` (manifest.json + rtlil + pins.lock + any macros)")
                 return
 
             def network_err(e):

@@ -47,6 +47,18 @@ class VoltageRange(SelectiveSerializationModel):
     typical: Annotated[Optional[Voltage], OmitIfNone()] = None
 
 
+class MacroDecl(BaseModel):
+    """Declaration of an NDA / third-party hard macro packaged by
+    `macrostrip` (or a conformant tool).
+
+    Minimum: a path to a ``*.blackbox.json`` describing the macro. The
+    JSON itself carries the companion artifact paths (LEF, Liberty,
+    frame-view GDS, Verilog stub). Paths inside the JSON are interpreted
+    relative to the JSON's own directory.
+    """
+    blackbox: Path
+
+
 class SiliconConfig(BaseModel):
     """Configuration for silicon in chipflow.toml."""
     process: 'Process'
@@ -54,6 +66,7 @@ class SiliconConfig(BaseModel):
     power: Dict[str, Voltage] = {}
     debug: Optional[Dict[str, bool]] = None
     # This is still kept around to allow forcing pad locations.
+    macros: Dict[str, MacroDecl] = {}
 
 class SimulationConfig(BaseModel):
     """Configuration for simulation settings."""

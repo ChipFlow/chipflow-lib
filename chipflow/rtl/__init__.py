@@ -21,6 +21,10 @@ Example usage::
     sim.step()
 """
 
+from chipflow.rtl.blackbox import (
+    BlackboxWrapper,
+    load_blackbox_wrapper,
+)
 from chipflow.rtl.wrapper import (
     RTLWrapper,
     VerilogWrapper,  # Alias for backwards compatibility
@@ -35,7 +39,9 @@ from chipflow.rtl.wrapper import (
 __all__ = [
     "RTLWrapper",
     "VerilogWrapper",
+    "BlackboxWrapper",
     "load_wrapper_from_toml",
+    "load_blackbox_wrapper",
     "_generate_auto_map",
     "_infer_auto_map",
     "_parse_verilog_ports",
