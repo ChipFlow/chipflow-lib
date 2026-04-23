@@ -30,6 +30,10 @@ void log_event(unsigned timestamp, const std::string &peripheral, const std::str
 std::vector<action> get_pending_actions(const std::string &peripheral);
 void close_event_log();
 
+// UART log file for VS Code extension real-time monitoring
+void open_uart_log(const std::string &filename);
+void close_uart_log();
+
 namespace models {
 
 
