@@ -187,7 +187,7 @@ class TestBuildBundleZip(unittest.TestCase):
             rtlil_path.write_text("module top(); endmodule\n")
             config = '{"pins": []}'
 
-            blob = _build_bundle_zip(rtlil_path, config)
+            blob = _build_bundle_zip(rtlil_path, config, "my_project")
 
             with zipfile.ZipFile(io.BytesIO(blob)) as zf:
                 names = set(zf.namelist())
@@ -195,6 +195,7 @@ class TestBuildBundleZip(unittest.TestCase):
 
                 manifest = json.loads(zf.read("manifest.json"))
                 self.assertEqual(manifest["version"], "1")
+                self.assertEqual(manifest["project"], "my_project")
                 self.assertEqual(manifest["rtlil"], "top.il")
                 self.assertEqual(manifest["config"], "pins.lock")
 
@@ -206,7 +207,7 @@ class TestBuildBundleZip(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             rtlil_path = Path(td) / "weird_name.rtlil"
             rtlil_path.write_text("x")
-            blob = _build_bundle_zip(rtlil_path, "{}")
+            blob = _build_bundle_zip(rtlil_path, "{}", "p")
             with zipfile.ZipFile(io.BytesIO(blob)) as zf:
                 self.assertIn("weird_name.rtlil", zf.namelist())
                 manifest = json.loads(zf.read("manifest.json"))
