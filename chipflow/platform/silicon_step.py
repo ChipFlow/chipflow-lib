@@ -226,8 +226,9 @@ class SiliconStep:
                 sp.succeed(f"✅ Design `{data['projectId']}:{data['name']}` ready for submission to ChipFlow cloud!")
                 logger.debug(f"data=\n{json.dumps(data, indent=2)}")
                 logger.debug(f"files['config']=\n{config}")
-                Path("bundle.zip").write_bytes(bundle_bytes)
-                sp.info("Compiled submission written to `bundle.zip` (manifest.json + rtlil + pins.lock)")
+                bundle_path = Path(rtlil_path).parent / "bundle.zip"
+                bundle_path.write_bytes(bundle_bytes)
+                sp.info(f"Compiled submission written to `{bundle_path}` (manifest.json + rtlil + pins.lock)")
                 return
 
             def network_err(e):
