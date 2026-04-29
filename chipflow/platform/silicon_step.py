@@ -46,17 +46,20 @@ def _build_bundle_zip(rtlil_path, config: str, project_name: str) -> bytes:
     use it to identify the design without re-parsing the pinlock.
 
     The manifest is the only contract: consumers locate the rtlil and
-    pinlock payloads via ``manifest["rtlil"]`` and ``manifest["pins_lock"]``.
-    Future additions (e.g. macro folders) extend the manifest without
-    changing this function's signature on the wire.
+    pinlock payloads via ``manifest["rtlil_file"]`` and
+    ``manifest["pins_lock_file"]``. Keys naming a file inside the
+    archive carry a ``_file`` suffix so they're distinguishable from
+    plain value keys (``version``, ``project``). Future additions (e.g.
+    macro folders) extend the manifest without changing this function's
+    signature on the wire.
     """
     rtlil_arc = Path(rtlil_path).name
     pins_lock_arc = "pins.lock"
     manifest = {
         "version": "1",
         "project": project_name,
-        "rtlil": rtlil_arc,
-        "pins_lock": pins_lock_arc,
+        "rtlil_file": rtlil_arc,
+        "pins_lock_file": pins_lock_arc,
     }
     manifest_bytes = (json.dumps(manifest, indent=2) + "\n").encode("utf-8")
 
