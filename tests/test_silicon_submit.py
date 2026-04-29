@@ -197,7 +197,7 @@ class TestBuildBundleZip(unittest.TestCase):
                 self.assertEqual(manifest["version"], "1")
                 self.assertEqual(manifest["project"], "my_project")
                 self.assertEqual(manifest["rtlil"], "top.il")
-                self.assertEqual(manifest["config"], "pins.lock")
+                self.assertEqual(manifest["pins_lock"], "pins.lock")
 
                 self.assertEqual(zf.read("top.il").decode(), "module top(); endmodule\n")
                 self.assertEqual(zf.read("pins.lock").decode(), config)
