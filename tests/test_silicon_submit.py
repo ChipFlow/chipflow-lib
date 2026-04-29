@@ -196,7 +196,7 @@ class TestBuildBundleZip(unittest.TestCase):
                 manifest = json.loads(zf.read("manifest.json"))
                 self.assertEqual(manifest["version"], "1")
                 self.assertEqual(manifest["project"], "my_project")
-                self.assertEqual(manifest["rtlil_file"], "top.il")
+                self.assertEqual(manifest["design_file"], "top.il")
                 self.assertEqual(manifest["pins_lock_file"], "pins.lock")
 
                 self.assertEqual(zf.read("top.il").decode(), "module top(); endmodule\n")
@@ -211,7 +211,7 @@ class TestBuildBundleZip(unittest.TestCase):
             with zipfile.ZipFile(io.BytesIO(blob)) as zf:
                 self.assertIn("weird_name.rtlil", zf.namelist())
                 manifest = json.loads(zf.read("manifest.json"))
-                self.assertEqual(manifest["rtlil_file"], "weird_name.rtlil")
+                self.assertEqual(manifest["design_file"], "weird_name.rtlil")
 
 
 class TestSiliconSubmitBundlePost(unittest.TestCase):
