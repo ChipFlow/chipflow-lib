@@ -45,20 +45,23 @@ def _build_bundle_zip(rtlil_path, config: str, project_name: str) -> bytes:
     consumers (logs, dashboards, the backend's working directory naming)
     use it to identify the design without re-parsing the pinlock.
 
-    The manifest is the only contract: consumers locate the rtlil and
-    pinlock payloads via ``manifest["rtlil_file"]`` and
+    The manifest is the only contract: consumers locate the design and
+    pinlock payloads via ``manifest["design_file"]`` and
     ``manifest["pins_lock_file"]``. Keys naming a file inside the
     archive carry a ``_file`` suffix so they're distinguishable from
-    plain value keys (``version``, ``project``). Future additions (e.g.
-    macro folders) extend the manifest without changing this function's
-    signature on the wire.
+    plain value keys (``version``, ``project``); the value is a
+    zip-relative path. ``design_file`` is named in terms of role rather
+    than format so the same key can carry rtlil today, or another
+    intermediate (Verilog, FIRRTL) tomorrow, without renaming. Future
+    additions (e.g. macro folders) extend the manifest without
+    changing this function's signature on the wire.
     """
-    rtlil_arc = Path(rtlil_path).name
+    design_arc = Path(rtlil_path).name
     pins_lock_arc = "pins.lock"
     manifest = {
         "version": "1",
         "project": project_name,
-        "rtlil_file": rtlil_arc,
+        "design_file": design_arc,
         "pins_lock_file": pins_lock_arc,
     }
     manifest_bytes = (json.dumps(manifest, indent=2) + "\n").encode("utf-8")
@@ -67,7 +70,7 @@ def _build_bundle_zip(rtlil_path, config: str, project_name: str) -> bytes:
     with zipfile.ZipFile(buf, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
         zf.writestr("manifest.json", manifest_bytes)
         zf.writestr(pins_lock_arc, config)
-        zf.write(str(rtlil_path), arcname=rtlil_arc)
+        zf.write(str(rtlil_path), arcname=design_arc)
     return buf.getvalue()
 
 
