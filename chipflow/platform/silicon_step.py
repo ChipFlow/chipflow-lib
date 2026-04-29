@@ -3,15 +3,17 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 import inspect
+import io
 import json
 import logging
 import os
 import requests
-import shutil
 import subprocess
 import sys
 import urllib3
 import webbrowser
+import zipfile
+from pathlib import Path
 from pprint import pformat
 
 
@@ -28,6 +30,37 @@ from ..auth import get_api_key, AuthenticationError
 
 
 logger = logging.getLogger(__name__)
+
+
+def _build_bundle_zip(rtlil_path, config: str) -> bytes:
+    """Pack the submission into a single zip with a manifest.
+
+    Layout::
+
+        manifest.json
+        <rtlil filename>     # e.g. "top.il", taken from rtlil_path
+        pins.lock            # the pinlock JSON
+
+    The manifest is the only contract: consumers locate the rtlil and
+    config payloads via ``manifest["rtlil"]`` and ``manifest["config"]``.
+    Future additions (e.g. macro folders) extend the manifest without
+    changing this function's signature on the wire.
+    """
+    rtlil_arc = Path(rtlil_path).name
+    config_arc = "pins.lock"
+    manifest = {
+        "version": "1",
+        "rtlil": rtlil_arc,
+        "config": config_arc,
+    }
+    manifest_bytes = (json.dumps(manifest, indent=2) + "\n").encode("utf-8")
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("manifest.json", manifest_bytes)
+        zf.writestr(config_arc, config)
+        zf.write(str(rtlil_path), arcname=rtlil_arc)
+    return buf.getvalue()
 
 
 def halo_logging(closure):
@@ -181,16 +214,14 @@ class SiliconStep:
             pinlock = load_pinlock()
             config = pinlock.model_dump_json(indent=2)
 
+            bundle_bytes = _build_bundle_zip(rtlil_path, config)
+
             if args.dry_run:
                 sp.succeed(f"✅ Design `{data['projectId']}:{data['name']}` ready for submission to ChipFlow cloud!")
                 logger.debug(f"data=\n{json.dumps(data, indent=2)}")
                 logger.debug(f"files['config']=\n{config}")
-                shutil.copyfile(rtlil_path, 'rtlil')
-                with open("rtlil", 'w') as f:
-                    json.dump(data, f)
-                with open("config", 'w') as f:
-                    f.write(config)
-                sp.info("Compiled design and configuration can be found in in `rtlil` and `config`")
+                Path("bundle.zip").write_bytes(bundle_bytes)
+                sp.info("Compiled submission written to `bundle.zip` (manifest.json + rtlil + pins.lock)")
                 return
 
             def network_err(e):
@@ -217,8 +248,7 @@ class SiliconStep:
                     auth=("", self._chipflow_api_key),
                     data=data,
                     files={
-                        "rtlil": open(rtlil_path, "rb"),
-                        "config": config,
+                        "bundle": ("bundle.zip", bundle_bytes, "application/zip"),
                     },
                     allow_redirects=False
                     )

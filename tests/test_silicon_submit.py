@@ -1,13 +1,16 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
+import io
+import json
 import unittest
+import zipfile
 from unittest import mock
 from argparse import Namespace
 from pathlib import Path
 import tempfile
 import os
 
-from chipflow.platform.silicon_step import SiliconStep
+from chipflow.platform.silicon_step import SiliconStep, _build_bundle_zip
 
 
 class TestSiliconSubmitBrowserPrompt(unittest.TestCase):
@@ -54,9 +57,9 @@ class TestSiliconSubmitBrowserPrompt(unittest.TestCase):
             step.platform._ports = {}
 
             # Mock the submit method dependencies
-            with mock.patch.object(step, 'prepare', return_value='/tmp/test.il'):
-                with mock.patch('builtins.open', mock.mock_open(read_data=b'')):
-                    with mock.patch('chipflow.platform.silicon_step.requests.post') as mock_post:
+            with mock.patch.object(step, 'prepare', return_value='/tmp/test.il'), \
+                    mock.patch('chipflow.platform.silicon_step._build_bundle_zip', return_value=b'fake-bundle'):
+                with mock.patch('chipflow.platform.silicon_step.requests.post') as mock_post:
                         # Mock successful submission
                         mock_response = mock.MagicMock()
                         mock_response.status_code = 200
@@ -103,9 +106,9 @@ class TestSiliconSubmitBrowserPrompt(unittest.TestCase):
             step.platform._ports = {}
 
             # Mock the submit method dependencies
-            with mock.patch.object(step, 'prepare', return_value='/tmp/test.il'):
-                with mock.patch('builtins.open', mock.mock_open(read_data=b'')):
-                    with mock.patch('chipflow.platform.silicon_step.requests.post') as mock_post:
+            with mock.patch.object(step, 'prepare', return_value='/tmp/test.il'), \
+                    mock.patch('chipflow.platform.silicon_step._build_bundle_zip', return_value=b'fake-bundle'):
+                with mock.patch('chipflow.platform.silicon_step.requests.post') as mock_post:
                         # Mock successful submission
                         mock_response = mock.MagicMock()
                         mock_response.status_code = 200
@@ -150,9 +153,9 @@ class TestSiliconSubmitBrowserPrompt(unittest.TestCase):
             step.platform._ports = {}
 
             # Mock the submit method dependencies
-            with mock.patch.object(step, 'prepare', return_value='/tmp/test.il'):
-                with mock.patch('builtins.open', mock.mock_open(read_data=b'')):
-                    with mock.patch('chipflow.platform.silicon_step.requests.post') as mock_post:
+            with mock.patch.object(step, 'prepare', return_value='/tmp/test.il'), \
+                    mock.patch('chipflow.platform.silicon_step._build_bundle_zip', return_value=b'fake-bundle'):
+                with mock.patch('chipflow.platform.silicon_step.requests.post') as mock_post:
                         # Mock successful submission
                         mock_response = mock.MagicMock()
                         mock_response.status_code = 200
@@ -173,6 +176,79 @@ class TestSiliconSubmitBrowserPrompt(unittest.TestCase):
                                 mock_input.assert_not_called()
                                 # Verify webbrowser.open was NOT called
                                 mock_webbrowser.assert_not_called()
+
+
+class TestBuildBundleZip(unittest.TestCase):
+    """Tests for the _build_bundle_zip helper."""
+
+    def test_manifest_and_layout(self):
+        with tempfile.TemporaryDirectory() as td:
+            rtlil_path = Path(td) / "top.il"
+            rtlil_path.write_text("module top(); endmodule\n")
+            config = '{"pins": []}'
+
+            blob = _build_bundle_zip(rtlil_path, config)
+
+            with zipfile.ZipFile(io.BytesIO(blob)) as zf:
+                names = set(zf.namelist())
+                self.assertEqual(names, {"manifest.json", "top.il", "pins.lock"})
+
+                manifest = json.loads(zf.read("manifest.json"))
+                self.assertEqual(manifest["version"], "1")
+                self.assertEqual(manifest["rtlil"], "top.il")
+                self.assertEqual(manifest["config"], "pins.lock")
+
+                self.assertEqual(zf.read("top.il").decode(), "module top(); endmodule\n")
+                self.assertEqual(zf.read("pins.lock").decode(), config)
+
+    def test_uses_real_rtlil_filename(self):
+        """Bundle preserves the source rtlil filename (not a fixed string)."""
+        with tempfile.TemporaryDirectory() as td:
+            rtlil_path = Path(td) / "weird_name.rtlil"
+            rtlil_path.write_text("x")
+            blob = _build_bundle_zip(rtlil_path, "{}")
+            with zipfile.ZipFile(io.BytesIO(blob)) as zf:
+                self.assertIn("weird_name.rtlil", zf.namelist())
+                manifest = json.loads(zf.read("manifest.json"))
+                self.assertEqual(manifest["rtlil"], "weird_name.rtlil")
+
+
+class TestSiliconSubmitBundlePost(unittest.TestCase):
+    """The submit() path posts a single 'bundle' multipart part."""
+
+    @mock.patch('chipflow.packaging.load_pinlock')
+    @mock.patch('chipflow.platform.silicon_step.subprocess.check_output')
+    def test_submit_sends_single_bundle_part(self, mock_subprocess, mock_load_pinlock):
+        mock_subprocess.return_value = 'test123\n'
+        mock_pinlock = mock.MagicMock()
+        mock_pinlock.model_dump_json.return_value = '{}'
+        mock_load_pinlock.return_value = mock_pinlock
+
+        with mock.patch('chipflow.platform.silicon_step.SiliconPlatform'):
+            config = mock.MagicMock()
+            config.chipflow.silicon = True
+            config.chipflow.project_name = 'test_project'
+            step = SiliconStep(config)
+            step.platform._ports = {}
+
+            with mock.patch.object(step, 'prepare', return_value='/tmp/test.il'), \
+                    mock.patch('chipflow.platform.silicon_step._build_bundle_zip',
+                               return_value=b'fake-bundle-bytes'), \
+                    mock.patch('chipflow.platform.silicon_step.requests.post') as mock_post, \
+                    mock.patch('chipflow.platform.silicon_step.get_api_key', return_value='k'), \
+                    mock.patch('chipflow.platform.silicon_step.exit'), \
+                    mock.patch('sys.stdout.isatty', return_value=False):
+                mock_post.return_value = mock.MagicMock(
+                    status_code=200, json=lambda: {'build_id': 'b1'})
+                step._chipflow_api_key = 'k'
+                step.submit('/tmp/test.il', Namespace(dry_run=False, wait=False))
+
+            files = mock_post.call_args.kwargs["files"]
+            self.assertEqual(set(files.keys()), {"bundle"})
+            filename, payload, content_type = files["bundle"]
+            self.assertEqual(filename, "bundle.zip")
+            self.assertEqual(payload, b'fake-bundle-bytes')
+            self.assertEqual(content_type, "application/zip")
 
 
 if __name__ == "__main__":
