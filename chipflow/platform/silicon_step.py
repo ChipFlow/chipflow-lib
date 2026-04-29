@@ -32,7 +32,7 @@ from ..auth import get_api_key, AuthenticationError
 logger = logging.getLogger(__name__)
 
 
-def _build_bundle_zip(rtlil_path, config: str) -> bytes:
+def _build_bundle_zip(rtlil_path, config: str, project_name: str) -> bytes:
     """Pack the submission into a single zip with a manifest.
 
     Layout::
@@ -40,6 +40,10 @@ def _build_bundle_zip(rtlil_path, config: str) -> bytes:
         manifest.json
         <rtlil filename>     # e.g. "top.il", taken from rtlil_path
         pins.lock            # the pinlock JSON
+
+    ``project_name`` is the chipflow.toml ``[chipflow] project_name`` value;
+    consumers (logs, dashboards, the backend's working directory naming)
+    use it to identify the design without re-parsing the config.
 
     The manifest is the only contract: consumers locate the rtlil and
     config payloads via ``manifest["rtlil"]`` and ``manifest["config"]``.
@@ -50,6 +54,7 @@ def _build_bundle_zip(rtlil_path, config: str) -> bytes:
     config_arc = "pins.lock"
     manifest = {
         "version": "1",
+        "project": project_name,
         "rtlil": rtlil_arc,
         "config": config_arc,
     }
@@ -214,7 +219,8 @@ class SiliconStep:
             pinlock = load_pinlock()
             config = pinlock.model_dump_json(indent=2)
 
-            bundle_bytes = _build_bundle_zip(rtlil_path, config)
+            bundle_bytes = _build_bundle_zip(
+                rtlil_path, config, self.config.chipflow.project_name)
 
             if args.dry_run:
                 sp.succeed(f"✅ Design `{data['projectId']}:{data['name']}` ready for submission to ChipFlow cloud!")
