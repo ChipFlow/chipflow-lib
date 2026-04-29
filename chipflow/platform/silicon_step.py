@@ -43,27 +43,27 @@ def _build_bundle_zip(rtlil_path, config: str, project_name: str) -> bytes:
 
     ``project_name`` is the chipflow.toml ``[chipflow] project_name`` value;
     consumers (logs, dashboards, the backend's working directory naming)
-    use it to identify the design without re-parsing the config.
+    use it to identify the design without re-parsing the pinlock.
 
     The manifest is the only contract: consumers locate the rtlil and
-    config payloads via ``manifest["rtlil"]`` and ``manifest["config"]``.
+    pinlock payloads via ``manifest["rtlil"]`` and ``manifest["pins_lock"]``.
     Future additions (e.g. macro folders) extend the manifest without
     changing this function's signature on the wire.
     """
     rtlil_arc = Path(rtlil_path).name
-    config_arc = "pins.lock"
+    pins_lock_arc = "pins.lock"
     manifest = {
         "version": "1",
         "project": project_name,
         "rtlil": rtlil_arc,
-        "config": config_arc,
+        "pins_lock": pins_lock_arc,
     }
     manifest_bytes = (json.dumps(manifest, indent=2) + "\n").encode("utf-8")
 
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
         zf.writestr("manifest.json", manifest_bytes)
-        zf.writestr(config_arc, config)
+        zf.writestr(pins_lock_arc, config)
         zf.write(str(rtlil_path), arcname=rtlil_arc)
     return buf.getvalue()
 
