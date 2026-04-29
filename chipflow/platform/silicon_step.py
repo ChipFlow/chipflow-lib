@@ -32,7 +32,7 @@ from ..auth import get_api_key, AuthenticationError
 logger = logging.getLogger(__name__)
 
 
-def _build_bundle_zip(rtlil_path, config: str, project_name: str) -> bytes:
+def _build_bundle_zip(rtlil_path, config: str, project_name: str, process: str) -> bytes:
     """Pack the submission into a single zip with a manifest.
 
     Layout::
@@ -42,16 +42,18 @@ def _build_bundle_zip(rtlil_path, config: str, project_name: str) -> bytes:
         pins.lock            # the pinlock JSON
 
     ``project_name`` is the chipflow.toml ``[chipflow] project_name`` value;
-    consumers (logs, dashboards, the backend's working directory naming)
-    use it to identify the design without re-parsing the pinlock.
+    ``process`` is the chipflow.toml ``[chipflow.silicon] process`` value
+    (e.g. "sky130", "gf180"). Consumers (logs, dashboards, the backend's
+    working directory naming and PDK selection) use these to identify
+    and route the design without re-parsing the pinlock.
 
     The manifest is the only contract: consumers locate the design and
     pinlock payloads via ``manifest["design_file"]`` and
     ``manifest["pins_lock_file"]``. Keys naming a file inside the
     archive carry a ``_file`` suffix so they're distinguishable from
-    plain value keys (``version``, ``project``); the value is a
-    zip-relative path. ``design_file`` is named in terms of role rather
-    than format so the same key can carry rtlil today, or another
+    plain value keys (``version``, ``project``, ``process``); the value
+    is a zip-relative path. ``design_file`` is named in terms of role
+    rather than format so the same key can carry rtlil today, or another
     intermediate (Verilog, FIRRTL) tomorrow, without renaming. Future
     additions (e.g. macro folders) extend the manifest without
     changing this function's signature on the wire.
@@ -61,6 +63,7 @@ def _build_bundle_zip(rtlil_path, config: str, project_name: str) -> bytes:
     manifest = {
         "version": "1",
         "project": project_name,
+        "process": process,
         "design_file": design_arc,
         "pins_lock_file": pins_lock_arc,
     }
@@ -226,7 +229,9 @@ class SiliconStep:
             config = pinlock.model_dump_json(indent=2)
 
             bundle_bytes = _build_bundle_zip(
-                rtlil_path, config, self.config.chipflow.project_name)
+                rtlil_path, config,
+                self.config.chipflow.project_name,
+                self.config.chipflow.silicon.process.value)
 
             if args.dry_run:
                 sp.succeed(f"✅ Design `{data['projectId']}:{data['name']}` ready for submission to ChipFlow cloud!")
