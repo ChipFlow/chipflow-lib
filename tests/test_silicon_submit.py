@@ -51,6 +51,7 @@ class TestSiliconSubmitBrowserPrompt(unittest.TestCase):
         with mock.patch('chipflow.platform.silicon_step.SiliconPlatform'):
             config = mock.MagicMock()
             config.chipflow.silicon.process.value = 'sky130'
+            config.chipflow.silicon.package = 'cf20'
             config.chipflow.project_name = 'test_project'
             step = SiliconStep(config)
             step._build_url = "https://build.chipflow.com/build/test123"
@@ -100,6 +101,7 @@ class TestSiliconSubmitBrowserPrompt(unittest.TestCase):
         with mock.patch('chipflow.platform.silicon_step.SiliconPlatform'):
             config = mock.MagicMock()
             config.chipflow.silicon.process.value = 'sky130'
+            config.chipflow.silicon.package = 'cf20'
             config.chipflow.project_name = 'test_project'
             step = SiliconStep(config)
             step._build_url = "https://build.chipflow.com/build/test123"
@@ -147,6 +149,7 @@ class TestSiliconSubmitBrowserPrompt(unittest.TestCase):
         with mock.patch('chipflow.platform.silicon_step.SiliconPlatform'):
             config = mock.MagicMock()
             config.chipflow.silicon.process.value = 'sky130'
+            config.chipflow.silicon.package = 'cf20'
             config.chipflow.project_name = 'test_project'
             step = SiliconStep(config)
             step._build_url = "https://build.chipflow.com/build/test123"
@@ -187,7 +190,7 @@ class TestBuildBundleZip(unittest.TestCase):
             rtlil_path.write_text("module top(); endmodule\n")
             config = '{"pins": []}'
 
-            blob = _build_bundle_zip(rtlil_path, config, "my_project", "sky130")
+            blob = _build_bundle_zip(rtlil_path, config, "my_project", "sky130", "cf20")
 
             with zipfile.ZipFile(io.BytesIO(blob)) as zf:
                 names = set(zf.namelist())
@@ -197,6 +200,7 @@ class TestBuildBundleZip(unittest.TestCase):
                 self.assertEqual(manifest["version"], "1")
                 self.assertEqual(manifest["project"], "my_project")
                 self.assertEqual(manifest["process"], "sky130")
+                self.assertEqual(manifest["package"], "cf20")
                 self.assertEqual(manifest["design_file"], "top.il")
                 self.assertEqual(manifest["pins_lock_file"], "pins.lock")
 
@@ -208,7 +212,7 @@ class TestBuildBundleZip(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             rtlil_path = Path(td) / "weird_name.rtlil"
             rtlil_path.write_text("x")
-            blob = _build_bundle_zip(rtlil_path, "{}", "p", "sky130")
+            blob = _build_bundle_zip(rtlil_path, "{}", "p", "sky130", "cf20")
             with zipfile.ZipFile(io.BytesIO(blob)) as zf:
                 self.assertIn("weird_name.rtlil", zf.namelist())
                 manifest = json.loads(zf.read("manifest.json"))
@@ -229,6 +233,7 @@ class TestSiliconSubmitBundlePost(unittest.TestCase):
         with mock.patch('chipflow.platform.silicon_step.SiliconPlatform'):
             config = mock.MagicMock()
             config.chipflow.silicon.process.value = 'sky130'
+            config.chipflow.silicon.package = 'cf20'
             config.chipflow.project_name = 'test_project'
             step = SiliconStep(config)
             step.platform._ports = {}

@@ -32,7 +32,9 @@ from ..auth import get_api_key, AuthenticationError
 logger = logging.getLogger(__name__)
 
 
-def _build_bundle_zip(rtlil_path, config: str, project_name: str, process: str) -> bytes:
+def _build_bundle_zip(
+    rtlil_path, config: str, project_name: str, process: str, package: str
+) -> bytes:
     """Pack the submission into a single zip with a manifest.
 
     Layout::
@@ -41,22 +43,22 @@ def _build_bundle_zip(rtlil_path, config: str, project_name: str, process: str) 
         <rtlil filename>     # e.g. "top.il", taken from rtlil_path
         pins.lock            # the pinlock JSON
 
-    ``project_name`` is the chipflow.toml ``[chipflow] project_name`` value;
-    ``process`` is the chipflow.toml ``[chipflow.silicon] process`` value
-    (e.g. "sky130", "gf180"). Consumers (logs, dashboards, the backend's
-    working directory naming and PDK selection) use these to identify
-    and route the design without re-parsing the pinlock.
+    ``project_name`` / ``process`` / ``package`` come from chipflow.toml
+    (``[chipflow] project_name``, ``[chipflow.silicon] process``,
+    ``[chipflow.silicon] package``). Consumers (logs, dashboards, the
+    backend's working directory naming and PDK / package selection) use
+    these to identify and route the design without re-parsing the pinlock.
 
     The manifest is the only contract: consumers locate the design and
     pinlock payloads via ``manifest["design_file"]`` and
     ``manifest["pins_lock_file"]``. Keys naming a file inside the
     archive carry a ``_file`` suffix so they're distinguishable from
-    plain value keys (``version``, ``project``, ``process``); the value
-    is a zip-relative path. ``design_file`` is named in terms of role
-    rather than format so the same key can carry rtlil today, or another
-    intermediate (Verilog, FIRRTL) tomorrow, without renaming. Future
-    additions (e.g. macro folders) extend the manifest without
-    changing this function's signature on the wire.
+    plain value keys (``version``, ``project``, ``process``,
+    ``package``); the value is a zip-relative path. ``design_file`` is
+    named in terms of role rather than format so the same key can carry
+    rtlil today, or another intermediate (Verilog, FIRRTL) tomorrow,
+    without renaming. Future additions (e.g. macro folders) extend the
+    manifest without changing this function's signature on the wire.
     """
     design_arc = Path(rtlil_path).name
     pins_lock_arc = "pins.lock"
@@ -64,6 +66,7 @@ def _build_bundle_zip(rtlil_path, config: str, project_name: str, process: str) 
         "version": "1",
         "project": project_name,
         "process": process,
+        "package": package,
         "design_file": design_arc,
         "pins_lock_file": pins_lock_arc,
     }
@@ -231,7 +234,8 @@ class SiliconStep:
             bundle_bytes = _build_bundle_zip(
                 rtlil_path, config,
                 self.config.chipflow.project_name,
-                self.config.chipflow.silicon.process.value)
+                self.config.chipflow.silicon.process.value,
+                self.config.chipflow.silicon.package)
 
             if args.dry_run:
                 sp.succeed(f"✅ Design `{data['projectId']}:{data['name']}` ready for submission to ChipFlow cloud!")
