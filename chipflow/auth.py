@@ -135,14 +135,27 @@ def authenticate_with_github_token(api_origin: str, interactive: bool = True):
                 logger.debug(f"Invalid JSON response on success: {e}, body: {response.text[:200]}")
                 return None
         else:
+            error_code = ""
             try:
-                error_msg = response.json().get("error_description", "Unknown error")
+                body = response.json()
+                error_code = body.get("error", "")
+                error_msg = body.get("error_description", "Unknown error")
             except ValueError:
                 error_msg = f"HTTP {response.status_code}"
                 logger.debug(f"Non-JSON error response: {response.text[:200]}")
 
             if interactive:
                 print(f"⚠️  GitHub token authentication failed: {error_msg}")
+                if error_code == "missing_email":
+                    # The server fetched the gh token but couldn't read the
+                    # user's email — the token is missing the user:email
+                    # scope. Tell the user the exact command to fix it,
+                    # otherwise they fall through to device flow with no clue.
+                    print(
+                        "\n💡 Your `gh` CLI token is missing the `user:email` scope.\n"
+                        "   Run this once and retry:\n"
+                        "       gh auth refresh -s user:email"
+                    )
             logger.debug(f"GitHub token auth failed: {response.status_code} - {error_msg}")
             return None
 
