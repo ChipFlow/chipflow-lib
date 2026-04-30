@@ -1,0 +1,113 @@
+chipflow.packaging.grid_array
+=============================
+
+.. py:module:: chipflow.packaging.grid_array
+
+.. autoapi-nested-parse::
+
+   Grid array package definitions.
+
+   This module provides package definitions for grid array packages
+   like BGA (Ball Grid Array) and PGA (Pin Grid Array) types.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   chipflow.packaging.grid_array.GAPin
+   chipflow.packaging.grid_array.GALayout
+   chipflow.packaging.grid_array.GAPackageDef
+
+
+Module Contents
+---------------
+
+.. py:class:: GAPin
+
+   Bases: :py:obj:`NamedTuple`
+
+
+   Pin identifier for grid array packages (row letter, column number)
+
+
+.. py:class:: GALayout
+
+   Bases: :py:obj:`enum.StrEnum`
+
+
+   Layout type for grid array packages
+
+
+.. py:class:: GAPackageDef
+
+   Bases: :py:obj:`chipflow.packaging.base.BasePackageDef`\ [\ :py:obj:`GAPin`\ ]
+
+
+   Definition of a grid array package.
+
+   Pins or pads are arranged in a regular array of 'width' by 'height'.
+   Pins are identified by a 2-tuple of (row, column), counting from
+   the bottom left when looking at the underside of the package.
+   Rows are identified by letter (A-Z), columns by number.
+
+   The grid may be complete or have missing pins (e.g., center cutout).
+
+   This includes many package types:
+
+   - CPGA: Ceramic Pin Grid Array
+   - OPGA: Organic Pin Grid Array
+   - SPGA: Staggered Pin Grid Array
+   - CABGA: Chip Array Ball Grid Array
+   - CBGA/PBGA: Ceramic/Plastic Ball Grid Array
+   - CTBGA: Thin Chip Array Ball Grid Array
+   - CVBGA: Very Thin Chip Array Ball Grid Array
+   - DSBGA: Die-Size Ball Grid Array
+   - FBGA: Fine Ball Grid Array / Fine Pitch Ball Grid Array
+   - FCmBGA: Flip Chip Molded Ball Grid Array
+   - LBGA: Low-Profile Ball Grid Array
+   - LFBGA: Low-Profile Fine-Pitch Ball Grid Array
+   - MBGA: Micro Ball Grid Array
+   - MCM-PBGA: Multi-Chip Module Plastic Ball Grid Array
+   - nFBGA: New Fine Ball Grid Array
+   - SuperBGA (SBGA): Super Ball Grid Array
+   - TABGA: Tape Array BGA
+   - TBGA: Thin BGA
+   - TEPBGA: Thermally Enhanced Plastic Ball Grid Array
+   - TFBGA: Thin and Fine Ball Grid Array
+   - UFBGA/UBGA: Ultra Fine Ball Grid Array
+   - VFBGA: Very Fine Pitch Ball Grid Array
+   - WFBGA: Very Very Thin Profile Fine Pitch Ball Grid Array
+   - wWLB: Embedded Wafer Level Ball Grid Array
+
+   :Attributes: * **width** -- Number of columns
+                * **height** -- Number of rows
+                * **layout_type** -- Pin layout configuration
+                * **channel_width** -- For PERIMETER/CHANNEL/ISLAND layouts
+                * **island_width** -- For ISLAND layout, size of center island
+                * **missing_pins** -- Specific pins to exclude (overrides layout)
+                * **additional_pins** -- Specific pins to add (overrides layout)
+
+
+   .. py:method:: model_post_init(__context)
+
+      Initialize pin ordering
+
+
+
+   .. py:property:: bringup_pins
+      :type: chipflow.packaging.pins.BringupPins
+
+
+      Bringup pins for grid array package
+
+
+   .. py:property:: heartbeat
+      :type: Dict[int, GAPin]
+
+
+      Numbered set of heartbeat pins for the package
+
+
