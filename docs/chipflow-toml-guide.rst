@@ -153,6 +153,31 @@ The form of IC packaging to use
 
 
 
+``[chipflow.silicon.macros]``
+=============================
+
+Optional. Declares third-party hard macros (SRAMs, PLLs, analog IP, vendor
+cores) for inclusion in the build. Each entry points at a
+``*.blackbox.json`` produced by `macrostrip
+<https://github.com/ChipFlow/macrostrip>`__ (or any conformant tool):
+
+.. code-block:: TOML
+
+   [chipflow.silicon.macros.sram_64x64]
+   blackbox = "vendor/ihp/sram_64x64.blackbox.json"
+
+   [chipflow.silicon.macros.pll_core]
+   blackbox = "vendor/pll/pll_core.blackbox.json"
+
+Paths are resolved relative to ``CHIPFLOW_ROOT``. The blackbox JSON itself
+points at the macro's companion files (LEF, Liberty, frame-view or real GDS,
+Verilog stub), which are all bundled into ``macros.tar.gz`` at submit time.
+
+Python code instantiates macros by logical name via
+:py:func:`chipflow.rtl.blackbox.load_blackbox_wrapper`; see
+:doc:`rtl-wrapper` for the usage pattern and the NDA vs. non-NDA workflows.
+
+
 Power connections
 -----------------
 
