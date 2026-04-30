@@ -51,6 +51,7 @@ from .base import (
 # Concrete package types
 from .standard import (
     BareDiePackageDef,
+    BlockPackageDef,
     QuadPackageDef,
 )
 
@@ -116,6 +117,7 @@ __all__ = [
     'LinearAllocPackageDef',
     # Package types
     'BareDiePackageDef',
+    'BlockPackageDef',
     'QuadPackageDef',
     'GAPin',
     'GALayout',

@@ -15,7 +15,7 @@ from .port_desc import PortMap
 if TYPE_CHECKING:
     # Forward references to package definitions
     from .grid_array import GAPackageDef
-    from .standard import QuadPackageDef, BareDiePackageDef
+    from .standard import QuadPackageDef, BareDiePackageDef, BlockPackageDef
     from .openframe import OpenframePackageDef
 
 # Import Process directly for pydantic to work properly
@@ -23,7 +23,13 @@ from ..config import Process
 
 
 # Union of all package definition types
-PackageDef = Union['GAPackageDef', 'QuadPackageDef', 'BareDiePackageDef', 'OpenframePackageDef']
+PackageDef = Union[
+    'GAPackageDef',
+    'QuadPackageDef',
+    'BareDiePackageDef',
+    'BlockPackageDef',
+    'OpenframePackageDef',
+]
 
 
 class Package(pydantic.BaseModel):

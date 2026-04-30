@@ -47,13 +47,25 @@ class VoltageRange(SelectiveSerializationModel):
     typical: Annotated[Optional[Voltage], OmitIfNone()] = None
 
 
+class BlockConfig(BaseModel):
+    """Per-project block dimensions when ``[chipflow.silicon] package = "block"``.
+
+    A block is a hard-macro target rather than a packaged chip — the user
+    declares how many pin slots they want on each axis, and the backend
+    sizes the macro to fit them at the process's preferred pin pitch.
+    """
+    width: int
+    height: int
+
+
 class SiliconConfig(BaseModel):
     """Configuration for silicon in chipflow.toml."""
     process: 'Process'
     package: str
     power: Dict[str, Voltage] = {}
     debug: Optional[Dict[str, bool]] = None
-    # This is still kept around to allow forcing pad locations.
+    # Required only when package = "block".
+    block: Optional[BlockConfig] = None
 
 class SimulationConfig(BaseModel):
     """Configuration for simulation settings."""
