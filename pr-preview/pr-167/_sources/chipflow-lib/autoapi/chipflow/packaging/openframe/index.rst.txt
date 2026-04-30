@@ -1,0 +1,61 @@
+chipflow.packaging.openframe
+============================
+
+.. py:module:: chipflow.packaging.openframe
+
+.. autoapi-nested-parse::
+
+   Openframe package definition.
+
+   This module provides the package definition for the ChipFoundry Openframe
+   harness, commonly used with open-source silicon projects.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   chipflow.packaging.openframe.OFPin
+   chipflow.packaging.openframe.OpenframePackageDef
+
+
+Module Contents
+---------------
+
+.. py:class:: OFPin
+
+   Bases: :py:obj:`NamedTuple`
+
+
+   Pin identifier for Openframe package
+
+
+.. py:class:: OpenframePackageDef
+
+   Bases: :py:obj:`chipflow.packaging.base.LinearAllocPackageDef`
+
+
+   Definition of the ChipFoundry Openframe harness package.
+
+   This is a standardized package/carrier used for open-source
+   silicon projects, particularly with the ChipFoundry chipIgnite
+   and OpenMPW programs.
+
+   :Attributes: **name** -- Package name (default "openframe")
+
+
+   .. py:method:: model_post_init(__context)
+
+      Initialize pin ordering from GPIO list
+
+
+
+   .. py:property:: bringup_pins
+      :type: chipflow.packaging.pins.BringupPins
+
+
+      Bringup pins for Openframe package
+
+

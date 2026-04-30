@@ -1,0 +1,131 @@
+chipflow.sim.cxxrtl
+===================
+
+.. py:module:: chipflow.sim.cxxrtl
+
+.. autoapi-nested-parse::
+
+   CXXRTL C API bindings via ctypes.
+
+   This module provides Python bindings for the CXXRTL simulation engine,
+   allowing fast compiled simulation of HDL designs with Python testbenches.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   chipflow.sim.cxxrtl.CxxrtlObject
+   chipflow.sim.cxxrtl.CxxrtlSimulator
+
+
+Module Contents
+---------------
+
+.. py:class:: CxxrtlObject
+
+   Bases: :py:obj:`ctypes.Structure`
+
+
+   CXXRTL object descriptor - matches struct cxxrtl_object in cxxrtl_capi.h
+
+
+.. py:class:: CxxrtlSimulator(library_path, top_module)
+
+   Python wrapper for CXXRTL simulation.
+
+   This class provides a Pythonic interface to CXXRTL compiled simulations,
+   supporting signal access, stepping, and VCD tracing.
+
+   Example::
+
+       sim = CxxrtlSimulator("build/design.so", "design")
+       sim.reset()
+
+       # Clock cycle
+       sim.set("clk", 0)
+       sim.step()
+       sim.set("clk", 1)
+       sim.step()
+
+       # Read output
+       value = sim.get("data_out")
+
+
+   .. py:method:: reset()
+
+      Reset the simulation to initial state.
+
+
+
+   .. py:method:: eval()
+
+      Evaluate combinatorial logic.
+
+      :returns: True if the design converged immediately
+
+
+
+   .. py:method:: commit()
+
+      Commit sequential state.
+
+      :returns: True if any state changed
+
+
+
+   .. py:method:: step()
+
+      Simulate to a fixed point (eval + commit until stable).
+
+      :returns: Number of delta cycles
+
+
+
+   .. py:method:: get(name)
+
+      Get the current value of a signal.
+
+      :param name: Signal name (e.g., "i_clk" or "o_data")
+
+      :returns: Current value as an integer
+
+
+
+   .. py:method:: set(name, value)
+
+      Set the next value of a signal.
+
+      :param name: Hierarchical signal name
+      :param value: Value to set
+
+
+
+   .. py:method:: signals()
+
+      Iterate over all signals in the design.
+
+      :Yields: Tuples of (name, object) for each signal
+
+
+
+   .. py:method:: inputs()
+
+      Iterate over input signals.
+
+
+
+   .. py:method:: outputs()
+
+      Iterate over output signals.
+
+
+
+   .. py:method:: close()
+
+      Release simulation resources.
+
+
+

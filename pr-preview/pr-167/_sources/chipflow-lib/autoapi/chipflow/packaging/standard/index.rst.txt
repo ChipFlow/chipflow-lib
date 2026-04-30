@@ -1,0 +1,162 @@
+chipflow.packaging.standard
+===========================
+
+.. py:module:: chipflow.packaging.standard
+
+.. autoapi-nested-parse::
+
+   Standard package definitions for common package types.
+
+   This module provides concrete package definitions for:
+   - Quad packages (QFN, LQFP, TQFP, etc.)
+   - Bare die packages
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   chipflow.packaging.standard.BareDiePackageDef
+   chipflow.packaging.standard.BlockPackageDef
+   chipflow.packaging.standard.QuadPackageDef
+
+
+Module Contents
+---------------
+
+.. py:class:: BareDiePackageDef
+
+   Bases: :py:obj:`chipflow.packaging.base.LinearAllocPackageDef`
+
+
+   Definition of a package with pins on four sides.
+
+   Sides are labeled north, south, east, west with an integer
+   identifier within each side, indicating pads across or down
+   from top-left corner.
+
+   This is typically used for direct die attach without traditional
+   packaging.
+
+   :Attributes: * **width** -- Number of die pads on top and bottom sides
+                * **height** -- Number of die pads on left and right sides
+
+
+   .. py:method:: model_post_init(__context)
+
+      Initialize pin ordering
+
+
+
+   .. py:property:: bringup_pins
+      :type: chipflow.packaging.pins.BringupPins
+
+
+      Bringup pins for bare die package
+
+
+.. py:class:: BlockPackageDef
+
+   Bases: :py:obj:`chipflow.packaging.base.LinearAllocPackageDef`
+
+
+   Definition of a hard-macro target with pins on four sides.
+
+   Structurally a sibling of :class:`BareDiePackageDef` — pins are
+   addressed by ``(_Side, index)`` tuples — but used when the build is
+   producing a block (LEF / Liberty / GDS for embedding into another
+   design) rather than a packaged chip. Differences:
+
+   - No I/O pad ring, no JTAG, no fixed clock/reset/power locations:
+     blocks take power via straps from the parent and route their
+     clocks/resets through regular pins. Bringup-pin allocation is
+     skipped.
+   - ``width`` and ``height`` are pin-slot counts, same units as
+     :class:`QuadPackageDef.width` / ``.height`` — not microns.
+     Translation to physical dimensions happens at the backend using
+     the process's pin pitch.
+
+   :Attributes: * **width** -- Number of pin slots on top and bottom edges.
+                * **height** -- Number of pin slots on left and right edges.
+
+
+   .. py:method:: model_post_init(__context)
+
+      Initialize pin ordering. No bringup pins to subtract.
+
+
+
+   .. py:property:: bringup_pins
+      :type: chipflow.packaging.pins.BringupPins
+
+      :abstractmethod:
+
+
+      Blocks have no chip-style bringup pins.
+
+      The base ``bringup_pins`` property is abstract and must return a
+      :class:`BringupPins` instance, but :meth:`allocate_pins` below
+      is overridden to skip the bringup step entirely so this value is
+      never read. We raise here to make any accidental future caller
+      fail loudly rather than silently allocating wrong locations.
+
+
+   .. py:method:: allocate_pins(config, process, lockfile)
+
+      Allocate pins without the chip-package bringup step.
+
+      Blocks don't have an I/O ring, so the parent class's
+      ``_allocate_bringup`` (which reserves clock/reset/power/JTAG
+      slots at fixed positions) doesn't apply. Just allocate registered
+      components linearly from the perimeter slots.
+
+
+
+.. py:class:: QuadPackageDef
+
+   Bases: :py:obj:`chipflow.packaging.base.LinearAllocPackageDef`
+
+
+   Definition of a quad flat package.
+
+   A package with 'width' pins on the top and bottom and 'height'
+   pins on the left and right. Pins are numbered anti-clockwise
+   from the top left pin.
+
+   This includes many common package types:
+
+   - QFN: quad flat no-leads (bottom pad = substrate)
+   - BQFP: bumpered quad flat package
+   - BQFPH: bumpered quad flat package with heat spreader
+   - CQFP: ceramic quad flat package
+   - EQFP: plastic enhanced quad flat package
+   - FQFP: fine pitch quad flat package
+   - LQFP: low profile quad flat package
+   - MQFP: metric quad flat package
+   - NQFP: near chip-scale quad flat package
+   - SQFP: small quad flat package
+   - TQFP: thin quad flat package
+   - VQFP: very small quad flat package
+   - VTQFP: very thin quad flat package
+   - TDFN: thin dual flat no-lead package
+   - CERQUAD: low-cost CQFP
+
+   :Attributes: * **width** -- The number of pins across on the top and bottom edges
+                * **height** -- The number of pins high on the left and right edges
+
+
+   .. py:method:: model_post_init(__context)
+
+      Initialize pin ordering
+
+
+
+   .. py:property:: bringup_pins
+      :type: chipflow.packaging.pins.BringupPins
+
+
+      Bringup pins for quad package
+
+
