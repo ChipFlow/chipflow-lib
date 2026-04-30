@@ -79,9 +79,30 @@ def lock_pins(config: Optional['Config'] = None) -> None:
     if not config.chipflow.silicon:
         raise ChipFlowError("no [chipflow.silicon] section found in chipflow.toml")
 
-    # Get package definition from dict
+    # Resolve the package definition. Most packages are fixed entries in
+    # PACKAGE_DEFINITIONS (PGA144, BGA144, …). The special name "block"
+    # is parameterized per project from [chipflow.silicon.block].
     package_name = config.chipflow.silicon.package
-    package_def = PACKAGE_DEFINITIONS[package_name]
+    if package_name == "block":
+        from .standard import BlockPackageDef
+        block_cfg = config.chipflow.silicon.block
+        if block_cfg is None:
+            raise ChipFlowError(
+                'package = "block" requires a [chipflow.silicon.block] '
+                'section with `width` and `height` (pin slot counts).'
+            )
+        package_def = BlockPackageDef(
+            name="block",
+            width=block_cfg.width,
+            height=block_cfg.height,
+        )
+    else:
+        if package_name not in PACKAGE_DEFINITIONS:
+            raise ChipFlowError(
+                f'Unknown package {package_name!r}. Known: '
+                f'{sorted(PACKAGE_DEFINITIONS.keys()) + ["block"]}'
+            )
+        package_def = PACKAGE_DEFINITIONS[package_name]
     process = config.chipflow.silicon.process
 
     top = top_components(config)

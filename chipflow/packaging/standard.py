@@ -9,10 +9,15 @@ This module provides concrete package definitions for:
 
 import itertools
 from enum import IntEnum
-from typing import List, Literal, Tuple
+from typing import TYPE_CHECKING, List, Literal, Tuple
 
 from .base import LinearAllocPackageDef
 from .pins import PowerPins, JTAGPins, BringupPins
+from .lockfile import LockFile
+from .allocation import _linear_allocate_components
+
+if TYPE_CHECKING:
+    from ..config import Config, Process
 
 
 class _Side(IntEnum):
@@ -81,6 +86,81 @@ class BareDiePackageDef(LinearAllocPackageDef):
                 (_Side.E, 5),
                 (_Side.E, 6)
             )
+        )
+
+
+class BlockPackageDef(LinearAllocPackageDef):
+    """
+    Definition of a hard-macro target with pins on four sides.
+
+    Structurally a sibling of :class:`BareDiePackageDef` — pins are
+    addressed by ``(_Side, index)`` tuples — but used when the build is
+    producing a block (LEF / Liberty / GDS for embedding into another
+    design) rather than a packaged chip. Differences:
+
+    - No I/O pad ring, no JTAG, no fixed clock/reset/power locations:
+      blocks take power via straps from the parent and route their
+      clocks/resets through regular pins. Bringup-pin allocation is
+      skipped.
+    - ``width`` and ``height`` are pin-slot counts, same units as
+      :class:`QuadPackageDef.width` / ``.height`` — not microns.
+      Translation to physical dimensions happens at the backend using
+      the process's pin pitch.
+
+    Attributes:
+        width: Number of pin slots on top and bottom edges.
+        height: Number of pin slots on left and right edges.
+    """
+
+    package_type: Literal["BlockPackageDef"] = "BlockPackageDef"
+
+    width: int
+    height: int
+
+    def model_post_init(self, __context):
+        """Initialize pin ordering. No bringup pins to subtract."""
+        pins = set(itertools.product((_Side.N, _Side.S), range(self.width)))
+        pins |= set(itertools.product((_Side.W, _Side.E), range(self.height)))
+        self._ordered_pins: List[BareDiePin] = sorted(pins)
+        return super().model_post_init(__context)
+
+    @property
+    def bringup_pins(self) -> BringupPins:
+        """Blocks have no chip-style bringup pins.
+
+        The base ``bringup_pins`` property is abstract and must return a
+        :class:`BringupPins` instance, but :meth:`allocate_pins` below
+        is overridden to skip the bringup step entirely so this value is
+        never read. We raise here to make any accidental future caller
+        fail loudly rather than silently allocating wrong locations.
+        """
+        raise NotImplementedError(
+            "BlockPackageDef has no bringup pins — clocks, resets and "
+            "power are wired through regular pins or via parent abutment."
+        )
+
+    def allocate_pins(
+        self, config: 'Config', process: 'Process', lockfile: LockFile | None
+    ) -> LockFile:
+        """Allocate pins without the chip-package bringup step.
+
+        Blocks don't have an I/O ring, so the parent class's
+        ``_allocate_bringup`` (which reserves clock/reset/power/JTAG
+        slots at fixed positions) doesn't apply. Just allocate registered
+        components linearly from the perimeter slots.
+        """
+        portmap = _linear_allocate_components(
+            self._interfaces,
+            lockfile,
+            self._allocate,
+            set(self._ordered_pins),
+        )
+        package = self._get_package()
+        return LockFile(
+            package=package,
+            process=process,
+            metadata=self._interfaces,
+            port_map=portmap,
         )
 
 
