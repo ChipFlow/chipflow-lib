@@ -6,7 +6,7 @@ This module contains the fundamental building blocks for defining
 physical pin assignments and power/signal groupings in IC packages.
 """
 
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from enum import StrEnum, auto
 from typing import Set, List, Union, Optional, TypeVar, Generic
 
@@ -92,23 +92,29 @@ class BringupPins(Generic[Pin]):
     Essential pins for bringing up an IC, always in fixed locations.
 
     These pins are used for initial testing and debug of the IC.
+    Clock and reset are required (every target needs them); power,
+    heartbeat, and JTAG are optional so minimal targets — e.g. hard
+    macros that take power via abutment and have no debug ring — can
+    declare just the signals they actually have.
 
     Attributes:
-        core_power: List of core power pin pairs
         core_clock: Core clock input pin
         core_reset: Core reset input pin
-        core_heartbeat: Heartbeat output pin (for liveness testing)
+        core_power: List of core power pin pairs (empty for blocks)
+        core_heartbeat: Heartbeat output pin (None when not present)
         core_jtag: Optional JTAG interface pins
     """
-    core_power: List[PowerPins]
     core_clock: Pin
     core_reset: Pin
-    core_heartbeat: Pin
+    core_power: List[PowerPins] = field(default_factory=list)
+    core_heartbeat: Optional[Pin] = None
     core_jtag: Optional[JTAGPins] = None
 
     def to_set(self) -> Set[Pin]:
-        """Convert all bringup pins to a set"""
+        """Convert all bringup pins to a set, skipping unset signals."""
         jtag = self.core_jtag.to_set() if self.core_jtag else set()
+        present = {self.core_clock, self.core_reset}
+        if self.core_heartbeat is not None:
+            present.add(self.core_heartbeat)
         return {p for pp in self.core_power for p in asdict(pp).values()} | \
-               set([self.core_clock, self.core_reset, self.core_heartbeat]) | \
-               jtag
+               present | jtag

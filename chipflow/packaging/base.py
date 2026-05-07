@@ -121,10 +121,12 @@ class BasePackageDef(pydantic.BaseModel, Generic[PinType], abc.ABC):
                 iomodel=IOModel(width=len(pins), direction=io.Direction.Input)
             )
 
-        # Add heartbeat if enabled
+        # Add heartbeat if enabled and the target actually has a
+        # heartbeat pin (blocks / minimal targets may not).
         assert config.chipflow.silicon
         if config.chipflow.silicon.debug and \
-           config.chipflow.silicon.debug['heartbeat']:
+           config.chipflow.silicon.debug['heartbeat'] and \
+           self.bringup_pins.core_heartbeat is not None:
             d['heartbeat'] = PortDesc(
                 type='heartbeat',
                 pins=[self.bringup_pins.core_heartbeat],
