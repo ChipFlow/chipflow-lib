@@ -4,17 +4,15 @@ when ``[chipflow.silicon] package = "block"``."""
 
 import unittest
 
-from chipflow.packaging.standard import BlockPackageDef, _Side
+from chipflow.packaging.standard import BlockPackageDef
 
 
 class BlockPackageDefTestCase(unittest.TestCase):
     def test_pin_slots_match_perimeter(self):
-        """A 5×3 block has 5 N + 5 S + 3 W + 3 E = 16 slots."""
+        """A 5×3 block has 5+5+3+3 = 16 linear pin slots, numbered
+        from 1 to 16 — same convention as QuadPackageDef."""
         pkg = BlockPackageDef(name="block", width=5, height=3)
-        slots = pkg._ordered_pins
-        self.assertEqual(len(slots), 5 + 5 + 3 + 3)
-        sides = {s for s, _ in slots}
-        self.assertEqual(sides, {_Side.N, _Side.S, _Side.W, _Side.E})
+        self.assertEqual(pkg._ordered_pins, list(range(1, 17)))
 
     def test_does_not_reserve_bringup_slots(self):
         """Unlike chip packages, BlockPackageDef must not subtract any
