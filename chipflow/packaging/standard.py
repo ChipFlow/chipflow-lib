@@ -13,11 +13,9 @@ from typing import TYPE_CHECKING, List, Literal, Tuple
 
 from .base import LinearAllocPackageDef
 from .pins import PowerPins, JTAGPins, BringupPins
-from .lockfile import LockFile
-from .allocation import _linear_allocate_components
 
 if TYPE_CHECKING:
-    from ..config import Config, Process
+    pass
 
 
 class _Side(IntEnum):
@@ -99,10 +97,12 @@ class BlockPackageDef(LinearAllocPackageDef):
     GDS for embedding into another design) rather than a packaged
     chip. Differences:
 
-    - No I/O pad ring, no JTAG, no fixed clock/reset/power locations:
-      blocks take power via straps from the parent and route their
-      clocks/resets through regular pins. Bringup-pin allocation is
-      skipped.
+    - No I/O pad ring, no JTAG, no power pins: blocks take power via
+      straps from the parent and have no chip-level debug ring.
+    - The bringup pin set contains only ``core_clock`` (pin 1) and
+      ``core_reset`` (pin 2). Clock and reset are real boundary
+      signals on the macro that the parent design drives through
+      ordinary block pins.
     - ``width`` and ``height`` are pin-slot counts, same units as
       :class:`QuadPackageDef.width` / ``.height`` — not microns.
       Translation to physical dimensions happens at the backend using
@@ -123,50 +123,22 @@ class BlockPackageDef(LinearAllocPackageDef):
     height: int
 
     def model_post_init(self, __context):
-        """Initialize pin ordering. No bringup pins to subtract."""
-        self._ordered_pins: List[int] = list(
-            range(1, 2 * (self.width + self.height) + 1)
-        )
+        """Initialize pin ordering, subtracting the bringup slots."""
+        pins = set(range(1, 2 * (self.width + self.height) + 1))
+        pins -= self.bringup_pins.to_set()
+        self._ordered_pins: List[int] = sorted(pins)
         return super().model_post_init(__context)
 
     @property
     def bringup_pins(self) -> BringupPins:
-        """Blocks have no chip-style bringup pins.
+        """Minimal bringup: clock at pin 1, reset at pin 2.
 
-        The base ``bringup_pins`` property is abstract and must return a
-        :class:`BringupPins` instance, but :meth:`allocate_pins` below
-        is overridden to skip the bringup step entirely so this value is
-        never read. We raise here to make any accidental future caller
-        fail loudly rather than silently allocating wrong locations.
+        No power (parent abutment), no heartbeat, no JTAG. The base
+        :meth:`_allocate_bringup` walks the empty ``core_power`` list
+        and skips heartbeat when ``core_heartbeat is None``, so the
+        resulting ``_core`` portmap contains just ``clk`` and ``rst_n``.
         """
-        raise NotImplementedError(
-            "BlockPackageDef has no bringup pins — clocks, resets and "
-            "power are wired through regular pins or via parent abutment."
-        )
-
-    def allocate_pins(
-        self, config: 'Config', process: 'Process', lockfile: LockFile | None
-    ) -> LockFile:
-        """Allocate pins without the chip-package bringup step.
-
-        Blocks don't have an I/O ring, so the parent class's
-        ``_allocate_bringup`` (which reserves clock/reset/power/JTAG
-        slots at fixed positions) doesn't apply. Just allocate registered
-        components linearly from the perimeter slots.
-        """
-        portmap = _linear_allocate_components(
-            self._interfaces,
-            lockfile,
-            self._allocate,
-            set(self._ordered_pins),
-        )
-        package = self._get_package()
-        return LockFile(
-            package=package,
-            process=process,
-            metadata=self._interfaces,
-            port_map=portmap,
-        )
+        return BringupPins(core_clock=1, core_reset=2)
 
 
 class QuadPackageDef(LinearAllocPackageDef):
