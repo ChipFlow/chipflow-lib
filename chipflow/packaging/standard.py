@@ -93,10 +93,11 @@ class BlockPackageDef(LinearAllocPackageDef):
     """
     Definition of a hard-macro target with pins on four sides.
 
-    Structurally a sibling of :class:`BareDiePackageDef` — pins are
-    addressed by ``(_Side, index)`` tuples — but used when the build is
-    producing a block (LEF / Liberty / GDS for embedding into another
-    design) rather than a packaged chip. Differences:
+    Structurally close to :class:`QuadPackageDef` — pins are numbered
+    linearly counter-clockwise starting from the top of the West edge
+    — but used when the build is producing a block (LEF / Liberty /
+    GDS for embedding into another design) rather than a packaged
+    chip. Differences:
 
     - No I/O pad ring, no JTAG, no fixed clock/reset/power locations:
       blocks take power via straps from the parent and route their
@@ -106,6 +107,10 @@ class BlockPackageDef(LinearAllocPackageDef):
       :class:`QuadPackageDef.width` / ``.height`` — not microns.
       Translation to physical dimensions happens at the backend using
       the process's pin pitch.
+
+    Linear pin numbering matches :class:`QuadPackageDef` so the
+    backend can use a single ``packaging.map`` convention to translate
+    pin indices to physical (side, slot) locations.
 
     Attributes:
         width: Number of pin slots on top and bottom edges.
@@ -119,9 +124,9 @@ class BlockPackageDef(LinearAllocPackageDef):
 
     def model_post_init(self, __context):
         """Initialize pin ordering. No bringup pins to subtract."""
-        pins = set(itertools.product((_Side.N, _Side.S), range(self.width)))
-        pins |= set(itertools.product((_Side.W, _Side.E), range(self.height)))
-        self._ordered_pins: List[BareDiePin] = sorted(pins)
+        self._ordered_pins: List[int] = list(
+            range(1, 2 * (self.width + self.height) + 1)
+        )
         return super().model_post_init(__context)
 
     @property
