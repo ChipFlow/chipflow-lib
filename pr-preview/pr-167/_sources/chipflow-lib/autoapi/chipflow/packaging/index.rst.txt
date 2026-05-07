@@ -156,17 +156,21 @@ Package Contents
    Essential pins for bringing up an IC, always in fixed locations.
 
    These pins are used for initial testing and debug of the IC.
+   Clock and reset are required (every target needs them); power,
+   heartbeat, and JTAG are optional so minimal targets — e.g. hard
+   macros that take power via abutment and have no debug ring — can
+   declare just the signals they actually have.
 
-   :Attributes: * **core_power** -- List of core power pin pairs
-                * **core_clock** -- Core clock input pin
+   :Attributes: * **core_clock** -- Core clock input pin
                 * **core_reset** -- Core reset input pin
-                * **core_heartbeat** -- Heartbeat output pin (for liveness testing)
+                * **core_power** -- List of core power pin pairs (empty for blocks)
+                * **core_heartbeat** -- Heartbeat output pin (None when not present)
                 * **core_jtag** -- Optional JTAG interface pins
 
 
    .. py:method:: to_set()
 
-      Convert all bringup pins to a set
+      Convert all bringup pins to a set, skipping unset signals.
 
 
 
@@ -389,10 +393,12 @@ Package Contents
    GDS for embedding into another design) rather than a packaged
    chip. Differences:
 
-   - No I/O pad ring, no JTAG, no fixed clock/reset/power locations:
-     blocks take power via straps from the parent and route their
-     clocks/resets through regular pins. Bringup-pin allocation is
-     skipped.
+   - No I/O pad ring, no JTAG, no power pins: blocks take power via
+     straps from the parent and have no chip-level debug ring.
+   - The bringup pin set contains only ``core_clock`` (pin 1) and
+     ``core_reset`` (pin 2). Clock and reset are real boundary
+     signals on the macro that the parent design drives through
+     ordinary block pins.
    - ``width`` and ``height`` are pin-slot counts, same units as
      :class:`QuadPackageDef.width` / ``.height`` — not microns.
      Translation to physical dimensions happens at the backend using
@@ -408,34 +414,22 @@ Package Contents
 
    .. py:method:: model_post_init(__context)
 
-      Initialize pin ordering. No bringup pins to subtract.
+      Initialize pin ordering, subtracting the bringup slots.
 
 
 
    .. py:property:: bringup_pins
       :type: chipflow.packaging.pins.BringupPins
 
-      :abstractmethod:
 
+      clock at pin 1, reset at pin 2.
 
-      Blocks have no chip-style bringup pins.
+      No power (parent abutment), no heartbeat, no JTAG. The base
+      :meth:`_allocate_bringup` walks the empty ``core_power`` list
+      and skips heartbeat when ``core_heartbeat is None``, so the
+      resulting ``_core`` portmap contains just ``clk`` and ``rst_n``.
 
-      The base ``bringup_pins`` property is abstract and must return a
-      :class:`BringupPins` instance, but :meth:`allocate_pins` below
-      is overridden to skip the bringup step entirely so this value is
-      never read. We raise here to make any accidental future caller
-      fail loudly rather than silently allocating wrong locations.
-
-
-   .. py:method:: allocate_pins(config, process, lockfile)
-
-      Allocate pins without the chip-package bringup step.
-
-      Blocks don't have an I/O ring, so the parent class's
-      ``_allocate_bringup`` (which reserves clock/reset/power/JTAG
-      slots at fixed positions) doesn't apply. Just allocate registered
-      components linearly from the perimeter slots.
-
+      :type: Minimal bringup
 
 
 .. py:class:: QuadPackageDef
