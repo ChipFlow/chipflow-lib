@@ -33,6 +33,7 @@ Submodules
    /chipflow-lib/autoapi/chipflow/packaging/openframe/index
    /chipflow-lib/autoapi/chipflow/packaging/pins/index
    /chipflow-lib/autoapi/chipflow/packaging/port_desc/index
+   /chipflow-lib/autoapi/chipflow/packaging/render/index
    /chipflow-lib/autoapi/chipflow/packaging/standard/index
    /chipflow-lib/autoapi/chipflow/packaging/utils/index
 
@@ -80,6 +81,9 @@ Functions
 
    chipflow.packaging.load_pinlock
    chipflow.packaging.lock_pins
+   chipflow.packaging.swap_pins
+   chipflow.packaging.render_text
+   chipflow.packaging.render_svg
 
 
 Package Contents
@@ -629,6 +633,37 @@ Package Contents
    :raises ChipFlowError: If configuration is invalid or pin allocation fails
 
 
+.. py:function:: swap_pins(pin_a, pin_b)
+
+   Swap two pin assignments in the current ``pins.lock``.
+
+   Bringup pins (clock, reset, power, heartbeat, JTAG — everything
+   under the ``_core`` component) are package-defined and cannot be
+   swapped. Both inputs must currently be allocated to user ports of a
+   package that uses integer pin numbers (Quad / Block / Openframe).
+
+   :param pin_a: First pin number.
+   :param pin_b: Second pin number.
+
+   :raises ChipFlowError: ``pins.lock`` is missing or malformed; pins are
+       identical; either pin is not allocated; either pin lives in
+       the bringup ring; or the package uses non-integer pins.
+
+
+.. py:function:: render_text(lockfile)
+
+   Render the pin allocation as a sorted text table.
+
+
+.. py:function:: render_svg(lockfile)
+
+   Render the pin allocation as SVG.
+
+   Currently supports :class:`QuadPackageDef` and
+   :class:`BlockPackageDef`. Other package types raise
+   :class:`ChipFlowError`.
+
+
 .. py:class:: PinCommand(config)
 
    CLI command handler for pin-related operations.
@@ -658,6 +693,25 @@ Package Contents
       Lock the pin map for the design.
 
       Will attempt to reuse previous pin positions.
+
+
+
+   .. py:method:: swap(pin_a, pin_b)
+
+      Swap two pin assignments in pins.lock.
+
+      Both pins must currently be allocated to user ports; bringup
+      pins (clock, reset, power, heartbeat, JTAG) are package-defined
+      and cannot be swapped.
+
+
+
+   .. py:method:: show(format = 'text', output = None)
+
+      Show the current pin allocation from pins.lock.
+
+      Text format works for any package type. SVG format renders a
+      package layout for perimeter packages (Quad/Block).
 
 
 

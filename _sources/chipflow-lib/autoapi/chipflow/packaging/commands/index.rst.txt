@@ -52,3 +52,22 @@ Module Contents
 
 
 
+   .. py:method:: swap(pin_a, pin_b)
+
+      Swap two pin assignments in pins.lock.
+
+      Both pins must currently be allocated to user ports; bringup
+      pins (clock, reset, power, heartbeat, JTAG) are package-defined
+      and cannot be swapped.
+
+
+
+   .. py:method:: show(format = 'text', output = None)
+
+      Show the current pin allocation from pins.lock.
+
+      Text format works for any package type. SVG format renders a
+      package layout for perimeter packages (Quad/Block).
+
+
+

@@ -3,11 +3,11 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../../../genindex.html" /><link rel="search" title="Search" href="../../../../../search.html" /><link rel="next" title="chipflow.sim" href="../../sim/index.html" /><link rel="prev" title="chipflow.rtl" href="../index.html" />
+<link rel="index" title="Index" href="../../../../../genindex.html" /><link rel="search" title="Search" href="../../../../../search.html" /><link rel="next" title="chipflow.packaging.standard" href="../standard/index.html" /><link rel="prev" title="chipflow.packaging.port_desc" href="../port_desc/index.html" />
         <link rel="prefetch" href="../../../../../_static/chipflow-logo.svg" as="image" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2025.07.19 -->
-        <title>chipflow.rtl.wrapper - ChipFlow Platform Documentation</title>
+        <title>chipflow.packaging.render - ChipFlow Platform Documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?v=25af2a20" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=fd3f3429" />
@@ -230,18 +230,18 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../packages/index.html">chipflow.packages</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../packaging/index.html">chipflow.packaging</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of chipflow.packaging</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../packaging/allocation/index.html">chipflow.packaging.allocation</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../packaging/base/index.html">chipflow.packaging.base</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../packaging/commands/index.html">chipflow.packaging.commands</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../packaging/grid_array/index.html">chipflow.packaging.grid_array</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../packaging/lockfile/index.html">chipflow.packaging.lockfile</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../packaging/openframe/index.html">chipflow.packaging.openframe</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../packaging/pins/index.html">chipflow.packaging.pins</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../packaging/port_desc/index.html">chipflow.packaging.port_desc</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../packaging/render/index.html">chipflow.packaging.render</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../packaging/standard/index.html">chipflow.packaging.standard</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../packaging/utils/index.html">chipflow.packaging.utils</a></li>
+<li class="toctree-l3 current has-children"><a class="reference internal" href="../index.html">chipflow.packaging</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of chipflow.packaging</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../allocation/index.html">chipflow.packaging.allocation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../base/index.html">chipflow.packaging.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../commands/index.html">chipflow.packaging.commands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../grid_array/index.html">chipflow.packaging.grid_array</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../lockfile/index.html">chipflow.packaging.lockfile</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../openframe/index.html">chipflow.packaging.openframe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pins/index.html">chipflow.packaging.pins</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../port_desc/index.html">chipflow.packaging.port_desc</a></li>
+<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">chipflow.packaging.render</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../standard/index.html">chipflow.packaging.standard</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../utils/index.html">chipflow.packaging.utils</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../platform/index.html">chipflow.platform</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of chipflow.platform</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -255,8 +255,8 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l3 current has-children"><a class="reference internal" href="../index.html">chipflow.rtl</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of chipflow.rtl</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">chipflow.rtl.wrapper</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../rtl/index.html">chipflow.rtl</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of chipflow.rtl</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../rtl/wrapper/index.html">chipflow.rtl.wrapper</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../sim/index.html">chipflow.sim</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of chipflow.sim</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -293,7 +293,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../../../../../_sources/chipflow-lib/autoapi/chipflow/rtl/wrapper/index.rst.txt" title="View this page">
+  <a class="muted-link" href="../../../../../_sources/chipflow-lib/autoapi/chipflow/packaging/render/index.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -313,38 +313,23 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="module-chipflow.rtl.wrapper">
-<span id="chipflow-rtl-wrapper"></span><h1>chipflow.rtl.wrapper<a class="headerlink" href="#module-chipflow.rtl.wrapper" title="Link to this heading">¶</a></h1>
-<p>RTL wrapper for external Verilog/SystemVerilog/SpinalHDL modules.</p>
-<p>This module provides a TOML-based configuration system for wrapping external RTL
-modules as Amaranth wiring.Component classes. It supports:</p>
-<ul class="simple">
-<li><p>Automatic Signature generation from TOML port definitions</p></li>
-<li><p>SpinalHDL code generation</p></li>
-<li><p>SystemVerilog to Verilog conversion via sv2v or yosys-slang</p></li>
-<li><p>Clock and reset signal mapping</p></li>
-<li><p>Port and pin interface mapping to RTL signals</p></li>
-<li><p>CXXRTL simulation via chipflow.sim integration</p></li>
-</ul>
-<section id="classes">
-<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
-<div class="table-wrapper autosummary longtable docutils container">
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow.rtl.wrapper.RTLWrapper" title="chipflow.rtl.wrapper.RTLWrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RTLWrapper</span></code></a></p></td>
-<td><p>Dynamic Amaranth Component that wraps an external RTL module.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
+          <section id="module-chipflow.packaging.render">
+<span id="chipflow-packaging-render"></span><h1>chipflow.packaging.render<a class="headerlink" href="#module-chipflow.packaging.render" title="Link to this heading">¶</a></h1>
+<p>Renderers for <code class="docutils literal notranslate"><span class="pre">pins.lock</span></code> — text table and SVG layout.</p>
+<p>Used by <code class="docutils literal notranslate"><span class="pre">chipflow</span> <span class="pre">pin</span> <span class="pre">show</span></code>. The text view works for any package
+type. The SVG view is currently implemented for perimeter-pin packages
+(<code class="xref py py-class docutils literal notranslate"><span class="pre">QuadPackageDef</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">BlockPackageDef</span></code>); other types raise
+<code class="xref py py-class docutils literal notranslate"><span class="pre">ChipFlowError</span></code> and are expected to fall back to the text view.</p>
 <section id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow.rtl.wrapper.load_wrapper_from_toml" title="chipflow.rtl.wrapper.load_wrapper_from_toml"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_wrapper_from_toml</span></code></a>(toml_path[, generate_dest, ...])</p></td>
-<td><p>Load an RTLWrapper from a TOML configuration file.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow.packaging.render.render_text" title="chipflow.packaging.render.render_text"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render_text</span></code></a>(lockfile)</p></td>
+<td><p>Render the pin allocation as a sorted text table.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#chipflow.packaging.render.render_svg" title="chipflow.packaging.render.render_svg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render_svg</span></code></a>(lockfile)</p></td>
+<td><p>Render the pin allocation as SVG.</p></td>
 </tr>
 </tbody>
 </table>
@@ -352,55 +337,13 @@ modules as Amaranth wiring.Component classes. It supports:</p>
 </section>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="chipflow.rtl.wrapper.RTLWrapper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow.rtl.wrapper.</span></span><span class="sig-name descname"><span class="pre">RTLWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verilog_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.rtl.wrapper.RTLWrapper" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://amaranth-lang.org/docs/amaranth/v0.5.4/stdlib/wiring.html#amaranth.lib.wiring.Component" title="(in Amaranth language &amp; toolchain v0.5.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">amaranth.lib.wiring.Component</span></code></a></p>
-<p>Dynamic Amaranth Component that wraps an external RTL module.</p>
-<p>This component is generated from TOML configuration and creates the appropriate
-Signature and elaborate() implementation to instantiate the RTL module.</p>
-<p>When a driver configuration is provided, the component uses SoftwareDriverSignature
-to enable automatic driver generation and register struct creation.</p>
-<p>Auto-mapping works by parsing the Verilog files to find actual port names,
-then matching patterns to identify which signals correspond to interface members.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="chipflow.packaging.render.render_text">
+<span class="sig-prename descclassname"><span class="pre">chipflow.packaging.render.</span></span><span class="sig-name descname"><span class="pre">render_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lockfile</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.packaging.render.render_text" title="Link to this definition">¶</a></dt>
+<dd><p>Render the pin allocation as a sorted text table.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>config</strong> (<em>ExternalWrapConfig</em>)</p></li>
-<li><p><strong>verilog_files</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><em>pathlib.Path</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
-<li><p><strong>parameters</strong> (<em>Dict</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>pydantic.JsonValue</em><em>] </em><em>| </em><em>None</em>)</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="chipflow.rtl.wrapper.RTLWrapper.elaborate">
-<span class="sig-name descname"><span class="pre">elaborate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">platform</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.rtl.wrapper.RTLWrapper.elaborate" title="Link to this definition">¶</a></dt>
-<dd><p>Generate the Amaranth module with Verilog instance.</p>
-<p>Creates an Instance() of the wrapped Verilog module with all
-port mappings configured from the TOML specification.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="chipflow.rtl.wrapper.RTLWrapper.get_source_files">
-<span class="sig-name descname"><span class="pre">get_source_files</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.rtl.wrapper.RTLWrapper.get_source_files" title="Link to this definition">¶</a></dt>
-<dd><p>Get the list of Verilog/SystemVerilog source files.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>List of paths to source files for this wrapper.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>List[<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)">pathlib.Path</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="chipflow.rtl.wrapper.RTLWrapper.get_top_module">
-<span class="sig-name descname"><span class="pre">get_top_module</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.rtl.wrapper.RTLWrapper.get_top_module" title="Link to this definition">¶</a></dt>
-<dd><p>Get the top module name.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Name of the top-level Verilog module.</p>
+<dd class="field-odd"><p><strong>lockfile</strong> (<a class="reference internal" href="../lockfile/index.html#chipflow.packaging.lockfile.LockFile" title="chipflow.packaging.lockfile.LockFile"><em>chipflow.packaging.lockfile.LockFile</em></a>)</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
@@ -408,92 +351,19 @@ port mappings configured from the TOML specification.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="chipflow.rtl.wrapper.RTLWrapper.get_signal_map">
-<span class="sig-name descname"><span class="pre">get_signal_map</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.rtl.wrapper.RTLWrapper.get_signal_map" title="Link to this definition">¶</a></dt>
-<dd><p>Get the mapping from Amaranth port paths to Verilog signal names.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Dictionary mapping port names to signal path → Verilog name mappings.
-Example: {‘bus’: {‘cyc’: ‘i_wb_cyc’, ‘stb’: ‘i_wb_stb’, …}}</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dict[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, Dict[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="chipflow.rtl.wrapper.RTLWrapper.build_simulator">
-<span class="sig-name descname"><span class="pre">build_simulator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_dir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'-O2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.rtl.wrapper.RTLWrapper.build_simulator" title="Link to this definition">¶</a></dt>
-<dd><p>Build a CXXRTL simulator for this wrapper.</p>
-<p>This compiles the Verilog/SystemVerilog sources into a CXXRTL shared
-library and returns a simulator instance ready for use.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>output_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><em>pathlib.Path</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Directory for build artifacts (library, object files, etc.)</p></li>
-<li><p><strong>optimization</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – C++ optimization level (default: -O2)</p></li>
-<li><p><strong>debug_info</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Include CXXRTL debug info for signal access (default: True)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>CxxrtlSimulator instance configured for this wrapper.</p>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ImportError" title="(in Python v3.14)"><strong>ImportError</strong></a> – If chipflow.sim is not installed</p></li>
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If compilation fails</p></li>
-</ul>
-</dd>
-</dl>
-<p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wrapper</span> <span class="o">=</span> <span class="n">load_wrapper_from_toml</span><span class="p">(</span><span class="s2">&quot;wb_timer.toml&quot;</span><span class="p">)</span>
-<span class="n">sim</span> <span class="o">=</span> <span class="n">wrapper</span><span class="o">.</span><span class="n">build_simulator</span><span class="p">(</span><span class="s2">&quot;build/sim&quot;</span><span class="p">)</span>
-
-<span class="c1"># Reset</span>
-<span class="n">sim</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;i_rst_n&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-<span class="n">sim</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;i_clk&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-<span class="n">sim</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
-<span class="n">sim</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;i_clk&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<span class="n">sim</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
-<span class="n">sim</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;i_rst_n&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-
-<span class="c1"># Access signals using Verilog names</span>
-<span class="n">sim</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;i_wb_cyc&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<span class="n">sim</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
-<span class="n">value</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;o_wb_dat&quot;</span><span class="p">)</span>
-
-<span class="n">sim</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-</pre></div>
-</div>
-</dd></dl>
-
-</dd></dl>
-
 <dl class="py function">
-<dt class="sig sig-object py" id="chipflow.rtl.wrapper.load_wrapper_from_toml">
-<span class="sig-prename descclassname"><span class="pre">chipflow.rtl.wrapper.</span></span><span class="sig-name descname"><span class="pre">load_wrapper_from_toml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">toml_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generate_dest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.rtl.wrapper.load_wrapper_from_toml" title="Link to this definition">¶</a></dt>
-<dd><p>Load an RTLWrapper from a TOML configuration file.</p>
+<dt class="sig sig-object py" id="chipflow.packaging.render.render_svg">
+<span class="sig-prename descclassname"><span class="pre">chipflow.packaging.render.</span></span><span class="sig-name descname"><span class="pre">render_svg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lockfile</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.packaging.render.render_svg" title="Link to this definition">¶</a></dt>
+<dd><p>Render the pin allocation as SVG.</p>
+<p>Currently supports <code class="xref py py-class docutils literal notranslate"><span class="pre">QuadPackageDef</span></code> and
+<code class="xref py py-class docutils literal notranslate"><span class="pre">BlockPackageDef</span></code>. Other package types raise
+<code class="xref py py-class docutils literal notranslate"><span class="pre">ChipFlowError</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>toml_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><em>pathlib.Path</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to the TOML configuration file</p></li>
-<li><p><strong>generate_dest</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><em>pathlib.Path</em></a><em> | </em><em>None</em>) – Destination directory for generated Verilog (if using SpinalHDL)</p></li>
-<li><p><strong>parameters</strong> (<em>Dict</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>pydantic.JsonValue</em><em>] </em><em>| </em><em>None</em>) – Verilog module parameter overrides. Merged on top of the TOML’s
-<code class="docutils literal notranslate"><span class="pre">parameters</span></code> table and applied both to code generation (so generators
-see the final values when templating their command-line) and to the
-<code class="docutils literal notranslate"><span class="pre">Instance()</span></code> of the wrapped module at elaboration.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Configured RTLWrapper component</p>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../index.html#chipflow.ChipFlowError" title="chipflow.ChipFlowError"><strong>ChipFlowError</strong></a> – If configuration is invalid or generation fails</p>
+<dd class="field-odd"><p><strong>lockfile</strong> (<a class="reference internal" href="../lockfile/index.html#chipflow.packaging.lockfile.LockFile" title="chipflow.packaging.lockfile.LockFile"><em>chipflow.packaging.lockfile.LockFile</em></a>)</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#chipflow.rtl.wrapper.RTLWrapper" title="chipflow.rtl.wrapper.RTLWrapper">RTLWrapper</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -506,23 +376,23 @@ see the final values when templating their command-line) and to the
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../../sim/index.html">
+          <a class="next-page" href="../standard/index.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">chipflow.sim</div>
+                <div class="title">chipflow.packaging.standard</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../index.html">
+          <a class="prev-page" href="../port_desc/index.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">chipflow.rtl</div>
+                <div class="title">chipflow.packaging.port_desc</div>
                 
               </div>
             </a>
@@ -556,19 +426,11 @@ see the final values when templating their command-line) and to the
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">chipflow.rtl.wrapper</a><ul>
-<li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#">chipflow.packaging.render</a><ul>
 <li><a class="reference internal" href="#functions">Functions</a></li>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
-<li><a class="reference internal" href="#chipflow.rtl.wrapper.RTLWrapper"><code class="docutils literal notranslate"><span class="pre">RTLWrapper</span></code></a><ul>
-<li><a class="reference internal" href="#chipflow.rtl.wrapper.RTLWrapper.elaborate"><code class="docutils literal notranslate"><span class="pre">RTLWrapper.elaborate()</span></code></a></li>
-<li><a class="reference internal" href="#chipflow.rtl.wrapper.RTLWrapper.get_source_files"><code class="docutils literal notranslate"><span class="pre">RTLWrapper.get_source_files()</span></code></a></li>
-<li><a class="reference internal" href="#chipflow.rtl.wrapper.RTLWrapper.get_top_module"><code class="docutils literal notranslate"><span class="pre">RTLWrapper.get_top_module()</span></code></a></li>
-<li><a class="reference internal" href="#chipflow.rtl.wrapper.RTLWrapper.get_signal_map"><code class="docutils literal notranslate"><span class="pre">RTLWrapper.get_signal_map()</span></code></a></li>
-<li><a class="reference internal" href="#chipflow.rtl.wrapper.RTLWrapper.build_simulator"><code class="docutils literal notranslate"><span class="pre">RTLWrapper.build_simulator()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#chipflow.rtl.wrapper.load_wrapper_from_toml"><code class="docutils literal notranslate"><span class="pre">load_wrapper_from_toml()</span></code></a></li>
+<li><a class="reference internal" href="#chipflow.packaging.render.render_text"><code class="docutils literal notranslate"><span class="pre">render_text()</span></code></a></li>
+<li><a class="reference internal" href="#chipflow.packaging.render.render_svg"><code class="docutils literal notranslate"><span class="pre">render_svg()</span></code></a></li>
 </ul>
 </li>
 </ul>

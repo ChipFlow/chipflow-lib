@@ -239,6 +239,7 @@
 <li class="toctree-l4"><a class="reference internal" href="openframe/index.html">chipflow.packaging.openframe</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pins/index.html">chipflow.packaging.pins</a></li>
 <li class="toctree-l4"><a class="reference internal" href="port_desc/index.html">chipflow.packaging.port_desc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="render/index.html">chipflow.packaging.render</a></li>
 <li class="toctree-l4"><a class="reference internal" href="standard/index.html">chipflow.packaging.standard</a></li>
 <li class="toctree-l4"><a class="reference internal" href="utils/index.html">chipflow.packaging.utils</a></li>
 </ul>
@@ -337,6 +338,7 @@ allocate pins to component interfaces, including:</p>
 <li class="toctree-l1"><a class="reference internal" href="openframe/index.html">chipflow.packaging.openframe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pins/index.html">chipflow.packaging.pins</a></li>
 <li class="toctree-l1"><a class="reference internal" href="port_desc/index.html">chipflow.packaging.port_desc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="render/index.html">chipflow.packaging.render</a></li>
 <li class="toctree-l1"><a class="reference internal" href="standard/index.html">chipflow.packaging.standard</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils/index.html">chipflow.packaging.utils</a></li>
 </ul>
@@ -436,6 +438,15 @@ allocate pins to component interfaces, including:</p>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#chipflow.packaging.lock_pins" title="chipflow.packaging.lock_pins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lock_pins</span></code></a>([config])</p></td>
 <td><p>Create or update the pin lock file for the design.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow.packaging.swap_pins" title="chipflow.packaging.swap_pins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">swap_pins</span></code></a>(pin_a, pin_b)</p></td>
+<td><p>Swap two pin assignments in the current <code class="docutils literal notranslate"><span class="pre">pins.lock</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#chipflow.packaging.render_text" title="chipflow.packaging.render_text"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render_text</span></code></a>(lockfile)</p></td>
+<td><p>Render the pin allocation as a sorted text table.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow.packaging.render_svg" title="chipflow.packaging.render_svg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render_svg</span></code></a>(lockfile)</p></td>
+<td><p>Render the pin allocation as SVG.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1125,6 +1136,63 @@ pin positions if pins.lock already exists.</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="chipflow.packaging.swap_pins">
+<span class="sig-prename descclassname"><span class="pre">chipflow.packaging.</span></span><span class="sig-name descname"><span class="pre">swap_pins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pin_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pin_b</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.packaging.swap_pins" title="Link to this definition">¶</a></dt>
+<dd><p>Swap two pin assignments in the current <code class="docutils literal notranslate"><span class="pre">pins.lock</span></code>.</p>
+<p>Bringup pins (clock, reset, power, heartbeat, JTAG — everything
+under the <code class="docutils literal notranslate"><span class="pre">_core</span></code> component) are package-defined and cannot be
+swapped. Both inputs must currently be allocated to user ports of a
+package that uses integer pin numbers (Quad / Block / Openframe).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pin_a</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – First pin number.</p></li>
+<li><p><strong>pin_b</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Second pin number.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../index.html#chipflow.ChipFlowError" title="chipflow.ChipFlowError"><strong>ChipFlowError</strong></a> – <code class="docutils literal notranslate"><span class="pre">pins.lock</span></code> is missing or malformed; pins are
+identical; either pin is not allocated; either pin lives in
+the bringup ring; or the package uses non-integer pins.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chipflow.packaging.render_text">
+<span class="sig-prename descclassname"><span class="pre">chipflow.packaging.</span></span><span class="sig-name descname"><span class="pre">render_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lockfile</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.packaging.render_text" title="Link to this definition">¶</a></dt>
+<dd><p>Render the pin allocation as a sorted text table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lockfile</strong> (<a class="reference internal" href="lockfile/index.html#chipflow.packaging.lockfile.LockFile" title="chipflow.packaging.lockfile.LockFile"><em>chipflow.packaging.lockfile.LockFile</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chipflow.packaging.render_svg">
+<span class="sig-prename descclassname"><span class="pre">chipflow.packaging.</span></span><span class="sig-name descname"><span class="pre">render_svg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lockfile</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.packaging.render_svg" title="Link to this definition">¶</a></dt>
+<dd><p>Render the pin allocation as SVG.</p>
+<p>Currently supports <a class="reference internal" href="#chipflow.packaging.QuadPackageDef" title="chipflow.packaging.QuadPackageDef"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuadPackageDef</span></code></a> and
+<a class="reference internal" href="#chipflow.packaging.BlockPackageDef" title="chipflow.packaging.BlockPackageDef"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockPackageDef</span></code></a>. Other package types raise
+<code class="xref py py-class docutils literal notranslate"><span class="pre">ChipFlowError</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lockfile</strong> (<a class="reference internal" href="lockfile/index.html#chipflow.packaging.lockfile.LockFile" title="chipflow.packaging.lockfile.LockFile"><em>chipflow.packaging.lockfile.LockFile</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="chipflow.packaging.PinCommand">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow.packaging.</span></span><span class="sig-name descname"><span class="pre">PinCommand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.packaging.PinCommand" title="Link to this definition">¶</a></dt>
@@ -1158,6 +1226,39 @@ pin allocations and lock files.</p>
 <span class="sig-name descname"><span class="pre">lock</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.packaging.PinCommand.lock" title="Link to this definition">¶</a></dt>
 <dd><p>Lock the pin map for the design.</p>
 <p>Will attempt to reuse previous pin positions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chipflow.packaging.PinCommand.swap">
+<span class="sig-name descname"><span class="pre">swap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pin_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pin_b</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.packaging.PinCommand.swap" title="Link to this definition">¶</a></dt>
+<dd><p>Swap two pin assignments in pins.lock.</p>
+<p>Both pins must currently be allocated to user ports; bringup
+pins (clock, reset, power, heartbeat, JTAG) are package-defined
+and cannot be swapped.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pin_a</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>)</p></li>
+<li><p><strong>pin_b</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chipflow.packaging.PinCommand.show">
+<span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'text'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.packaging.PinCommand.show" title="Link to this definition">¶</a></dt>
+<dd><p>Show the current pin allocation from pins.lock.</p>
+<p>Text format works for any package type. SVG format renders a
+package layout for perimeter packages (Quad/Block).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>format</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+<li><p><strong>output</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><em>pathlib.Path</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -1295,10 +1396,15 @@ pin allocations and lock files.</p>
 <li><a class="reference internal" href="#chipflow.packaging.UnableToAllocate"><code class="docutils literal notranslate"><span class="pre">UnableToAllocate</span></code></a></li>
 <li><a class="reference internal" href="#chipflow.packaging.load_pinlock"><code class="docutils literal notranslate"><span class="pre">load_pinlock()</span></code></a></li>
 <li><a class="reference internal" href="#chipflow.packaging.lock_pins"><code class="docutils literal notranslate"><span class="pre">lock_pins()</span></code></a></li>
+<li><a class="reference internal" href="#chipflow.packaging.swap_pins"><code class="docutils literal notranslate"><span class="pre">swap_pins()</span></code></a></li>
+<li><a class="reference internal" href="#chipflow.packaging.render_text"><code class="docutils literal notranslate"><span class="pre">render_text()</span></code></a></li>
+<li><a class="reference internal" href="#chipflow.packaging.render_svg"><code class="docutils literal notranslate"><span class="pre">render_svg()</span></code></a></li>
 <li><a class="reference internal" href="#chipflow.packaging.PinCommand"><code class="docutils literal notranslate"><span class="pre">PinCommand</span></code></a><ul>
 <li><a class="reference internal" href="#chipflow.packaging.PinCommand.build_cli_parser"><code class="docutils literal notranslate"><span class="pre">PinCommand.build_cli_parser()</span></code></a></li>
 <li><a class="reference internal" href="#chipflow.packaging.PinCommand.run_cli"><code class="docutils literal notranslate"><span class="pre">PinCommand.run_cli()</span></code></a></li>
 <li><a class="reference internal" href="#chipflow.packaging.PinCommand.lock"><code class="docutils literal notranslate"><span class="pre">PinCommand.lock()</span></code></a></li>
+<li><a class="reference internal" href="#chipflow.packaging.PinCommand.swap"><code class="docutils literal notranslate"><span class="pre">PinCommand.swap()</span></code></a></li>
+<li><a class="reference internal" href="#chipflow.packaging.PinCommand.show"><code class="docutils literal notranslate"><span class="pre">PinCommand.show()</span></code></a></li>
 </ul>
 </li>
 </ul>

@@ -239,6 +239,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../openframe/index.html">chipflow.packaging.openframe</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pins/index.html">chipflow.packaging.pins</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../port_desc/index.html">chipflow.packaging.port_desc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../render/index.html">chipflow.packaging.render</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../standard/index.html">chipflow.packaging.standard</a></li>
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">chipflow.packaging.utils</a></li>
 </ul>
@@ -326,6 +327,9 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#chipflow.packaging.utils.lock_pins" title="chipflow.packaging.utils.lock_pins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lock_pins</span></code></a>([config])</p></td>
 <td><p>Create or update the pin lock file for the design.</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow.packaging.utils.swap_pins" title="chipflow.packaging.utils.swap_pins"><code class="xref py py-obj docutils literal notranslate"><span class="pre">swap_pins</span></code></a>(pin_a, pin_b)</p></td>
+<td><p>Swap two pin assignments in the current <code class="docutils literal notranslate"><span class="pre">pins.lock</span></code>.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -362,6 +366,32 @@ pin positions if pins.lock already exists.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../index.html#chipflow.ChipFlowError" title="chipflow.ChipFlowError"><strong>ChipFlowError</strong></a> – If configuration is invalid or pin allocation fails</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chipflow.packaging.utils.swap_pins">
+<span class="sig-prename descclassname"><span class="pre">chipflow.packaging.utils.</span></span><span class="sig-name descname"><span class="pre">swap_pins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pin_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pin_b</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.packaging.utils.swap_pins" title="Link to this definition">¶</a></dt>
+<dd><p>Swap two pin assignments in the current <code class="docutils literal notranslate"><span class="pre">pins.lock</span></code>.</p>
+<p>Bringup pins (clock, reset, power, heartbeat, JTAG — everything
+under the <code class="docutils literal notranslate"><span class="pre">_core</span></code> component) are package-defined and cannot be
+swapped. Both inputs must currently be allocated to user ports of a
+package that uses integer pin numbers (Quad / Block / Openframe).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pin_a</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – First pin number.</p></li>
+<li><p><strong>pin_b</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Second pin number.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../index.html#chipflow.ChipFlowError" title="chipflow.ChipFlowError"><strong>ChipFlowError</strong></a> – <code class="docutils literal notranslate"><span class="pre">pins.lock</span></code> is missing or malformed; pins are
+identical; either pin is not allocated; either pin lives in
+the bringup ring; or the package uses non-integer pins.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
@@ -432,6 +462,7 @@ pin positions if pins.lock already exists.</p>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
 <li><a class="reference internal" href="#chipflow.packaging.utils.load_pinlock"><code class="docutils literal notranslate"><span class="pre">load_pinlock()</span></code></a></li>
 <li><a class="reference internal" href="#chipflow.packaging.utils.lock_pins"><code class="docutils literal notranslate"><span class="pre">lock_pins()</span></code></a></li>
+<li><a class="reference internal" href="#chipflow.packaging.utils.swap_pins"><code class="docutils literal notranslate"><span class="pre">swap_pins()</span></code></a></li>
 </ul>
 </li>
 </ul>
