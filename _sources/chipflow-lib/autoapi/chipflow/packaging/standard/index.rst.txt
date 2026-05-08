@@ -19,6 +19,7 @@ Classes
 .. autoapisummary::
 
    chipflow.packaging.standard.BareDiePackageDef
+   chipflow.packaging.standard.BlockPackageDef
    chipflow.packaging.standard.QuadPackageDef
 
 
@@ -54,6 +55,58 @@ Module Contents
 
 
       Bringup pins for bare die package
+
+
+.. py:class:: BlockPackageDef
+
+   Bases: :py:obj:`chipflow.packaging.base.LinearAllocPackageDef`
+
+
+   Definition of a hard-macro target with pins on four sides.
+
+   Structurally close to :class:`QuadPackageDef` — pins are numbered
+   linearly counter-clockwise starting from the top of the West edge
+   — but used when the build is producing a block (LEF / Liberty /
+   GDS for embedding into another design) rather than a packaged
+   chip. Differences:
+
+   - No I/O pad ring, no JTAG, no power pins: blocks take power via
+     straps from the parent and have no chip-level debug ring.
+   - The bringup pin set contains only ``core_clock`` (pin 1) and
+     ``core_reset`` (pin 2). Clock and reset are real boundary
+     signals on the macro that the parent design drives through
+     ordinary block pins.
+   - ``width`` and ``height`` are pin-slot counts, same units as
+     :class:`QuadPackageDef.width` / ``.height`` — not microns.
+     Translation to physical dimensions happens at the backend using
+     the process's pin pitch.
+
+   Linear pin numbering matches :class:`QuadPackageDef` so the
+   backend can use a single ``packaging.map`` convention to translate
+   pin indices to physical (side, slot) locations.
+
+   :Attributes: * **width** -- Number of pin slots on top and bottom edges.
+                * **height** -- Number of pin slots on left and right edges.
+
+
+   .. py:method:: model_post_init(__context)
+
+      Initialize pin ordering, subtracting the bringup slots.
+
+
+
+   .. py:property:: bringup_pins
+      :type: chipflow.packaging.pins.BringupPins
+
+
+      clock at pin 1, reset at pin 2.
+
+      No power (parent abutment), no heartbeat, no JTAG. The base
+      :meth:`_allocate_bringup` walks the empty ``core_power`` list
+      and skips heartbeat when ``core_heartbeat is None``, so the
+      resulting ``_core`` portmap contains just ``clk`` and ``rst_n``.
+
+      :type: Minimal bringup
 
 
 .. py:class:: QuadPackageDef

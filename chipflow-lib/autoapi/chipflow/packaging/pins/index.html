@@ -429,14 +429,18 @@ physical pin assignments and power/signal groupings in IC packages.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow.packaging.pins.</span></span><span class="sig-name descname"><span class="pre">BringupPins</span></span><a class="headerlink" href="#chipflow.packaging.pins.BringupPins" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">Pin</span></code>]</p>
 <p>Essential pins for bringing up an IC, always in fixed locations.</p>
-<p>These pins are used for initial testing and debug of the IC.</p>
+<p>These pins are used for initial testing and debug of the IC.
+Clock and reset are required (every target needs them); power,
+heartbeat, and JTAG are optional so minimal targets — e.g. hard
+macros that take power via abutment and have no debug ring — can
+declare just the signals they actually have.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Attributes<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>core_power</strong> – List of core power pin pairs</p></li>
 <li><p><strong>core_clock</strong> – Core clock input pin</p></li>
 <li><p><strong>core_reset</strong> – Core reset input pin</p></li>
-<li><p><strong>core_heartbeat</strong> – Heartbeat output pin (for liveness testing)</p></li>
+<li><p><strong>core_power</strong> – List of core power pin pairs (empty for blocks)</p></li>
+<li><p><strong>core_heartbeat</strong> – Heartbeat output pin (None when not present)</p></li>
 <li><p><strong>core_jtag</strong> – Optional JTAG interface pins</p></li>
 </ul>
 </dd>
@@ -444,7 +448,7 @@ physical pin assignments and power/signal groupings in IC packages.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="chipflow.packaging.pins.BringupPins.to_set">
 <span class="sig-name descname"><span class="pre">to_set</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.packaging.pins.BringupPins.to_set" title="Link to this definition">¶</a></dt>
-<dd><p>Convert all bringup pins to a set</p>
+<dd><p>Convert all bringup pins to a set, skipping unset signals.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Set[Pin]</p>
