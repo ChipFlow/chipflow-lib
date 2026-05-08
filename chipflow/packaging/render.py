@@ -80,10 +80,23 @@ def _pin_to_perimeter_position(pin: int, width: int, height: int) -> Tuple[str, 
 
 def _perimeter_svg(width: int, height: int,
                    pin_labels: Dict[int, str], title: str) -> str:
-    """Render a perimeter package layout as standalone SVG."""
+    """Render a perimeter package layout as standalone SVG.
+
+    N/S labels are rotated and extend OUTWARD from the package; W/E
+    labels are horizontal and extend outward from the side. Canvas
+    padding scales with the longest label so nothing gets clipped.
+    """
     pitch = 30
-    pad_x = 240
-    pad_y = 100
+    # Approximate per-character width for 11px monospace.
+    char_px = 6.6
+    longest_label = max((len(s) for s in pin_labels.values()), default=4)
+    label_run = int(longest_label * char_px) + 16
+
+    # Side margins: enough for horizontal W/E labels + a small gap.
+    pad_x = label_run + 40
+    # Top/bottom margins: enough for rotated N/S labels + title strip.
+    pad_y = label_run + 60
+
     box_w = width * pitch
     box_h = height * pitch
     svg_w = box_w + 2 * pad_x
@@ -105,7 +118,7 @@ def _perimeter_svg(width: int, height: int,
         '</style>'
     )
     parts.append(
-        f'<text class="title" x="{svg_w / 2}" y="30" '
+        f'<text class="title" x="{svg_w / 2}" y="24" '
         f'text-anchor="middle">{escape(title)}</text>'
     )
     parts.append(
@@ -132,23 +145,6 @@ def _perimeter_svg(width: int, height: int,
                 f'<text class="lbl" x="{cx - 32}" y="{cy + 4}" '
                 f'text-anchor="end">{label}</text>'
             )
-        elif side == 'S':
-            cx = pad_x + (slot + 0.5) * pitch
-            cy = pad_y + box_h
-            parts.append(
-                f'<line class="tick" x1="{cx}" y1="{cy}" '
-                f'x2="{cx}" y2="{cy + 8}"/>'
-            )
-            parts.append(
-                f'<text class="pin" x="{cx}" y="{cy + 20}" '
-                f'text-anchor="middle">{pin}</text>'
-            )
-            anchor_x, anchor_y = cx + 4, cy + 36
-            parts.append(
-                f'<text class="lbl" x="{anchor_x}" y="{anchor_y}" '
-                f'text-anchor="end" '
-                f'transform="rotate(90 {anchor_x} {anchor_y})">{label}</text>'
-            )
         elif side == 'E':
             cx = pad_x + box_w
             cy = pad_y + box_h - (slot + 0.5) * pitch
@@ -164,9 +160,11 @@ def _perimeter_svg(width: int, height: int,
                 f'<text class="lbl" x="{cx + 32}" y="{cy + 4}" '
                 f'text-anchor="start">{label}</text>'
             )
-        else:  # 'N'
-            cx = pad_x + box_w - (slot + 0.5) * pitch
-            cy = pad_y
+        elif side == 'N':
+            # rotate(-90) + text-anchor="start": glyphs extend in +x
+            # pre-rotation; after a -90° (CCW) rotation about the
+            # anchor, they extend upward — away from the block top.
+            cx, cy = pad_x + box_w - (slot + 0.5) * pitch, pad_y
             parts.append(
                 f'<line class="tick" x1="{cx}" y1="{cy - 8}" '
                 f'x2="{cx}" y2="{cy}"/>'
@@ -175,11 +173,31 @@ def _perimeter_svg(width: int, height: int,
                 f'<text class="pin" x="{cx}" y="{cy - 12}" '
                 f'text-anchor="middle">{pin}</text>'
             )
-            anchor_x, anchor_y = cx - 4, cy - 30
+            anchor_x, anchor_y = cx + 3, cy - 28
             parts.append(
                 f'<text class="lbl" x="{anchor_x}" y="{anchor_y}" '
                 f'text-anchor="start" '
                 f'transform="rotate(-90 {anchor_x} {anchor_y})">{label}</text>'
+            )
+        else:  # 'S'
+            # rotate(90) + text-anchor="start": glyphs extend in +x
+            # pre-rotation; after a +90° (CW) rotation about the anchor,
+            # they extend downward — away from the block bottom.
+            cx = pad_x + (slot + 0.5) * pitch
+            cy = pad_y + box_h
+            parts.append(
+                f'<line class="tick" x1="{cx}" y1="{cy}" '
+                f'x2="{cx}" y2="{cy + 8}"/>'
+            )
+            parts.append(
+                f'<text class="pin" x="{cx}" y="{cy + 20}" '
+                f'text-anchor="middle">{pin}</text>'
+            )
+            anchor_x, anchor_y = cx - 3, cy + 28
+            parts.append(
+                f'<text class="lbl" x="{anchor_x}" y="{anchor_y}" '
+                f'text-anchor="start" '
+                f'transform="rotate(90 {anchor_x} {anchor_y})">{label}</text>'
             )
 
     parts.append('</svg>')
