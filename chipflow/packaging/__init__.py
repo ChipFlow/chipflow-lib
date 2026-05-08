@@ -75,6 +75,13 @@ from .allocation import (
 from .utils import (
     load_pinlock,
     lock_pins,
+    swap_pins,
+)
+
+# Renderers
+from .render import (
+    render_text,
+    render_svg,
 )
 
 # CLI commands
@@ -129,6 +136,10 @@ __all__ = [
     # Utilities
     'load_pinlock',
     'lock_pins',
+    'swap_pins',
+    # Renderers
+    'render_text',
+    'render_svg',
     # CLI
     'PinCommand',
 ]
