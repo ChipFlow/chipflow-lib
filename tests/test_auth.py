@@ -121,7 +121,7 @@ class TestGitHubTokenAuth(unittest.TestCase):
         api_key = authenticate_with_github_token("https://test.api", interactive=True)
 
         self.assertEqual(api_key, "cf_test_key")
-        mock_save.assert_called_once_with("cf_test_key")
+        mock_save.assert_called_once_with("cf_test_key", origin="https://test.api")
         mock_post.assert_called_once()
 
     @mock.patch('chipflow.auth.is_gh_authenticated')
@@ -203,7 +203,7 @@ class TestDeviceFlowAuth(unittest.TestCase):
         api_key = authenticate_with_device_flow("https://test.api", interactive=True)
 
         self.assertEqual(api_key, "cf_test_key")
-        mock_save.assert_called_once_with("cf_test_key")
+        mock_save.assert_called_once_with("cf_test_key", origin="https://test.api")
 
     @mock.patch('chipflow.auth.time.sleep')
     @mock.patch('chipflow.auth.requests.post')
@@ -345,6 +345,69 @@ class TestGetAPIKey(unittest.TestCase):
                 self.assertEqual(api_key, "new_key")
                 # Should not have called load_saved_api_key due to force_login
                 mock_load.assert_not_called()
+
+
+class TestOriginNamespacing(unittest.TestCase):
+    """Keys minted against different origins must not collide."""
+
+    def _with_creds_file(self, tmpdir):
+        return mock.patch(
+            'chipflow.auth.get_credentials_file',
+            return_value=Path(tmpdir) / "credentials",
+        )
+
+    def test_two_origins_keep_separate_keys(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with self._with_creds_file(tmpdir):
+                save_api_key("prod_key", origin="https://build.chipflow.com")
+                save_api_key("staging_key", origin="https://build.staging.chipflow.com")
+
+                self.assertEqual(
+                    load_saved_api_key(origin="https://build.chipflow.com"),
+                    "prod_key",
+                )
+                self.assertEqual(
+                    load_saved_api_key(origin="https://build.staging.chipflow.com"),
+                    "staging_key",
+                )
+
+    def test_legacy_format_is_treated_as_default_origin(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            creds_file = Path(tmpdir) / "credentials"
+            creds_file.write_text(json.dumps({"api_key": "legacy_key"}))
+            with mock.patch('chipflow.auth.get_credentials_file', return_value=creds_file):
+                self.assertEqual(
+                    load_saved_api_key(origin="https://build.chipflow.com"),
+                    "legacy_key",
+                )
+                self.assertIsNone(
+                    load_saved_api_key(origin="https://build.staging.chipflow.com")
+                )
+
+    def test_logout_per_origin_keeps_other_keys(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with self._with_creds_file(tmpdir):
+                save_api_key("prod_key", origin="https://build.chipflow.com")
+                save_api_key("staging_key", origin="https://build.staging.chipflow.com")
+                with mock.patch('builtins.print'):
+                    logout(origin="https://build.staging.chipflow.com")
+
+                self.assertEqual(
+                    load_saved_api_key(origin="https://build.chipflow.com"),
+                    "prod_key",
+                )
+                self.assertIsNone(
+                    load_saved_api_key(origin="https://build.staging.chipflow.com")
+                )
+
+    def test_origin_trailing_slash_is_normalized(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with self._with_creds_file(tmpdir):
+                save_api_key("k", origin="https://build.chipflow.com/")
+                self.assertEqual(
+                    load_saved_api_key(origin="https://build.chipflow.com"),
+                    "k",
+                )
 
 
 if __name__ == "__main__":

@@ -26,36 +26,65 @@ class AuthenticationError(Exception):
     pass
 
 
+DEFAULT_API_ORIGIN = "https://build.chipflow.com"
+
+
 def get_credentials_file():
     """Get path to credentials file."""
     config_dir = Path.home() / ".config" / "chipflow"
     return config_dir / "credentials"
 
 
-def save_api_key(api_key: str):
-    """Save API key to credentials file."""
-    creds_file = get_credentials_file()
-    creds_file.parent.mkdir(parents=True, exist_ok=True)
-
-    creds_data = {"api_key": api_key}
-    creds_file.write_text(json.dumps(creds_data))
-    creds_file.chmod(0o600)
-
-    logger.info(f"API key saved to {creds_file}")
+def _normalize_origin(origin: str) -> str:
+    return (origin or DEFAULT_API_ORIGIN).rstrip("/")
 
 
-def load_saved_api_key():
-    """Load API key from credentials file if it exists."""
+def _read_creds() -> dict:
     creds_file = get_credentials_file()
     if not creds_file.exists():
-        return None
+        return {"origins": {}}
 
     try:
-        creds_data = json.loads(creds_file.read_text())
-        return creds_data.get("api_key")
-    except (json.JSONDecodeError, KeyError):
+        data = json.loads(creds_file.read_text())
+    except json.JSONDecodeError:
         logger.warning(f"Invalid credentials file at {creds_file}")
-        return None
+        return {"origins": {}}
+
+    if isinstance(data, dict) and "origins" in data:
+        return data
+
+    # Legacy single-key format: {"api_key": "..."}. Treat as belonging to the
+    # default origin so existing users don't lose their key on upgrade.
+    if isinstance(data, dict) and "api_key" in data:
+        return {"origins": {DEFAULT_API_ORIGIN: {"api_key": data["api_key"]}}}
+
+    return {"origins": {}}
+
+
+def _write_creds(data: dict):
+    creds_file = get_credentials_file()
+    creds_file.parent.mkdir(parents=True, exist_ok=True)
+    creds_file.write_text(json.dumps(data))
+    creds_file.chmod(0o600)
+
+
+def save_api_key(api_key: str, origin: str = DEFAULT_API_ORIGIN):
+    """Save API key for a given origin in the credentials file."""
+    origin = _normalize_origin(origin)
+    data = _read_creds()
+    data.setdefault("origins", {})[origin] = {"api_key": api_key}
+    _write_creds(data)
+    logger.info(f"API key saved for {origin}")
+
+
+def load_saved_api_key(origin: str = DEFAULT_API_ORIGIN):
+    """Load saved API key for the given origin, or None if not present."""
+    origin = _normalize_origin(origin)
+    data = _read_creds()
+    entry = data.get("origins", {}).get(origin)
+    if entry:
+        return entry.get("api_key")
+    return None
 
 
 def is_gh_authenticated():
@@ -125,7 +154,7 @@ def authenticate_with_github_token(api_origin: str, interactive: bool = True):
         if response.status_code == 200:
             try:
                 api_key = response.json()["api_key"]
-                save_api_key(api_key)
+                save_api_key(api_key, origin=api_origin)
                 if interactive:
                     print("✅ Authenticated using GitHub CLI!")
                 return api_key
@@ -220,7 +249,7 @@ def authenticate_with_device_flow(api_origin: str, interactive: bool = True):
                 if poll_response.status_code == 200:
                     # Success!
                     api_key = poll_response.json()["api_key"]
-                    save_api_key(api_key)
+                    save_api_key(api_key, origin=api_origin)
                     if interactive:
                         print("\n✅ Authentication successful!")
                     return api_key
@@ -267,7 +296,7 @@ def get_api_key(api_origin: str | None = None, interactive: bool = True, force_l
         AuthenticationError: If all authentication methods fail
     """
     if api_origin is None:
-        api_origin = os.environ.get("CHIPFLOW_API_ORIGIN", "https://build.chipflow.com")
+        api_origin = os.environ.get("CHIPFLOW_API_ORIGIN", DEFAULT_API_ORIGIN)
 
     # Method 1: Check environment variable
     api_key = os.environ.get("CHIPFLOW_API_KEY")
@@ -283,11 +312,11 @@ def get_api_key(api_origin: str | None = None, interactive: bool = True, force_l
         logger.warning("Using deprecated CHIPFLOW_API_KEY_SECRET environment variable")
         return api_key
 
-    # Method 2: Check saved credentials (unless force_login)
+    # Method 2: Check saved credentials for THIS origin (unless force_login)
     if not force_login:
-        api_key = load_saved_api_key()
+        api_key = load_saved_api_key(origin=api_origin)
         if api_key:
-            logger.debug("Using saved API key from credentials file")
+            logger.debug(f"Using saved API key from credentials file for {api_origin}")
             return api_key
 
     # Method 3: Try GitHub CLI token authentication
@@ -311,11 +340,33 @@ def get_api_key(api_origin: str | None = None, interactive: bool = True, force_l
         )
 
 
-def logout():
-    """Remove saved credentials."""
+def logout(origin: str | None = None):
+    """Remove saved credentials.
+
+    If origin is given, only that origin's key is removed; the file is deleted
+    when no origins remain. If origin is None, the entire credentials file is
+    deleted (legacy behaviour, used by `chipflow auth logout` without args).
+    """
     creds_file = get_credentials_file()
-    if creds_file.exists():
+    if not creds_file.exists():
+        print("ℹ️  No saved credentials found")
+        return
+
+    if origin is None:
         creds_file.unlink()
         print(f"✅ Logged out. Credentials removed from {creds_file}")
+        return
+
+    origin = _normalize_origin(origin)
+    data = _read_creds()
+    origins = data.get("origins", {})
+    if origin in origins:
+        del origins[origin]
+        if origins:
+            _write_creds(data)
+            print(f"✅ Logged out from {origin}")
+        else:
+            creds_file.unlink()
+            print(f"✅ Logged out from {origin}. Credentials file removed.")
     else:
-        print("ℹ️  No saved credentials found")
+        print(f"ℹ️  No saved credentials for {origin}")

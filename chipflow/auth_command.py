@@ -53,10 +53,17 @@ class AuthCommand:
             raise ChipFlowError(f"Unknown auth action: {args.action}")
 
     def _login(self, force=False):
-        """Perform login/authentication."""
-        import os
+        """Perform login/authentication.
 
-        api_origin = os.environ.get("CHIPFLOW_API_ORIGIN", "https://build.chipflow.com")
+        `chipflow auth login` always re-authenticates against the configured
+        origin — the cached credential is never reused, otherwise the user
+        gets a stale key bound to a different origin and `submit` 401s.
+        The `--force` flag is kept for clarity but is effectively the default.
+        """
+        import os
+        from .auth import DEFAULT_API_ORIGIN
+
+        api_origin = os.environ.get("CHIPFLOW_API_ORIGIN", DEFAULT_API_ORIGIN)
 
         print(f"🔐 Authenticating with ChipFlow API ({api_origin})...")
 
@@ -64,7 +71,7 @@ class AuthCommand:
             api_key = get_api_key(
                 api_origin=api_origin,
                 interactive=True,
-                force_login=force
+                force_login=True,
             )
             print("\n✅ Successfully authenticated!")
             print(f"   API key: {api_key[:20]}...")
