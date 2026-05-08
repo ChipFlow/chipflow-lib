@@ -1,0 +1,112 @@
+chipflow.packaging.base
+=======================
+
+.. py:module:: chipflow.packaging.base
+
+.. autoapi-nested-parse::
+
+   Base classes for package definitions.
+
+   This module provides the abstract base classes that all package
+   definitions inherit from, defining the common interface for
+   pin allocation and package description.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   chipflow.packaging.base.BasePackageDef
+   chipflow.packaging.base.LinearAllocPackageDef
+
+
+Module Contents
+---------------
+
+.. py:class:: BasePackageDef(/, **data)
+
+   Bases: :py:obj:`pydantic.BaseModel`, :py:obj:`Generic`\ [\ :py:obj:`PinType`\ ], :py:obj:`abc.ABC`
+
+
+   Abstract base class for the definition of a package.
+
+   Serializing this or any derived classes results in the
+   description of the package (not serializable directly).
+
+   All package definitions must inherit from this class and
+   implement the required abstract methods.
+
+   :Attributes: **name** -- The name of the package
+
+
+   .. py:method:: model_post_init(__context)
+
+      Initialize internal tracking structures
+
+
+
+   .. py:method:: register_component(name, component)
+
+      Register a component to be allocated to the pad ring and pins.
+
+      :param name: Component name
+      :param component: Amaranth wiring.Component to allocate
+
+
+
+   .. py:method:: allocate_pins(config, process, lockfile)
+
+      Allocate package pins to the registered components.
+
+      Pins should be allocated in the most usable way for users
+      of the packaged IC.
+
+      This default implementation uses _linear_allocate_components with
+      self._allocate for the allocation strategy. Subclasses can override
+      if they need completely different allocation logic.
+
+      :param config: ChipFlow configuration
+      :param process: Semiconductor process
+      :param lockfile: Optional existing lockfile to preserve allocations
+
+      :returns: LockFile representing the pin allocation
+
+      :raises UnableToAllocate: If the ports cannot be allocated
+
+
+
+   .. py:property:: bringup_pins
+      :type: chipflow.packaging.pins.BringupPins
+
+      :abstractmethod:
+
+
+      Get the bringup pins for this package.
+
+      To aid bringup, these are always in the same place for each
+      package type. Should include core power, clock and reset.
+
+      Power, clocks and resets needed for non-core are allocated
+      with the port.
+
+      :returns: BringupPins configuration
+
+
+.. py:class:: LinearAllocPackageDef
+
+   Bases: :py:obj:`BasePackageDef`\ [\ :py:obj:`int`\ ]
+
+
+   Base class for package types with linear pin/pad allocation.
+
+   This is used for packages where pins are allocated from a
+   simple linear ordering (e.g., numbered pins around a perimeter).
+
+   Subclasses should populate self._ordered_pins in model_post_init
+   before calling super().model_post_init(__context).
+
+   Not directly serializable - use concrete subclasses.
+
+
