@@ -54,14 +54,14 @@ Module Contents
    Get path to credentials file.
 
 
-.. py:function:: save_api_key(api_key)
+.. py:function:: save_api_key(api_key, origin = DEFAULT_API_ORIGIN)
 
-   Save API key to credentials file.
+   Save API key for a given origin in the credentials file.
 
 
-.. py:function:: load_saved_api_key()
+.. py:function:: load_saved_api_key(origin = DEFAULT_API_ORIGIN)
 
-   Load API key from credentials file if it exists.
+   Load saved API key for the given origin, or None if not present.
 
 
 .. py:function:: is_gh_authenticated()
@@ -111,8 +111,12 @@ Module Contents
    :raises AuthenticationError: If all authentication methods fail
 
 
-.. py:function:: logout()
+.. py:function:: logout(origin = None)
 
    Remove saved credentials.
+
+   If origin is given, only that origin's key is removed; the file is deleted
+   when no origins remain. If origin is None, the entire credentials file is
+   deleted (legacy behaviour, used by `chipflow auth logout` without args).
 
 
