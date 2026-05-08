@@ -1,0 +1,42 @@
+chipflow.packaging.render
+=========================
+
+.. py:module:: chipflow.packaging.render
+
+.. autoapi-nested-parse::
+
+   Renderers for ``pins.lock`` — text table and SVG layout.
+
+   Used by ``chipflow pin show``. The text view works for any package
+   type. The SVG view is currently implemented for perimeter-pin packages
+   (:class:`QuadPackageDef`, :class:`BlockPackageDef`); other types raise
+   :class:`ChipFlowError` and are expected to fall back to the text view.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   chipflow.packaging.render.render_text
+   chipflow.packaging.render.render_svg
+
+
+Module Contents
+---------------
+
+.. py:function:: render_text(lockfile)
+
+   Render the pin allocation as a sorted text table.
+
+
+.. py:function:: render_svg(lockfile)
+
+   Render the pin allocation as SVG.
+
+   Currently supports :class:`QuadPackageDef` and
+   :class:`BlockPackageDef`. Other package types raise
+   :class:`ChipFlowError`.
+
+

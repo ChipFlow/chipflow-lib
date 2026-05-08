@@ -33,6 +33,7 @@ Submodules
    /chipflow-lib/autoapi/chipflow/packaging/openframe/index
    /chipflow-lib/autoapi/chipflow/packaging/pins/index
    /chipflow-lib/autoapi/chipflow/packaging/port_desc/index
+   /chipflow-lib/autoapi/chipflow/packaging/render/index
    /chipflow-lib/autoapi/chipflow/packaging/standard/index
    /chipflow-lib/autoapi/chipflow/packaging/utils/index
 
@@ -63,6 +64,7 @@ Classes
    chipflow.packaging.BasePackageDef
    chipflow.packaging.LinearAllocPackageDef
    chipflow.packaging.BareDiePackageDef
+   chipflow.packaging.BlockPackageDef
    chipflow.packaging.QuadPackageDef
    chipflow.packaging.GAPin
    chipflow.packaging.GALayout
@@ -79,6 +81,9 @@ Functions
 
    chipflow.packaging.load_pinlock
    chipflow.packaging.lock_pins
+   chipflow.packaging.swap_pins
+   chipflow.packaging.render_text
+   chipflow.packaging.render_svg
 
 
 Package Contents
@@ -155,17 +160,21 @@ Package Contents
    Essential pins for bringing up an IC, always in fixed locations.
 
    These pins are used for initial testing and debug of the IC.
+   Clock and reset are required (every target needs them); power,
+   heartbeat, and JTAG are optional so minimal targets — e.g. hard
+   macros that take power via abutment and have no debug ring — can
+   declare just the signals they actually have.
 
-   :Attributes: * **core_power** -- List of core power pin pairs
-                * **core_clock** -- Core clock input pin
+   :Attributes: * **core_clock** -- Core clock input pin
                 * **core_reset** -- Core reset input pin
-                * **core_heartbeat** -- Heartbeat output pin (for liveness testing)
+                * **core_power** -- List of core power pin pairs (empty for blocks)
+                * **core_heartbeat** -- Heartbeat output pin (None when not present)
                 * **core_jtag** -- Optional JTAG interface pins
 
 
    .. py:method:: to_set()
 
-      Convert all bringup pins to a set
+      Convert all bringup pins to a set, skipping unset signals.
 
 
 
@@ -375,6 +384,58 @@ Package Contents
       Bringup pins for bare die package
 
 
+.. py:class:: BlockPackageDef
+
+   Bases: :py:obj:`chipflow.packaging.base.LinearAllocPackageDef`
+
+
+   Definition of a hard-macro target with pins on four sides.
+
+   Structurally close to :class:`QuadPackageDef` — pins are numbered
+   linearly counter-clockwise starting from the top of the West edge
+   — but used when the build is producing a block (LEF / Liberty /
+   GDS for embedding into another design) rather than a packaged
+   chip. Differences:
+
+   - No I/O pad ring, no JTAG, no power pins: blocks take power via
+     straps from the parent and have no chip-level debug ring.
+   - The bringup pin set contains only ``core_clock`` (pin 1) and
+     ``core_reset`` (pin 2). Clock and reset are real boundary
+     signals on the macro that the parent design drives through
+     ordinary block pins.
+   - ``width`` and ``height`` are pin-slot counts, same units as
+     :class:`QuadPackageDef.width` / ``.height`` — not microns.
+     Translation to physical dimensions happens at the backend using
+     the process's pin pitch.
+
+   Linear pin numbering matches :class:`QuadPackageDef` so the
+   backend can use a single ``packaging.map`` convention to translate
+   pin indices to physical (side, slot) locations.
+
+   :Attributes: * **width** -- Number of pin slots on top and bottom edges.
+                * **height** -- Number of pin slots on left and right edges.
+
+
+   .. py:method:: model_post_init(__context)
+
+      Initialize pin ordering, subtracting the bringup slots.
+
+
+
+   .. py:property:: bringup_pins
+      :type: chipflow.packaging.pins.BringupPins
+
+
+      clock at pin 1, reset at pin 2.
+
+      No power (parent abutment), no heartbeat, no JTAG. The base
+      :meth:`_allocate_bringup` walks the empty ``core_power`` list
+      and skips heartbeat when ``core_heartbeat is None``, so the
+      resulting ``_core`` portmap contains just ``clk`` and ``rst_n``.
+
+      :type: Minimal bringup
+
+
 .. py:class:: QuadPackageDef
 
    Bases: :py:obj:`chipflow.packaging.base.LinearAllocPackageDef`
@@ -572,6 +633,37 @@ Package Contents
    :raises ChipFlowError: If configuration is invalid or pin allocation fails
 
 
+.. py:function:: swap_pins(pin_a, pin_b)
+
+   Swap two pin assignments in the current ``pins.lock``.
+
+   Bringup pins (clock, reset, power, heartbeat, JTAG — everything
+   under the ``_core`` component) are package-defined and cannot be
+   swapped. Both inputs must currently be allocated to user ports of a
+   package that uses integer pin numbers (Quad / Block / Openframe).
+
+   :param pin_a: First pin number.
+   :param pin_b: Second pin number.
+
+   :raises ChipFlowError: ``pins.lock`` is missing or malformed; pins are
+       identical; either pin is not allocated; either pin lives in
+       the bringup ring; or the package uses non-integer pins.
+
+
+.. py:function:: render_text(lockfile)
+
+   Render the pin allocation as a sorted text table.
+
+
+.. py:function:: render_svg(lockfile)
+
+   Render the pin allocation as SVG.
+
+   Currently supports :class:`QuadPackageDef` and
+   :class:`BlockPackageDef`. Other package types raise
+   :class:`ChipFlowError`.
+
+
 .. py:class:: PinCommand(config)
 
    CLI command handler for pin-related operations.
@@ -601,6 +693,25 @@ Package Contents
       Lock the pin map for the design.
 
       Will attempt to reuse previous pin positions.
+
+
+
+   .. py:method:: swap(pin_a, pin_b)
+
+      Swap two pin assignments in pins.lock.
+
+      Both pins must currently be allocated to user ports; bringup
+      pins (clock, reset, power, heartbeat, JTAG) are package-defined
+      and cannot be swapped.
+
+
+
+   .. py:method:: show(format = 'text', output = None)
+
+      Show the current pin allocation from pins.lock.
+
+      Text format works for any package type. SVG format renders a
+      package layout for perimeter packages (Quad/Block).
 
 
 
