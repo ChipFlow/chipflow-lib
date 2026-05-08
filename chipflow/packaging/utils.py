@@ -115,3 +115,79 @@ def lock_pins(config: Optional['Config'] = None) -> None:
 
     with open(lockfile, 'w') as f:
         f.write(newlock.model_dump_json(indent=2, serialize_as_any=True))
+
+
+def swap_pins(pin_a: int, pin_b: int) -> None:
+    """
+    Swap two pin assignments in the current ``pins.lock``.
+
+    Bringup pins (clock, reset, power, heartbeat, JTAG — everything
+    under the ``_core`` component) are package-defined and cannot be
+    swapped. Both inputs must currently be allocated to user ports of a
+    package that uses integer pin numbers (Quad / Block / Openframe).
+
+    Args:
+        pin_a: First pin number.
+        pin_b: Second pin number.
+
+    Raises:
+        ChipFlowError: ``pins.lock`` is missing or malformed; pins are
+            identical; either pin is not allocated; either pin lives in
+            the bringup ring; or the package uses non-integer pins.
+    """
+    if pin_a == pin_b:
+        raise ChipFlowError(f"Cannot swap pin {pin_a} with itself.")
+
+    chipflow_root = ensure_chipflow_root()
+    lockfile_path = Path(chipflow_root, 'pins.lock')
+    lockfile = load_pinlock()
+
+    def find_slot(pin):
+        for cname, comp in lockfile.port_map.ports.items():
+            for iname, intf in comp.items():
+                for pname, port in intf.items():
+                    if port.pins is None:
+                        continue
+                    for i, p in enumerate(port.pins):
+                        if not isinstance(p, int):
+                            raise ChipFlowError(
+                                "swap is currently only supported for "
+                                "packages with integer pin numbers "
+                                "(Quad / Block / Openframe). This "
+                                f"lockfile uses pins of type "
+                                f"{type(p).__name__}."
+                            )
+                        if p == pin:
+                            return cname, iname, pname, i
+        return None
+
+    loc_a = find_slot(pin_a)
+    loc_b = find_slot(pin_b)
+
+    if loc_a is None:
+        raise ChipFlowError(f"Pin {pin_a} is not allocated in pins.lock.")
+    if loc_b is None:
+        raise ChipFlowError(f"Pin {pin_b} is not allocated in pins.lock.")
+
+    for loc, pin in ((loc_a, pin_a), (loc_b, pin_b)):
+        if loc[0] == "_core":
+            raise ChipFlowError(
+                f"Pin {pin} is a bringup pin ({loc[1]}.{loc[2]}); "
+                "bringup pins are package-defined and cannot be swapped."
+            )
+
+    ca, ia, na, idx_a = loc_a
+    cb, ib, nb, idx_b = loc_b
+    port_a = lockfile.port_map.ports[ca][ia][na]
+    port_b = lockfile.port_map.ports[cb][ib][nb]
+    assert port_a.pins is not None and port_b.pins is not None
+    port_a.pins[idx_a] = pin_b
+    port_b.pins[idx_b] = pin_a
+
+    with open(lockfile_path, 'w') as f:
+        f.write(lockfile.model_dump_json(indent=2, serialize_as_any=True))
+
+    from .render import _slot_label
+    label_a = _slot_label(ca, ia, na, idx_a, len(port_a.pins))
+    label_b = _slot_label(cb, ib, nb, idx_b, len(port_b.pins))
+    print(f"Swapped pin {pin_a} ({label_a}) with pin {pin_b} ({label_b}).")
