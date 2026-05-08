@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" /><link rel="next" title="chipflow.rtl.wrapper" href="wrapper/index.html" /><link rel="prev" title="chipflow.platform.io.sky130" href="../platform/io/sky130/index.html" />
+<link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" /><link rel="next" title="chipflow.rtl.blackbox" href="blackbox/index.html" /><link rel="prev" title="chipflow.platform.io.sky130" href="../platform/io/sky130/index.html" />
         <link rel="prefetch" href="../../../../_static/chipflow-logo.svg" as="image" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2025.07.19 -->
@@ -217,6 +217,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../chipflow-toml-guide.html#clock-domains">clock_domains</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../chipflow-toml-guide.html#process">process</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../chipflow-toml-guide.html#package">package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../chipflow-toml-guide.html#chipflow-silicon-macros"><code class="docutils literal notranslate"><span class="pre">[chipflow.silicon.macros]</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../chipflow-commands.html">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../using-pin-signatures.html">Using Pin Signatures and Software Drivers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../rtl-wrapper.html">Wrapping External RTL</a></li>
@@ -256,6 +257,7 @@
 </ul>
 </li>
 <li class="toctree-l3 current has-children current-page"><a class="current reference internal" href="#">chipflow.rtl</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of chipflow.rtl</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="blackbox/index.html">chipflow.rtl.blackbox</a></li>
 <li class="toctree-l4"><a class="reference internal" href="wrapper/index.html">chipflow.rtl.wrapper</a></li>
 </ul>
 </li>
@@ -338,6 +340,7 @@ SystemVerilog, SpinalHDL, etc.) into Amaranth designs via TOML configuration.</p
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="blackbox/index.html">chipflow.rtl.blackbox</a></li>
 <li class="toctree-l1"><a class="reference internal" href="wrapper/index.html">chipflow.rtl.wrapper</a></li>
 </ul>
 </div>
@@ -347,7 +350,10 @@ SystemVerilog, SpinalHDL, etc.) into Amaranth designs via TOML configuration.</p
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow.rtl.RTLWrapper" title="chipflow.rtl.RTLWrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RTLWrapper</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow.rtl.BlackboxWrapper" title="chipflow.rtl.BlackboxWrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlackboxWrapper</span></code></a></p></td>
+<td><p>RTLWrapper subclass that also registers the macro with the platform.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#chipflow.rtl.RTLWrapper" title="chipflow.rtl.RTLWrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RTLWrapper</span></code></a></p></td>
 <td><p>Dynamic Amaranth Component that wraps an external RTL module.</p></td>
 </tr>
 </tbody>
@@ -359,7 +365,10 @@ SystemVerilog, SpinalHDL, etc.) into Amaranth designs via TOML configuration.</p
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow.rtl.load_wrapper_from_toml" title="chipflow.rtl.load_wrapper_from_toml"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_wrapper_from_toml</span></code></a>(toml_path[, generate_dest, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#chipflow.rtl.load_blackbox_wrapper" title="chipflow.rtl.load_blackbox_wrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_blackbox_wrapper</span></code></a>(logical_name, *[, clocks, resets])</p></td>
+<td><p>Load a hard macro by logical name declared in <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#chipflow.rtl.load_wrapper_from_toml" title="chipflow.rtl.load_wrapper_from_toml"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_wrapper_from_toml</span></code></a>(toml_path[, generate_dest, ...])</p></td>
 <td><p>Load an RTLWrapper from a TOML configuration file.</p></td>
 </tr>
 </tbody>
@@ -368,6 +377,66 @@ SystemVerilog, SpinalHDL, etc.) into Amaranth designs via TOML configuration.</p
 </section>
 <section id="package-contents">
 <h2>Package Contents<a class="headerlink" href="#package-contents" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="chipflow.rtl.BlackboxWrapper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow.rtl.</span></span><span class="sig-name descname"><span class="pre">BlackboxWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verilog_files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logical_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.rtl.BlackboxWrapper" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="wrapper/index.html#chipflow.rtl.wrapper.RTLWrapper" title="chipflow.rtl.wrapper.RTLWrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">chipflow.rtl.wrapper.RTLWrapper</span></code></a></p>
+<p>RTLWrapper subclass that also registers the macro with the platform.</p>
+<p>Shares all wrapper behaviour with <a class="reference internal" href="#chipflow.rtl.RTLWrapper" title="chipflow.rtl.RTLWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">RTLWrapper</span></code></a>; the only
+difference is that <a class="reference internal" href="#chipflow.rtl.BlackboxWrapper.elaborate" title="chipflow.rtl.BlackboxWrapper.elaborate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">elaborate()</span></code></a> informs the platform about the
+macro’s physical artifacts (LEF / Liberty / frame-view GDS) so the
+submit step can bundle them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>chipflow.rtl.wrapper.ExternalWrapConfig</em>)</p></li>
+<li><p><strong>verilog_files</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><em>pathlib.Path</em></a><em>]</em>)</p></li>
+<li><p><strong>logical_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="chipflow.rtl.BlackboxWrapper.elaborate">
+<span class="sig-name descname"><span class="pre">elaborate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">platform</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.rtl.BlackboxWrapper.elaborate" title="Link to this definition">¶</a></dt>
+<dd><p>Generate the Amaranth module with Verilog instance.</p>
+<p>Creates an Instance() of the wrapped Verilog module with all
+port mappings configured from the TOML specification.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chipflow.rtl.load_blackbox_wrapper">
+<span class="sig-prename descclassname"><span class="pre">chipflow.rtl.</span></span><span class="sig-name descname"><span class="pre">load_blackbox_wrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logical_name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.rtl.load_blackbox_wrapper" title="Link to this definition">¶</a></dt>
+<dd><p>Load a hard macro by logical name declared in <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>logical_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Key under <code class="docutils literal notranslate"><span class="pre">[chipflow.silicon.macros]</span></code>.</p></li>
+<li><p><strong>clocks</strong> (<em>Optional</em><em>[</em><em>Dict</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em><em>]</em>) – Amaranth clock-domain → macro pin name. e.g.
+<code class="docutils literal notranslate"><span class="pre">{&quot;sys&quot;:</span> <span class="pre">&quot;CLK&quot;}</span></code> wires the <code class="docutils literal notranslate"><span class="pre">sys</span></code> domain’s clock to the
+macro’s LEF pin <code class="docutils literal notranslate"><span class="pre">CLK</span></code>.</p></li>
+<li><p><strong>resets</strong> (<em>Optional</em><em>[</em><em>Dict</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em><em>]</em>) – Amaranth clock-domain → macro reset pin name (active-low
+convention, matching <a class="reference internal" href="#chipflow.rtl.RTLWrapper" title="chipflow.rtl.RTLWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">RTLWrapper</span></code></a>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <a class="reference internal" href="#chipflow.rtl.BlackboxWrapper" title="chipflow.rtl.BlackboxWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlackboxWrapper</span></code></a> (a <code class="xref py py-class docutils literal notranslate"><span class="pre">wiring.Component</span></code>) whose
+signature mirrors the macro’s signal pins. Power/ground pins
+are omitted; clock/reset pins are omitted from the signature
+and wired at elaborate time.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../index.html#chipflow.ChipFlowError" title="chipflow.ChipFlowError"><strong>ChipFlowError</strong></a> – if the macro isn’t declared in <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code>,
+its blackbox JSON is missing/malformed, or a referenced
+clock/reset pin isn’t in the macro’s pin list.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#chipflow.rtl.BlackboxWrapper" title="chipflow.rtl.BlackboxWrapper">BlackboxWrapper</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="chipflow.rtl.RTLWrapper">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chipflow.rtl.</span></span><span class="sig-name descname"><span class="pre">RTLWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verilog_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chipflow.rtl.RTLWrapper" title="Link to this definition">¶</a></dt>
@@ -522,12 +591,12 @@ see the final values when templating their command-line) and to the
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="wrapper/index.html">
+          <a class="next-page" href="blackbox/index.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">chipflow.rtl.wrapper</div>
+                <div class="title">chipflow.rtl.blackbox</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -577,6 +646,11 @@ see the final values when templating their command-line) and to the
 <li><a class="reference internal" href="#classes">Classes</a></li>
 <li><a class="reference internal" href="#functions">Functions</a></li>
 <li><a class="reference internal" href="#package-contents">Package Contents</a><ul>
+<li><a class="reference internal" href="#chipflow.rtl.BlackboxWrapper"><code class="docutils literal notranslate"><span class="pre">BlackboxWrapper</span></code></a><ul>
+<li><a class="reference internal" href="#chipflow.rtl.BlackboxWrapper.elaborate"><code class="docutils literal notranslate"><span class="pre">BlackboxWrapper.elaborate()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#chipflow.rtl.load_blackbox_wrapper"><code class="docutils literal notranslate"><span class="pre">load_blackbox_wrapper()</span></code></a></li>
 <li><a class="reference internal" href="#chipflow.rtl.RTLWrapper"><code class="docutils literal notranslate"><span class="pre">RTLWrapper</span></code></a><ul>
 <li><a class="reference internal" href="#chipflow.rtl.RTLWrapper.elaborate"><code class="docutils literal notranslate"><span class="pre">RTLWrapper.elaborate()</span></code></a></li>
 <li><a class="reference internal" href="#chipflow.rtl.RTLWrapper.get_source_files"><code class="docutils literal notranslate"><span class="pre">RTLWrapper.get_source_files()</span></code></a></li>

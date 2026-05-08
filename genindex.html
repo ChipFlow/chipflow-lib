@@ -215,6 +215,7 @@
 <li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#clock-domains">clock_domains</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#process">process</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#package">package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#chipflow-silicon-macros"><code class="docutils literal notranslate"><span class="pre">[chipflow.silicon.macros]</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-commands.html">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a></li>
 <li class="toctree-l1"><a class="reference internal" href="using-pin-signatures.html">Using Pin Signatures and Software Drivers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rtl-wrapper.html">Wrapping External RTL</a></li>
@@ -254,6 +255,7 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/rtl/index.html">chipflow.rtl</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of chipflow.rtl</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/rtl/blackbox/index.html">chipflow.rtl.blackbox</a></li>
 <li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/rtl/wrapper/index.html">chipflow.rtl.wrapper</a></li>
 </ul>
 </li>
@@ -360,6 +362,12 @@
         </ul></li>
         <li><a href="chipflow-lib/autoapi/chipflow/platform/io/signatures/index.html#chipflow.platform.io.signatures.BinaryData">BinaryData (class in chipflow.platform.io.signatures)</a>
 </li>
+        <li><a href="chipflow-lib/autoapi/chipflow/rtl/index.html#chipflow.rtl.BlackboxWrapper">BlackboxWrapper (class in chipflow.rtl)</a>
+
+        <ul>
+          <li><a href="chipflow-lib/autoapi/chipflow/rtl/blackbox/index.html#chipflow.rtl.blackbox.BlackboxWrapper">(class in chipflow.rtl.blackbox)</a>
+</li>
+        </ul></li>
         <li><a href="chipflow-lib/autoapi/chipflow/packaging/index.html#chipflow.packaging.BlockPackageDef">BlockPackageDef (class in chipflow.packaging)</a>
 
         <ul>
@@ -589,8 +597,6 @@
           <li><a href="chipflow-lib/autoapi/chipflow/packaging/utils/index.html#module-chipflow.packaging.utils">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     chipflow.platform
 
@@ -598,6 +604,8 @@
           <li><a href="chipflow-lib/autoapi/chipflow/platform/index.html#module-chipflow.platform">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     chipflow.platform.base
 
@@ -645,6 +653,13 @@
 
         <ul>
           <li><a href="chipflow-lib/autoapi/chipflow/rtl/index.html#module-chipflow.rtl">module</a>
+</li>
+        </ul></li>
+        <li>
+    chipflow.rtl.blackbox
+
+        <ul>
+          <li><a href="chipflow-lib/autoapi/chipflow/rtl/blackbox/index.html#module-chipflow.rtl.blackbox">module</a>
 </li>
         </ul></li>
         <li>
@@ -752,20 +767,24 @@
   <h2>E</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="chipflow-lib/autoapi/chipflow/rtl/index.html#chipflow.rtl.RTLWrapper.elaborate">elaborate() (chipflow.rtl.RTLWrapper method)</a>
+        <li><a href="chipflow-lib/autoapi/chipflow/rtl/blackbox/index.html#chipflow.rtl.blackbox.BlackboxWrapper.elaborate">elaborate() (chipflow.rtl.blackbox.BlackboxWrapper method)</a>
 
         <ul>
+          <li><a href="chipflow-lib/autoapi/chipflow/rtl/index.html#chipflow.rtl.BlackboxWrapper.elaborate">(chipflow.rtl.BlackboxWrapper method)</a>
+</li>
+          <li><a href="chipflow-lib/autoapi/chipflow/rtl/index.html#chipflow.rtl.RTLWrapper.elaborate">(chipflow.rtl.RTLWrapper method)</a>
+</li>
           <li><a href="chipflow-lib/autoapi/chipflow/rtl/wrapper/index.html#chipflow.rtl.wrapper.RTLWrapper.elaborate">(chipflow.rtl.wrapper.RTLWrapper method)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="chipflow-lib/autoapi/chipflow/index.html#chipflow.ensure_chipflow_root">ensure_chipflow_root() (in module chipflow)</a>
 
         <ul>
           <li><a href="chipflow-lib/autoapi/chipflow/utils/index.html#chipflow.utils.ensure_chipflow_root">(in module chipflow.utils)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="chipflow-lib/autoapi/chipflow/sim/cxxrtl/index.html#chipflow.sim.cxxrtl.CxxrtlSimulator.eval">eval() (chipflow.sim.cxxrtl.CxxrtlSimulator method)</a>
 
         <ul>
@@ -1002,6 +1021,12 @@
           <li><a href="chipflow-lib/autoapi/chipflow/packaging/base/index.html#chipflow.packaging.base.LinearAllocPackageDef">(class in chipflow.packaging.base)</a>
 </li>
         </ul></li>
+        <li><a href="chipflow-lib/autoapi/chipflow/rtl/index.html#chipflow.rtl.load_blackbox_wrapper">load_blackbox_wrapper() (in module chipflow.rtl)</a>
+
+        <ul>
+          <li><a href="chipflow-lib/autoapi/chipflow/rtl/blackbox/index.html#chipflow.rtl.blackbox.load_blackbox_wrapper">(in module chipflow.rtl.blackbox)</a>
+</li>
+        </ul></li>
         <li><a href="chipflow-lib/autoapi/chipflow/packaging/index.html#chipflow.packaging.load_pinlock">load_pinlock() (in module chipflow.packaging)</a>
 
         <ul>
@@ -1131,6 +1156,8 @@
           <li><a href="chipflow-lib/autoapi/chipflow/platform/io/sky130/index.html#module-chipflow.platform.io.sky130">chipflow.platform.io.sky130</a>
 </li>
           <li><a href="chipflow-lib/autoapi/chipflow/rtl/index.html#module-chipflow.rtl">chipflow.rtl</a>
+</li>
+          <li><a href="chipflow-lib/autoapi/chipflow/rtl/blackbox/index.html#module-chipflow.rtl.blackbox">chipflow.rtl.blackbox</a>
 </li>
           <li><a href="chipflow-lib/autoapi/chipflow/rtl/wrapper/index.html#module-chipflow.rtl.wrapper">chipflow.rtl.wrapper</a>
 </li>

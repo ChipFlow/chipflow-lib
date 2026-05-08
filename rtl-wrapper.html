@@ -217,6 +217,7 @@
 <li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#clock-domains">clock_domains</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#process">process</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#package">package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chipflow-toml-guide.html#chipflow-silicon-macros"><code class="docutils literal notranslate"><span class="pre">[chipflow.silicon.macros]</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-commands.html">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a></li>
 <li class="toctree-l1"><a class="reference internal" href="using-pin-signatures.html">Using Pin Signatures and Software Drivers</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Wrapping External RTL</a></li>
@@ -256,6 +257,7 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/rtl/index.html">chipflow.rtl</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of chipflow.rtl</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/rtl/blackbox/index.html">chipflow.rtl.blackbox</a></li>
 <li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/rtl/wrapper/index.html">chipflow.rtl.wrapper</a></li>
 </ul>
 </li>
@@ -359,6 +361,52 @@ table):</p>
 substitution (so SpinalHDL / sv2v / yosys-slang see the final values when
 producing Verilog).</p>
 </section>
+<section id="wrapping-an-nda-hard-macro">
+<h2>Wrapping an NDA hard macro<a class="headerlink" href="#wrapping-an-nda-hard-macro" title="Link to this heading">¶</a></h2>
+<p>For third-party / NDA hard macros shipped as a LEF + Liberty + Verilog stub,
+use <a class="reference internal" href="chipflow-lib/autoapi/chipflow/rtl/blackbox/index.html#chipflow.rtl.blackbox.load_blackbox_wrapper" title="chipflow.rtl.blackbox.load_blackbox_wrapper"><code class="xref py py-func docutils literal notranslate"><span class="pre">chipflow.rtl.blackbox.load_blackbox_wrapper()</span></code></a>. The macro is
+declared in <code class="docutils literal notranslate"><span class="pre">chipflow.toml</span></code> by logical name, pointing at a
+<code class="docutils literal notranslate"><span class="pre">*.blackbox.json</span></code> produced by <a class="reference external" href="https://github.com/ChipFlow/macrostrip">macrostrip</a>:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="c1"># chipflow.toml</span>
+<span class="k">[chipflow.silicon.macros.sram_64x64]</span>
+<span class="n">blackbox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;vendor/ihp/sram_64x64.blackbox.json&quot;</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chipflow.rtl</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_blackbox_wrapper</span>
+
+<span class="n">sram</span> <span class="o">=</span> <span class="n">load_blackbox_wrapper</span><span class="p">(</span>
+    <span class="s2">&quot;sram_64x64&quot;</span><span class="p">,</span>
+    <span class="n">clocks</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;sys&quot;</span><span class="p">:</span> <span class="s2">&quot;CLK&quot;</span><span class="p">},</span>
+    <span class="n">resets</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;sys&quot;</span><span class="p">:</span> <span class="s2">&quot;RST_N&quot;</span><span class="p">},</span>
+<span class="p">)</span>
+<span class="n">m</span><span class="o">.</span><span class="n">submodules</span><span class="o">.</span><span class="n">sram</span> <span class="o">=</span> <span class="n">sram</span>
+</pre></div>
+</div>
+<p>Signal pins become signature members (<code class="docutils literal notranslate"><span class="pre">In(width)</span></code> / <code class="docutils literal notranslate"><span class="pre">Out(width)</span></code>); power,
+ground, clock, and reset pins are handled out-of-band. At submit time the
+platform bundles the macro’s companion files (LEF, Liberty, frame-view GDS,
+Verilog stub, blackbox JSON) into a <code class="docutils literal notranslate"><span class="pre">macros.tar.gz</span></code> alongside the RTLIL, so
+the ChipFlow backend can feed them to ORFS without the real macro layout ever
+leaving customer premises.</p>
+<section id="non-nda-macros">
+<h3>Non-NDA macros<a class="headerlink" href="#non-nda-macros" title="Link to this heading">¶</a></h3>
+<p>The same mechanism works for macros you’re free to ship in full — no NDA, no
+stripping. Point <code class="docutils literal notranslate"><span class="pre">macrostrip</span> <span class="pre">blackbox</span></code> at the <em>real</em> GDS (rather than
+running <code class="docutils literal notranslate"><span class="pre">macrostrip</span> <span class="pre">frame</span></code> first):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>macrostrip<span class="w"> </span>blackbox<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--lef<span class="w"> </span>macro.lef<span class="w"> </span>--top<span class="w"> </span>MY_MACRO<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--frame-gds<span class="w"> </span>macro.real.gds<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--liberty<span class="w"> </span>macro.lib<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--verilog-stub<span class="w"> </span>macro.v<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-o<span class="w"> </span>macro.blackbox.json
+</pre></div>
+</div>
+<p>Declare and instantiate it exactly as above. The blackbox JSON schema field
+is named <code class="docutils literal notranslate"><span class="pre">frame_gds</span></code> for historical reasons, but chipflow-lib treats it as
+“the GDS to include” — frame-view or real, the submission path is identical.
+Skip <code class="docutils literal notranslate"><span class="pre">macrostrip</span> <span class="pre">swap</span></code> on return: there’s nothing to substitute back.</p>
+</section>
+</section>
 <section id="api">
 <h2>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h2>
 <ul class="simple">
@@ -368,6 +416,10 @@ the TOML, runs any configured preprocessing, and returns an
 <a class="reference internal" href="chipflow-lib/autoapi/chipflow/rtl/wrapper/index.html#chipflow.rtl.wrapper.RTLWrapper" title="chipflow.rtl.wrapper.RTLWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">RTLWrapper</span></code></a>.</p></li>
 <li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">chipflow.rtl.wrapper.ExternalWrapConfig</span></code> — Pydantic schema for the
 TOML configuration.</p></li>
+<li><p><a class="reference internal" href="chipflow-lib/autoapi/chipflow/rtl/blackbox/index.html#chipflow.rtl.blackbox.load_blackbox_wrapper" title="chipflow.rtl.blackbox.load_blackbox_wrapper"><code class="xref py py-func docutils literal notranslate"><span class="pre">chipflow.rtl.blackbox.load_blackbox_wrapper()</span></code></a> — loader for hard
+macros declared in <code class="docutils literal notranslate"><span class="pre">[chipflow.silicon.macros]</span></code>.</p></li>
+<li><p><a class="reference internal" href="chipflow-lib/autoapi/chipflow/rtl/blackbox/index.html#chipflow.rtl.blackbox.BlackboxWrapper" title="chipflow.rtl.blackbox.BlackboxWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">chipflow.rtl.blackbox.BlackboxWrapper</span></code></a> — the generated component
+for a hard macro; subclass of <a class="reference internal" href="chipflow-lib/autoapi/chipflow/rtl/wrapper/index.html#chipflow.rtl.wrapper.RTLWrapper" title="chipflow.rtl.wrapper.RTLWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">RTLWrapper</span></code></a>.</p></li>
 </ul>
 </section>
 </section>
@@ -429,6 +481,10 @@ TOML configuration.</p></li>
             <ul>
 <li><a class="reference internal" href="#">Wrapping External RTL</a><ul>
 <li><a class="reference internal" href="#quick-reference">Quick reference</a></li>
+<li><a class="reference internal" href="#wrapping-an-nda-hard-macro">Wrapping an NDA hard macro</a><ul>
+<li><a class="reference internal" href="#non-nda-macros">Non-NDA macros</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#api">API</a></li>
 </ul>
 </li>

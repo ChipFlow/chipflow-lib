@@ -52,6 +52,60 @@ The merged parameters are emitted as ``p_<NAME>=<value>`` kwargs on the
 substitution (so SpinalHDL / sv2v / yosys-slang see the final values when
 producing Verilog).
 
+Wrapping an NDA hard macro
+--------------------------
+
+For third-party / NDA hard macros shipped as a LEF + Liberty + Verilog stub,
+use :py:func:`chipflow.rtl.blackbox.load_blackbox_wrapper`. The macro is
+declared in ``chipflow.toml`` by logical name, pointing at a
+``*.blackbox.json`` produced by `macrostrip
+<https://github.com/ChipFlow/macrostrip>`__:
+
+.. code-block:: toml
+
+   # chipflow.toml
+   [chipflow.silicon.macros.sram_64x64]
+   blackbox = "vendor/ihp/sram_64x64.blackbox.json"
+
+.. code-block:: python
+
+   from chipflow.rtl import load_blackbox_wrapper
+
+   sram = load_blackbox_wrapper(
+       "sram_64x64",
+       clocks={"sys": "CLK"},
+       resets={"sys": "RST_N"},
+   )
+   m.submodules.sram = sram
+
+Signal pins become signature members (``In(width)`` / ``Out(width)``); power,
+ground, clock, and reset pins are handled out-of-band. At submit time the
+platform bundles the macro's companion files (LEF, Liberty, frame-view GDS,
+Verilog stub, blackbox JSON) into a ``macros.tar.gz`` alongside the RTLIL, so
+the ChipFlow backend can feed them to ORFS without the real macro layout ever
+leaving customer premises.
+
+Non-NDA macros
+~~~~~~~~~~~~~~
+
+The same mechanism works for macros you're free to ship in full — no NDA, no
+stripping. Point ``macrostrip blackbox`` at the *real* GDS (rather than
+running ``macrostrip frame`` first):
+
+.. code-block:: bash
+
+   macrostrip blackbox \
+     --lef macro.lef --top MY_MACRO \
+     --frame-gds macro.real.gds \
+     --liberty macro.lib \
+     --verilog-stub macro.v \
+     -o macro.blackbox.json
+
+Declare and instantiate it exactly as above. The blackbox JSON schema field
+is named ``frame_gds`` for historical reasons, but chipflow-lib treats it as
+"the GDS to include" — frame-view or real, the submission path is identical.
+Skip ``macrostrip swap`` on return: there's nothing to substitute back.
+
 API
 ---
 
@@ -61,3 +115,7 @@ API
   :py:class:`~chipflow.rtl.wrapper.RTLWrapper`.
 - :py:class:`chipflow.rtl.wrapper.ExternalWrapConfig` — Pydantic schema for the
   TOML configuration.
+- :py:func:`chipflow.rtl.blackbox.load_blackbox_wrapper` — loader for hard
+  macros declared in ``[chipflow.silicon.macros]``.
+- :py:class:`chipflow.rtl.blackbox.BlackboxWrapper` — the generated component
+  for a hard macro; subclass of :py:class:`~chipflow.rtl.wrapper.RTLWrapper`.

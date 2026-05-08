@@ -217,6 +217,7 @@
 <li class="toctree-l1"><a class="reference internal" href="#clock-domains">clock_domains</a></li>
 <li class="toctree-l1"><a class="reference internal" href="#process">process</a></li>
 <li class="toctree-l1"><a class="reference internal" href="#package">package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#chipflow-silicon-macros"><code class="docutils literal notranslate"><span class="pre">[chipflow.silicon.macros]</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="chipflow-commands.html">The <code class="docutils literal notranslate"><span class="pre">chipflow</span></code> command</a></li>
 <li class="toctree-l1"><a class="reference internal" href="using-pin-signatures.html">Using Pin Signatures and Software Drivers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rtl-wrapper.html">Wrapping External RTL</a></li>
@@ -256,6 +257,7 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/rtl/index.html">chipflow.rtl</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of chipflow.rtl</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/rtl/blackbox/index.html">chipflow.rtl.blackbox</a></li>
 <li class="toctree-l4"><a class="reference internal" href="chipflow-lib/autoapi/chipflow/rtl/wrapper/index.html">chipflow.rtl.wrapper</a></li>
 </ul>
 </li>
@@ -489,6 +491,25 @@ and add the following to your <cite>chipflow.toml</cite>, with the appropriate <
 </tbody>
 </table>
 </div>
+</section>
+<section id="chipflow-silicon-macros">
+<h1><code class="docutils literal notranslate"><span class="pre">[chipflow.silicon.macros]</span></code><a class="headerlink" href="#chipflow-silicon-macros" title="Link to this heading">¶</a></h1>
+<p>Optional. Declares third-party hard macros (SRAMs, PLLs, analog IP, vendor
+cores) for inclusion in the build. Each entry points at a
+<code class="docutils literal notranslate"><span class="pre">*.blackbox.json</span></code> produced by <a class="reference external" href="https://github.com/ChipFlow/macrostrip">macrostrip</a> (or any conformant tool):</p>
+<div class="highlight-TOML notranslate"><div class="highlight"><pre><span></span><span class="k">[chipflow.silicon.macros.sram_64x64]</span>
+<span class="n">blackbox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;vendor/ihp/sram_64x64.blackbox.json&quot;</span>
+
+<span class="k">[chipflow.silicon.macros.pll_core]</span>
+<span class="n">blackbox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;vendor/pll/pll_core.blackbox.json&quot;</span>
+</pre></div>
+</div>
+<p>Paths are resolved relative to <code class="docutils literal notranslate"><span class="pre">CHIPFLOW_ROOT</span></code>. The blackbox JSON itself
+points at the macro’s companion files (LEF, Liberty, frame-view or real GDS,
+Verilog stub), which are all bundled into <code class="docutils literal notranslate"><span class="pre">macros.tar.gz</span></code> at submit time.</p>
+<p>Python code instantiates macros by logical name via
+<a class="reference internal" href="chipflow-lib/autoapi/chipflow/rtl/blackbox/index.html#chipflow.rtl.blackbox.load_blackbox_wrapper" title="chipflow.rtl.blackbox.load_blackbox_wrapper"><code class="xref py py-func docutils literal notranslate"><span class="pre">chipflow.rtl.blackbox.load_blackbox_wrapper()</span></code></a>; see
+<a class="reference internal" href="rtl-wrapper.html"><span class="doc">Wrapping External RTL</span></a> for the usage pattern and the NDA vs. non-NDA workflows.</p>
 <section id="power-connections">
 <h2>Power connections<a class="headerlink" href="#power-connections" title="Link to this heading">¶</a></h2>
 <p>The package definition provides default locations for pins needed for bringup and test, like core power, ground, clock and reset, along with JTAG.</p>
@@ -574,7 +595,8 @@ and add the following to your <cite>chipflow.toml</cite>, with the appropriate <
 </ul>
 </li>
 <li><a class="reference internal" href="#process">process</a></li>
-<li><a class="reference internal" href="#package">package</a><ul>
+<li><a class="reference internal" href="#package">package</a></li>
+<li><a class="reference internal" href="#chipflow-silicon-macros"><code class="docutils literal notranslate"><span class="pre">[chipflow.silicon.macros]</span></code></a><ul>
 <li><a class="reference internal" href="#power-connections">Power connections</a></li>
 </ul>
 </li>

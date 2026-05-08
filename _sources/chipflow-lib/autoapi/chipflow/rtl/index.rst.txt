@@ -34,6 +34,7 @@ Submodules
 .. toctree::
    :maxdepth: 1
 
+   /chipflow-lib/autoapi/chipflow/rtl/blackbox/index
    /chipflow-lib/autoapi/chipflow/rtl/wrapper/index
 
 
@@ -42,6 +43,7 @@ Classes
 
 .. autoapisummary::
 
+   chipflow.rtl.BlackboxWrapper
    chipflow.rtl.RTLWrapper
 
 
@@ -50,11 +52,55 @@ Functions
 
 .. autoapisummary::
 
+   chipflow.rtl.load_blackbox_wrapper
    chipflow.rtl.load_wrapper_from_toml
 
 
 Package Contents
 ----------------
+
+.. py:class:: BlackboxWrapper(config, verilog_files, logical_name)
+
+   Bases: :py:obj:`chipflow.rtl.wrapper.RTLWrapper`
+
+
+   RTLWrapper subclass that also registers the macro with the platform.
+
+   Shares all wrapper behaviour with :class:`RTLWrapper`; the only
+   difference is that :meth:`elaborate` informs the platform about the
+   macro's physical artifacts (LEF / Liberty / frame-view GDS) so the
+   submit step can bundle them.
+
+
+   .. py:method:: elaborate(platform)
+
+      Generate the Amaranth module with Verilog instance.
+
+      Creates an Instance() of the wrapped Verilog module with all
+      port mappings configured from the TOML specification.
+
+
+
+.. py:function:: load_blackbox_wrapper(logical_name, *, clocks = None, resets = None)
+
+   Load a hard macro by logical name declared in ``chipflow.toml``.
+
+   :param logical_name: Key under ``[chipflow.silicon.macros]``.
+   :param clocks: Amaranth clock-domain → macro pin name. e.g.
+                  ``{"sys": "CLK"}`` wires the ``sys`` domain's clock to the
+                  macro's LEF pin ``CLK``.
+   :param resets: Amaranth clock-domain → macro reset pin name (active-low
+                  convention, matching :class:`RTLWrapper`).
+
+   :returns: A :class:`BlackboxWrapper` (a :class:`wiring.Component`) whose
+             signature mirrors the macro's signal pins. Power/ground pins
+             are omitted; clock/reset pins are omitted from the signature
+             and wired at elaborate time.
+
+   :raises ChipFlowError: if the macro isn't declared in ``chipflow.toml``,
+       its blackbox JSON is missing/malformed, or a referenced
+       clock/reset pin isn't in the macro's pin list.
+
 
 .. py:class:: RTLWrapper(config, verilog_files = None, parameters = None)
 
