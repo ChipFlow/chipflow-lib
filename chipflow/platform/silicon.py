@@ -342,7 +342,7 @@ def port_for_process(p: Process):
     match p:
         case Process.SKY130:
             return Sky130Port
-        case Process.GF180 | Process.HELVELLYN2 | Process.GF130BCD | Process.IHP_SG13G2:
+        case Process.GF180 | Process.GF180MCU | Process.HELVELLYN2 | Process.GF130BCD | Process.IHP_SG13G2:
             return SiliconPlatformPort
 
 
