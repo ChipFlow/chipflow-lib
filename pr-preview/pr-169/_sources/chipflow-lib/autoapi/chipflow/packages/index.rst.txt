@@ -1,0 +1,13 @@
+chipflow.packages
+=================
+
+.. py:module:: chipflow.packages
+
+.. autoapi-nested-parse::
+
+   Package definitions for ChipFlow platforms.
+
+   This module contains package type definitions for supported IC packages.
+
+
+
