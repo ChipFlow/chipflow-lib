@@ -15,8 +15,10 @@ class Process(Enum):
     """
     #: Skywater foundry open-source 130nm process
     SKY130 = "sky130"
-    #: GlobalFoundries open-source 130nm process
+    #: GlobalFoundries open-source 130nm process (c4m-gf180 variant)
     GF180 = "gf180"
+    #: GlobalFoundries open-source 180nm MCU PDK
+    GF180MCU = "gf180mcu"
     #: Pragmatic Semiconductor FlexIC process (old)
     HELVELLYN2 = "helvellyn2"
     #: GlobalFoundries 130nm BCD process
