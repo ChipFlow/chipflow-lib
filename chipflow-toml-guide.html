@@ -510,6 +510,32 @@ Verilog stub), which are all bundled into <code class="docutils literal notransl
 <p>Python code instantiates macros by logical name via
 <a class="reference internal" href="chipflow-lib/autoapi/chipflow/rtl/blackbox/index.html#chipflow.rtl.blackbox.load_blackbox_wrapper" title="chipflow.rtl.blackbox.load_blackbox_wrapper"><code class="xref py py-func docutils literal notranslate"><span class="pre">chipflow.rtl.blackbox.load_blackbox_wrapper()</span></code></a>; see
 <a class="reference internal" href="rtl-wrapper.html"><span class="doc">Wrapping External RTL</span></a> for the usage pattern and the NDA vs. non-NDA workflows.</p>
+<section id="chipflow-backend-table">
+<h2><code class="docutils literal notranslate"><span class="pre">[chipflow.backend]</span></code> table<a class="headerlink" href="#chipflow-backend-table" title="Link to this heading">¶</a></h2>
+<p><span class="sd-sphinx-override sd-badge sd-outline-secondary sd-text-secondary">Optional</span></p>
+<p>Free-form parameters passed through to the ChipFlow cloud backend.
+Everything under this table is copied verbatim into the submission
+bundle’s <code class="docutils literal notranslate"><span class="pre">manifest.json</span></code> under the <code class="docutils literal notranslate"><span class="pre">backend</span></code> key; <code class="docutils literal notranslate"><span class="pre">chipflow-lib</span></code>
+does no validation — the backend owns the schema, so new knobs can be
+added without a library release.</p>
+<div class="highlight-TOML notranslate"><div class="highlight"><pre><span></span><span class="k">[chipflow.backend]</span>
+<span class="n">build_mode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;synth_only&quot;</span>
+<span class="n">some_knob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">42</span>
+</pre></div>
+</div>
+<p>The above lands in the submitted manifest as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="o">...</span>
+  <span class="s2">&quot;backend&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;build_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;synth_only&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;some_knob&quot;</span><span class="p">:</span> <span class="mi">42</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>When the table is empty or absent, the <code class="docutils literal notranslate"><span class="pre">backend</span></code> key is omitted from
+the manifest entirely.</p>
+</section>
 <section id="power-connections">
 <h2>Power connections<a class="headerlink" href="#power-connections" title="Link to this heading">¶</a></h2>
 <p>The package definition provides default locations for pins needed for bringup and test, like core power, ground, clock and reset, along with JTAG.</p>
@@ -597,6 +623,7 @@ Verilog stub), which are all bundled into <code class="docutils literal notransl
 <li><a class="reference internal" href="#process">process</a></li>
 <li><a class="reference internal" href="#package">package</a></li>
 <li><a class="reference internal" href="#chipflow-silicon-macros"><code class="docutils literal notranslate"><span class="pre">[chipflow.silicon.macros]</span></code></a><ul>
+<li><a class="reference internal" href="#chipflow-backend-table"><code class="docutils literal notranslate"><span class="pre">[chipflow.backend]</span></code> table</a></li>
 <li><a class="reference internal" href="#power-connections">Power connections</a></li>
 </ul>
 </li>
