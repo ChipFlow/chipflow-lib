@@ -178,6 +178,37 @@ Python code instantiates macros by logical name via
 :doc:`rtl-wrapper` for the usage pattern and the NDA vs. non-NDA workflows.
 
 
+``[chipflow.backend]`` table
+----------------------------
+
+|optional|
+
+Free-form parameters passed through to the ChipFlow cloud backend.
+Everything under this table is copied verbatim into the submission
+bundle's ``manifest.json`` under the ``backend`` key; ``chipflow-lib``
+does no validation — the backend owns the schema, so new knobs can be
+added without a library release.
+
+.. code-block:: TOML
+
+   [chipflow.backend]
+   build_mode = "synth_only"
+   some_knob = 42
+
+The above lands in the submitted manifest as::
+
+   {
+     ...
+     "backend": {
+       "build_mode": "synth_only",
+       "some_knob": 42
+     }
+   }
+
+When the table is empty or absent, the ``backend`` key is omitted from
+the manifest entirely.
+
+
 Power connections
 -----------------
 
