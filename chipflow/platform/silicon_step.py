@@ -39,6 +39,7 @@ def _build_bundle_zip(
     process: str,
     package: str,
     macros: dict | None = None,
+    backend: dict | None = None,
 ) -> bytes:
     """Pack the submission into a single zip with a manifest.
 
@@ -78,6 +79,8 @@ def _build_bundle_zip(
         "design_file": design_arc,
         "pins_lock_file": pins_lock_arc,
     }
+    if backend:
+        manifest["backend"] = backend
 
     file_entries: list[tuple[str, Path]] = []  # (archive_path, real_path)
     if macros:
@@ -268,7 +271,8 @@ class SiliconStep:
                 self.config.chipflow.project_name,
                 self.config.chipflow.silicon.process.value,
                 self.config.chipflow.silicon.package,
-                self.platform._macros)
+                self.platform._macros,
+                self.config.chipflow.backend or None)
 
             if args.dry_run:
                 sp.succeed(f"✅ Design `{data['projectId']}:{data['name']}` ready for submission to ChipFlow cloud!")

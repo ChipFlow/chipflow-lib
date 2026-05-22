@@ -113,6 +113,10 @@ class ChipFlowConfig(BaseModel):
     software: SoftwareConfig = SoftwareConfig()
     clock_domains: Optional[List[str]] = None
     test: Optional[TestConfig] = None
+    # Free-form parameters copied verbatim into the submission manifest
+    # under `manifest["backend"]`. The backend defines and validates the
+    # schema; chipflow-lib treats this as an opaque pass-through.
+    backend: Dict[str, Any] = {}
 
 class Config(BaseModel):
     """Root configuration model for chipflow.toml."""

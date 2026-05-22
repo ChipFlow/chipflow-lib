@@ -218,6 +218,37 @@ class TestBuildBundleZip(unittest.TestCase):
                 manifest = json.loads(zf.read("manifest.json"))
                 self.assertEqual(manifest["design_file"], "weird_name.rtlil")
 
+    def test_backend_section_passthrough(self):
+        """Contents of [chipflow.backend] land verbatim under manifest.backend."""
+        with tempfile.TemporaryDirectory() as td:
+            rtlil_path = Path(td) / "top.il"
+            rtlil_path.write_text("x")
+            backend = {"build_mode": "synth_only", "knob": 42, "nested": {"a": 1}}
+            blob = _build_bundle_zip(
+                rtlil_path, "{}", "p", "sky130", "cf20",
+                backend=backend,
+            )
+            with zipfile.ZipFile(io.BytesIO(blob)) as zf:
+                manifest = json.loads(zf.read("manifest.json"))
+                self.assertEqual(manifest["backend"], backend)
+
+    def test_backend_omitted_when_empty(self):
+        """Empty/None backend → no `backend` key in manifest (clean default)."""
+        with tempfile.TemporaryDirectory() as td:
+            rtlil_path = Path(td) / "top.il"
+            rtlil_path.write_text("x")
+            blob = _build_bundle_zip(rtlil_path, "{}", "p", "sky130", "cf20")
+            with zipfile.ZipFile(io.BytesIO(blob)) as zf:
+                manifest = json.loads(zf.read("manifest.json"))
+                self.assertNotIn("backend", manifest)
+
+            blob = _build_bundle_zip(
+                rtlil_path, "{}", "p", "sky130", "cf20", backend={},
+            )
+            with zipfile.ZipFile(io.BytesIO(blob)) as zf:
+                manifest = json.loads(zf.read("manifest.json"))
+                self.assertNotIn("backend", manifest)
+
 
 class TestSiliconSubmitBundlePost(unittest.TestCase):
     """The submit() path posts a single 'bundle' multipart part."""
