@@ -47,7 +47,8 @@ chipflow-lib is a Python library for working with the ChipFlow platform, enablin
    - `chipflow.toml`: User project configuration file (must exist in `CHIPFLOW_ROOT`)
    - `config_models.py`: Pydantic models defining configuration schema
    - `config.py`: Configuration file parsing logic
-   - Key configuration sections: `[chipflow]`, `[chipflow.silicon]`, `[chipflow.silicon.macros]`, `[chipflow.simulation]`, `[chipflow.software]`, `[chipflow.test]`
+   - Key configuration sections: `[chipflow]`, `[chipflow.silicon]`, `[chipflow.silicon.macros]`, `[chipflow.simulation]`, `[chipflow.software]`, `[chipflow.test]`, `[chipflow.backend]`
+   - `[chipflow.backend]` is a free-form table of parameters copied verbatim into `manifest["backend"]` in the submission bundle. The backend defines and validates its schema; chipflow-lib treats it as an opaque pass-through and omits it from the manifest when empty.
 
 3. **Platform Abstraction** (`platforms/`):
    - `SiliconPlatform`: Targets ASIC fabrication (supports SKY130, GF180, GF130BCD, IHP_SG13G2, HELVELLYN2)
