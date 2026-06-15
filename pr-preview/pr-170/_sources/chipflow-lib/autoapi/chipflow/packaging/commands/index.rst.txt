@@ -1,0 +1,73 @@
+chipflow.packaging.commands
+===========================
+
+.. py:module:: chipflow.packaging.commands
+
+.. autoapi-nested-parse::
+
+   CLI commands for pin lock management.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   chipflow.packaging.commands.PinCommand
+
+
+Module Contents
+---------------
+
+.. py:class:: PinCommand(config)
+
+   CLI command handler for pin-related operations.
+
+   This class provides the command-line interface for managing
+   pin allocations and lock files.
+
+
+   .. py:method:: build_cli_parser(parser)
+
+      Build the CLI parser for pin commands.
+
+      :param parser: argparse parser to add subcommands to
+
+
+
+   .. py:method:: run_cli(args)
+
+      Execute the CLI command.
+
+      :param args: Parsed command-line arguments
+
+
+
+   .. py:method:: lock()
+
+      Lock the pin map for the design.
+
+      Will attempt to reuse previous pin positions.
+
+
+
+   .. py:method:: swap(pin_a, pin_b)
+
+      Swap two pin assignments in pins.lock.
+
+      Both pins must currently be allocated to user ports; bringup
+      pins (clock, reset, power, heartbeat, JTAG) are package-defined
+      and cannot be swapped.
+
+
+
+   .. py:method:: show(format = 'text', output = None)
+
+      Show the current pin allocation from pins.lock.
+
+      Text format works for any package type. SVG format renders a
+      package layout for perimeter packages (Quad/Block).
+
+
+
