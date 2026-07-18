@@ -26,6 +26,7 @@ int main(int argc, char **argv) {
         std::cerr << "Waiting for debugger on " << agent.start_debugging() << std::endl;
 
     open_event_log(BUILD_DIR "/sim/events.json");
+    open_uart_log(PROJECT_ROOT "/uart.log");
     open_input_commands(PROJECT_ROOT "/design/tests/input.json");
 
     unsigned timestamp = 0;
@@ -74,5 +75,6 @@ int main(int argc, char **argv) {
         tick();
 
     close_event_log();
+    close_uart_log();
     return 0;
 }
